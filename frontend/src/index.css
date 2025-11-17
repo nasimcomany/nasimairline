@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Estedad:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  direction: rtl;
+}
+
+/* Language-specific styles */
+body[dir="ltr"] {
+  direction: ltr;
+}
+
+body[dir="rtl"] {
+  direction: rtl;
+}
+
+/* Custom slider styles */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Arabic font */
+.arabic-font {
+  font-family: 'Amiri', 'Noto Sans Arabic', sans-serif;
+}
+
+/* English font */
+.english-font {
+  font-family: 'Inter', sans-serif;
+}
+
+.iran-font {
+  font-family: 'IRANSans', sans-serif;
+}
+
+/* Persian Font Classes */
+.persian-font-vazir {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+.persian-font-estedad {
+  font-family: 'Estedad', sans-serif;
+}
+
+/* 3D Text Effects */
+.text-3d-gold {
+  color: #FFD700;
+  text-shadow: 
+    0 1px 0 #FFA500,
+    0 2px 0 #FF8C00,
+    0 3px 0 #FF7F00,
+    0 4px 0 #FF6600,
+    0 5px 0 #FF4500,
+    0 6px 1px rgba(0,0,0,.1),
+    0 0 5px rgba(0,0,0,.1),
+    0 1px 3px rgba(0,0,0,.3),
+    0 3px 5px rgba(0,0,0,.2),
+    0 5px 10px rgba(0,0,0,.25),
+    0 10px 10px rgba(0,0,0,.2),
+    0 20px 20px rgba(0,0,0,.15);
+  transform: perspective(500px) rotateX(15deg);
+}
+
+.text-3d-white {
+  color: #FFFFFF;
+  text-shadow: 
+    0 1px 0 #E8E8E8,
+    0 2px 0 #D0D0D0,
+    0 3px 0 #B8B8B8,
+    0 4px 0 #A0A0A0,
+    0 5px 0 #888888,
+    0 6px 1px rgba(0,0,0,.1),
+    0 0 5px rgba(0,0,0,.1),
+    0 1px 3px rgba(0,0,0,.3),
+    0 3px 5px rgba(0,0,0,.2),
+    0 5px 10px rgba(0,0,0,.25),
+    0 10px 10px rgba(0,0,0,.2),
+    0 20px 20px rgba(0,0,0,.15);
+  transform: perspective(500px) rotateX(15deg);
+}
+
+.text-3d-animated {
+  animation: text3dFloat 3s ease-in-out infinite;
+}
+
+@keyframes text3dFloat {
+  0%, 100% {
+    transform: perspective(500px) rotateX(15deg) translateY(0px);
+  }
+  50% {
+    transform: perspective(500px) rotateX(15deg) translateY(-10px);
+  }
+}
+
+.text-glow {
+  text-shadow: 
+    0 0 5px #FFD700,
+    0 0 10px #FFD700,
+    0 0 15px #FFD700,
+    0 0 20px #FFD700,
+    0 0 35px #FFD700,
+    0 0 40px #FFD700;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 
+      0 0 5px #FFD700,
+      0 0 10px #FFD700,
+      0 0 15px #FFD700,
+      0 0 20px #FFD700,
+      0 0 35px #FFD700,
+      0 0 40px #FFD700;
+  }
+  to {
+    text-shadow: 
+      0 0 2px #FFD700,
+      0 0 5px #FFD700,
+      0 0 8px #FFD700,
+      0 0 12px #FFD700,
+      0 0 18px #FFD700,
+      0 0 22px #FFD700;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes airplane {
+  0% {
+    transform: translateX(100px) translateY(50px) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    transform: translateX(-50px) translateY(-20px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100px) translateY(-50px) scale(0.8);
+    opacity: 0.8;
+  }
+}
+
+.animate-airplane {
+  animation: airplane 8s ease-in-out infinite;
+}
