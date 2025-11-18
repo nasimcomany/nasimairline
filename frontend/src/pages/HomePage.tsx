@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import GlassmorphismHeader from '../components/Layout/GlassmorphismHeader';
 import FlightSearchForm from '../components/FlightSearch/FlightSearchForm';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   PaperAirplaneIcon, 
   BuildingOfficeIcon, 
@@ -37,6 +38,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const HomePage: React.FC = () => {
+  const { t, fontClass } = useLanguage();
   const [isLoaded, setIsLoaded] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -44,12 +46,12 @@ const HomePage: React.FC = () => {
 
   // Flight Search state
   const [tripType, setTripType] = useState<'round' | 'oneway' | 'multi'>('round');
-  const [from, setFrom] = useState('تهران (THR)');
-  const [to, setTo] = useState('دبی (DXB)');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const [departDate, setDepartDate] = useState('2024-01-15');
   const [returnDate, setReturnDate] = useState('2024-01-22');
   const [priceRange, setPriceRange] = useState([200, 1200]);
-  const [passengers, setPassengers] = useState('2 بزرگسال، 1 کودک');
+  const [passengers, setPassengers] = useState('');
 
   // Booking state
   const [passengerInfo, setPassengerInfo] = useState({
@@ -62,10 +64,10 @@ const HomePage: React.FC = () => {
   });
 
   const [flightInfo, setFlightInfo] = useState({
-    from: 'تهران (THR)',
-    to: 'دبی (DXB)',
+    from: '',
+    to: '',
     date: '2024-01-15',
-    passengers: '2 بزرگسال، 1 کودک',
+    passengers: '',
     seat: '12A',
     price: '$450'
   });
@@ -91,449 +93,489 @@ const HomePage: React.FC = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Update default values when language changes
+  useEffect(() => {
+    if (!from) setFrom(t('home.flightSearch.defaultFrom'));
+    if (!to) setTo(t('home.flightSearch.defaultTo'));
+    if (!passengers) setPassengers(t('home.flightSearch.defaultPassengers'));
+    if (!flightInfo.from) setFlightInfo(prev => ({ ...prev, from: t('home.flightSearch.defaultFrom') }));
+    if (!flightInfo.to) setFlightInfo(prev => ({ ...prev, to: t('home.flightSearch.defaultTo') }));
+    if (!flightInfo.passengers) setFlightInfo(prev => ({ ...prev, passengers: t('home.flightSearch.defaultPassengers') }));
+  }, [t]);
+
   const features = [
     {
       icon: PaperAirplaneIcon,
-      title: 'پروازهای متنوع',
-      description: 'انتخاب از بین هزاران پرواز داخلی و بین‌المللی',
+      title: t('home.features.diverseFlights'),
+      description: t('home.features.diverseFlightsDesc'),
       gradient: 'from-blue-500 to-cyan-500',
       delay: '0ms'
     },
     {
       icon: BuildingOfficeIcon,
-      title: 'رزرو هتل',
-      description: 'رزرو هتل در تمام مقاصد با بهترین قیمت',
+      title: t('home.features.hotelBooking'),
+      description: t('home.features.hotelBookingDesc'),
       gradient: 'from-purple-500 to-pink-500',
       delay: '100ms'
     },
     {
       icon: GiftIcon,
-      title: 'پکیج‌های ویژه',
-      description: 'پکیج‌های سفر کامل با تخفیف‌های ویژه',
+      title: t('home.features.specialPackages'),
+      description: t('home.features.specialPackagesDesc'),
       gradient: 'from-emerald-500 to-teal-500',
       delay: '200ms'
     },
     {
       icon: ShieldCheckIcon,
-      title: 'امنیت بالا',
-      description: 'پرداخت امن و اطلاعات محافظت شده',
+      title: t('home.features.highSecurity'),
+      description: t('home.features.highSecurityDesc'),
       gradient: 'from-amber-500 to-orange-500',
       delay: '300ms'
     },
     {
       icon: ClockIcon,
-      title: 'پشتیبانی 24/7',
-      description: 'پشتیبانی آنلاین در تمام ساعات شبانه‌روز',
+      title: t('home.features.support247'),
+      description: t('home.features.support247Desc'),
       gradient: 'from-red-500 to-rose-500',
       delay: '400ms'
     },
     {
       icon: UserGroupIcon,
-      title: 'برنامه وفاداری',
-      description: 'کسب امتیاز و استفاده از مزایای ویژه',
+      title: t('home.features.loyaltyProgram'),
+      description: t('home.features.loyaltyProgramDesc'),
       gradient: 'from-indigo-500 to-blue-500',
       delay: '500ms'
     }
   ];
 
   // Destinations data
-  const destinations = [
+  const destinations = useMemo(() => [
     {
       id: 1,
-      name: 'تهران',
-      description: 'پایتخت ایران',
-      country: 'ایران',
-      flights: 'پرواز روزانه',
-      price: 'از $120',
+      name: t('destinations.tehran.name'),
+      description: t('destinations.tehran.desc'),
+      country: t('destinations.iran'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $120`,
       image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
       gradient: 'from-blue-500 to-blue-700'
     },
     {
       id: 2,
-      name: 'مشهد',
-      description: 'شهر مقدس',
-      country: 'ایران',
-      flights: 'پرواز روزانه',
-      price: 'از $95',
+      name: t('destinations.mashhad.name'),
+      description: t('destinations.mashhad.desc'),
+      country: t('destinations.iran'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $95`,
       image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
       gradient: 'from-orange-500 to-orange-700'
     },
     {
       id: 3,
-      name: 'شیراز',
-      description: 'شهر شعر و هنر',
-      country: 'ایران',
-      flights: 'پرواز روزانه',
-      price: 'از $110',
+      name: t('destinations.shiraz.name'),
+      description: t('destinations.shiraz.desc'),
+      country: t('destinations.iran'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $110`,
       image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
       gradient: 'from-pink-500 to-pink-700'
     },
     {
       id: 4,
-      name: 'دبی',
-      description: 'شهر طلایی',
-      country: 'امارات',
-      flights: 'پرواز روزانه',
-      price: 'از $280',
+      name: t('destinations.dubai.name'),
+      description: t('destinations.dubai.desc'),
+      country: t('destinations.uae'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $280`,
       image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop',
       gradient: 'from-yellow-500 to-yellow-700'
     },
     {
       id: 5,
-      name: 'استانبول',
-      description: 'شهر دو قاره',
-      country: 'ترکیه',
-      flights: 'پرواز روزانه',
-      price: 'از $320',
+      name: t('destinations.istanbul.name'),
+      description: t('destinations.istanbul.desc'),
+      country: t('destinations.turkey'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $320`,
       image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&h=300&fit=crop',
       gradient: 'from-purple-500 to-purple-700'
     },
     {
       id: 6,
-      name: 'پاریس',
-      description: 'شهر عشق',
-      country: 'فرانسه',
-      flights: 'پرواز هفتگی',
-      price: 'از $450',
+      name: t('destinations.paris.name'),
+      description: t('destinations.paris.desc'),
+      country: t('destinations.france'),
+      flights: t('destinations.weeklyFlights'),
+      price: `${t('destinations.from')} $450`,
       image: 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop',
       gradient: 'from-indigo-500 to-indigo-700'
     }
-  ];
+  ], [t]);
 
   // Services data
-  const services = [
+  const services = useMemo(() => [
     {
       id: 1,
-      title: 'پروازهای داخلی',
-      description: 'پرواز به تمام شهرهای ایران با بهترین قیمت و کیفیت',
+      title: t('services.domesticFlights.title'),
+      description: t('services.domesticFlights.description'),
       icon: PaperAirplaneIcon,
       gradient: 'from-blue-500 to-blue-700',
-      features: ['پرواز روزانه', 'قیمت مناسب', 'امنیت بالا']
+      features: [t('services.feature.dailyFlights'), t('services.feature.goodPrice'), t('services.feature.highSecurity')]
     },
     {
       id: 2,
-      title: 'پروازهای خارجی',
-      description: 'پرواز به مقاصد بین‌المللی محبوب در سراسر جهان',
+      title: t('services.internationalFlights.title'),
+      description: t('services.internationalFlights.description'),
       icon: GlobeAltIcon,
       gradient: 'from-green-500 to-green-700',
-      features: ['مقاصد متنوع', 'پرواز مستقیم', 'خدمات بین‌المللی']
+      features: [t('services.feature.diverseDestinations'), t('services.feature.directFlight'), t('services.feature.internationalServices')]
     },
     {
       id: 3,
-      title: 'خدمات VIP',
-      description: 'خدمات ویژه و لوکس برای مسافران ممتاز',
+      title: t('services.vip.title'),
+      description: t('services.vip.description'),
       icon: StarIcon,
       gradient: 'from-purple-500 to-purple-700',
-      features: ['لانژ اختصاصی', 'خدمات شخصی', 'راحتی بیشتر']
+      features: [t('services.feature.privateLounge'), t('services.feature.personalService'), t('services.feature.moreComfort')]
     },
     {
       id: 4,
-      title: 'رزرو هتل',
-      description: 'رزرو هتل در تمام مقاصد با بهترین قیمت',
+      title: t('services.hotelBooking.title'),
+      description: t('services.hotelBooking.description'),
       icon: BuildingOfficeIcon,
       gradient: 'from-orange-500 to-orange-700',
-      features: ['هتل‌های لوکس', 'قیمت رقابتی', 'رزرو آسان']
+      features: [t('services.feature.luxuryHotels'), t('services.feature.competitivePrice'), t('services.feature.easyBooking')]
     },
     {
       id: 5,
-      title: 'پکیج‌های سفر',
-      description: 'پکیج‌های کامل سفر با تخفیف‌های ویژه',
+      title: t('services.travelPackages.title'),
+      description: t('services.travelPackages.description'),
       icon: GiftIcon,
       gradient: 'from-pink-500 to-pink-700',
-      features: ['تخفیف ویژه', 'پکیج کامل', 'صرفه‌جویی']
+      features: [t('services.feature.specialDiscount'), t('services.feature.completePackage'), t('services.feature.savings')]
     },
     {
       id: 6,
-      title: 'بیمه مسافرتی',
-      description: 'بیمه کامل برای امنیت سفر شما',
+      title: t('services.travelInsurance.title'),
+      description: t('services.travelInsurance.description'),
       icon: ShieldCheckIcon,
       gradient: 'from-red-500 to-red-700',
-      features: ['پوشش کامل', 'پرداخت سریع', 'پشتیبانی 24/7']
+      features: [t('services.feature.fullCoverage'), t('services.feature.fastPayment'), t('services.feature.support247')]
     },
     {
       id: 7,
-      title: 'بار اضافی',
-      description: 'خدمات بار اضافی با قیمت مناسب',
+      title: t('services.extraBaggage.title'),
+      description: t('services.extraBaggage.description'),
       icon: TruckIcon,
       gradient: 'from-indigo-500 to-indigo-700',
-      features: ['ظرفیت بیشتر', 'قیمت مناسب', 'امنیت بار']
+      features: [t('services.feature.moreCapacity'), t('services.feature.goodPrice'), t('services.feature.baggageSecurity')]
     },
     {
       id: 8,
-      title: 'اینترنت رایگان',
-      description: 'دسترسی به اینترنت رایگان در تمام پروازها',
+      title: t('services.freeInternet.title'),
+      description: t('services.freeInternet.description'),
       icon: WifiIcon,
       gradient: 'from-teal-500 to-teal-700',
-      features: ['سرعت بالا', 'رایگان', 'بدون محدودیت']
+      features: [t('services.feature.highSpeed'), t('services.feature.free'), t('services.feature.unlimited')]
     },
     {
       id: 9,
-      title: 'پشتیبانی 24/7',
-      description: 'پشتیبانی آنلاین در تمام ساعات شبانه‌روز',
+      title: t('services.support247.title'),
+      description: t('services.support247.description'),
       icon: ClockIcon,
       gradient: 'from-yellow-500 to-yellow-700',
-      features: ['همیشه در دسترس', 'پاسخ سریع', 'حل مشکل']
+      features: [t('services.feature.alwaysAvailable'), t('services.feature.quickResponse'), t('services.feature.problemSolving')]
     }
-  ];
+  ], [t]);
 
   // Offers data
-  const offers = [
+  const offers = useMemo(() => [
     {
       id: 1,
-      title: 'تخفیف ۵۰٪',
-      description: 'برای سفرهای داخلی با بهترین قیمت',
+      title: t('offers.50off.title'),
+      description: t('offers.50off.description'),
       icon: FireIcon,
       gradient: 'from-red-500 to-red-700',
       discount: '50%',
       originalPrice: '$200',
       newPrice: '$100',
-      validUntil: 'تا پایان ماه',
-      features: ['پرواز داخلی', 'قیمت مناسب', 'تخفیف ویژه']
+      validUntil: t('offers.validUntil.endOfMonth'),
+      features: [t('offers.feature.domesticFlight'), t('offers.feature.goodPrice'), t('offers.feature.specialDiscount')]
     },
     {
       id: 2,
-      title: 'پکیج خانوادگی',
-      description: 'سفر برای ۴ نفر با صرفه‌جویی فوق‌العاده',
+      title: t('offers.familyPackage.title'),
+      description: t('offers.familyPackage.description'),
       icon: UserGroupIcon,
       gradient: 'from-pink-500 to-pink-700',
       discount: '30%',
       originalPrice: '$800',
       newPrice: '$560',
-      validUntil: 'تا ۱۵ روز',
-      features: ['۴ نفر', 'صرفه‌جویی', 'پکیج کامل']
+      validUntil: t('offers.validUntil.15Days'),
+      features: [t('offers.feature.4people'), t('offers.feature.savings'), t('offers.feature.completePackage')]
     },
     {
       id: 3,
-      title: 'پرواز زودهنگام',
-      description: 'رزرو تا ۳ ماه قبل و دریافت تخفیف',
+      title: t('offers.earlyBooking.title'),
+      description: t('offers.earlyBooking.description'),
       icon: CalendarDaysIcon,
       gradient: 'from-blue-500 to-blue-700',
       discount: '25%',
       originalPrice: '$400',
       newPrice: '$300',
-      validUntil: 'تا ۳ ماه',
-      features: ['رزرو زودهنگام', 'تخفیف ویژه', 'برنامه‌ریزی']
+      validUntil: t('offers.validUntil.3Months'),
+      features: [t('offers.feature.earlyBooking'), t('offers.feature.specialDiscount'), t('offers.feature.planning')]
     },
     {
       id: 4,
-      title: 'پیشنهاد آخر هفته',
-      description: 'سفرهای آخر هفته با قیمت ویژه',
+      title: t('offers.weekend.title'),
+      description: t('offers.weekend.description'),
       icon: SparklesIcon,
       gradient: 'from-purple-500 to-purple-700',
       discount: '40%',
       originalPrice: '$300',
       newPrice: '$180',
-      validUntil: 'فقط آخر هفته',
-      features: ['آخر هفته', 'قیمت ویژه', 'سریع']
+      validUntil: t('offers.validUntil.weekendOnly'),
+      features: [t('offers.feature.weekend'), t('offers.feature.specialPrice'), t('offers.feature.fast')]
     },
     {
       id: 5,
-      title: 'پیشنهاد دانشجویی',
-      description: 'تخفیف ویژه برای دانشجویان',
+      title: t('offers.student.title'),
+      description: t('offers.student.description'),
       icon: StarIcon,
       gradient: 'from-green-500 to-green-700',
       discount: '35%',
       originalPrice: '$250',
       newPrice: '$162',
-      validUntil: 'همیشه',
-      features: ['دانشجویی', 'تخفیف دائمی', 'کارت دانشجویی']
+      validUntil: t('offers.validUntil.always'),
+      features: [t('offers.feature.student'), t('offers.feature.permanentDiscount'), t('offers.feature.studentCard')]
     },
     {
       id: 6,
-      title: 'پیشنهاد عاشقانه',
-      description: 'سفرهای دونفره با تخفیف ویژه',
+      title: t('offers.romantic.title'),
+      description: t('offers.romantic.description'),
       icon: HeartIcon,
       gradient: 'from-rose-500 to-rose-700',
       discount: '20%',
       originalPrice: '$500',
       newPrice: '$400',
-      validUntil: 'تا ۱۰ روز',
-      features: ['دونفره', 'رمانتیک', 'تخفیف ویژه']
+      validUntil: t('offers.validUntil.10Days'),
+      features: [t('offers.feature.couple'), t('offers.feature.romantic'), t('offers.feature.specialDiscount')]
     }
-  ];
+  ], [t]);
 
   // Gallery data
-  const galleryImages = [
+  const galleryImages = useMemo(() => [
     {
       id: 1,
-      title: 'هواپیمای مدرن',
-      description: 'ناوگان هوایی پیشرفته و مدرن',
+      title: t('gallery.modernPlane.title'),
+      description: t('gallery.modernPlane.description'),
       image: '/images/airport-plane-photo_991869-62.jpg',
-      category: 'هواپیما'
+      category: t('gallery.category.airplane')
     },
     {
       id: 2,
-      title: 'پرواز در شب',
-      description: 'پرواز زیبا در آسمان شب',
+      title: t('gallery.nightFlight.title'),
+      description: t('gallery.nightFlight.description'),
       image: '/images/airplane-clouds-night_864588-19786.jpg',
-      category: 'پرواز'
+      category: t('gallery.category.flight')
     },
     {
       id: 3,
-      title: 'آسمان آبی',
-      description: 'پرواز در آسمان صاف و آبی',
+      title: t('gallery.blueSky.title'),
+      description: t('gallery.blueSky.description'),
       image: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
-      category: 'آسمان'
+      category: t('gallery.category.sky')
     },
     {
       id: 4,
-      title: 'فرودگاه شبانه',
-      description: 'فرودگاه زیبا در شب بارانی',
+      title: t('gallery.nightAirport.title'),
+      description: t('gallery.nightAirport.description'),
       image: '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg',
-      category: 'فرودگاه'
+      category: t('gallery.category.airport')
     },
     {
       id: 5,
-      title: 'منظره هوایی',
-      description: 'منظره زیبای شهر از بالا',
+      title: t('gallery.aerialView.title'),
+      description: t('gallery.aerialView.description'),
       image: '/images/360_F_600352190_78zb8hHbSeQdHtfGQliVRtHXEEXcvtHf.jpg',
-      category: 'منظره'
+      category: t('gallery.category.view')
     },
     {
       id: 6,
-      title: 'شهر زیبا',
-      description: 'تصویر زیبای شهر در شب',
+      title: t('gallery.beautifulCity.title'),
+      description: t('gallery.beautifulCity.description'),
       image: '/images/1697200583302.jpg',
-      category: 'شهر'
+      category: t('gallery.category.city')
     }
-  ];
+  ], [t]);
 
   // News data
-  const newsItems = [
+  const newsItems = useMemo(() => [
     {
       id: 1,
-      title: 'افتتاح مسیر جدید',
-      description: 'راه‌اندازی پروازهای جدید به شهرهای مختلف با بهترین قیمت و کیفیت',
-      author: 'تیم تحریریه',
-      date: '۲ روز پیش',
-      category: 'مسیرهای جدید',
+      title: t('news.newRoute.title'),
+      description: t('news.newRoute.description'),
+      author: t('news.author.editorial'),
+      date: t('news.date.2daysAgo'),
+      category: t('news.category.newRoutes'),
       icon: GlobeAltIcon,
       gradient: 'from-blue-500 to-blue-700',
       image: '/images/airport-plane-photo_991869-62.jpg',
-      readTime: '۳ دقیقه'
+      readTime: t('news.readTime.3min')
     },
     {
       id: 2,
-      title: 'خدمات جدید',
-      description: 'ارائه خدمات ویژه و لوکس به مسافران با بالاترین استانداردها',
-      author: 'مدیریت خدمات',
-      date: '۱ هفته پیش',
-      category: 'خدمات',
+      title: t('news.newServices.title'),
+      description: t('news.newServices.description'),
+      author: t('news.author.serviceManagement'),
+      date: t('news.date.1weekAgo'),
+      category: t('news.category.services'),
       icon: SparklesIcon,
       gradient: 'from-green-500 to-green-700',
       image: '/images/airplane-clouds-night_864588-19786.jpg',
-      readTime: '۴ دقیقه'
+      readTime: t('news.readTime.4min')
     },
     {
       id: 3,
-      title: 'تخفیف‌های ویژه',
-      description: 'فرصت‌های طلایی برای سفر با تخفیف‌های فوق‌العاده',
-      author: 'تیم بازاریابی',
-      date: '۲ هفته پیش',
-      category: 'تخفیف',
+      title: t('news.specialOffers.title'),
+      description: t('news.specialOffers.description'),
+      author: t('news.author.marketing'),
+      date: t('news.date.2weeksAgo'),
+      category: t('news.category.discounts'),
       icon: GiftIcon,
       gradient: 'from-purple-500 to-purple-700',
       image: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
-      readTime: '۲ دقیقه'
+      readTime: t('news.readTime.2min')
     }
-  ];
+  ], [t]);
 
   // Membership data
-  const membershipTiers = [
+  const membershipTiers = useMemo(() => [
     {
       id: 1,
-      name: 'عضو برنزی',
-      description: 'مزایای پایه برای شروع سفر',
+      name: t('home.membership.bronze.name'),
+      description: t('home.membership.bronze.desc'),
       icon: StarIcon,
       gradient: 'from-amber-500 to-amber-700',
-      price: 'رایگان',
-      points: '0 امتیاز',
-      features: ['رزرو آنلاین', 'اطلاع‌رسانی پرواز', 'پشتیبانی پایه', 'تخفیف ۵٪'],
-      benefits: ['رایگان', 'شروع آسان', 'مزایای پایه']
+      price: t('home.membership.bronze.price'),
+      points: t('home.membership.bronze.points'),
+      features: [
+        t('home.membership.feature.onlineBooking'),
+        t('home.membership.feature.flightNotification'),
+        t('home.membership.feature.basicSupport'),
+        t('home.membership.feature.discount5')
+      ],
+      benefits: [
+        t('home.membership.benefit.free'),
+        t('home.membership.benefit.easyStart'),
+        t('home.membership.benefit.basicBenefits')
+      ]
     },
     {
       id: 2,
-      name: 'عضو نقره‌ای',
-      description: 'مزایای ویژه برای مسافران منظم',
+      name: t('home.membership.silver.name'),
+      description: t('home.membership.silver.desc'),
       icon: GiftIcon,
       gradient: 'from-gray-500 to-gray-700',
-      price: '۱۰۰۰ امتیاز',
-      points: '1000 امتیاز',
-      features: ['همه مزایای برنزی', 'تخفیف ۱۰٪', 'اولویت رزرو', 'بار اضافی رایگان', 'لانژ دسترسی'],
-      benefits: ['مزایای ویژه', 'تخفیف بیشتر', 'اولویت']
+      price: t('home.membership.silver.price'),
+      points: t('home.membership.silver.points'),
+      features: [
+        t('home.membership.feature.allBronzeBenefits'),
+        t('home.membership.feature.discount10'),
+        t('home.membership.feature.priorityBooking'),
+        t('home.membership.feature.freeExtraBaggage'),
+        t('home.membership.feature.loungeAccess')
+      ],
+      benefits: [
+        t('home.membership.benefit.specialBenefits'),
+        t('home.membership.benefit.moreDiscount'),
+        t('home.membership.benefit.priority')
+      ]
     },
     {
       id: 3,
-      name: 'عضو طلایی',
-      description: 'مزایای ممتاز برای مسافران VIP',
+      name: t('home.membership.gold.name'),
+      description: t('home.membership.gold.desc'),
       icon: TrophyIcon,
       gradient: 'from-yellow-500 to-yellow-700',
-      price: '۵۰۰۰ امتیاز',
-      points: '5000 امتیاز',
-      features: ['همه مزایای نقره‌ای', 'تخفیف ۲۰٪', 'لانژ اختصاصی', 'خدمات شخصی', 'ارتقاء رایگان', 'اینترنت رایگان'],
-      benefits: ['VIP', 'مزایای کامل', 'خدمات شخصی']
+      price: t('home.membership.gold.price'),
+      points: t('home.membership.gold.points'),
+      features: [
+        t('home.membership.feature.allSilverBenefits'),
+        t('home.membership.feature.discount20'),
+        t('home.membership.feature.privateLounge'),
+        t('home.membership.feature.personalService'),
+        t('home.membership.feature.freeUpgrade'),
+        t('home.membership.feature.freeInternet')
+      ],
+      benefits: [
+        t('home.membership.benefit.vip'),
+        t('home.membership.benefit.fullBenefits'),
+        t('home.membership.benefit.personalService')
+      ]
     }
-  ];
+  ], [t]);
 
   // Support data
-  const supportMethods = [
+  const supportMethods = useMemo(() => [
     {
       id: 1,
-      title: 'تماس تلفنی',
-      description: '۲۴ ساعته در خدمت شما',
+      title: t('support.phone'),
+      description: t('support.phoneDesc'),
       contact: '۰۲۱-۱۲۳۴۵۶۷۸',
       icon: PhoneIcon,
       gradient: 'from-blue-500 to-blue-700',
-      availability: '۲۴/۷',
-      responseTime: 'فوری'
+      availability: t('support.availability24_7'),
+      responseTime: t('support.immediate')
     },
     {
       id: 2,
-      title: 'ایمیل',
-      description: 'پاسخ در کمتر از ۲ ساعت',
+      title: t('support.email'),
+      description: t('support.emailDesc'),
       contact: 'support@nasimair.com',
       icon: EnvelopeIcon,
       gradient: 'from-green-500 to-green-700',
-      availability: '۲۴/۷',
-      responseTime: 'کمتر از ۲ ساعت'
+      availability: t('support.availability24_7'),
+      responseTime: t('support.within2Hours')
     },
     {
       id: 3,
-      title: 'چت آنلاین',
-      description: 'پشتیبانی فوری و آنلاین',
-      contact: 'آنلاین',
+      title: t('support.chat'),
+      description: t('support.chatDesc'),
+      contact: t('support.online'),
       icon: ChatBubbleLeftRightIcon,
       gradient: 'from-purple-500 to-purple-700',
-      availability: '۲۴/۷',
-      responseTime: 'فوری'
+      availability: t('support.availability24_7'),
+      responseTime: t('support.immediate')
     }
-  ];
+  ], [t]);
 
-  const faqCategories = [
-    { id: 'general', name: 'عمومی', icon: QuestionMarkCircleIcon },
-    { id: 'booking', name: 'رزرو', icon: DocumentTextIcon },
-    { id: 'flight', name: 'پرواز', icon: GlobeAltIcon },
-    { id: 'payment', name: 'پرداخت', icon: CheckCircleIcon }
-  ];
+  const faqCategories = useMemo(() => [
+    { id: 'general', name: t('support.faqCategories.general'), icon: QuestionMarkCircleIcon },
+    { id: 'booking', name: t('support.faqCategories.booking'), icon: DocumentTextIcon },
+    { id: 'flight', name: t('support.faqCategories.flight'), icon: GlobeAltIcon },
+    { id: 'payment', name: t('support.faqCategories.payment'), icon: CheckCircleIcon }
+  ], [t]);
 
-  const faqs = {
+  const faqs = useMemo(() => ({
     general: [
-      { question: 'چگونه می‌توانم بلیط خود را لغو کنم؟', answer: 'می‌توانید از طریق پنل کاربری یا تماس با پشتیبانی بلیط خود را لغو کنید.' },
-      { question: 'آیا امکان تغییر تاریخ پرواز وجود دارد؟', answer: 'بله، با توجه به شرایط بلیط می‌توانید تاریخ پرواز را تغییر دهید.' }
+      { question: t('support.faqs.general.cancel.question'), answer: t('support.faqs.general.cancel.answer') },
+      { question: t('support.faqs.general.changeDate.question'), answer: t('support.faqs.general.changeDate.answer') }
     ],
     booking: [
-      { question: 'چگونه بلیط رزرو کنم؟', answer: 'از طریق فرم جستجو در صفحه اصلی می‌توانید بلیط مورد نظر خود را رزرو کنید.' },
-      { question: 'آیا امکان رزرو گروهی وجود دارد؟', answer: 'بله، برای رزرو گروهی با پشتیبانی تماس بگیرید.' }
+      { question: t('support.faqs.booking.howTo.question'), answer: t('support.faqs.booking.howTo.answer') },
+      { question: t('support.faqs.booking.group.question'), answer: t('support.faqs.booking.group.answer') }
     ],
     flight: [
-      { question: 'چه مدارکی برای پرواز نیاز دارم؟', answer: 'کارت ملی یا پاسپورت معتبر برای پروازهای داخلی و بین‌المللی.' },
-      { question: 'آیا امکان انتخاب صندلی وجود دارد؟', answer: 'بله، در زمان رزرو می‌توانید صندلی مورد نظر خود را انتخاب کنید.' }
+      { question: t('support.faqs.flight.documents.question'), answer: t('support.faqs.flight.documents.answer') },
+      { question: t('support.faqs.flight.seatSelection.question'), answer: t('support.faqs.flight.seatSelection.answer') }
     ],
     payment: [
-      { question: 'چه روش‌های پرداختی پشتیبانی می‌شود؟', answer: 'کارت‌های بانکی، پرداخت آنلاین و پرداخت در فرودگاه.' },
-      { question: 'آیا پرداخت امن است؟', answer: 'بله، تمام پرداخت‌ها با بالاترین استانداردهای امنیتی انجام می‌شود.' }
+      { question: t('support.faqs.payment.methods.question'), answer: t('support.faqs.payment.methods.answer') },
+      { question: t('support.faqs.payment.security.question'), answer: t('support.faqs.payment.security.answer') }
     ]
-  };
+  }), [t]);
 
   const openModal = (image: string) => {
     setSelectedImage(image);
@@ -626,11 +668,11 @@ const HomePage: React.FC = () => {
           
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2 persian-font-vazir">
-              رزرو بلیط پرواز
+            <h1 className={`text-3xl font-bold text-white mb-2 ${fontClass}`}>
+              {t('booking.title')}
             </h1>
-            <p className="text-blue-200 text-sm persian-font-vazir">
-              اطلاعات خود را تکمیل کنید تا رزرو شما نهایی شود
+            <p className={`text-blue-200 text-sm ${fontClass}`}>
+              {t('booking.subtitle')}
             </p>
           </div>
 
@@ -639,119 +681,119 @@ const HomePage: React.FC = () => {
             
             {/* Flight Summary */}
             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/30">
-              <h3 className="text-white font-semibold mb-3 text-sm persian-font-vazir flex items-center gap-2">
+              <h3 className={`text-white font-semibold mb-3 text-sm ${fontClass} flex items-center gap-2`}>
                 <MapPinIcon className="w-4 h-4" />
-                خلاصه پرواز
+                {t('booking.flightSummary')}
               </h3>
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="text-blue-200 persian-font-vazir">مبدا:</span>
-                  <span className="text-white mr-2 persian-font-vazir">{flightInfo.from}</span>
+                  <span className={`text-blue-200 ${fontClass}`}>{t('booking.from')}</span>
+                  <span className={`text-white mr-2 ${fontClass}`}>{flightInfo.from}</span>
                 </div>
                 <div>
-                  <span className="text-blue-200 persian-font-vazir">مقصد:</span>
-                  <span className="text-white mr-2 persian-font-vazir">{flightInfo.to}</span>
+                  <span className={`text-blue-200 ${fontClass}`}>{t('booking.to')}</span>
+                  <span className={`text-white mr-2 ${fontClass}`}>{flightInfo.to}</span>
                 </div>
                 <div>
-                  <span className="text-blue-200 persian-font-vazir">تاریخ:</span>
-                  <span className="text-white mr-2 persian-font-vazir">{flightInfo.date}</span>
+                  <span className={`text-blue-200 ${fontClass}`}>{t('booking.date')}</span>
+                  <span className={`text-white mr-2 ${fontClass}`}>{flightInfo.date}</span>
                 </div>
                 <div>
-                  <span className="text-blue-200 persian-font-vazir">مسافران:</span>
-                  <span className="text-white mr-2 persian-font-vazir">{flightInfo.passengers}</span>
+                  <span className={`text-blue-200 ${fontClass}`}>{t('booking.passengers')}</span>
+                  <span className={`text-white mr-2 ${fontClass}`}>{flightInfo.passengers}</span>
                 </div>
               </div>
             </div>
 
             {/* Passenger Information */}
             <div className="mb-6">
-              <h3 className="text-white font-semibold mb-4 text-sm persian-font-vazir flex items-center gap-2">
+              <h3 className={`text-white font-semibold mb-4 text-sm ${fontClass} flex items-center gap-2`}>
                 <UserIcon className="w-4 h-4" />
-                اطلاعات مسافر
+                {t('booking.passengerInfo')}
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <UserIcon className="w-4 h-4" />
-                    نام
+                    {t('auth.firstName')}
                   </label>
                   <input
                     type="text"
                     value={passengerInfo.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="نام خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('auth.firstNamePlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <UserIcon className="w-4 h-4" />
-                    نام خانوادگی
+                    {t('auth.lastName')}
                   </label>
                   <input
                     type="text"
                     value={passengerInfo.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="نام خانوادگی خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('auth.lastNamePlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <UserIcon className="w-4 h-4" />
-                    کد ملی
+                    {t('booking.nationalId')}
                   </label>
                   <input
                     type="text"
                     value={passengerInfo.nationalId}
                     onChange={(e) => handleInputChange('nationalId', e.target.value)}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="کد ملی خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('booking.nationalIdPlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <EnvelopeIcon className="w-4 h-4" />
-                    ایمیل
+                    {t('auth.email')}
                   </label>
                   <input
                     type="email"
                     value={passengerInfo.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="ایمیل خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('auth.emailPlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <PhoneIcon className="w-4 h-4" />
-                    شماره تلفن
+                    {t('auth.phone')}
                   </label>
                   <input
                     type="tel"
                     value={passengerInfo.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="شماره تلفن خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('auth.phonePlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <MapPinIcon className="w-4 h-4" />
-                    آدرس
+                    {t('booking.address')}
                   </label>
                   <input
                     type="text"
                     value={passengerInfo.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="آدرس خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('booking.addressPlaceholder')}
                   />
                 </div>
               </div>
@@ -759,35 +801,35 @@ const HomePage: React.FC = () => {
 
             {/* Seat Selection */}
             <div className="mb-6">
-              <h3 className="text-white font-semibold mb-4 text-sm persian-font-vazir flex items-center gap-2">
+              <h3 className={`text-white font-semibold mb-4 text-sm ${fontClass} flex items-center gap-2`}>
                 <UserGroupIcon className="w-4 h-4" />
-                انتخاب صندلی
+                {t('booking.selectSeat')}
               </h3>
               
               <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-white text-sm persian-font-vazir mb-1">
-                      صندلی‌های انتخاب شده: {selectedSeats.length > 0 ? selectedSeats.join(', ') : 'هیچ صندلی انتخاب نشده'}
+                    <div className={`text-white text-sm ${fontClass} mb-1`}>
+                      {t('booking.selectedSeats')}: {selectedSeats.length > 0 ? selectedSeats.join(', ') : t('common.none')}
                     </div>
                     {selectedSeats.length > 0 && (
-                      <div className="text-blue-200 text-xs persian-font-vazir">
-                        هزینه صندلی‌ها: ${selectedSeats.reduce((total, seat) => total + getSeatPrice(seat), 0)}
+                      <div className={`text-blue-200 text-xs ${fontClass}`}>
+                        {t('booking.seatPrice')}: ${selectedSeats.reduce((total, seat) => total + getSeatPrice(seat), 0)}
                       </div>
                     )}
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowSeatModal(true)}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-sm"
+                      className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-sm`}
                     >
-                      انتخاب صندلی
+                      {t('booking.selectSeat')}
                     </button>
                     <button
                       onClick={() => setShow3DViewer(true)}
-                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-sm"
+                      className={`bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-sm`}
                     >
-                      مشاهده فضای سه‌بعدی
+                      {t('booking.view3D')}
                     </button>
                   </div>
                 </div>
@@ -796,9 +838,9 @@ const HomePage: React.FC = () => {
 
             {/* Extras */}
             <div className="mb-6">
-              <h3 className="text-white font-semibold mb-4 text-sm persian-font-vazir flex items-center gap-2">
+              <h3 className={`text-white font-semibold mb-4 text-sm ${fontClass} flex items-center gap-2`}>
                 <CheckCircleIcon className="w-4 h-4" />
-                خدمات اضافی
+                {t('booking.extras')}
               </h3>
               
               <div className="space-y-3">
@@ -809,7 +851,7 @@ const HomePage: React.FC = () => {
                     onChange={(e) => handleExtraChange('insurance', e.target.checked)}
                     className="w-4 h-4 text-blue-600 bg-white/80 border-white/50 rounded focus:ring-blue-500/50"
                   />
-                  <span className="text-white text-sm persian-font-vazir">بیمه مسافرتی (+$25)</span>
+                  <span className={`text-white text-sm ${fontClass}`}>{t('booking.insurance')} (+$25)</span>
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -819,7 +861,7 @@ const HomePage: React.FC = () => {
                     onChange={(e) => handleExtraChange('extraBaggage', e.target.checked)}
                     className="w-4 h-4 text-blue-600 bg-white/80 border-white/50 rounded focus:ring-blue-500/50"
                   />
-                  <span className="text-white text-sm persian-font-vazir">بار اضافی (+$35)</span>
+                  <span className={`text-white text-sm ${fontClass}`}>{t('booking.extraBaggage')} (+$35)</span>
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -829,50 +871,50 @@ const HomePage: React.FC = () => {
                     onChange={(e) => handleExtraChange('meal', e.target.checked)}
                     className="w-4 h-4 text-blue-600 bg-white/80 border-white/50 rounded focus:ring-blue-500/50"
                   />
-                  <span className="text-white text-sm persian-font-vazir">غذای ویژه (+$15)</span>
+                  <span className={`text-white text-sm ${fontClass}`}>{t('booking.meal')} (+$15)</span>
                 </label>
               </div>
             </div>
 
             {/* Payment Summary */}
             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/30">
-              <h3 className="text-white font-semibold mb-3 text-sm persian-font-vazir flex items-center gap-2">
+              <h3 className={`text-white font-semibold mb-3 text-sm ${fontClass} flex items-center gap-2`}>
                 <CreditCardIcon className="w-4 h-4" />
-                خلاصه پرداخت
+                {t('booking.paymentSummary')}
               </h3>
                 <div className="space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-blue-200 persian-font-vazir">بلیط پرواز:</span>
-                  <span className="text-white persian-font-vazir">{flightInfo.price}</span>
+                  <span className={`text-blue-200 ${fontClass}`}>{t('booking.flightTicket')}:</span>
+                  <span className={`text-white ${fontClass}`}>{flightInfo.price}</span>
                 </div>
                 {selectedSeats.length > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-blue-200 persian-font-vazir">هزینه صندلی‌ها:</span>
-                    <span className="text-white persian-font-vazir">+${selectedSeats.reduce((total, seat) => total + getSeatPrice(seat), 0)}</span>
+                    <span className={`text-blue-200 ${fontClass}`}>{t('booking.seatPrice')}:</span>
+                    <span className={`text-white ${fontClass}`}>+${selectedSeats.reduce((total, seat) => total + getSeatPrice(seat), 0)}</span>
                   </div>
                 )}
                 {extras.insurance && (
                   <div className="flex justify-between">
-                    <span className="text-blue-200 persian-font-vazir">بیمه مسافرتی:</span>
-                    <span className="text-white persian-font-vazir">+$25</span>
+                    <span className={`text-blue-200 ${fontClass}`}>{t('booking.insurance')}:</span>
+                    <span className={`text-white ${fontClass}`}>+$25</span>
                   </div>
                 )}
                 {extras.extraBaggage && (
                   <div className="flex justify-between">
-                    <span className="text-blue-200 persian-font-vazir">بار اضافی:</span>
-                    <span className="text-white persian-font-vazir">+$35</span>
+                    <span className={`text-blue-200 ${fontClass}`}>{t('booking.extraBaggage')}:</span>
+                    <span className={`text-white ${fontClass}`}>+$35</span>
                   </div>
                 )}
                 {extras.meal && (
                   <div className="flex justify-between">
-                    <span className="text-blue-200 persian-font-vazir">غذای ویژه:</span>
-                    <span className="text-white persian-font-vazir">+$15</span>
+                    <span className={`text-blue-200 ${fontClass}`}>{t('booking.meal')}:</span>
+                    <span className={`text-white ${fontClass}`}>+$15</span>
                   </div>
                 )}
                 <div className="border-t border-white/30 pt-2 mt-2">
                   <div className="flex justify-between">
-                    <span className="text-white font-semibold persian-font-vazir">مجموع:</span>
-                    <span className="text-white font-semibold persian-font-vazir">
+                    <span className={`text-white font-semibold ${fontClass}`}>{t('booking.totalPrice')}:</span>
+                    <span className={`text-white font-semibold ${fontClass}`}>
                       ${450 + selectedSeats.reduce((total, seat) => total + getSeatPrice(seat), 0) + 
                         (extras.insurance ? 25 : 0) + 
                         (extras.extraBaggage ? 35 : 0) + 
@@ -884,8 +926,8 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Submit button */}
-            <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir">
-              تکمیل رزرو و پرداخت
+            <button className={`w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass}`}>
+              {t('booking.completeBooking')}
             </button>
           </div>
         </div>
@@ -895,11 +937,11 @@ const HomePage: React.FC = () => {
       <section id="flights" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              جستجوی پرواز
+            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+              {t('home.flightSearch.title')}
             </h2>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              جستجو و رزرو پروازهای داخلی و بین‌المللی
+            <p className={`text-blue-200 text-xs ${fontClass}`}>
+              {t('home.flightSearch.subtitle')}
             </p>
           </div>
           <div className="max-w-3xl mx-auto">
@@ -909,33 +951,33 @@ const HomePage: React.FC = () => {
               <div className="flex gap-1.5 mb-6">
                 <button
                   onClick={() => setTripType('round')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium persian-font-vazir transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${fontClass} transition-all duration-300 ${
                     tripType === 'round'
                       ? 'bg-blue-200 text-blue-900'
                       : 'bg-blue-900/50 text-white hover:bg-blue-800/50'
                   }`}
                 >
-                  رفت و برگشت
+                  {t('home.flightSearch.roundTrip')}
                 </button>
                 <button
                   onClick={() => setTripType('oneway')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium persian-font-vazir transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${fontClass} transition-all duration-300 ${
                     tripType === 'oneway'
                       ? 'bg-blue-200 text-blue-900'
                       : 'bg-blue-900/50 text-white hover:bg-blue-800/50'
                   }`}
                 >
-                  یک طرفه
+                  {t('home.flightSearch.oneWay')}
                 </button>
                 <button
                   onClick={() => setTripType('multi')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium persian-font-vazir transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${fontClass} transition-all duration-300 ${
                     tripType === 'multi'
                       ? 'bg-blue-200 text-blue-900'
                       : 'bg-blue-900/50 text-white hover:bg-blue-800/50'
                   }`}
                 >
-                  چند شهری
+                  {t('home.flightSearch.multiCity')}
                 </button>
               </div>
 
@@ -943,50 +985,50 @@ const HomePage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {/* From */}
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <PaperAirplaneIcon className="w-4 h-4" />
-                    از
+                    {t('home.flightSearch.from')}
                   </label>
                   <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50">
                     <input
                       type="text"
                       value={from}
                       onChange={(e) => setFrom(e.target.value)}
-                      className="w-full bg-transparent text-blue-900 font-medium placeholder-blue-600/60 focus:outline-none text-sm persian-font-vazir"
-                      placeholder="شهر یا فرودگاه"
+                      className={`w-full bg-transparent text-blue-900 font-medium placeholder-blue-600/60 focus:outline-none text-sm ${fontClass}`}
+                      placeholder={t('home.flightSearch.cityOrAirport')}
                     />
                   </div>
                 </div>
 
                 {/* To */}
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <PaperAirplaneIcon className="w-4 h-4" />
-                    به
+                    {t('home.flightSearch.to')}
                   </label>
                   <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50">
                     <input
                       type="text"
                       value={to}
                       onChange={(e) => setTo(e.target.value)}
-                      className="w-full bg-transparent text-blue-900 font-medium placeholder-blue-600/60 focus:outline-none text-sm persian-font-vazir"
-                      placeholder="شهر یا فرودگاه"
+                      className={`w-full bg-transparent text-blue-900 font-medium placeholder-blue-600/60 focus:outline-none text-sm ${fontClass}`}
+                      placeholder={t('home.flightSearch.cityOrAirport')}
                     />
                   </div>
                 </div>
 
                 {/* Depart date */}
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <CalendarDaysIcon className="w-4 h-4" />
-                    تاریخ رفت
+                    {t('home.flightSearch.departDate')}
                   </label>
                   <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50">
                     <input
                       type="date"
                       value={departDate}
                       onChange={(e) => setDepartDate(e.target.value)}
-                      className="w-full bg-transparent text-blue-900 font-medium focus:outline-none text-sm persian-font-vazir"
+                      className={`w-full bg-transparent text-blue-900 font-medium focus:outline-none text-sm ${fontClass}`}
                     />
                   </div>
                 </div>
@@ -994,16 +1036,16 @@ const HomePage: React.FC = () => {
                 {/* Return date */}
                 {tripType === 'round' && (
                   <div>
-                    <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                    <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                       <CalendarDaysIcon className="w-4 h-4" />
-                      تاریخ برگشت
+                      {t('home.flightSearch.returnDate')}
                     </label>
                     <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50">
                       <input
                         type="date"
                         value={returnDate}
                         onChange={(e) => setReturnDate(e.target.value)}
-                        className="w-full bg-transparent text-blue-900 font-medium focus:outline-none text-sm persian-font-vazir"
+                        className={`w-full bg-transparent text-blue-900 font-medium focus:outline-none text-sm ${fontClass}`}
                       />
                     </div>
                   </div>
@@ -1024,34 +1066,34 @@ const HomePage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {/* Price range */}
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <CurrencyDollarIcon className="w-4 h-4" />
-                    محدوده قیمت
+                    {t('home.flightSearch.priceRange')}
                   </label>
                   <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50">
                     <input
                       type="text"
                       value={`$${priceRange[0]} - $${priceRange[1]}`}
                       readOnly
-                      className="w-full bg-transparent text-blue-900 font-medium placeholder-blue-600/60 focus:outline-none text-sm persian-font-vazir"
-                      placeholder="محدوده قیمت"
+                      className={`w-full bg-transparent text-blue-900 font-medium placeholder-blue-600/60 focus:outline-none text-sm ${fontClass}`}
+                      placeholder={t('home.flightSearch.priceRange')}
                     />
                   </div>
                 </div>
 
                 {/* Passengers */}
                 <div>
-                  <label className="flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm persian-font-vazir">
+                  <label className={`flex items-center gap-1.5 text-white font-medium mb-1.5 text-sm ${fontClass}`}>
                     <UserGroupIcon className="w-4 h-4" />
-                    مسافران
+                    {t('home.flightSearch.passengers')}
                   </label>
                   <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-white/50">
                     <input
                       type="text"
                       value={passengers}
                       onChange={(e) => setPassengers(e.target.value)}
-                      className="w-full bg-transparent text-blue-900 font-medium placeholder-blue-600/60 focus:outline-none text-sm persian-font-vazir"
-                      placeholder="تعداد مسافران"
+                      className={`w-full bg-transparent text-blue-900 font-medium placeholder-blue-600/60 focus:outline-none text-sm ${fontClass}`}
+                      placeholder={t('home.flightSearch.passengersPlaceholder')}
                     />
                   </div>
                 </div>
@@ -1073,10 +1115,10 @@ const HomePage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
             {[
-              { number: '500+', label: 'مقصد', icon: GlobeAltIcon },
-              { number: '1M+', label: 'مسافر راضی', icon: HeartIcon },
-              { number: '24/7', label: 'پشتیبانی', icon: ClockIcon },
-              { number: '99%', label: 'رضایت مشتری', icon: StarIcon }
+              { number: '500+', label: t('home.stats.destinations'), icon: GlobeAltIcon },
+              { number: '1M+', label: t('home.stats.happyPassengers'), icon: HeartIcon },
+              { number: '24/7', label: t('home.stats.support'), icon: ClockIcon },
+              { number: '99%', label: t('home.stats.customerSatisfaction'), icon: StarIcon }
             ].map((stat, index) => (
               <div
                 key={index}
@@ -1091,7 +1133,7 @@ const HomePage: React.FC = () => {
                   <div className="text-3xl md:text-4xl font-black text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                     {stat.number}
                   </div>
-                  <div className="text-white/70 text-sm font-medium persian-font-vazir">{stat.label}</div>
+                  <div className={`text-white/70 text-sm font-medium ${fontClass}`}>{stat.label}</div>
                 </div>
               </div>
             ))}
@@ -1103,11 +1145,11 @@ const HomePage: React.FC = () => {
       <section id="destinations" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              مقاصد پروازی
+            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+              {t('destinations.title')}
             </h2>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              مقاصد مختلف داخلی و خارجی نسیم ایر
+            <p className={`text-blue-200 text-xs ${fontClass}`}>
+              {t('destinations.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1127,28 +1169,28 @@ const HomePage: React.FC = () => {
                   </div>
                   <div className="absolute bottom-2 right-2">
                     <div className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1">
-                      <span className="text-white text-xs font-medium persian-font-vazir">{destination.country}</span>
+                      <span className={`text-white text-xs font-medium ${fontClass}`}>{destination.country}</span>
                     </div>
                   </div>
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-white persian-font-vazir">
+                    <h3 className={`text-lg font-semibold text-white ${fontClass}`}>
                       {destination.name}
                     </h3>
-                    <div className="text-white/60 text-xs persian-font-vazir">
+                    <div className={`text-white/60 text-xs ${fontClass}`}>
                       {destination.flights}
                     </div>
                   </div>
-                  <p className="text-white/70 text-sm mb-3 persian-font-vazir">
+                  <p className={`text-white/70 text-sm mb-3 ${fontClass}`}>
                     {destination.description}
                   </p>
                   <div className="flex items-center justify-between">
-                    <div className="text-white font-semibold text-sm persian-font-vazir">
+                    <div className={`text-white font-semibold text-sm ${fontClass}`}>
                       {destination.price}
                     </div>
-                    <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-1.5 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-xs">
-                      مشاهده
+                    <button className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-1.5 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-xs`}>
+                      {t('common.view')}
                     </button>
                   </div>
                 </div>
@@ -1162,11 +1204,11 @@ const HomePage: React.FC = () => {
       <section id="membership" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              برنامه عضویت
+            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+              {t('home.membership.title')}
             </h2>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              مزایای عضویت در باشگاه نسیم ایر
+            <p className={`text-blue-200 text-xs ${fontClass}`}>
+              {t('home.membership.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -1177,23 +1219,23 @@ const HomePage: React.FC = () => {
                     <tier.icon className="h-8 w-8 text-white" />
                   </div>
                   {tier.id === 2 && (
-                    <div className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full persian-font-vazir">
-                      محبوب
+                    <div className={`absolute -top-2 -right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full ${fontClass}`}>
+                      {t('home.membership.popular')}
                     </div>
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-1 persian-font-vazir">
+                  <h3 className={`text-lg font-semibold text-white mb-1 ${fontClass}`}>
                     {tier.name}
                   </h3>
-                  <p className="text-white/70 text-sm mb-3 persian-font-vazir">
+                  <p className={`text-white/70 text-sm mb-3 ${fontClass}`}>
                     {tier.description}
                   </p>
                   <div className="text-center mb-4">
-                    <div className="text-white font-bold text-xl persian-font-vazir">
+                    <div className={`text-white font-bold text-xl ${fontClass}`}>
                       {tier.price}
                     </div>
-                    <div className="text-white/60 text-xs persian-font-vazir">
+                    <div className={`text-white/60 text-xs ${fontClass}`}>
                       {tier.points}
                     </div>
                   </div>
@@ -1201,25 +1243,25 @@ const HomePage: React.FC = () => {
                     {tier.features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <CheckCircleIcon className="h-4 w-4 text-green-400 flex-shrink-0" />
-                        <span className="text-white/70 text-xs persian-font-vazir">{feature}</span>
+                        <span className={`text-white/70 text-xs ${fontClass}`}>{feature}</span>
                       </div>
                     ))}
                   </div>
                   <div className="flex flex-wrap gap-1 mb-4">
                     {tier.benefits.map((benefit, idx) => (
-                      <span key={idx} className="bg-white/20 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs persian-font-vazir">
+                      <span key={idx} className={`bg-white/20 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs ${fontClass}`}>
                         {benefit}
                       </span>
                     ))}
                   </div>
-                  <button className={`w-full font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-xs ${
+                  <button className={`w-full font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-xs ${
                     tier.id === 1 
                       ? 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white' 
                       : tier.id === 2
                       ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
                       : 'bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white'
                   }`}>
-                    {tier.id === 1 ? 'عضویت رایگان' : 'ارتقاء عضویت'}
+                    {tier.id === 1 ? t('home.membership.freeMembership') : t('home.membership.upgradeMembership')}
                   </button>
                 </div>
               </div>
@@ -1232,11 +1274,11 @@ const HomePage: React.FC = () => {
       <section id="services" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              خدمات ما
+            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+              {t('services.title')}
             </h2>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              خدمات متنوع و باکیفیت هواپیمایی نسیم ایر
+            <p className={`text-blue-200 text-xs ${fontClass}`}>
+              {t('services.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1248,22 +1290,22 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-2 persian-font-vazir">
+                  <h3 className={`text-lg font-semibold text-white mb-2 ${fontClass}`}>
                     {service.title}
                   </h3>
-                  <p className="text-white/70 text-sm mb-3 persian-font-vazir">
+                  <p className={`text-white/70 text-sm mb-3 ${fontClass}`}>
                     {service.description}
                   </p>
                   <div className="space-y-1 mb-3">
                     {service.features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                        <span className="text-white/60 text-xs persian-font-vazir">{feature}</span>
+                        <span className={`text-white/60 text-xs ${fontClass}`}>{feature}</span>
                       </div>
                     ))}
                   </div>
-                  <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-xs">
-                    اطلاعات بیشتر
+                  <button className={`w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-xs`}>
+                    {t('common.moreInfo')}
                   </button>
                 </div>
               </div>
@@ -1276,19 +1318,19 @@ const HomePage: React.FC = () => {
       <section id="offers" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              پیشنهادات ویژه
+            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+              {t('offers.title')}
             </h2>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              تخفیف‌ها و پیشنهادات جذاب نسیم ایر
+            <p className={`text-blue-200 text-xs ${fontClass}`}>
+              {t('offers.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {offers.map((offer) => (
               <div key={offer.id} className="group bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden border border-white/20 shadow-xl hover:bg-white/20 transition-all duration-300 hover:scale-105">
                 <div className="absolute top-2 right-2 z-10">
-                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-1 rounded-full persian-font-vazir">
-                    {offer.discount} تخفیف
+                  <div className={`bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-1 rounded-full ${fontClass}`}>
+                    {offer.discount} {t('offers.discount')}
                   </div>
                 </div>
                 <div className={`h-20 bg-gradient-to-r ${offer.gradient} flex items-center justify-center relative`}>
@@ -1297,17 +1339,17 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-2 persian-font-vazir">
+                  <h3 className={`text-lg font-semibold text-white mb-2 ${fontClass}`}>
                     {offer.title}
                   </h3>
-                  <p className="text-white/70 text-sm mb-3 persian-font-vazir">
+                  <p className={`text-white/70 text-sm mb-3 ${fontClass}`}>
                     {offer.description}
                   </p>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-white/50 text-sm line-through persian-font-vazir">
+                    <span className={`text-white/50 text-sm line-through ${fontClass}`}>
                       {offer.originalPrice}
                     </span>
-                    <span className="text-white font-bold text-lg persian-font-vazir">
+                    <span className={`text-white font-bold text-lg ${fontClass}`}>
                       {offer.newPrice}
                     </span>
                   </div>
@@ -1315,18 +1357,18 @@ const HomePage: React.FC = () => {
                     {offer.features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                        <span className="text-white/60 text-xs persian-font-vazir">{feature}</span>
+                        <span className={`text-white/60 text-xs ${fontClass}`}>{feature}</span>
                       </div>
                     ))}
                   </div>
                   <div className="flex items-center gap-1 mb-3">
                     <ClockIcon className="h-3 w-3 text-yellow-400" />
-                    <span className="text-yellow-400 text-xs persian-font-vazir">
+                    <span className={`text-yellow-400 text-xs ${fontClass}`}>
                       {offer.validUntil}
                     </span>
                   </div>
-                  <button className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-xs">
-                    استفاده از پیشنهاد
+                  <button className={`w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-xs`}>
+                    {t('offers.useOffer')}
                   </button>
                 </div>
               </div>
@@ -1339,11 +1381,11 @@ const HomePage: React.FC = () => {
       <section id="gallery" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              گالری تصاویر
+            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+              {t('gallery.title')}
             </h2>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              تصاویر زیبا از هواپیماها و خدمات ما
+            <p className={`text-blue-200 text-xs ${fontClass}`}>
+              {t('gallery.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1363,15 +1405,15 @@ const HomePage: React.FC = () => {
                   </div>
                   <div className="absolute top-2 right-2">
                     <div className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1">
-                      <span className="text-white text-xs font-medium persian-font-vazir">{item.category}</span>
+                      <span className={`text-white text-xs font-medium ${fontClass}`}>{item.category}</span>
                     </div>
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-1 persian-font-vazir">
+                  <h3 className={`text-lg font-semibold text-white mb-1 ${fontClass}`}>
                     {item.title}
                   </h3>
-                  <p className="text-white/70 text-sm persian-font-vazir">
+                  <p className={`text-white/70 text-sm ${fontClass}`}>
                     {item.description}
                   </p>
                 </div>
@@ -1385,11 +1427,11 @@ const HomePage: React.FC = () => {
       <section id="news" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              اخبار هواپیمایی
+            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+              {t('news.title')}
             </h2>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              آخرین اخبار و رویدادهای نسیم ایر
+            <p className={`text-blue-200 text-xs ${fontClass}`}>
+              {t('news.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1404,7 +1446,7 @@ const HomePage: React.FC = () => {
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300"></div>
                   <div className="absolute top-2 right-2">
                     <div className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1">
-                      <span className="text-white text-xs font-medium persian-font-vazir">{news.category}</span>
+                      <span className={`text-white text-xs font-medium ${fontClass}`}>{news.category}</span>
                     </div>
                   </div>
                   <div className="absolute bottom-2 right-2">
@@ -1414,30 +1456,30 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-2 persian-font-vazir">
+                  <h3 className={`text-lg font-semibold text-white mb-2 ${fontClass}`}>
                     {news.title}
                   </h3>
-                  <p className="text-white/70 text-sm mb-3 persian-font-vazir">
+                  <p className={`text-white/70 text-sm mb-3 ${fontClass}`}>
                     {news.description}
                   </p>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <UserIcon className="h-3 w-3 text-white/60" />
-                      <span className="text-white/60 text-xs persian-font-vazir">{news.author}</span>
+                      <span className={`text-white/60 text-xs ${fontClass}`}>{news.author}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <ClockIcon className="h-3 w-3 text-white/60" />
-                      <span className="text-white/60 text-xs persian-font-vazir">{news.readTime}</span>
+                      <span className={`text-white/60 text-xs ${fontClass}`}>{news.readTime}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 mb-3">
                     <CalendarDaysIcon className="h-3 w-3 text-yellow-400" />
-                    <span className="text-yellow-400 text-xs persian-font-vazir">
+                    <span className={`text-yellow-400 text-xs ${fontClass}`}>
                       {news.date}
                     </span>
                   </div>
-                  <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-xs">
-                    مطالعه بیشتر
+                  <button className={`w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-xs`}>
+                    {t('common.readMore')}
                   </button>
                 </div>
               </div>
@@ -1450,11 +1492,11 @@ const HomePage: React.FC = () => {
       <section id="support" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              پشتیبانی مشتریان
+            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+              {t('support.title')}
             </h2>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              راه‌های ارتباط با تیم پشتیبانی نسیم ایر
+            <p className={`text-blue-200 text-xs ${fontClass}`}>
+              {t('support.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1466,29 +1508,29 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-2 persian-font-vazir">
+                  <h3 className="text-lg font-semibold text-white mb-2 ${fontClass}">
                     {method.title}
                   </h3>
-                  <p className="text-white/70 text-sm mb-3 persian-font-vazir">
+                  <p className="text-white/70 text-sm mb-3 ${fontClass}">
                     {method.description}
                   </p>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 mb-3">
-                    <div className="text-white font-bold text-lg persian-font-vazir">
+                    <div className="text-white font-bold text-lg ${fontClass}">
                       {method.contact}
                     </div>
                   </div>
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-white/60 text-xs persian-font-vazir">دسترسی:</span>
-                      <span className="text-green-400 text-xs persian-font-vazir">{method.availability}</span>
+                      <span className={`text-white/60 text-xs ${fontClass}`}>{t('support.availability')}:</span>
+                      <span className={`text-green-400 text-xs ${fontClass}`}>{method.availability}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-white/60 text-xs persian-font-vazir">زمان پاسخ:</span>
-                      <span className="text-blue-400 text-xs persian-font-vazir">{method.responseTime}</span>
+                      <span className={`text-white/60 text-xs ${fontClass}`}>{t('support.responseTime')}:</span>
+                      <span className={`text-blue-400 text-xs ${fontClass}`}>{method.responseTime}</span>
                     </div>
                   </div>
-                  <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-xs">
-                    تماس بگیرید
+                  <button className={`w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-xs`}>
+                    {t('support.contactUs')}
                   </button>
                 </div>
               </div>
@@ -1497,10 +1539,10 @@ const HomePage: React.FC = () => {
 
           {/* FAQ Section */}
           <div className="text-center mb-6 mt-12">
-            <h2 className="text-xl font-bold text-white mb-2 persian-font-vazir">
+            <h2 className="text-xl font-bold text-white mb-2 ${fontClass}">
               سوالات متداول
             </h2>
-            <p className="text-blue-200 text-sm persian-font-vazir">
+            <p className="text-blue-200 text-sm ${fontClass}">
               پاسخ سوالات رایج شما
             </p>
           </div>
@@ -1511,7 +1553,7 @@ const HomePage: React.FC = () => {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 persian-font-vazir ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${fontClass} ${
                   selectedCategory === category.id
                     ? 'bg-blue-600 text-white'
                     : 'bg-white/10 text-white/70 hover:bg-white/20'
@@ -1530,10 +1572,10 @@ const HomePage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <QuestionMarkCircleIcon className="h-5 w-5 text-blue-400 mt-1 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="text-white font-semibold mb-2 persian-font-vazir">
+                    <h3 className="text-white font-semibold mb-2 ${fontClass}">
                       {faq.question}
                     </h3>
-                    <p className="text-white/70 text-sm persian-font-vazir">
+                    <p className="text-white/70 text-sm ${fontClass}">
                       {faq.answer}
                     </p>
                   </div>
@@ -1559,8 +1601,8 @@ const HomePage: React.FC = () => {
               <XMarkIcon className="w-6 h-6" />
             </button>
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2 persian-font-vazir">انتخاب صندلی</h2>
-              <p className="text-blue-200 text-sm persian-font-vazir">صندلی‌های دلخواه خود را انتخاب کنید</p>
+              <h2 className="text-2xl font-bold text-white mb-2 ${fontClass}">انتخاب صندلی</h2>
+              <p className="text-blue-200 text-sm ${fontClass}">صندلی‌های دلخواه خود را انتخاب کنید</p>
             </div>
             <div className="bg-gradient-to-b from-gray-100 to-gray-50 rounded-xl p-4">
               <div className="max-w-lg mx-auto">
@@ -1619,8 +1661,8 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-4 justify-center mt-6">
-              <button onClick={() => setShowSeatModal(false)} className="bg-slate-600 text-white px-6 py-3 rounded-lg persian-font-vazir">لغو</button>
-              <button onClick={() => setShowSeatModal(false)} className="bg-blue-600 text-white px-6 py-3 rounded-lg persian-font-vazir">تأیید</button>
+              <button onClick={() => setShowSeatModal(false)} className="bg-slate-600 text-white px-6 py-3 rounded-lg ${fontClass}">لغو</button>
+              <button onClick={() => setShowSeatModal(false)} className="bg-blue-600 text-white px-6 py-3 rounded-lg ${fontClass}">تأیید</button>
             </div>
           </div>
         </div>
@@ -1641,7 +1683,7 @@ const HomePage: React.FC = () => {
               <XMarkIcon className="w-6 h-6" />
             </button>
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2 persian-font-vazir">مشاهده فضای سه‌بعدی کابین</h2>
+              <h2 className="text-2xl font-bold text-white mb-2 ${fontClass}">مشاهده فضای سه‌بعدی کابین</h2>
             </div>
             <div className="relative w-full h-96 bg-gray-900 rounded-2xl overflow-hidden">
               <iframe
@@ -1655,7 +1697,7 @@ const HomePage: React.FC = () => {
               ></iframe>
             </div>
             <div className="flex gap-4 justify-center mt-6">
-              <button onClick={() => setShow3DViewer(false)} className="bg-slate-600 text-white px-6 py-3 rounded-lg persian-font-vazir">بستن</button>
+              <button onClick={() => setShow3DViewer(false)} className="bg-slate-600 text-white px-6 py-3 rounded-lg ${fontClass}">بستن</button>
             </div>
           </div>
         </div>
@@ -1697,48 +1739,48 @@ const HomePage: React.FC = () => {
                   alt="نسیم ایر" 
                   className="w-12 h-12 object-contain"
                 />
-                <div className="text-white">
-                  <div className="text-lg font-medium persian-font-vazir text-white">
-                    نسیم ایر
+                  <div className="text-white">
+                  <div className={`text-lg font-medium ${fontClass} text-white`}>
+                    {t('common.nasimAir')}
                   </div>
-                  <div className="text-xs text-blue-200 font-light tracking-wider persian-font-vazir">
+                  <div className={`text-xs text-blue-200 font-light tracking-wider ${fontClass}`}>
                     NASIM AIR
                   </div>
                 </div>
               </div>
-              <p className="text-white/70 leading-relaxed persian-font-vazir">
-                بهترین خدمات سفر با بالاترین کیفیت و امنیت در سطح بین‌المللی
+              <p className={`text-white/70 leading-relaxed ${fontClass}`}>
+                {t('footer.description')}
               </p>
             </div>
             <div>
-              <h4 className="text-xl font-semibold mb-6 text-white persian-font-vazir">خدمات</h4>
+              <h4 className={`text-xl font-semibold mb-6 text-white ${fontClass}`}>{t('footer.services.title')}</h4>
               <ul className="space-y-3 text-white/70">
-                <li><span className="hover:text-blue-400 transition-colors cursor-pointer persian-font-vazir">پروازهای داخلی</span></li>
-                <li><span className="hover:text-blue-400 transition-colors cursor-pointer persian-font-vazir">پروازهای بین‌المللی</span></li>
-                <li><span className="hover:text-blue-400 transition-colors cursor-pointer persian-font-vazir">رزرو هتل</span></li>
-                <li><span className="hover:text-blue-400 transition-colors cursor-pointer persian-font-vazir">پکیج‌های سفر</span></li>
+                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.services.domesticFlights')}</span></li>
+                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.services.internationalFlights')}</span></li>
+                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.services.hotelBooking')}</span></li>
+                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.services.travelPackages')}</span></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-xl font-semibold mb-6 text-white persian-font-vazir">پشتیبانی</h4>
+              <h4 className={`text-xl font-semibold mb-6 text-white ${fontClass}`}>{t('footer.support.title')}</h4>
               <ul className="space-y-3 text-white/70">
-                <li><span className="hover:text-blue-400 transition-colors cursor-pointer persian-font-vazir">مرکز راهنمایی</span></li>
-                <li><span className="hover:text-blue-400 transition-colors cursor-pointer persian-font-vazir">تماس با ما</span></li>
-                <li><span className="hover:text-blue-400 transition-colors cursor-pointer persian-font-vazir">سوالات متداول</span></li>
-                <li><span className="hover:text-blue-400 transition-colors cursor-pointer persian-font-vazir">شرایط و قوانین</span></li>
+                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.support.helpCenter')}</span></li>
+                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.support.contactUs')}</span></li>
+                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.support.faq')}</span></li>
+                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.support.terms')}</span></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-xl font-semibold mb-6 text-white persian-font-vazir">تماس با ما</h4>
-              <div className="space-y-3 text-white/70 persian-font-vazir">
-                <p>📞 تلفن: 021-12345678</p>
-                <p>✉️ ایمیل: info@nasimbehesht.com</p>
-                <p>📍 آدرس: تهران، خیابان ولیعصر</p>
+              <h4 className={`text-xl font-semibold mb-6 text-white ${fontClass}`}>{t('footer.contact.title')}</h4>
+              <div className={`space-y-3 text-white/70 ${fontClass}`}>
+                <p>📞 {t('footer.contact.phone')}: {t('footer.contact.phoneValue')}</p>
+                <p>✉️ {t('footer.contact.email')}: {t('footer.contact.emailValue')}</p>
+                <p>📍 {t('footer.contact.address')}: {t('footer.contact.addressValue')}</p>
               </div>
             </div>
           </div>
-          <div className="border-t border-white/10 mt-12 pt-8 text-center text-white/50 persian-font-vazir">
-            <p>&copy; 2024 نسیم ایر ایرلاین. تمامی حقوق محفوظ است.</p>
+          <div className={`border-t border-white/10 mt-12 pt-8 text-center text-white/50 ${fontClass}`}>
+            <p>&copy; 2024 {t('common.nasimAir')} {t('footer.copyright')}.</p>
           </div>
         </div>
       </footer>

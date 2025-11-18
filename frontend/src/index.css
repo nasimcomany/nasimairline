@@ -5,6 +5,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Estedad:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 * {
   margin: 0;
@@ -50,7 +51,8 @@ body[dir="rtl"] {
 
 /* Arabic font */
 .arabic-font {
-  font-family: 'Amiri', 'Noto Sans Arabic', sans-serif;
+  font-family: 'Noto Sans Arabic', 'Amiri', sans-serif;
+  font-feature-settings: 'kern' 1;
 }
 
 /* English font */

@@ -6,6 +6,7 @@ import { registerUser, clearError } from '../store/slices/authSlice';
 import { useAppDispatch } from '../store/hooks';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import GlassmorphismHeader from '../components/Layout/GlassmorphismHeader';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ const RegisterPage: React.FC = () => {
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { t, fontClass } = useLanguage();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,7 +41,7 @@ const RegisterPage: React.FC = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      alert('رمز عبور و تأیید رمز عبور مطابقت ندارند');
+      alert(t('auth.passwordMismatch'));
       return;
     }
 
@@ -89,28 +91,28 @@ const RegisterPage: React.FC = () => {
           <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-white/30">
             {/* Header */}
             <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-white mb-2 persian-font-vazir">
-                ایجاد حساب کاربری
+              <h1 className={`text-2xl font-bold text-white mb-2 ${fontClass}`}>
+                {t('auth.register')}
               </h1>
-              <p className="text-blue-200 text-xs persian-font-vazir">
-                یا{' '}
+              <p className={`text-blue-200 text-xs ${fontClass}`}>
+                {t('common.or')} {' '}
                 <Link to="/login" className="font-medium text-blue-300 hover:text-blue-200 transition-colors">
-                  وارد حساب موجود شوید
+                  {t('auth.loginExisting')}
                 </Link>
               </p>
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               {error && (
-                <div className="bg-red-500/20 backdrop-blur-sm border border-red-400/50 text-red-200 px-3 py-2 rounded-lg text-xs persian-font-vazir">
+                <div className={`bg-red-500/20 backdrop-blur-sm border border-red-400/50 text-red-200 px-3 py-2 rounded-lg text-xs ${fontClass}`}>
                   {error}
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="firstName" className="flex items-center gap-1.5 text-white font-medium mb-1 text-xs persian-font-vazir">
-                    نام
+                  <label htmlFor="firstName" className={`flex items-center gap-1.5 text-white font-medium mb-1 text-xs ${fontClass}`}>
+                    {t('auth.firstName')}
                   </label>
                   <div className="mt-1">
                     <input
@@ -120,15 +122,15 @@ const RegisterPage: React.FC = () => {
                       required
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                      placeholder="نام"
+                      className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                      placeholder={t('auth.firstName')}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="flex items-center gap-1.5 text-white font-medium mb-1 text-xs persian-font-vazir">
-                    نام خانوادگی
+                  <label htmlFor="lastName" className={`flex items-center gap-1.5 text-white font-medium mb-1 text-xs ${fontClass}`}>
+                    {t('auth.lastName')}
                   </label>
                   <div className="mt-1">
                     <input
@@ -138,16 +140,16 @@ const RegisterPage: React.FC = () => {
                       required
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                      placeholder="نام خانوادگی"
+                      className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                      placeholder={t('auth.lastName')}
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label htmlFor="email" className="flex items-center gap-1.5 text-white font-medium mb-1 text-xs persian-font-vazir">
-                  آدرس ایمیل
+                <label htmlFor="email" className={`flex items-center gap-1.5 text-white font-medium mb-1 text-xs ${fontClass}`}>
+                  {t('auth.email')}
                 </label>
                 <div className="mt-1">
                   <input
@@ -158,15 +160,15 @@ const RegisterPage: React.FC = () => {
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="ایمیل خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('auth.emailPlaceholder')}
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="phone" className="flex items-center gap-1.5 text-white font-medium mb-1 text-xs persian-font-vazir">
-                  شماره تلفن
+                <label htmlFor="phone" className={`flex items-center gap-1.5 text-white font-medium mb-1 text-xs ${fontClass}`}>
+                  {t('auth.phone')}
                 </label>
                 <div className="mt-1">
                   <input
@@ -176,15 +178,15 @@ const RegisterPage: React.FC = () => {
                     required
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="شماره تلفن خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('auth.phone')}
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="password" className="flex items-center gap-1.5 text-white font-medium mb-1 text-xs persian-font-vazir">
-                  رمز عبور
+                <label htmlFor="password" className={`flex items-center gap-1.5 text-white font-medium mb-1 text-xs ${fontClass}`}>
+                  {t('auth.password')}
                 </label>
                 <div className="mt-1 relative">
                   <input
@@ -195,8 +197,8 @@ const RegisterPage: React.FC = () => {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 pr-10 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="رمز عبور خود را وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 pr-10 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('auth.passwordPlaceholder')}
                   />
                   <button
                     type="button"
@@ -213,8 +215,8 @@ const RegisterPage: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="flex items-center gap-1.5 text-white font-medium mb-1 text-xs persian-font-vazir">
-                  تأیید رمز عبور
+                <label htmlFor="confirmPassword" className={`flex items-center gap-1.5 text-white font-medium mb-1 text-xs ${fontClass}`}>
+                  {t('auth.confirmPassword')}
                 </label>
                 <div className="mt-1 relative">
                   <input
@@ -225,8 +227,8 @@ const RegisterPage: React.FC = () => {
                     required
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 pr-10 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm persian-font-vazir"
-                    placeholder="رمز عبور را دوباره وارد کنید"
+                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 pr-10 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                    placeholder={t('auth.confirmPasswordPlaceholder')}
                   />
                   <button
                     type="button"
@@ -250,12 +252,12 @@ const RegisterPage: React.FC = () => {
                   required
                   className="w-4 h-4 text-blue-600 bg-white/80 border-white/50 rounded focus:ring-blue-500/50"
                 />
-                <label htmlFor="agree-terms" className="mr-2 block text-xs text-white persian-font-vazir">
-                  با{' '}
+                <label htmlFor="agree-terms" className={`mr-2 block text-xs text-white ${fontClass}`}>
+                  {t('auth.agreeTerms').split(' ').slice(0, -2).join(' ')}{' '}
                   <a href="#" className="text-blue-300 hover:text-blue-200 transition-colors">
-                    شرایط و قوانین
+                    {t('auth.terms')}
                   </a>{' '}
-                  موافقم
+                  {t('auth.agreeTerms').split(' ').slice(-1).join(' ')}
                 </label>
               </div>
 
@@ -263,9 +265,9 @@ const RegisterPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 persian-font-vazir"
+                  className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 ${fontClass}`}
                 >
-                  {loading ? 'در حال ایجاد حساب...' : 'ایجاد حساب'}
+                  {loading ? t('auth.creatingAccount') : t('auth.registerButton')}
                 </button>
               </div>
             </form>
