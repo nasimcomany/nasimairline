@@ -6,7 +6,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const GlassmorphismHeader: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const [isLoginMenuOpen, setIsLoginMenuOpen] = useState(false);
+  const loginMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const languageMenuRef = useRef<HTMLDivElement>(null);
+  const loginMenuRef = useRef<HTMLDivElement>(null);
   
   const { language, setLanguage, t, fontClass } = useLanguage();
   const navigate = useNavigate();
@@ -90,17 +93,26 @@ const GlassmorphismHeader: React.FC = () => {
     }
   };
 
-  // Close language menu when clicking outside
+  // Close language menu and login menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (languageMenuRef.current && !languageMenuRef.current.contains(event.target as Node)) {
         setIsLanguageMenuOpen(false);
+      }
+      if (loginMenuRef.current && !loginMenuRef.current.contains(event.target as Node)) {
+        if (loginMenuTimeoutRef.current) {
+          clearTimeout(loginMenuTimeoutRef.current);
+        }
+        setIsLoginMenuOpen(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      if (loginMenuTimeoutRef.current) {
+        clearTimeout(loginMenuTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -178,12 +190,65 @@ const GlassmorphismHeader: React.FC = () => {
 
           {/* Action Buttons & Mobile Menu */}
           <div className="flex items-center space-x-0">
-            <button 
-              onClick={() => navigate('/login')} 
-              className={`hidden md:block px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm`}
+            {/* Login Dropdown */}
+            <div 
+              className="relative hidden md:block" 
+              ref={loginMenuRef}
+              onMouseEnter={() => {
+                if (loginMenuTimeoutRef.current) {
+                  clearTimeout(loginMenuTimeoutRef.current);
+                  loginMenuTimeoutRef.current = null;
+                }
+                setIsLoginMenuOpen(true);
+              }}
+              onMouseLeave={() => {
+                loginMenuTimeoutRef.current = setTimeout(() => {
+                  setIsLoginMenuOpen(false);
+                }, 200); // 200ms delay before closing
+              }}
             >
-              {t('nav.login')}
-            </button>
+              <button 
+                className={`px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm flex items-center gap-1`}
+              >
+                {t('nav.loginUsers')}
+                <ChevronDownIcon className="h-3 w-3" />
+              </button>
+              
+              {/* Login Dropdown Menu */}
+              {isLoginMenuOpen && (
+                <div 
+                  className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-1 w-48 bg-white/95 backdrop-blur-md rounded-lg shadow-xl border border-white/20 overflow-hidden z-50`}
+                >
+                  <button
+                    onClick={() => {
+                      navigate('/login');
+                      setIsLoginMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-2.5 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-blue-50 transition-colors duration-200 ${fontClass} text-gray-700 text-sm border-b border-gray-100`}
+                  >
+                    {t('nav.loginUsers')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/admin/login?type=staff');
+                      setIsLoginMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-2.5 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-blue-50 transition-colors duration-200 ${fontClass} text-gray-700 text-sm border-b border-gray-100`}
+                  >
+                    {t('nav.loginStaff')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/admin/login?type=admin');
+                      setIsLoginMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-2.5 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-blue-50 transition-colors duration-200 ${fontClass} text-gray-700 text-sm`}
+                  >
+                    {t('nav.loginAdmin')}
+                  </button>
+                </div>
+              )}
+            </div>
             <button 
               onClick={() => navigate('/register')} 
               className={`hidden md:block px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm`}
@@ -273,8 +338,15 @@ const GlassmorphismHeader: React.FC = () => {
               
               {/* Mobile Action Buttons */}
               <div className="pt-4 space-y-4">
+                <div className={`text-white/70 text-sm font-medium ${fontClass} mb-2`}>{t('nav.loginUsers')}:</div>
                 <button onClick={() => {navigate('/login'); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
-                  {t('nav.login')}
+                  {t('nav.loginUsers')}
+                </button>
+                <button onClick={() => {navigate('/admin/login?type=staff'); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
+                  {t('nav.loginStaff')}
+                </button>
+                <button onClick={() => {navigate('/admin/login?type=admin'); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
+                  {t('nav.loginAdmin')}
                 </button>
                 <button onClick={() => {navigate('/register'); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
                   {t('nav.register')}

@@ -29,6 +29,9 @@ const translations = {
     'nav.membership': 'عضویت',
     'nav.support': 'پشتیبانی',
     'nav.login': 'ورود',
+    'nav.loginUsers': 'ورود کاربران',
+    'nav.loginStaff': 'ورود پرسنل شرکت',
+    'nav.loginAdmin': 'ورود اعضای اصلی',
     'nav.register': 'ثبت نام',
     'nav.language': 'انتخاب زبان',
     
@@ -432,6 +435,9 @@ const translations = {
     'nav.membership': 'العضوية',
     'nav.support': 'الدعم',
     'nav.login': 'تسجيل الدخول',
+    'nav.loginUsers': 'تسجيل دخول المستخدمين',
+    'nav.loginStaff': 'تسجيل دخول الموظفين',
+    'nav.loginAdmin': 'تسجيل دخول الأعضاء الرئيسيين',
     'nav.register': 'إنشاء حساب',
     'nav.language': 'اختيار اللغة',
     
@@ -835,6 +841,9 @@ const translations = {
     'nav.membership': 'Membership',
     'nav.support': 'Support',
     'nav.login': 'Login',
+    'nav.loginUsers': 'User Login',
+    'nav.loginStaff': 'Staff Login',
+    'nav.loginAdmin': 'Admin Login',
     'nav.register': 'Register',
     'nav.language': 'Select Language',
     
