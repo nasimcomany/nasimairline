@@ -523,7 +523,7 @@ const HomePage: React.FC = () => {
       id: 1,
       title: t('support.phone'),
       description: t('support.phoneDesc'),
-      contact: '۰۲۱-۱۲۳۴۵۶۷۸',
+      contact: t('support.phoneNumber'),
       icon: PhoneIcon,
       gradient: 'from-blue-500 to-blue-700',
       availability: t('support.availability24_7'),
@@ -1508,14 +1508,14 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-2 ${fontClass}">
+                  <h3 className={`text-lg font-semibold text-white mb-2 ${fontClass}`}>
                     {method.title}
                   </h3>
-                  <p className="text-white/70 text-sm mb-3 ${fontClass}">
+                  <p className={`text-white/70 text-sm mb-3 ${fontClass}`}>
                     {method.description}
                   </p>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 mb-3">
-                    <div className="text-white font-bold text-lg ${fontClass}">
+                    <div className={`text-white font-bold text-lg ${fontClass}`}>
                       {method.contact}
                     </div>
                   </div>
@@ -1539,11 +1539,11 @@ const HomePage: React.FC = () => {
 
           {/* FAQ Section */}
           <div className="text-center mb-6 mt-12">
-            <h2 className="text-xl font-bold text-white mb-2 ${fontClass}">
-              سوالات متداول
+            <h2 className={`text-xl font-bold text-white mb-2 ${fontClass}`}>
+              {t('support.faq')}
             </h2>
-            <p className="text-blue-200 text-sm ${fontClass}">
-              پاسخ سوالات رایج شما
+            <p className={`text-blue-200 text-sm ${fontClass}`}>
+              {t('support.faqSubtitle')}
             </p>
           </div>
 

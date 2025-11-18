@@ -415,6 +415,7 @@ const translations = {
     'support.immediate': 'فوری',
     'support.within2Hours': 'کمتر از ۲ ساعت',
     'support.online': 'آنلاین',
+    'support.phoneNumber': '۰۲۱-۱۲۳۴۵۶۷۸',
   },
   ar: {
     // Navigation
@@ -793,6 +794,7 @@ const translations = {
     'support.immediate': 'فوري',
     'support.within2Hours': 'أقل من ساعتين',
     'support.online': 'عبر الإنترنت',
+    'support.phoneNumber': '021-12345678',
     
     // Support FAQ Categories
     'support.faqCategories.general': 'عام',
@@ -1195,6 +1197,7 @@ const translations = {
     'support.immediate': 'Immediate',
     'support.within2Hours': 'Within 2 Hours',
     'support.online': 'Online',
+    'support.phoneNumber': '021-12345678',
     
     // Support FAQ Categories
     'support.faqCategories.general': 'General',
