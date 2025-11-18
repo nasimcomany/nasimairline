@@ -1,0 +1,43 @@
+"""
+Constants and choices for security app
+"""
+
+# Security Level
+SECURITY_LOW = 'LOW'
+SECURITY_NORMAL = 'NORMAL'
+SECURITY_HIGH = 'HIGH'
+SECURITY_CRITICAL = 'CRITICAL'
+
+SECURITY_LEVEL_CHOICES = [
+    (SECURITY_LOW, 'پایین'),
+    (SECURITY_NORMAL, 'عادی'),
+    (SECURITY_HIGH, 'بالا'),
+    (SECURITY_CRITICAL, 'بحرانی'),
+]
+
+# Threat Type
+THREAT_PASSENGER = 'PASSENGER'
+THREAT_BAGGAGE = 'BAGGAGE'
+THREAT_AIRPORT = 'AIRPORT'
+THREAT_WEATHER = 'WEATHER'
+THREAT_OTHER = 'OTHER'
+
+THREAT_TYPE_CHOICES = [
+    (THREAT_PASSENGER, 'مسافر'),
+    (THREAT_BAGGAGE, 'بار'),
+    (THREAT_AIRPORT, 'فرودگاه'),
+    (THREAT_WEATHER, 'آب و هوا'),
+    (THREAT_OTHER, 'سایر'),
+]
+
+# Alert Status
+ALERT_ACTIVE = 'ACTIVE'
+ALERT_RESOLVED = 'RESOLVED'
+ALERT_FALSE_ALARM = 'FALSE_ALARM'
+
+ALERT_STATUS_CHOICES = [
+    (ALERT_ACTIVE, 'فعال'),
+    (ALERT_RESOLVED, 'حل شده'),
+    (ALERT_FALSE_ALARM, 'هشدار کاذب'),
+]
+

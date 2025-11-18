@@ -1,0 +1,101 @@
+"""
+Constants and choices for accounts app
+"""
+
+# Membership Levels
+MEMBERSHIP_BRONZE = 'BRONZE'
+MEMBERSHIP_SILVER = 'SILVER'
+MEMBERSHIP_GOLD = 'GOLD'
+MEMBERSHIP_PLATINUM = 'PLATINUM'
+
+MEMBERSHIP_LEVELS = [
+    (MEMBERSHIP_BRONZE, 'برنزی'),
+    (MEMBERSHIP_SILVER, 'نقره‌ای'),
+    (MEMBERSHIP_GOLD, 'طلایی'),
+    (MEMBERSHIP_PLATINUM, 'پلاتینیوم'),
+]
+
+# Membership Points Thresholds
+MEMBERSHIP_THRESHOLDS = {
+    MEMBERSHIP_BRONZE: 0,
+    MEMBERSHIP_SILVER: 2000,
+    MEMBERSHIP_GOLD: 5000,
+    MEMBERSHIP_PLATINUM: 10000,
+}
+
+# Gender Choices
+GENDER_MALE = 'M'
+GENDER_FEMALE = 'F'
+
+GENDER_CHOICES = [
+    (GENDER_MALE, 'مرد'),
+    (GENDER_FEMALE, 'زن'),
+]
+
+# Two-Factor Authentication Methods
+TWO_FA_SMS = 'SMS'
+TWO_FA_EMAIL = 'EMAIL'
+TWO_FA_APP = 'APP'
+
+TWO_FA_METHODS = [
+    (TWO_FA_SMS, 'پیامک'),
+    (TWO_FA_EMAIL, 'ایمیل'),
+    (TWO_FA_APP, 'اپلیکیشن احراز هویت'),
+]
+
+# Seat Preferences
+SEAT_WINDOW = 'WINDOW'
+SEAT_AISLE = 'AISLE'
+SEAT_MIDDLE = 'MIDDLE'
+SEAT_ANY = 'ANY'
+
+SEAT_PREFERENCES = [
+    (SEAT_WINDOW, 'پنجره'),
+    (SEAT_AISLE, 'راهرو'),
+    (SEAT_MIDDLE, 'وسط'),
+    (SEAT_ANY, 'هر کدام'),
+]
+
+# Meal Preferences
+MEAL_VEGETARIAN = 'VEGETARIAN'
+MEAL_VEGAN = 'VEGAN'
+MEAT_HALAL = 'HALAL'
+MEAL_KOSHER = 'KOSHER'
+MEAL_REGULAR = 'REGULAR'
+MEAL_ANY = 'ANY'
+
+MEAL_PREFERENCES = [
+    (MEAL_VEGETARIAN, 'گیاه‌خواری'),
+    (MEAL_VEGAN, 'وگان'),
+    (MEAT_HALAL, 'حلال'),
+    (MEAL_KOSHER, 'کوشر'),
+    (MEAL_REGULAR, 'عادی'),
+    (MEAL_ANY, 'هر کدام'),
+]
+
+# Points Calculation Rates (points per currency unit)
+POINTS_RATE_BRONZE = 1
+POINTS_RATE_SILVER = 1.2
+POINTS_RATE_GOLD = 1.5
+POINTS_RATE_PLATINUM = 2
+
+MEMBERSHIP_POINTS_RATES = {
+    MEMBERSHIP_BRONZE: POINTS_RATE_BRONZE,
+    MEMBERSHIP_SILVER: POINTS_RATE_SILVER,
+    MEMBERSHIP_GOLD: POINTS_RATE_GOLD,
+    MEMBERSHIP_PLATINUM: POINTS_RATE_PLATINUM,
+}
+
+# Account Status
+ACCOUNT_ACTIVE = 'ACTIVE'
+ACCOUNT_INACTIVE = 'INACTIVE'
+ACCOUNT_SUSPENDED = 'SUSPENDED'
+ACCOUNT_DELETED = 'DELETED'
+
+ACCOUNT_STATUS_CHOICES = [
+    (ACCOUNT_ACTIVE, 'فعال'),
+    (ACCOUNT_INACTIVE, 'غیرفعال'),
+    (ACCOUNT_SUSPENDED, 'معلق'),
+    (ACCOUNT_DELETED, 'حذف شده'),
+]
+

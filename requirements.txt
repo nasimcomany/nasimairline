@@ -6,3 +6,27 @@ pyt==1.3.0
 python-dotenv==1.1.1
 sqlparse==0.5.3
 tzdata==2025.2
+
+# Django REST Framework
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.0
+
+# CORS
+django-cors-headers==4.3.1
+
+# Filtering
+django-filter==23.3
+
+# Authentication
+django-allauth==0.57.0
+
+# Redis & Cache
+django-redis==5.4.0
+redis==5.0.1
+
+# Celery (برای کارهای پس‌زمینه)
+celery==5.3.4
+
+# Validation
+django-phonenumber-field==7.1.0
+phonenumbers==8.13.27

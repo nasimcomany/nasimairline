@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class Project(models.Model):
@@ -11,17 +11,17 @@ class Project(models.Model):
     project_status = models.CharField(max_length=255)
     project_type = models.CharField(max_length=255)
     project_priority = models.CharField(max_length=255)
-    project_assigned_to = models.ForeignKey(User, on_delete=models.CASCADE)
+    project_assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project_start_date = models.DateTimeField()
     project_end_date = models.DateTimeField()
     project_budget = models.DecimalField(max_digits=10, decimal_places=2)
     project_progress = models.IntegerField()
     project_completed = models.BooleanField(default=False)
-    #project_created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    #project_updated_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    #project_created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    #project_updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project_deleted = models.BooleanField(default=False)
     project_deleted_at = models.DateTimeField(null=True, blank=True)
-    project_deleted_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_deleted_by')
+    project_deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='project_deleted_by')
     project_deleted_reason = models.TextField(null=True, blank=True)
     project_deleted_comment = models.TextField(null=True, blank=True)
 
@@ -37,7 +37,7 @@ class Ticket(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=255)
     priority = models.CharField(max_length=255)
-    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE)
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     ticket_type = models.CharField(max_length=255)
     ticket_status = models.CharField(max_length=255)
