@@ -1,3 +1,90 @@
+"""
+Admin configuration for accounts app
+"""
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.translation import gettext_lazy as _
+from .models import User
 
-# Register your models here.
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
+    """
+    Custom User Admin with extended fields
+    """
+    list_display = [
+        'email', 'username', 'first_name', 'last_name', 
+        'phone_number', 'membership_level', 'loyalty_points',
+        'account_status', 'is_active', 'is_staff', 'is_superuser',
+        'date_joined', 'last_login'
+    ]
+    list_filter = [
+        'is_active', 'is_staff', 'is_superuser', 
+        'account_status', 'membership_level', 'gender',
+        'two_factor_enabled', 'date_joined'
+    ]
+    search_fields = [
+        'email', 'username', 'first_name', 'last_name',
+        'phone_number', 'national_id', 'passport_number'
+    ]
+    ordering = ['-date_joined']
+    list_per_page = 25
+    list_max_show_all = 100
+    
+    fieldsets = (
+        (None, {'fields': ('email', 'username', 'password')}),
+        (_('اطلاعات شخصی'), {
+            'fields': (
+                'first_name', 'last_name', 'date_of_birth', 
+                'gender', 'nationality'
+            )
+        }),
+        (_('اطلاعات تماس'), {
+            'fields': ('phone_number',)
+        }),
+        (_('اطلاعات گذرنامه'), {
+            'fields': (
+                'passport_number', 'passport_expiry', 'national_id'
+            ),
+            'classes': ('collapse',)
+        }),
+        (_('سیستم وفاداری'), {
+            'fields': ('loyalty_points', 'membership_level')
+        }),
+        (_('ترجیحات سفر'), {
+            'fields': ('preferred_seat', 'preferred_meal'),
+            'classes': ('collapse',)
+        }),
+        (_('احراز هویت دو مرحله‌ای'), {
+            'fields': (
+                'two_factor_enabled', 'two_factor_method', 
+                'two_factor_secret'
+            ),
+            'classes': ('collapse',)
+        }),
+        (_('وضعیت حساب'), {
+            'fields': ('account_status', 'is_active', 'is_staff', 'is_superuser')
+        }),
+        (_('تاریخ‌ها'), {
+            'fields': ('date_joined', 'last_login', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+        (_('دسترسی‌ها'), {
+            'fields': ('groups', 'user_permissions'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'email', 'username', 'password1', 'password2',
+                'first_name', 'last_name', 'phone_number'
+            ),
+        }),
+    )
+    
+    readonly_fields = ['date_joined', 'last_login', 'created_at', 'updated_at']
+    
+    filter_horizontal = ['groups', 'user_permissions']
