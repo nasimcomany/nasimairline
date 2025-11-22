@@ -6,6 +6,7 @@ from rest_framework.fields import SerializerMethodField
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import models
 from .models import User
 
 User = get_user_model()
@@ -40,8 +41,8 @@ class UserSerializer(BaseUserSerializer):
         validators=[validate_password],
         style={'input_type': 'password'}
     )
-    registration_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
-    last_login_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    registration_ip = serializers.CharField(read_only=True, required=False, allow_null=True)
+    last_login_ip = serializers.CharField(read_only=True, required=False, allow_null=True)
     
     class Meta(BaseUserSerializer.Meta):
         fields = [
@@ -98,8 +99,8 @@ class UserDetailSerializer(BaseUserSerializer):
     discount_percentage = SerializerMethodField()
     booking_count = SerializerMethodField()
     total_spent = SerializerMethodField()
-    registration_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
-    last_login_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    registration_ip = serializers.CharField(read_only=True, required=False, allow_null=True)
+    last_login_ip = serializers.CharField(read_only=True, required=False, allow_null=True)
     
     class Meta(BaseUserSerializer.Meta):
         fields = [

@@ -28,9 +28,9 @@ class AirportViewSet(viewsets.ModelViewSet):
     serializer_class = AirportSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['country', 'city', 'is_active']
-    search_fields = ['code', 'name', 'city', 'country']
-    ordering_fields = ['name', 'city', 'country', 'created_at']
+    filterset_fields = ['country', 'city', 'is_active', 'uuid']
+    search_fields = ['uuid', 'code', 'name', 'slug', 'city', 'country']
+    ordering_fields = ['uuid', 'name', 'city', 'country', 'created_at']
     ordering = ['country', 'city', 'name']
     
     def get_serializer_class(self):
@@ -48,9 +48,9 @@ class AircraftViewSet(viewsets.ModelViewSet):
     serializer_class = AircraftSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['aircraft_type', 'manufacturer', 'is_active']
-    search_fields = ['registration_number', 'model', 'manufacturer']
-    ordering_fields = ['manufacturer', 'model', 'registration_number', 'created_at']
+    filterset_fields = ['aircraft_type', 'manufacturer', 'is_active', 'uuid']
+    search_fields = ['uuid', 'registration_number', 'model', 'manufacturer']
+    ordering_fields = ['uuid', 'manufacturer', 'model', 'registration_number', 'created_at']
     ordering = ['manufacturer', 'model', 'registration_number']
     
     def get_serializer_class(self):
@@ -70,13 +70,13 @@ class FlightViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
         'status', 'flight_type', 'origin', 'destination',
-        'aircraft', 'departure_time'
+        'aircraft', 'departure_time', 'uuid'
     ]
     search_fields = [
-        'flight_number', 'origin__code', 'origin__name',
+        'uuid', 'flight_number', 'origin__code', 'origin__name',
         'destination__code', 'destination__name'
     ]
-    ordering_fields = ['departure_time', 'arrival_time', 'created_at']
+    ordering_fields = ['uuid', 'departure_time', 'arrival_time', 'created_at']
     ordering = ['departure_time']
     
     def get_serializer_class(self):

@@ -39,17 +39,17 @@ class BookingAdmin(admin.ModelAdmin):
     Admin configuration for Booking model
     """
     list_display = [
-        'booking_reference', 'user', 'flight',
+        'uuid', 'booking_reference', 'user', 'flight',
         'booking_type', 'cabin_class', 'status',
-        'total_amount', 'created_at'
+        'total_amount', 'booking_ip', 'created_at'
     ]
     list_filter = [
         'status', 'booking_type', 'cabin_class',
-        'booking_source', 'created_at', 'cancelled_at'
+        'booking_source', 'booking_ip', 'created_at', 'cancelled_at'
     ]
     search_fields = [
-        'booking_reference', 'user__email', 'user__first_name',
-        'user__last_name', 'flight__flight_number'
+        'uuid', 'booking_reference', 'user__email', 'user__first_name',
+        'user__last_name', 'flight__flight_number', 'booking_ip'
     ]
     list_editable = ['status']
     list_per_page = 25
@@ -78,6 +78,10 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('cancellation_reason', 'cancelled_at'),
             'classes': ('collapse',)
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid', 'booking_ip', 'metadata'),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
@@ -85,7 +89,7 @@ class BookingAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = [
-        'booking_reference', 'created_at', 'updated_at',
+        'uuid', 'booking_reference', 'created_at', 'updated_at',
         'cancelled_at'
     ]
     

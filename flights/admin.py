@@ -12,14 +12,14 @@ class AirportAdmin(admin.ModelAdmin):
     Admin configuration for Airport model
     """
     list_display = [
-        'code', 'name', 'city', 'country', 
+        'uuid', 'code', 'name', 'slug', 'city', 'country', 
         'is_active', 'flight_count', 'created_at'
     ]
     list_filter = [
         'is_active', 'country', 'city', 'created_at'
     ]
     search_fields = [
-        'code', 'name', 'city', 'country'
+        'uuid', 'code', 'name', 'slug', 'city', 'country'
     ]
     list_editable = ['is_active']
     list_per_page = 25
@@ -36,13 +36,17 @@ class AirportAdmin(admin.ModelAdmin):
         (_('وضعیت'), {
             'fields': ('is_active', 'flight_count')
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid', 'slug'),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
     
-    readonly_fields = ['created_at', 'updated_at', 'flight_count']
+    readonly_fields = ['uuid', 'slug', 'created_at', 'updated_at', 'flight_count']
 
 
 @admin.register(Aircraft)
@@ -51,7 +55,7 @@ class AircraftAdmin(admin.ModelAdmin):
     Admin configuration for Aircraft model
     """
     list_display = [
-        'registration_number', 'model', 'manufacturer',
+        'uuid', 'registration_number', 'model', 'manufacturer',
         'aircraft_type', 'total_seats', 'is_active',
         'in_service_date', 'created_at'
     ]
@@ -60,7 +64,7 @@ class AircraftAdmin(admin.ModelAdmin):
         'in_service_date', 'created_at'
     ]
     search_fields = [
-        'registration_number', 'model', 'manufacturer'
+        'uuid', 'registration_number', 'model', 'manufacturer'
     ]
     list_editable = ['is_active']
     list_per_page = 25
@@ -82,6 +86,10 @@ class AircraftAdmin(admin.ModelAdmin):
         (_('وضعیت'), {
             'fields': ('is_active', 'in_service_date')
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid',),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
@@ -97,7 +105,7 @@ class FlightAdmin(admin.ModelAdmin):
     Admin configuration for Flight model
     """
     list_display = [
-        'flight_number', 'origin', 'destination', 'aircraft',
+        'uuid', 'flight_number', 'origin', 'destination', 'aircraft',
         'departure_time', 'arrival_time', 'status',
         'economy_price', 'business_price', 'first_class_price',
         'economy_available', 'business_available', 'first_class_available',
@@ -108,7 +116,7 @@ class FlightAdmin(admin.ModelAdmin):
         'aircraft', 'departure_time', 'created_at'
     ]
     search_fields = [
-        'flight_number', 'origin__code', 'origin__name',
+        'uuid', 'flight_number', 'origin__code', 'origin__name',
         'destination__code', 'destination__name',
         'aircraft__registration_number', 'aircraft__model'
     ]
@@ -142,7 +150,11 @@ class FlightAdmin(admin.ModelAdmin):
             )
         }),
         (_('اطلاعات اضافی'), {
-            'fields': ('gate', 'terminal'),
+            'fields': ('gate', 'terminal', 'gate_info'),
+            'classes': ('collapse',)
+        }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid',),
             'classes': ('collapse',)
         }),
         (_('تاریخ‌ها'), {

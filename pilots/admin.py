@@ -12,7 +12,7 @@ class PilotAdmin(admin.ModelAdmin):
     Admin configuration for Pilot model
     """
     list_display = [
-        'user', 'license_number', 'license_type',
+        'uuid', 'user', 'license_number', 'license_type',
         'license_expiry', 'total_flight_hours',
         'status', 'created_at'
     ]
@@ -21,7 +21,7 @@ class PilotAdmin(admin.ModelAdmin):
         'created_at'
     ]
     search_fields = [
-        'license_number', 'user__email', 'user__first_name',
+        'uuid', 'license_number', 'user__email', 'user__first_name',
         'user__last_name'
     ]
     list_editable = ['status']
@@ -47,13 +47,17 @@ class PilotAdmin(admin.ModelAdmin):
         (_('وضعیت'), {
             'fields': ('status',)
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid',),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
     
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['uuid', 'created_at', 'updated_at']
     
     autocomplete_fields = ['user']
 
@@ -64,7 +68,7 @@ class PilotRequestAdmin(admin.ModelAdmin):
     Admin configuration for PilotRequest model
     """
     list_display = [
-        'pilot', 'request_type', 'title',
+        'uuid', 'pilot', 'request_type', 'title',
         'status', 'requested_date', 'created_at',
         'responded_at', 'responded_by'
     ]
@@ -73,7 +77,7 @@ class PilotRequestAdmin(admin.ModelAdmin):
         'responded_at', 'requested_date'
     ]
     search_fields = [
-        'title', 'description', 'pilot__user__email',
+        'uuid', 'title', 'description', 'pilot__user__email',
         'pilot__user__first_name', 'pilot__user__last_name',
         'flight__flight_number'
     ]
@@ -95,6 +99,10 @@ class PilotRequestAdmin(admin.ModelAdmin):
             ),
             'classes': ('collapse',)
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid',),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
@@ -102,7 +110,7 @@ class PilotRequestAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = [
-        'created_at', 'updated_at', 'responded_at'
+        'uuid', 'created_at', 'updated_at', 'responded_at'
     ]
     
     autocomplete_fields = ['pilot', 'flight', 'responded_by']

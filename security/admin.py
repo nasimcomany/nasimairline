@@ -12,7 +12,7 @@ class SecurityInfoAdmin(admin.ModelAdmin):
     Admin configuration for SecurityInfo model
     """
     list_display = [
-        'flight', 'security_level',
+        'uuid', 'flight', 'security_level',
         'passenger_screening', 'baggage_screening',
         'created_at', 'updated_at'
     ]
@@ -21,7 +21,7 @@ class SecurityInfoAdmin(admin.ModelAdmin):
         'baggage_screening', 'created_at'
     ]
     search_fields = [
-        'flight__flight_number', 'special_instructions', 'notes'
+        'uuid', 'flight__flight_number', 'special_instructions', 'notes'
     ]
     list_editable = [
         'security_level', 'passenger_screening', 'baggage_screening'
@@ -47,13 +47,17 @@ class SecurityInfoAdmin(admin.ModelAdmin):
             'fields': ('notes',),
             'classes': ('collapse',)
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid',),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
     
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['uuid', 'created_at', 'updated_at']
     
     autocomplete_fields = ['flight']
 
@@ -64,7 +68,7 @@ class SecurityAlertAdmin(admin.ModelAdmin):
     Admin configuration for SecurityAlert model
     """
     list_display = [
-        'title', 'flight', 'threat_type',
+        'uuid', 'title', 'flight', 'threat_type',
         'security_level', 'status',
         'resolved_by', 'resolved_at', 'created_at'
     ]
@@ -73,7 +77,7 @@ class SecurityAlertAdmin(admin.ModelAdmin):
         'created_at', 'resolved_at'
     ]
     search_fields = [
-        'title', 'description', 'flight__flight_number',
+        'uuid', 'title', 'description', 'flight__flight_number',
         'resolution_notes'
     ]
     list_editable = ['status']
@@ -96,6 +100,10 @@ class SecurityAlertAdmin(admin.ModelAdmin):
             ),
             'classes': ('collapse',)
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid',),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
@@ -103,7 +111,7 @@ class SecurityAlertAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = [
-        'created_at', 'updated_at', 'resolved_at'
+        'uuid', 'created_at', 'updated_at', 'resolved_at'
     ]
     
     autocomplete_fields = ['flight', 'resolved_by']

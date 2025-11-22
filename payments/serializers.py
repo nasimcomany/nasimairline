@@ -4,6 +4,7 @@ Serializers for payments app
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from django.core.exceptions import ValidationError
+from django.db import models
 from .models import Payment, Transaction, Refund
 from bookings.serializers import BookingSerializer
 from accounts.serializers import UserSerializer
@@ -76,7 +77,7 @@ class PaymentSerializer(BasePaymentSerializer):
     is_successful = SerializerMethodField()
     can_refund = SerializerMethodField()
     is_refunded = SerializerMethodField()
-    payment_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    payment_ip = serializers.CharField(read_only=True, required=False, allow_null=True)
     gateway_response_summary = SerializerMethodField()
     
     class Meta(BasePaymentSerializer.Meta):
@@ -121,7 +122,7 @@ class PaymentDetailSerializer(BasePaymentSerializer):
     is_refunded = SerializerMethodField()
     installment_details = SerializerMethodField()
     total_refunded = SerializerMethodField()
-    payment_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    payment_ip = serializers.CharField(read_only=True, required=False, allow_null=True)
     gateway_response_summary = SerializerMethodField()
     
     class Meta(BasePaymentSerializer.Meta):
@@ -158,6 +159,22 @@ class PaymentDetailSerializer(BasePaymentSerializer):
     def get_installment_details(self, obj):
         """Get installment calculation details"""
         return obj.get_installment_details()
+    
+    def get_total_refunded(self, obj):
+        """Get total refunded amount"""
+        total = obj.refunds.filter(status='COMPLETED').aggregate(
+            total=models.Sum('refund_amount')
+        )['total']
+        return float(total) if total else 0.0
+    
+    def get_gateway_response_summary(self, obj):
+        """Get summary of gateway response"""
+        if obj.gateway_response:
+            return {
+                'status': obj.gateway_response.get('status', 'unknown'),
+                'code': obj.gateway_response.get('code', ''),
+            }
+        return None
 
 
 class PaymentCreateSerializer(serializers.ModelSerializer):

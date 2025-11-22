@@ -38,17 +38,17 @@ class PaymentAdmin(admin.ModelAdmin):
     Admin configuration for Payment model
     """
     list_display = [
-        'transaction_id', 'user', 'booking',
+        'uuid', 'transaction_id', 'user', 'booking',
         'amount', 'method', 'gateway', 'status',
-        'is_installment', 'created_at', 'completed_at'
+        'is_installment', 'payment_ip', 'created_at', 'completed_at'
     ]
     list_filter = [
         'status', 'method', 'gateway',
-        'is_installment', 'created_at', 'completed_at'
+        'is_installment', 'payment_ip', 'created_at', 'completed_at'
     ]
     search_fields = [
-        'transaction_id', 'gateway_transaction_id',
-        'user__email', 'booking__booking_reference'
+        'uuid', 'transaction_id', 'gateway_transaction_id',
+        'user__email', 'booking__booking_reference', 'payment_ip'
     ]
     list_editable = ['status']
     list_per_page = 25
@@ -84,6 +84,10 @@ class PaymentAdmin(admin.ModelAdmin):
             ),
             'classes': ('collapse',)
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid', 'payment_ip', 'metadata'),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at', 'completed_at'),
             'classes': ('collapse',)
@@ -91,7 +95,7 @@ class PaymentAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = [
-        'transaction_id', 'created_at', 'updated_at', 'completed_at'
+        'uuid', 'transaction_id', 'created_at', 'updated_at', 'completed_at'
     ]
     
     autocomplete_fields = ['user', 'booking']
@@ -103,14 +107,14 @@ class TransactionAdmin(admin.ModelAdmin):
     Admin configuration for Transaction model
     """
     list_display = [
-        'transaction_id', 'payment', 'transaction_type',
+        'uuid', 'transaction_id', 'payment', 'transaction_type',
         'amount', 'status', 'gateway', 'created_at'
     ]
     list_filter = [
         'transaction_type', 'status', 'gateway', 'created_at'
     ]
     search_fields = [
-        'transaction_id', 'gateway_transaction_id',
+        'uuid', 'transaction_id', 'gateway_transaction_id',
         'payment__transaction_id'
     ]
     list_per_page = 25
@@ -131,13 +135,17 @@ class TransactionAdmin(admin.ModelAdmin):
             'fields': ('description',),
             'classes': ('collapse',)
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid',),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
     
-    readonly_fields = ['transaction_id', 'created_at', 'updated_at']
+    readonly_fields = ['uuid', 'transaction_id', 'created_at', 'updated_at']
     
     autocomplete_fields = ['payment']
 

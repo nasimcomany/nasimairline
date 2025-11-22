@@ -13,19 +13,20 @@ class UserAdmin(BaseUserAdmin):
     Custom User Admin with extended fields
     """
     list_display = [
-        'email', 'username', 'first_name', 'last_name', 
+        'uuid', 'email', 'username', 'first_name', 'last_name', 
         'phone_number', 'membership_level', 'loyalty_points',
         'account_status', 'is_active', 'is_staff', 'is_superuser',
-        'date_joined', 'last_login'
+        'registration_ip', 'last_login_ip', 'date_joined', 'last_login'
     ]
     list_filter = [
         'is_active', 'is_staff', 'is_superuser', 
         'account_status', 'membership_level', 'gender',
-        'two_factor_enabled', 'date_joined'
+        'two_factor_enabled', 'date_joined', 'registration_ip', 'last_login_ip'
     ]
     search_fields = [
-        'email', 'username', 'first_name', 'last_name',
-        'phone_number', 'national_id', 'passport_number'
+        'uuid', 'email', 'username', 'first_name', 'last_name',
+        'phone_number', 'national_id', 'passport_number',
+        'registration_ip', 'last_login_ip'
     ]
     ordering = ['-date_joined']
     list_per_page = 25
@@ -65,6 +66,10 @@ class UserAdmin(BaseUserAdmin):
         (_('وضعیت حساب'), {
             'fields': ('account_status', 'is_active', 'is_staff', 'is_superuser')
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid', 'registration_ip', 'last_login_ip', 'preferences'),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('date_joined', 'last_login', 'created_at', 'updated_at'),
             'classes': ('collapse',)
@@ -85,6 +90,6 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
     
-    readonly_fields = ['date_joined', 'last_login', 'created_at', 'updated_at']
+    readonly_fields = ['uuid', 'date_joined', 'last_login', 'created_at', 'updated_at']
     
     filter_horizontal = ['groups', 'user_permissions']

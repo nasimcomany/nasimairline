@@ -25,10 +25,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
         'notification_type', 'channel', 'status',
-        'priority', 'is_read', 'user'
+        'priority', 'is_read', 'user', 'uuid'
     ]
-    search_fields = ['title', 'message', 'user__email']
-    ordering_fields = ['created_at', 'sent_at', 'read_at', 'priority']
+    search_fields = ['uuid', 'title', 'message', 'user__email']
+    ordering_fields = ['uuid', 'created_at', 'sent_at', 'read_at', 'priority']
     ordering = ['-created_at']
     
     def get_serializer_class(self):

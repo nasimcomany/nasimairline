@@ -26,12 +26,12 @@ class SecurityInfoViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
         'security_level', 'passenger_screening',
-        'baggage_screening', 'flight'
+        'baggage_screening', 'flight', 'uuid'
     ]
     search_fields = [
-        'flight__flight_number', 'special_instructions', 'notes'
+        'uuid', 'flight__flight_number', 'special_instructions', 'notes'
     ]
-    ordering_fields = ['created_at', 'updated_at']
+    ordering_fields = ['uuid', 'created_at', 'updated_at']
     ordering = ['-created_at']
     
     def get_serializer_class(self):
@@ -52,14 +52,14 @@ class SecurityAlertViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
-        'threat_type', 'security_level', 'status', 'flight'
+        'threat_type', 'security_level', 'status', 'flight', 'uuid'
     ]
     search_fields = [
-        'title', 'description', 'flight__flight_number',
+        'uuid', 'title', 'description', 'flight__flight_number',
         'resolution_notes'
     ]
     ordering_fields = [
-        'created_at', 'updated_at', 'resolved_at'
+        'uuid', 'created_at', 'updated_at', 'resolved_at'
     ]
     ordering = ['-created_at']
     

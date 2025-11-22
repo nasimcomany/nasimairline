@@ -28,13 +28,13 @@ class BookingViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
         'status', 'booking_type', 'cabin_class',
-        'booking_source', 'flight', 'user'
+        'booking_source', 'flight', 'user', 'uuid', 'booking_ip'
     ]
     search_fields = [
-        'booking_reference', 'user__email',
-        'flight__flight_number'
+        'uuid', 'booking_reference', 'user__email',
+        'flight__flight_number', 'booking_ip'
     ]
-    ordering_fields = ['created_at', 'updated_at', 'total_amount']
+    ordering_fields = ['uuid', 'created_at', 'updated_at', 'total_amount']
     ordering = ['-created_at']
     
     def get_serializer_class(self):

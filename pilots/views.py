@@ -24,13 +24,13 @@ class PilotViewSet(viewsets.ModelViewSet):
     serializer_class = PilotSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['status', 'license_type']
+    filterset_fields = ['status', 'license_type', 'uuid']
     search_fields = [
-        'license_number', 'user__email',
+        'uuid', 'license_number', 'user__email',
         'user__first_name', 'user__last_name'
     ]
     ordering_fields = [
-        'user__last_name', 'user__first_name',
+        'uuid', 'user__last_name', 'user__first_name',
         'total_flight_hours', 'created_at'
     ]
     ordering = ['user__last_name', 'user__first_name']
@@ -53,14 +53,14 @@ class PilotRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
-        'request_type', 'status', 'pilot', 'flight'
+        'request_type', 'status', 'pilot', 'flight', 'uuid'
     ]
     search_fields = [
-        'title', 'description', 'pilot__user__email',
+        'uuid', 'title', 'description', 'pilot__user__email',
         'pilot__user__first_name', 'pilot__user__last_name',
         'flight__flight_number'
     ]
-    ordering_fields = ['created_at', 'updated_at', 'requested_date', 'responded_at']
+    ordering_fields = ['uuid', 'created_at', 'updated_at', 'requested_date', 'responded_at']
     ordering = ['-created_at']
     
     def get_serializer_class(self):

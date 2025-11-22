@@ -27,13 +27,14 @@ class PaymentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
-        'status', 'method', 'gateway', 'is_installment', 'user', 'booking'
+        'status', 'method', 'gateway', 'is_installment', 'user', 'booking',
+        'uuid', 'payment_ip'
     ]
     search_fields = [
-        'transaction_id', 'gateway_transaction_id',
-        'user__email', 'booking__booking_reference'
+        'uuid', 'transaction_id', 'gateway_transaction_id',
+        'user__email', 'booking__booking_reference', 'payment_ip'
     ]
-    ordering_fields = ['created_at', 'updated_at', 'amount', 'completed_at']
+    ordering_fields = ['uuid', 'created_at', 'updated_at', 'amount', 'completed_at']
     ordering = ['-created_at']
     
     def get_serializer_class(self):
@@ -118,13 +119,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
-        'transaction_type', 'status', 'gateway', 'payment'
+        'transaction_type', 'status', 'gateway', 'payment', 'uuid'
     ]
     search_fields = [
-        'transaction_id', 'gateway_transaction_id',
+        'uuid', 'transaction_id', 'gateway_transaction_id',
         'payment__transaction_id'
     ]
-    ordering_fields = ['created_at', 'updated_at', 'amount']
+    ordering_fields = ['uuid', 'created_at', 'updated_at', 'amount']
     ordering = ['-created_at']
     
     def get_queryset(self):

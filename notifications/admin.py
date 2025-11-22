@@ -12,7 +12,7 @@ class NotificationAdmin(admin.ModelAdmin):
     Admin configuration for Notification model
     """
     list_display = [
-        'title', 'user', 'notification_type',
+        'uuid', 'title', 'user', 'notification_type',
         'channel', 'status', 'priority',
         'is_read', 'created_at', 'sent_at'
     ]
@@ -21,7 +21,7 @@ class NotificationAdmin(admin.ModelAdmin):
         'priority', 'is_read', 'created_at', 'sent_at'
     ]
     search_fields = [
-        'title', 'message', 'user__email',
+        'uuid', 'title', 'message', 'user__email',
         'user__first_name', 'user__last_name'
     ]
     list_editable = ['status', 'is_read']
@@ -46,13 +46,17 @@ class NotificationAdmin(admin.ModelAdmin):
             'fields': ('metadata',),
             'classes': ('collapse',)
         }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid',),
+            'classes': ('collapse',)
+        }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'sent_at'),
             'classes': ('collapse',)
         }),
     )
     
-    readonly_fields = ['created_at', 'sent_at', 'read_at']
+    readonly_fields = ['uuid', 'created_at', 'sent_at', 'read_at']
     
     autocomplete_fields = ['user']
     

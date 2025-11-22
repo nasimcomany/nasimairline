@@ -27,14 +27,16 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
         'account_status', 'membership_level', 'gender',
-        'is_active', 'two_factor_enabled'
+        'is_active', 'two_factor_enabled', 'uuid',
+        'registration_ip', 'last_login_ip'
     ]
     search_fields = [
-        'email', 'username', 'first_name', 'last_name',
-        'phone_number', 'national_id', 'passport_number'
+        'uuid', 'email', 'username', 'first_name', 'last_name',
+        'phone_number', 'national_id', 'passport_number',
+        'registration_ip', 'last_login_ip'
     ]
     ordering_fields = [
-        'created_at', 'updated_at', 'date_joined', 'last_login',
+        'uuid', 'created_at', 'updated_at', 'date_joined', 'last_login',
         'loyalty_points', 'membership_level'
     ]
     ordering = ['-created_at']

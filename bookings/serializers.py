@@ -76,7 +76,7 @@ class BookingSerializer(BaseBookingSerializer):
     passenger_count = SerializerMethodField()
     is_refundable = SerializerMethodField()
     can_modify = SerializerMethodField()
-    booking_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    booking_ip = serializers.CharField(read_only=True, required=False, allow_null=True)
     days_until_flight = SerializerMethodField()
     
     class Meta(BaseBookingSerializer.Meta):
@@ -122,7 +122,7 @@ class BookingDetailSerializer(BaseBookingSerializer):
     can_modify = SerializerMethodField()
     days_until_flight = SerializerMethodField()
     refund_amount = SerializerMethodField()
-    booking_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    booking_ip = serializers.CharField(read_only=True, required=False, allow_null=True)
     
     class Meta(BaseBookingSerializer.Meta):
         model = Booking
