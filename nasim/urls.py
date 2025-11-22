@@ -14,6 +14,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+from .admin_site import limited_admin_site
 
 # API Router for API root view
 api_router = DefaultRouter()
@@ -21,6 +22,9 @@ api_router = DefaultRouter()
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
+    
+    # Limited Admin (only blog and gallery)
+    path('limited-admin/', limited_admin_site.urls),
     
     # API Root
     path('api/', include([
@@ -38,6 +42,7 @@ urlpatterns = [
         path('pilots/', include('pilots.urls')),
         path('security/', include('security.urls')),
         path('blog/', include('blog.urls')),
+        path('gallery/', include('gallery.urls')),
         path('main/', include('main.urls')),
     ])),
     

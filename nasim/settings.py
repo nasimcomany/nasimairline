@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'pilots',
     'security',
     'blog',  # Blog and SEO content management
+    'gallery',  # Gallery and media management
     'main',  # اپ قبلی
 ]
 

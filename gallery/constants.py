@@ -1,0 +1,47 @@
+"""
+Constants for gallery app
+"""
+from django.utils.translation import gettext_lazy as _
+
+# Gallery Category Status
+GALLERY_CATEGORY_ACTIVE = 'ACTIVE'
+GALLERY_CATEGORY_INACTIVE = 'INACTIVE'
+
+GALLERY_CATEGORY_STATUS_CHOICES = [
+    (GALLERY_CATEGORY_ACTIVE, _('فعال')),
+    (GALLERY_CATEGORY_INACTIVE, _('غیرفعال')),
+]
+
+# Image Status
+IMAGE_STATUS_PUBLISHED = 'PUBLISHED'
+IMAGE_STATUS_DRAFT = 'DRAFT'
+IMAGE_STATUS_ARCHIVED = 'ARCHIVED'
+
+IMAGE_STATUS_CHOICES = [
+    (IMAGE_STATUS_PUBLISHED, _('منتشر شده')),
+    (IMAGE_STATUS_DRAFT, _('پیش‌نویس')),
+    (IMAGE_STATUS_ARCHIVED, _('بایگانی شده')),
+]
+
+# Album Status
+ALBUM_STATUS_PUBLISHED = 'PUBLISHED'
+ALBUM_STATUS_DRAFT = 'DRAFT'
+ALBUM_STATUS_ARCHIVED = 'ARCHIVED'
+
+ALBUM_STATUS_CHOICES = [
+    (ALBUM_STATUS_PUBLISHED, _('منتشر شده')),
+    (ALBUM_STATUS_DRAFT, _('پیش‌نویس')),
+    (ALBUM_STATUS_ARCHIVED, _('بایگانی شده')),
+]
+
+# Media Type
+MEDIA_TYPE_IMAGE = 'IMAGE'
+MEDIA_TYPE_VIDEO = 'VIDEO'
+MEDIA_TYPE_DOCUMENT = 'DOCUMENT'
+
+MEDIA_TYPE_CHOICES = [
+    (MEDIA_TYPE_IMAGE, _('تصویر')),
+    (MEDIA_TYPE_VIDEO, _('ویدیو')),
+    (MEDIA_TYPE_DOCUMENT, _('سند')),
+]
+
