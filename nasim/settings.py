@@ -152,7 +152,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CKEditor Configuration
-CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_UPLOAD_PATH = 'blog/uploads/'
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'full',
@@ -163,12 +163,17 @@ CKEDITOR_CONFIGS = {
             ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             ['Link', 'Unlink'],
             ['RemoveFormat', 'Source'],
-            ['Image', 'Table', 'HorizontalRule'],
+            ['Image', 'Flash', 'Table', 'HorizontalRule'],
             ['Styles', 'Format', 'Font', 'FontSize'],
             ['TextColor', 'BGColor'],
             ['Maximize', 'ShowBlocks'],
         ],
         'toolbar': 'Custom',
+        'filebrowserWindowHeight': 725,
+        'filebrowserWindowWidth': 940,
+        'toolbarCanCollapse': True,
+        'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
+        'tabSpaces': 4,
         'extraPlugins': ','.join([
             'uploadimage',  # the upload image feature
             'div',
@@ -183,6 +188,10 @@ CKEDITOR_CONFIGS = {
             'dialogui',
             'elementspath'
         ]),
+        'filebrowserBrowseUrl': '/ckeditor/browse/',
+        'filebrowserUploadUrl': '/ckeditor/upload/',
+        'filebrowserImageBrowseUrl': '/ckeditor/browse/',
+        'filebrowserImageUploadUrl': '/ckeditor/upload/',
     },
     'seo_optimized': {
         'toolbar': 'full',
@@ -205,6 +214,9 @@ CKEDITOR_CONFIGS = {
             ['About'],
         ],
         'toolbar': 'Custom',
+        'filebrowserWindowHeight': 725,
+        'filebrowserWindowWidth': 940,
+        'toolbarCanCollapse': True,
         'extraPlugins': ','.join([
             'uploadimage',
             'div',
@@ -221,6 +233,10 @@ CKEDITOR_CONFIGS = {
             'codesnippet',
         ]),
         'codeSnippet_theme': 'monokai_sublime',
+        'filebrowserBrowseUrl': '/ckeditor/browse/',
+        'filebrowserUploadUrl': '/ckeditor/upload/',
+        'filebrowserImageBrowseUrl': '/ckeditor/browse/',
+        'filebrowserImageUploadUrl': '/ckeditor/upload/',
     },
 }
 

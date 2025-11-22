@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 from .managers import ArticleManager, CategoryManager, TagManager, CommentManager
 from .constants import (
     ARTICLE_STATUS_CHOICES,
@@ -189,7 +189,7 @@ class Article(models.Model):
         max_length=500,
         help_text=_('خلاصه مقاله (حداکثر 500 کاراکتر)'),
     )
-    content = RichTextField(_('محتوای کامل'), help_text=_('محتوای کامل مقاله با ویرایشگر پیشرفته'))
+    content = RichTextUploadingField(_('محتوای کامل'), help_text=_('محتوای کامل مقاله با ویرایشگر پیشرفته - می‌توانید تصاویر را آپلود کنید'))
     
     # Heading Structure for SEO
     h1_title = models.CharField(

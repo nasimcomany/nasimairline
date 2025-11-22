@@ -4,6 +4,7 @@ Admin configuration for blog app
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from .models import Article, Category, Tag, Comment, SEOData, InternalLink, ExternalLink, Backlink
 
 
@@ -130,6 +131,11 @@ class ArticleAdmin(admin.ModelAdmin):
         'keyword_density', 'created_at', 'updated_at'
     ]
     date_hierarchy = 'published_at'
+    
+    # Use CKEditor with upload capability for content field
+    formfield_overrides = {
+        'RichTextUploadingField': {'widget': CKEditorUploadingWidget(config_name='seo_optimized')},
+    }
     
     fieldsets = (
         ('اطلاعات پایه', {
