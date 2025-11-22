@@ -2,9 +2,28 @@
 Serializers for bookings app
 """
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
+from django.core.exceptions import ValidationError
 from .models import Booking, Passenger, BookingExtra
 from flights.serializers import FlightSerializer
 from accounts.serializers import UserSerializer
+
+
+class BaseBookingSerializer(serializers.ModelSerializer):
+    """
+    Base serializer for Booking-related models with common fields
+    """
+    uuid = serializers.UUIDField(read_only=True)
+    metadata = serializers.JSONField(read_only=True, required=False, allow_null=True)
+    
+    class Meta:
+        abstract = True
+        read_only_fields = ('id', 'uuid', 'created_at', 'updated_at', 'metadata')
+    
+    def to_representation(self, instance):
+        """Override to add computed fields"""
+        data = super().to_representation(instance)
+        return data
 
 
 class PassengerSerializer(serializers.ModelSerializer):
@@ -48,30 +67,33 @@ class BookingExtraSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class BookingSerializer(serializers.ModelSerializer):
+class BookingSerializer(BaseBookingSerializer):
     """
-    Serializer for Booking model
+    Serializer for Booking model with UUID and computed fields
     """
     user_email = serializers.EmailField(source='user.email', read_only=True)
     flight_number = serializers.CharField(source='flight.flight_number', read_only=True)
-    passenger_count = serializers.SerializerMethodField()
-    is_refundable = serializers.SerializerMethodField()
-    can_modify = serializers.SerializerMethodField()
+    passenger_count = SerializerMethodField()
+    is_refundable = SerializerMethodField()
+    can_modify = SerializerMethodField()
+    booking_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    days_until_flight = SerializerMethodField()
     
-    class Meta:
+    class Meta(BaseBookingSerializer.Meta):
         model = Booking
         fields = [
-            'id', 'booking_reference', 'user', 'user_email', 'flight',
+            'id', 'uuid', 'booking_reference', 'user', 'user_email', 'flight',
             'flight_number', 'booking_type', 'cabin_class',
             'base_price', 'extras_price', 'taxes', 'total_amount',
             'status', 'booking_source', 'special_requests',
             'cancellation_reason', 'cancelled_at', 'passenger_count',
-            'is_refundable', 'can_modify', 'created_at', 'updated_at'
+            'is_refundable', 'can_modify', 'days_until_flight', 'booking_ip', 'metadata',
+            'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'booking_reference', 'created_at', 'updated_at',
+            'id', 'uuid', 'booking_reference', 'created_at', 'updated_at',
             'cancelled_at', 'passenger_count', 'is_refundable', 'can_modify',
-            'user_email', 'flight_number'
+            'user_email', 'flight_number', 'days_until_flight', 'booking_ip', 'metadata'
         ]
     
     def get_passenger_count(self, obj):
@@ -87,33 +109,38 @@ class BookingSerializer(serializers.ModelSerializer):
         return obj.can_modify()
 
 
-class BookingDetailSerializer(serializers.ModelSerializer):
+class BookingDetailSerializer(BaseBookingSerializer):
     """
-    Detailed serializer for Booking model with nested objects
+    Detailed serializer for Booking model with nested objects and statistics
     """
     user_detail = UserSerializer(source='user', read_only=True)
     flight_detail = FlightSerializer(source='flight', read_only=True)
     passengers = PassengerSerializer(many=True, read_only=True)
     extras = BookingExtraSerializer(many=True, read_only=True)
-    passenger_count = serializers.SerializerMethodField()
-    is_refundable = serializers.SerializerMethodField()
-    can_modify = serializers.SerializerMethodField()
+    passenger_count = SerializerMethodField()
+    is_refundable = SerializerMethodField()
+    can_modify = SerializerMethodField()
+    days_until_flight = SerializerMethodField()
+    refund_amount = SerializerMethodField()
+    booking_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
     
-    class Meta:
+    class Meta(BaseBookingSerializer.Meta):
         model = Booking
         fields = [
-            'id', 'booking_reference', 'user', 'user_detail', 'flight',
+            'id', 'uuid', 'booking_reference', 'user', 'user_detail', 'flight',
             'flight_detail', 'booking_type', 'cabin_class',
             'base_price', 'extras_price', 'taxes', 'total_amount',
             'status', 'booking_source', 'special_requests',
             'cancellation_reason', 'cancelled_at', 'passengers',
             'extras', 'passenger_count', 'is_refundable', 'can_modify',
+            'days_until_flight', 'refund_amount', 'booking_ip', 'metadata',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'booking_reference', 'created_at', 'updated_at',
+            'id', 'uuid', 'booking_reference', 'created_at', 'updated_at',
             'cancelled_at', 'passenger_count', 'is_refundable', 'can_modify',
-            'user_detail', 'flight_detail', 'passengers', 'extras'
+            'user_detail', 'flight_detail', 'passengers', 'extras',
+            'days_until_flight', 'refund_amount', 'booking_ip', 'metadata'
         ]
     
     def get_passenger_count(self, obj):

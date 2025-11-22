@@ -1,0 +1,61 @@
+"""
+Constants for blog app
+"""
+from django.utils.translation import gettext_lazy as _
+
+# Article Status
+ARTICLE_STATUS_DRAFT = 'DRAFT'
+ARTICLE_STATUS_PUBLISHED = 'PUBLISHED'
+ARTICLE_STATUS_ARCHIVED = 'ARCHIVED'
+ARTICLE_STATUS_PENDING = 'PENDING'
+
+ARTICLE_STATUS_CHOICES = [
+    (ARTICLE_STATUS_DRAFT, _('پیش‌نویس')),
+    (ARTICLE_STATUS_PUBLISHED, _('منتشر شده')),
+    (ARTICLE_STATUS_ARCHIVED, _('بایگانی شده')),
+    (ARTICLE_STATUS_PENDING, _('در انتظار بررسی')),
+]
+
+# Article Type
+ARTICLE_TYPE_BLOG = 'BLOG'
+ARTICLE_TYPE_NEWS = 'NEWS'
+ARTICLE_TYPE_GUIDE = 'GUIDE'
+ARTICLE_TYPE_FAQ = 'FAQ'
+
+ARTICLE_TYPE_CHOICES = [
+    (ARTICLE_TYPE_BLOG, _('وبلاگ')),
+    (ARTICLE_TYPE_NEWS, _('خبر')),
+    (ARTICLE_TYPE_GUIDE, _('راهنما')),
+    (ARTICLE_TYPE_FAQ, _('سوالات متداول')),
+]
+
+# SEO Priority
+SEO_PRIORITY_LOW = 'LOW'
+SEO_PRIORITY_NORMAL = 'NORMAL'
+SEO_PRIORITY_HIGH = 'HIGH'
+SEO_PRIORITY_CRITICAL = 'CRITICAL'
+
+SEO_PRIORITY_CHOICES = [
+    (SEO_PRIORITY_LOW, _('کم')),
+    (SEO_PRIORITY_NORMAL, _('متوسط')),
+    (SEO_PRIORITY_HIGH, _('بالا')),
+    (SEO_PRIORITY_CRITICAL, _('بسیار بالا')),
+]
+
+# Comment Status
+COMMENT_STATUS_PENDING = 'PENDING'
+COMMENT_STATUS_APPROVED = 'APPROVED'
+COMMENT_STATUS_REJECTED = 'REJECTED'
+COMMENT_STATUS_SPAM = 'SPAM'
+
+COMMENT_STATUS_CHOICES = [
+    (COMMENT_STATUS_PENDING, _('در انتظار تایید')),
+    (COMMENT_STATUS_APPROVED, _('تایید شده')),
+    (COMMENT_STATUS_REJECTED, _('رد شده')),
+    (COMMENT_STATUS_SPAM, _('اسپم')),
+]
+
+# Featured Status
+FEATURED_FALSE = False
+FEATURED_TRUE = True
+

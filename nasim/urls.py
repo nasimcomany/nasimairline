@@ -35,6 +35,7 @@ urlpatterns = [
         path('notifications/', include('notifications.urls')),
         path('pilots/', include('pilots.urls')),
         path('security/', include('security.urls')),
+        path('blog/', include('blog.urls')),
         path('main/', include('main.urls')),
     ])),
 ]

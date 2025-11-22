@@ -1,6 +1,7 @@
 """
 Models for accounts app
 """
+import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -26,6 +27,15 @@ class User(AbstractUser):
     """
     Custom User model extending Django's AbstractUser
     """
+    # UUID for external references
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
     # Basic Information
     email = models.EmailField(_('ایمیل'), unique=True, db_index=True)
     phone_number = models.CharField(
@@ -120,6 +130,48 @@ class User(AbstractUser):
         db_index=True,
     )
     
+    # IP Tracking
+    last_login_ip = models.GenericIPAddressField(
+        _('آی‌پی آخرین ورود'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    registration_ip = models.GenericIPAddressField(
+        _('آی‌پی ثبت‌نام'),
+        null=True,
+        blank=True,
+    )
+    
+    # Additional Metadata
+    preferences = models.JSONField(
+        _('ترجیحات کاربر'),
+        default=dict,
+        blank=True,
+        help_text=_('ترجیحات و تنظیمات کاربر به صورت JSON'),
+    )
+    
+    # IP Tracking
+    registration_ip = models.GenericIPAddressField(
+        _('آی‌پی ثبت‌نام'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    last_login_ip = models.GenericIPAddressField(
+        _('آی‌پی آخرین ورود'),
+        null=True,
+        blank=True,
+    )
+    
+    # Metadata
+    metadata = models.JSONField(
+        _('اطلاعات اضافی'),
+        default=dict,
+        blank=True,
+        help_text=_('اطلاعات اضافی به صورت JSON'),
+    )
+    
     # Timestamps
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
@@ -146,10 +198,13 @@ class User(AbstractUser):
         verbose_name_plural = _('کاربران')
         ordering = ['-created_at']
         indexes = [
+            models.Index(fields=['uuid']),
             models.Index(fields=['email']),
             models.Index(fields=['phone_number']),
             models.Index(fields=['membership_level', 'loyalty_points']),
             models.Index(fields=['account_status', 'is_active']),
+            models.Index(fields=['registration_ip']),
+            models.Index(fields=['created_at', 'account_status']),
         ]
     
     def __str__(self):

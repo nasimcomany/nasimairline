@@ -2,25 +2,49 @@
 Serializers for payments app
 """
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
+from django.core.exceptions import ValidationError
 from .models import Payment, Transaction, Refund
 from bookings.serializers import BookingSerializer
 from accounts.serializers import UserSerializer
 
 
-class TransactionSerializer(serializers.ModelSerializer):
+class BasePaymentSerializer(serializers.ModelSerializer):
     """
-    Serializer for Transaction model
+    Base serializer for Payment-related models with common fields
     """
+    uuid = serializers.UUIDField(read_only=True)
+    
     class Meta:
+        abstract = True
+        read_only_fields = ('id', 'uuid', 'created_at', 'updated_at')
+    
+    def to_representation(self, instance):
+        """Override to add computed fields"""
+        data = super().to_representation(instance)
+        return data
+
+
+class TransactionSerializer(BasePaymentSerializer):
+    """
+    Serializer for Transaction model with UUID
+    """
+    is_successful = SerializerMethodField()
+    
+    class Meta(BasePaymentSerializer.Meta):
         model = Transaction
         fields = [
-            'id', 'payment', 'transaction_type', 'transaction_id',
+            'id', 'uuid', 'payment', 'transaction_type', 'transaction_id',
             'amount', 'status', 'gateway', 'gateway_transaction_id',
-            'description', 'created_at', 'updated_at'
+            'description', 'is_successful', 'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'transaction_id', 'created_at', 'updated_at'
+            'id', 'uuid', 'transaction_id', 'created_at', 'updated_at', 'is_successful'
         ]
+    
+    def get_is_successful(self, obj):
+        """Check if transaction is successful"""
+        return obj.status == 'COMPLETED'
 
 
 class RefundSerializer(serializers.ModelSerializer):
@@ -39,9 +63,9 @@ class RefundSerializer(serializers.ModelSerializer):
         ]
 
 
-class PaymentSerializer(serializers.ModelSerializer):
+class PaymentSerializer(BasePaymentSerializer):
     """
-    Serializer for Payment model
+    Serializer for Payment model with UUID and computed fields
     """
     user_email = serializers.EmailField(source='user.email', read_only=True)
     booking_reference = serializers.CharField(
@@ -49,24 +73,26 @@ class PaymentSerializer(serializers.ModelSerializer):
         read_only=True,
         allow_null=True
     )
-    is_successful = serializers.SerializerMethodField()
-    can_refund = serializers.SerializerMethodField()
-    is_refunded = serializers.SerializerMethodField()
+    is_successful = SerializerMethodField()
+    can_refund = SerializerMethodField()
+    is_refunded = SerializerMethodField()
+    payment_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    gateway_response_summary = SerializerMethodField()
     
-    class Meta:
+    class Meta(BasePaymentSerializer.Meta):
         model = Payment
         fields = [
-            'id', 'transaction_id', 'user', 'user_email', 'booking',
+            'id', 'uuid', 'transaction_id', 'user', 'user_email', 'booking',
             'booking_reference', 'amount', 'method', 'gateway', 'status',
-            'gateway_transaction_id', 'gateway_response', 'error_message',
-            'error_code', 'is_installment', 'installment_months',
+            'gateway_transaction_id', 'gateway_response', 'gateway_response_summary',
+            'error_message', 'error_code', 'is_installment', 'installment_months',
             'monthly_payment', 'is_successful', 'can_refund', 'is_refunded',
-            'created_at', 'updated_at', 'completed_at'
+            'payment_ip', 'created_at', 'updated_at', 'completed_at'
         ]
         read_only_fields = [
-            'id', 'transaction_id', 'created_at', 'updated_at',
+            'id', 'uuid', 'transaction_id', 'created_at', 'updated_at',
             'completed_at', 'is_successful', 'can_refund', 'is_refunded',
-            'user_email', 'booking_reference'
+            'user_email', 'booking_reference', 'gateway_response_summary', 'payment_ip'
         ]
     
     def get_is_successful(self, obj):
@@ -82,35 +108,39 @@ class PaymentSerializer(serializers.ModelSerializer):
         return obj.is_refunded()
 
 
-class PaymentDetailSerializer(serializers.ModelSerializer):
+class PaymentDetailSerializer(BasePaymentSerializer):
     """
-    Detailed serializer for Payment model with nested objects
+    Detailed serializer for Payment model with nested objects and statistics
     """
     user_detail = UserSerializer(source='user', read_only=True)
     booking_detail = BookingSerializer(source='booking', read_only=True)
     transactions = TransactionSerializer(many=True, read_only=True)
     refunds = RefundSerializer(many=True, read_only=True)
-    is_successful = serializers.SerializerMethodField()
-    can_refund = serializers.SerializerMethodField()
-    is_refunded = serializers.SerializerMethodField()
-    installment_details = serializers.SerializerMethodField()
+    is_successful = SerializerMethodField()
+    can_refund = SerializerMethodField()
+    is_refunded = SerializerMethodField()
+    installment_details = SerializerMethodField()
+    total_refunded = SerializerMethodField()
+    payment_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    gateway_response_summary = SerializerMethodField()
     
-    class Meta:
+    class Meta(BasePaymentSerializer.Meta):
         model = Payment
         fields = [
-            'id', 'transaction_id', 'user', 'user_detail', 'booking',
+            'id', 'uuid', 'transaction_id', 'user', 'user_detail', 'booking',
             'booking_detail', 'amount', 'method', 'gateway', 'status',
-            'gateway_transaction_id', 'gateway_response', 'error_message',
-            'error_code', 'is_installment', 'installment_months',
+            'gateway_transaction_id', 'gateway_response', 'gateway_response_summary',
+            'error_message', 'error_code', 'is_installment', 'installment_months',
             'monthly_payment', 'transactions', 'refunds',
             'is_successful', 'can_refund', 'is_refunded',
-            'installment_details', 'created_at', 'updated_at', 'completed_at'
+            'installment_details', 'total_refunded', 'payment_ip',
+            'created_at', 'updated_at', 'completed_at'
         ]
         read_only_fields = [
-            'id', 'transaction_id', 'created_at', 'updated_at',
+            'id', 'uuid', 'transaction_id', 'created_at', 'updated_at',
             'completed_at', 'is_successful', 'can_refund', 'is_refunded',
-            'installment_details', 'user_detail', 'booking_detail',
-            'transactions', 'refunds'
+            'installment_details', 'total_refunded', 'gateway_response_summary',
+            'user_detail', 'booking_detail', 'transactions', 'refunds', 'payment_ip'
         ]
     
     def get_is_successful(self, obj):

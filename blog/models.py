@@ -1,0 +1,558 @@
+"""
+Models for blog app - Professional SEO-focused content management
+"""
+import uuid
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+from .managers import ArticleManager, CategoryManager, TagManager, CommentManager
+from .constants import (
+    ARTICLE_STATUS_CHOICES,
+    ARTICLE_STATUS_PUBLISHED,
+    ARTICLE_STATUS_DRAFT,
+    ARTICLE_TYPE_CHOICES,
+    ARTICLE_TYPE_BLOG,
+    SEO_PRIORITY_CHOICES,
+    SEO_PRIORITY_NORMAL,
+    COMMENT_STATUS_CHOICES,
+    COMMENT_STATUS_PENDING,
+)
+from .validators import (
+    validate_slug,
+    validate_meta_description,
+    validate_meta_title,
+)
+
+User = get_user_model()
+
+
+class Category(models.Model):
+    """
+    Category model for organizing articles
+    """
+    name = models.CharField(_('نام'), max_length=100, unique=True, db_index=True)
+    slug = models.SlugField(
+        _('اسلاگ'),
+        max_length=100,
+        unique=True,
+        db_index=True,
+        validators=[validate_slug],
+        help_text=_('اسلاگ یکتا برای URL'),
+    )
+    description = models.TextField(_('توضیحات'), null=True, blank=True)
+    
+    # SEO Fields
+    meta_title = models.CharField(
+        _('عنوان متا'),
+        max_length=60,
+        null=True,
+        blank=True,
+        validators=[validate_meta_title],
+        help_text=_('عنوان برای SEO (حداکثر 60 کاراکتر)'),
+    )
+    meta_description = models.CharField(
+        _('توضیحات متا'),
+        max_length=160,
+        null=True,
+        blank=True,
+        validators=[validate_meta_description],
+        help_text=_('توضیحات برای SEO (حداکثر 160 کاراکتر)'),
+    )
+    meta_keywords = models.CharField(
+        _('کلمات کلیدی متا'),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=_('کلمات کلیدی جدا شده با کاما'),
+    )
+    
+    # Display
+    image = models.ImageField(
+        _('تصویر'),
+        upload_to='blog/categories/',
+        null=True,
+        blank=True,
+    )
+    is_active = models.BooleanField(_('فعال'), default=True, db_index=True)
+    order = models.PositiveIntegerField(_('ترتیب نمایش'), default=0, db_index=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    
+    objects = CategoryManager()
+    
+    class Meta:
+        verbose_name = _('دسته‌بندی')
+        verbose_name_plural = _('دسته‌بندی‌ها')
+        ordering = ['order', 'name']
+        indexes = [
+            models.Index(fields=['slug', 'is_active']),
+            models.Index(fields=['is_active', 'order']),
+        ]
+    
+    def __str__(self):
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate slug if not provided"""
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        """Get absolute URL for category"""
+        return reverse('blog:category-detail', kwargs={'slug': self.slug})
+
+
+class Tag(models.Model):
+    """
+    Tag model for tagging articles
+    """
+    name = models.CharField(_('نام'), max_length=50, unique=True, db_index=True)
+    slug = models.SlugField(
+        _('اسلاگ'),
+        max_length=50,
+        unique=True,
+        db_index=True,
+        validators=[validate_slug],
+    )
+    description = models.TextField(_('توضیحات'), null=True, blank=True)
+    
+    # SEO Fields
+    meta_description = models.CharField(
+        _('توضیحات متا'),
+        max_length=160,
+        null=True,
+        blank=True,
+        validators=[validate_meta_description],
+    )
+    
+    is_active = models.BooleanField(_('فعال'), default=True, db_index=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    
+    objects = TagManager()
+    
+    class Meta:
+        verbose_name = _('تگ')
+        verbose_name_plural = _('تگ‌ها')
+        ordering = ['name']
+        indexes = [
+            models.Index(fields=['slug', 'is_active']),
+        ]
+    
+    def __str__(self):
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate slug if not provided"""
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        """Get absolute URL for tag"""
+        return reverse('blog:tag-detail', kwargs={'slug': self.slug})
+
+
+class Article(models.Model):
+    """
+    Article model - Professional SEO-optimized content management
+    """
+    # UUID for external references
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    # Basic Information
+    title = models.CharField(_('عنوان'), max_length=200, db_index=True)
+    slug = models.SlugField(
+        _('اسلاگ'),
+        max_length=200,
+        unique=True,
+        db_index=True,
+        validators=[validate_slug],
+        help_text=_('اسلاگ یکتا برای URL'),
+    )
+    excerpt = models.TextField(
+        _('خلاصه'),
+        max_length=500,
+        help_text=_('خلاصه مقاله (حداکثر 500 کاراکتر)'),
+    )
+    content = models.TextField(_('محتوای کامل'))
+    
+    # Author
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='articles',
+        verbose_name=_('نویسنده'),
+        db_index=True,
+    )
+    
+    # Categorization
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='articles',
+        verbose_name=_('دسته‌بندی'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    tags = models.ManyToManyField(
+        Tag,
+        related_name='articles',
+        verbose_name=_('تگ‌ها'),
+        blank=True,
+    )
+    
+    # Article Type
+    article_type = models.CharField(
+        _('نوع مقاله'),
+        max_length=20,
+        choices=ARTICLE_TYPE_CHOICES,
+        default=ARTICLE_TYPE_BLOG,
+        db_index=True,
+    )
+    
+    # Media
+    featured_image = models.ImageField(
+        _('تصویر شاخص'),
+        upload_to='blog/articles/',
+        null=True,
+        blank=True,
+        help_text=_('تصویر اصلی مقاله'),
+    )
+    image_alt = models.CharField(
+        _('متن جایگزین تصویر'),
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text=_('متن جایگزین برای SEO'),
+    )
+    
+    # SEO Fields - Critical for Google indexing
+    meta_title = models.CharField(
+        _('عنوان متا'),
+        max_length=60,
+        null=True,
+        blank=True,
+        validators=[validate_meta_title],
+        help_text=_('عنوان برای SEO (حداکثر 60 کاراکتر)'),
+    )
+    meta_description = models.CharField(
+        _('توضیحات متا'),
+        max_length=160,
+        null=True,
+        blank=True,
+        validators=[validate_meta_description],
+        help_text=_('توضیحات برای SEO (حداکثر 160 کاراکتر)'),
+    )
+    meta_keywords = models.CharField(
+        _('کلمات کلیدی متا'),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=_('کلمات کلیدی جدا شده با کاما'),
+    )
+    seo_priority = models.CharField(
+        _('اولویت SEO'),
+        max_length=20,
+        choices=SEO_PRIORITY_CHOICES,
+        default=SEO_PRIORITY_NORMAL,
+        db_index=True,
+    )
+    
+    # Open Graph & Social Media
+    og_title = models.CharField(
+        _('عنوان Open Graph'),
+        max_length=60,
+        null=True,
+        blank=True,
+        help_text=_('عنوان برای شبکه‌های اجتماعی'),
+    )
+    og_description = models.CharField(
+        _('توضیحات Open Graph'),
+        max_length=160,
+        null=True,
+        blank=True,
+        help_text=_('توضیحات برای شبکه‌های اجتماعی'),
+    )
+    og_image = models.ImageField(
+        _('تصویر Open Graph'),
+        upload_to='blog/og-images/',
+        null=True,
+        blank=True,
+        help_text=_('تصویر برای اشتراک‌گذاری در شبکه‌های اجتماعی'),
+    )
+    
+    # Canonical URL
+    canonical_url = models.URLField(
+        _('Canonical URL'),
+        null=True,
+        blank=True,
+        help_text=_('URL کانونیکال برای جلوگیری از محتوای تکراری'),
+    )
+    
+    # Status & Visibility
+    status = models.CharField(
+        _('وضعیت'),
+        max_length=20,
+        choices=ARTICLE_STATUS_CHOICES,
+        default=ARTICLE_STATUS_DRAFT,
+        db_index=True,
+    )
+    is_featured = models.BooleanField(_('ویژه'), default=False, db_index=True)
+    is_pinned = models.BooleanField(_('ثابت'), default=False)
+    allow_comments = models.BooleanField(_('اجازه نظر'), default=True)
+    
+    # Statistics
+    view_count = models.PositiveIntegerField(_('تعداد بازدید'), default=0, db_index=True)
+    reading_time = models.PositiveIntegerField(
+        _('زمان مطالعه (دقیقه)'),
+        default=0,
+        help_text=_('زمان تقریبی مطالعه مقاله'),
+    )
+    
+    # Additional Metadata
+    metadata = models.JSONField(
+        _('اطلاعات اضافی'),
+        default=dict,
+        blank=True,
+        help_text=_('اطلاعات اضافی به صورت JSON'),
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    published_at = models.DateTimeField(
+        _('تاریخ انتشار'),
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text=_('تاریخ و زمان انتشار مقاله'),
+    )
+    
+    objects = ArticleManager()
+    
+    class Meta:
+        verbose_name = _('مقاله')
+        verbose_name_plural = _('مقالات')
+        ordering = ['-published_at', '-created_at']
+        indexes = [
+            models.Index(fields=['slug', 'status']),
+            models.Index(fields=['status', 'published_at']),
+            models.Index(fields=['category', 'status']),
+            models.Index(fields=['author', 'status']),
+            models.Index(fields=['is_featured', 'status']),
+            models.Index(fields=['view_count']),
+            models.Index(fields=['seo_priority', 'status']),
+        ]
+    
+    def __str__(self):
+        return self.title
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate slug, excerpt, and reading time"""
+        from .utils import generate_slug, generate_excerpt, calculate_reading_time, generate_meta_description
+        
+        # Generate slug if not provided
+        if not self.slug:
+            self.slug = generate_slug(self.title)
+        
+        # Generate excerpt if not provided
+        if not self.excerpt and self.content:
+            self.excerpt = generate_excerpt(self.content, 200)
+        
+        # Calculate reading time
+        if self.content:
+            self.reading_time = calculate_reading_time(self.content)
+        
+        # Generate meta description if not provided
+        if not self.meta_description and self.content:
+            self.meta_description = generate_meta_description(self.content)
+        
+        # Set published_at when status changes to published
+        if self.status == ARTICLE_STATUS_PUBLISHED and not self.published_at:
+            from django.utils import timezone
+            self.published_at = timezone.now()
+        
+        super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        """Get absolute URL for article"""
+        return reverse('blog:article-detail', kwargs={'slug': self.slug})
+    
+    def get_canonical_url(self):
+        """Get canonical URL"""
+        if self.canonical_url:
+            return self.canonical_url
+        return self.get_absolute_url()
+    
+    def get_og_image_url(self):
+        """Get Open Graph image URL"""
+        from .utils import generate_og_image_url
+        return generate_og_image_url(self)
+    
+    def increment_view(self):
+        """Increment view count"""
+        from .utils import increment_view_count
+        increment_view_count(self)
+    
+    def get_related_articles(self, limit=5):
+        """Get related articles"""
+        from .utils import get_related_articles
+        return get_related_articles(self, limit)
+
+
+class Comment(models.Model):
+    """
+    Comment model for article comments
+    """
+    # UUID for external references
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name=_('مقاله'),
+        db_index=True,
+    )
+    
+    # Commenter Information
+    name = models.CharField(_('نام'), max_length=100)
+    email = models.EmailField(_('ایمیل'), db_index=True)
+    website = models.URLField(_('وب‌سایت'), null=True, blank=True)
+    
+    # Comment Content
+    content = models.TextField(_('متن نظر'))
+    
+    # Status
+    status = models.CharField(
+        _('وضعیت'),
+        max_length=20,
+        choices=COMMENT_STATUS_CHOICES,
+        default=COMMENT_STATUS_PENDING,
+        db_index=True,
+    )
+    
+    # IP Tracking
+    ip_address = models.GenericIPAddressField(
+        _('آی‌پی'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    
+    # Parent Comment (for nested comments)
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name='replies',
+        verbose_name=_('نظر والد'),
+        null=True,
+        blank=True,
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    
+    objects = CommentManager()
+    
+    class Meta:
+        verbose_name = _('نظر')
+        verbose_name_plural = _('نظرات')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['article', 'status']),
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['ip_address']),
+        ]
+    
+    def __str__(self):
+        return f"Comment by {self.name} on {self.article.title}"
+
+
+class SEOData(models.Model):
+    """
+    SEO Data model for storing additional SEO information
+    """
+    article = models.OneToOneField(
+        Article,
+        on_delete=models.CASCADE,
+        related_name='seo_data',
+        verbose_name=_('مقاله'),
+    )
+    
+    # Structured Data (JSON-LD)
+    structured_data = models.JSONField(
+        _('داده‌های ساختاریافته'),
+        default=dict,
+        blank=True,
+        help_text=_('داده‌های JSON-LD برای Google'),
+    )
+    
+    # Schema.org markup
+    schema_markup = models.TextField(
+        _('Schema.org Markup'),
+        null=True,
+        blank=True,
+        help_text=_('Schema.org markup برای SEO'),
+    )
+    
+    # Robots Meta
+    robots_index = models.BooleanField(_('اجازه ایندکس'), default=True)
+    robots_follow = models.BooleanField(_('اجازه فالو'), default=True)
+    robots_noarchive = models.BooleanField(_('عدم بایگانی'), default=False)
+    robots_nosnippet = models.BooleanField(_('عدم نمایش خلاصه'), default=False)
+    
+    # Sitemap Priority
+    sitemap_priority = models.DecimalField(
+        _('اولویت در Sitemap'),
+        max_digits=2,
+        decimal_places=1,
+        default=0.5,
+        help_text=_('اولویت از 0.0 تا 1.0'),
+    )
+    sitemap_changefreq = models.CharField(
+        _('فرکانس تغییر در Sitemap'),
+        max_length=20,
+        default='weekly',
+        choices=[
+            ('always', _('همیشه')),
+            ('hourly', _('ساعتی')),
+            ('daily', _('روزانه')),
+            ('weekly', _('هفتگی')),
+            ('monthly', _('ماهانه')),
+            ('yearly', _('سالانه')),
+            ('never', _('هرگز')),
+        ],
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('اطلاعات SEO')
+        verbose_name_plural = _('اطلاعات SEO')
+    
+    def __str__(self):
+        return f"SEO Data for {self.article.title}"

@@ -1,6 +1,7 @@
 """
 Models for notifications app
 """
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
@@ -22,6 +23,17 @@ class Notification(models.Model):
     """
     Notification model for user notifications
     """
+    # UUID for external references
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
+    
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -79,8 +91,10 @@ class Notification(models.Model):
         verbose_name_plural = _('اعلان‌ها')
         ordering = ['-created_at']
         indexes = [
+            models.Index(fields=['uuid']),
             models.Index(fields=['user', 'is_read']),
             models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['notification_type', 'status']),
         ]
     
     def __str__(self):

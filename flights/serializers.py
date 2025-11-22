@@ -2,50 +2,78 @@
 Serializers for flights app
 """
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
+from django.core.exceptions import ValidationError
 from .models import Airport, Aircraft, Flight
 
 
-class AirportSerializer(serializers.ModelSerializer):
+class BaseFlightSerializer(serializers.ModelSerializer):
     """
-    Serializer for Airport model
+    Base serializer for Flight-related models with common fields
     """
-    full_name = serializers.SerializerMethodField()
+    uuid = serializers.UUIDField(read_only=True)
+    metadata = serializers.JSONField(read_only=True, required=False, allow_null=True)
     
     class Meta:
+        abstract = True
+        read_only_fields = ('id', 'uuid', 'created_at', 'updated_at', 'metadata')
+    
+    def to_representation(self, instance):
+        """Override to add computed fields"""
+        data = super().to_representation(instance)
+        return data
+
+
+class AirportSerializer(BaseFlightSerializer):
+    """
+    Serializer for Airport model with UUID and advanced fields
+    """
+    full_name = SerializerMethodField()
+    slug = serializers.SlugField(read_only=True)
+    is_popular = SerializerMethodField()
+    
+    class Meta(BaseFlightSerializer.Meta):
         model = Airport
         fields = [
-            'id', 'code', 'name', 'city', 'country',
+            'id', 'uuid', 'code', 'name', 'slug', 'city', 'country',
             'latitude', 'longitude', 'timezone',
-            'is_active', 'flight_count', 'full_name',
+            'is_active', 'flight_count', 'full_name', 'is_popular', 'metadata',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'flight_count', 'created_at', 'updated_at', 'full_name']
+        read_only_fields = [
+            'id', 'uuid', 'slug', 'flight_count', 'created_at', 'updated_at', 
+            'full_name', 'is_popular', 'metadata'
+        ]
     
     def get_full_name(self, obj):
         """Return full airport name"""
         return obj.get_full_name()
 
 
-class AirportDetailSerializer(serializers.ModelSerializer):
+class AirportDetailSerializer(BaseFlightSerializer):
     """
-    Detailed serializer for Airport model
+    Detailed serializer for Airport model with computed statistics
     """
-    full_name = serializers.SerializerMethodField()
-    departure_count = serializers.SerializerMethodField()
-    arrival_count = serializers.SerializerMethodField()
+    full_name = SerializerMethodField()
+    departure_count = SerializerMethodField()
+    arrival_count = SerializerMethodField()
+    slug = serializers.SlugField(read_only=True)
+    is_popular = SerializerMethodField()
+    total_flights = SerializerMethodField()
     
-    class Meta:
+    class Meta(BaseFlightSerializer.Meta):
         model = Airport
         fields = [
-            'id', 'code', 'name', 'city', 'country',
+            'id', 'uuid', 'code', 'name', 'slug', 'city', 'country',
             'latitude', 'longitude', 'timezone',
             'is_active', 'flight_count', 'full_name',
-            'departure_count', 'arrival_count',
+            'departure_count', 'arrival_count', 'is_popular', 'total_flights', 'metadata',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'flight_count', 'created_at', 'updated_at',
-            'full_name', 'departure_count', 'arrival_count'
+            'id', 'uuid', 'slug', 'flight_count', 'created_at', 'updated_at',
+            'full_name', 'departure_count', 'arrival_count', 'is_popular', 
+            'total_flights', 'metadata'
         ]
     
     def get_full_name(self, obj):
@@ -59,70 +87,108 @@ class AirportDetailSerializer(serializers.ModelSerializer):
     def get_arrival_count(self, obj):
         """Get count of arrivals"""
         return obj.arrivals.count()
-
-
-class AircraftSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Aircraft model
-    """
-    class Meta:
-        model = Aircraft
-        fields = [
-            'id', 'registration_number', 'model', 'manufacturer',
-            'aircraft_type', 'total_seats', 'economy_seats',
-            'business_seats', 'first_class_seats', 'is_active',
-            'in_service_date', 'created_at', 'updated_at'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-
-class AircraftDetailSerializer(serializers.ModelSerializer):
-    """
-    Detailed serializer for Aircraft model
-    """
-    flight_count = serializers.SerializerMethodField()
     
-    class Meta:
+    def get_is_popular(self, obj):
+        """Check if airport is popular"""
+        return obj.flight_count > 100
+    
+    def get_total_flights(self, obj):
+        """Get total flights (departures + arrivals)"""
+        return obj.departures.count() + obj.arrivals.count()
+
+
+class AircraftSerializer(BaseFlightSerializer):
+    """
+    Serializer for Aircraft model with UUID
+    """
+    utilization_rate = SerializerMethodField()
+    
+    class Meta(BaseFlightSerializer.Meta):
         model = Aircraft
         fields = [
-            'id', 'registration_number', 'model', 'manufacturer',
+            'id', 'uuid', 'registration_number', 'model', 'manufacturer',
             'aircraft_type', 'total_seats', 'economy_seats',
             'business_seats', 'first_class_seats', 'is_active',
-            'in_service_date', 'flight_count', 'created_at', 'updated_at'
+            'in_service_date', 'utilization_rate', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'flight_count']
+        read_only_fields = [
+            'id', 'uuid', 'created_at', 'updated_at', 'utilization_rate'
+        ]
+    
+    def get_utilization_rate(self, obj):
+        """Calculate aircraft utilization rate"""
+        # This is a placeholder - can be calculated based on flight hours
+        return 0.0
+
+
+class AircraftDetailSerializer(BaseFlightSerializer):
+    """
+    Detailed serializer for Aircraft model with statistics
+    """
+    flight_count = SerializerMethodField()
+    utilization_rate = SerializerMethodField()
+    seat_occupancy_rate = SerializerMethodField()
+    
+    class Meta(BaseFlightSerializer.Meta):
+        model = Aircraft
+        fields = [
+            'id', 'uuid', 'registration_number', 'model', 'manufacturer',
+            'aircraft_type', 'total_seats', 'economy_seats',
+            'business_seats', 'first_class_seats', 'is_active',
+            'in_service_date', 'flight_count', 'utilization_rate', 
+            'seat_occupancy_rate', 'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'id', 'uuid', 'created_at', 'updated_at', 'flight_count',
+            'utilization_rate', 'seat_occupancy_rate'
+        ]
     
     def get_flight_count(self, obj):
         """Get count of flights"""
         return obj.flights.count()
+    
+    def get_utilization_rate(self, obj):
+        """Calculate aircraft utilization rate"""
+        return 0.0  # Placeholder
+    
+    def get_seat_occupancy_rate(self, obj):
+        """Calculate average seat occupancy rate"""
+        return 0.0  # Placeholder
 
 
-class FlightSerializer(serializers.ModelSerializer):
+class FlightSerializer(BaseFlightSerializer):
     """
-    Serializer for Flight model
+    Serializer for Flight model with UUID and computed fields
     """
     origin_code = serializers.CharField(source='origin.code', read_only=True)
     origin_name = serializers.CharField(source='origin.name', read_only=True)
     destination_code = serializers.CharField(source='destination.code', read_only=True)
     destination_name = serializers.CharField(source='destination.name', read_only=True)
     aircraft_model = serializers.CharField(source='aircraft.model', read_only=True)
-    route = serializers.SerializerMethodField()
+    route = SerializerMethodField()
+    is_available = SerializerMethodField()
+    lowest_price = SerializerMethodField()
+    departure_date = serializers.DateField(source='departure_time.date', read_only=True)
+    arrival_date = serializers.DateField(source='arrival_time.date', read_only=True)
     
-    class Meta:
+    class Meta(BaseFlightSerializer.Meta):
         model = Flight
         fields = [
-            'id', 'flight_number', 'origin', 'destination',
+            'id', 'uuid', 'flight_number', 'origin', 'destination',
             'origin_code', 'origin_name', 'destination_code', 'destination_name',
             'aircraft', 'aircraft_model', 'departure_time', 'arrival_time',
-            'duration', 'economy_price', 'business_price', 'first_class_price',
+            'departure_date', 'arrival_date', 'duration', 
+            'economy_price', 'business_price', 'first_class_price',
             'economy_available', 'business_available', 'first_class_available',
             'status', 'flight_type', 'gate', 'terminal', 'route',
+            'is_available', 'lowest_price', 'metadata',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'created_at', 'updated_at', 'route',
+            'id', 'uuid', 'created_at', 'updated_at', 'route',
             'origin_code', 'origin_name', 'destination_code',
-            'destination_name', 'aircraft_model'
+            'destination_name', 'aircraft_model', 'is_available',
+            'lowest_price', 'departure_date', 'arrival_date', 'metadata'
         ]
     
     def get_route(self, obj):
@@ -130,30 +196,39 @@ class FlightSerializer(serializers.ModelSerializer):
         return obj.get_route()
 
 
-class FlightDetailSerializer(serializers.ModelSerializer):
+class FlightDetailSerializer(BaseFlightSerializer):
     """
-    Detailed serializer for Flight model
+    Detailed serializer for Flight model with nested objects and statistics
     """
     origin_detail = AirportSerializer(source='origin', read_only=True)
     destination_detail = AirportSerializer(source='destination', read_only=True)
     aircraft_detail = AircraftSerializer(source='aircraft', read_only=True)
-    route = serializers.SerializerMethodField()
-    booking_count = serializers.SerializerMethodField()
+    route = SerializerMethodField()
+    booking_count = SerializerMethodField()
+    is_available = SerializerMethodField()
+    lowest_price = SerializerMethodField()
+    occupancy_rate = SerializerMethodField()
+    departure_date = serializers.DateField(source='departure_time.date', read_only=True)
+    arrival_date = serializers.DateField(source='arrival_time.date', read_only=True)
     
-    class Meta:
+    class Meta(BaseFlightSerializer.Meta):
         model = Flight
         fields = [
-            'id', 'flight_number', 'origin', 'destination',
+            'id', 'uuid', 'flight_number', 'origin', 'destination',
             'origin_detail', 'destination_detail', 'aircraft',
             'aircraft_detail', 'departure_time', 'arrival_time',
-            'duration', 'economy_price', 'business_price', 'first_class_price',
+            'departure_date', 'arrival_date', 'duration', 
+            'economy_price', 'business_price', 'first_class_price',
             'economy_available', 'business_available', 'first_class_available',
             'status', 'flight_type', 'gate', 'terminal', 'route',
-            'booking_count', 'created_at', 'updated_at'
+            'booking_count', 'is_available', 'lowest_price', 'occupancy_rate', 'metadata',
+            'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'created_at', 'updated_at', 'route', 'booking_count',
-            'origin_detail', 'destination_detail', 'aircraft_detail'
+            'id', 'uuid', 'created_at', 'updated_at', 'route', 'booking_count',
+            'origin_detail', 'destination_detail', 'aircraft_detail',
+            'is_available', 'lowest_price', 'occupancy_rate', 'departure_date',
+            'arrival_date', 'metadata'
         ]
     
     def get_route(self, obj):
@@ -163,6 +238,29 @@ class FlightDetailSerializer(serializers.ModelSerializer):
     def get_booking_count(self, obj):
         """Get count of bookings"""
         return obj.bookings.count()
+    
+    def get_is_available(self, obj):
+        """Check if flight has available seats"""
+        return obj.is_available('ECONOMY', 1)
+    
+    def get_lowest_price(self, obj):
+        """Get lowest price among all cabin classes"""
+        prices = [
+            float(obj.economy_price),
+            float(obj.business_price),
+            float(obj.first_class_price)
+        ]
+        return min(prices)
+    
+    def get_occupancy_rate(self, obj):
+        """Calculate seat occupancy rate"""
+        total_seats = obj.aircraft.total_seats
+        booked_seats = total_seats - (
+            obj.economy_available + obj.business_available + obj.first_class_available
+        )
+        if total_seats > 0:
+            return round((booked_seats / total_seats) * 100, 2)
+        return 0.0
 
 
 class FlightSearchSerializer(serializers.Serializer):

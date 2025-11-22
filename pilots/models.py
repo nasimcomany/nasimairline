@@ -1,6 +1,7 @@
 """
 Models for pilots app
 """
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
@@ -25,6 +26,15 @@ class Pilot(models.Model):
     """
     Pilot model representing pilots
     """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -48,7 +58,7 @@ class Pilot(models.Model):
     
     license_expiry = models.DateField(_('تاریخ انقضای مجوز'))
     
-    total_flight_hours = models.IntegerField(
+    total_flight_hours = models.PositiveIntegerField(
         _('کل ساعات پرواز'),
         default=0,
         validators=[validate_flight_hours],
@@ -88,6 +98,15 @@ class PilotRequest(models.Model):
     """
     PilotRequest model for pilot requests
     """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
     pilot = models.ForeignKey(
         Pilot,
         on_delete=models.CASCADE,

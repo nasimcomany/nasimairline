@@ -2,16 +2,37 @@
 Serializers for accounts app
 """
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from .models import User
 
 User = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class BaseUserSerializer(serializers.ModelSerializer):
     """
-    Serializer for User model
+    Base serializer for User model with common fields and methods
+    """
+    uuid = serializers.UUIDField(read_only=True)
+    metadata = serializers.JSONField(read_only=True, required=False, allow_null=True)
+    
+    class Meta:
+        abstract = True
+        model = User
+        read_only_fields = ('id', 'uuid', 'created_at', 'updated_at', 'metadata')
+    
+    def to_representation(self, instance):
+        """Override to add computed fields"""
+        data = super().to_representation(instance)
+        # Add computed fields if needed
+        return data
+
+
+class UserSerializer(BaseUserSerializer):
+    """
+    Serializer for User model with UUID and advanced fields
     """
     password = serializers.CharField(
         write_only=True,
@@ -19,23 +40,29 @@ class UserSerializer(serializers.ModelSerializer):
         validators=[validate_password],
         style={'input_type': 'password'}
     )
+    registration_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    last_login_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
     
-    class Meta:
-        model = User
+    class Meta(BaseUserSerializer.Meta):
         fields = [
-            'id', 'email', 'username', 'first_name', 'last_name',
+            'id', 'uuid', 'email', 'username', 'first_name', 'last_name',
             'phone_number', 'date_of_birth', 'gender', 'nationality',
             'passport_number', 'passport_expiry', 'national_id',
             'loyalty_points', 'membership_level', 'preferred_seat',
             'preferred_meal', 'two_factor_enabled', 'two_factor_method',
             'account_status', 'is_active', 'is_staff', 'is_superuser',
+            'registration_ip', 'last_login_ip', 'metadata',
             'date_joined', 'last_login', 'created_at', 'updated_at',
             'password'
         ]
         read_only_fields = [
-            'id', 'date_joined', 'last_login', 'created_at', 'updated_at',
-            'is_staff', 'is_superuser'
+            'id', 'uuid', 'date_joined', 'last_login', 'created_at', 'updated_at',
+            'is_staff', 'is_superuser', 'registration_ip', 'last_login_ip', 'metadata'
         ]
+        extra_kwargs = {
+            'email': {'required': True},
+            'password': {'write_only': True, 'required': False},
+        }
         extra_kwargs = {
             'email': {'required': True},
             'password': {'write_only': True, 'required': False},
@@ -61,30 +88,37 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(BaseUserSerializer):
     """
-    Detailed serializer for User model with additional information
+    Detailed serializer for User model with additional computed fields
     """
-    full_name = serializers.SerializerMethodField()
-    is_premium_member = serializers.SerializerMethodField()
-    can_access_lounge = serializers.SerializerMethodField()
+    full_name = SerializerMethodField()
+    is_premium_member = SerializerMethodField()
+    can_access_lounge = SerializerMethodField()
+    discount_percentage = SerializerMethodField()
+    booking_count = SerializerMethodField()
+    total_spent = SerializerMethodField()
+    registration_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
+    last_login_ip = serializers.IPAddressField(read_only=True, required=False, allow_null=True)
     
-    class Meta:
-        model = User
+    class Meta(BaseUserSerializer.Meta):
         fields = [
-            'id', 'email', 'username', 'first_name', 'last_name', 'full_name',
+            'id', 'uuid', 'email', 'username', 'first_name', 'last_name', 'full_name',
             'phone_number', 'date_of_birth', 'gender', 'nationality',
             'passport_number', 'passport_expiry', 'national_id',
             'loyalty_points', 'membership_level', 'preferred_seat',
             'preferred_meal', 'two_factor_enabled', 'two_factor_method',
             'account_status', 'is_active', 'is_staff', 'is_superuser',
-            'is_premium_member', 'can_access_lounge',
+            'is_premium_member', 'can_access_lounge', 'discount_percentage',
+            'booking_count', 'total_spent',
+            'registration_ip', 'last_login_ip', 'metadata',
             'date_joined', 'last_login', 'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'date_joined', 'last_login', 'created_at', 'updated_at',
+            'id', 'uuid', 'date_joined', 'last_login', 'created_at', 'updated_at',
             'is_staff', 'is_superuser', 'full_name', 'is_premium_member',
-            'can_access_lounge'
+            'can_access_lounge', 'discount_percentage', 'booking_count', 'total_spent',
+            'registration_ip', 'last_login_ip', 'metadata'
         ]
     
     def get_full_name(self, obj):
@@ -98,6 +132,23 @@ class UserDetailSerializer(serializers.ModelSerializer):
     def get_can_access_lounge(self, obj):
         """Check if user can access lounge"""
         return obj.can_access_lounge()
+    
+    def get_discount_percentage(self, obj):
+        """Get discount percentage based on membership level"""
+        return obj.get_discount_percentage()
+    
+    def get_booking_count(self, obj):
+        """Get total booking count"""
+        return obj.bookings.count()
+    
+    def get_total_spent(self, obj):
+        """Get total amount spent by user"""
+        from payments.models import Payment
+        total = Payment.objects.filter(
+            user=obj,
+            status='COMPLETED'
+        ).aggregate(total=models.Sum('amount'))['total']
+        return float(total) if total else 0.0
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

@@ -1,9 +1,11 @@
 """
 Models for flights app
 """
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
+from django.utils.text import slugify
 from .managers import AirportManager, FlightManager, AircraftManager
 from .constants import (
     FLIGHT_STATUS_CHOICES,
@@ -24,6 +26,15 @@ class Airport(models.Model):
     """
     Airport model representing airports
     """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
     code = models.CharField(
         _('کد فرودگاه'),
         max_length=3,
@@ -33,6 +44,14 @@ class Airport(models.Model):
         help_text=_('کد IATA فرودگاه (3 حرف)'),
     )
     name = models.CharField(_('نام فرودگاه'), max_length=200)
+    slug = models.SlugField(
+        _('اسلاگ'),
+        max_length=255,
+        unique=True,
+        blank=True,
+        db_index=True,
+        help_text=_('برای SEO و URL های دوستانه'),
+    )
     city = models.CharField(_('شهر'), max_length=100, db_index=True)
     country = models.CharField(_('کشور'), max_length=100, db_index=True)
     
@@ -55,7 +74,15 @@ class Airport(models.Model):
     # Additional Information
     timezone = models.CharField(_('منطقه زمانی'), max_length=50, null=True, blank=True)
     is_active = models.BooleanField(_('فعال'), default=True, db_index=True)
-    flight_count = models.IntegerField(_('تعداد پروازها'), default=0)
+    flight_count = models.PositiveIntegerField(_('تعداد پروازها'), default=0)
+    
+    # Metadata
+    metadata = models.JSONField(
+        _('اطلاعات اضافی'),
+        default=dict,
+        blank=True,
+        help_text=_('اطلاعات اضافی به صورت JSON'),
+    )
     
     # Timestamps
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -68,13 +95,21 @@ class Airport(models.Model):
         verbose_name_plural = _('فرودگاه‌ها')
         ordering = ['country', 'city', 'name']
         indexes = [
+            models.Index(fields=['uuid']),
             models.Index(fields=['code']),
+            models.Index(fields=['slug']),
             models.Index(fields=['country', 'city']),
             models.Index(fields=['is_active']),
         ]
     
     def __str__(self):
         return f"{self.code} - {self.name} ({self.city}, {self.country})"
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate slug if not provided"""
+        if not self.slug:
+            self.slug = slugify(f"{self.name}-{self.code}")
+        super().save(*args, **kwargs)
     
     def get_full_name(self):
         """Return full airport name"""
@@ -85,6 +120,15 @@ class Aircraft(models.Model):
     """
     Aircraft model representing aircrafts
     """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
     registration_number = models.CharField(
         _('شماره ثبت'),
         max_length=20,
@@ -102,21 +146,21 @@ class Aircraft(models.Model):
     )
     
     # Seat Configuration
-    total_seats = models.IntegerField(
+    total_seats = models.PositiveIntegerField(
         _('کل صندلی‌ها'),
         validators=[MinValueValidator(1)],
     )
-    economy_seats = models.IntegerField(
+    economy_seats = models.PositiveIntegerField(
         _('صندلی‌های اکونومی'),
         validators=[MinValueValidator(0)],
         default=0,
     )
-    business_seats = models.IntegerField(
+    business_seats = models.PositiveIntegerField(
         _('صندلی‌های بیزینس'),
         validators=[MinValueValidator(0)],
         default=0,
     )
-    first_class_seats = models.IntegerField(
+    first_class_seats = models.PositiveIntegerField(
         _('صندلی‌های فرست کلاس'),
         validators=[MinValueValidator(0)],
         default=0,
@@ -137,6 +181,7 @@ class Aircraft(models.Model):
         verbose_name_plural = _('هواپیماها')
         ordering = ['manufacturer', 'model', 'registration_number']
         indexes = [
+            models.Index(fields=['uuid']),
             models.Index(fields=['registration_number']),
             models.Index(fields=['model']),
             models.Index(fields=['is_active']),
@@ -162,6 +207,15 @@ class Flight(models.Model):
     """
     Flight model representing flights
     """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
     flight_number = models.CharField(
         _('شماره پرواز'),
         max_length=20,
@@ -197,6 +251,10 @@ class Flight(models.Model):
     # Schedule
     departure_time = models.DateTimeField(_('زمان پرواز'), db_index=True)
     arrival_time = models.DateTimeField(_('زمان فرود'), db_index=True)
+    departure_date = models.DateField(_('تاریخ پرواز'), db_index=True, null=True, blank=True)
+    arrival_date = models.DateField(_('تاریخ فرود'), db_index=True, null=True, blank=True)
+    departure_time_only = models.TimeField(_('ساعت پرواز'), null=True, blank=True)
+    arrival_time_only = models.TimeField(_('ساعت فرود'), null=True, blank=True)
     duration = models.DurationField(_('مدت پرواز'), null=True, blank=True)
     
     # Pricing
@@ -220,20 +278,28 @@ class Flight(models.Model):
     )
     
     # Availability
-    economy_available = models.IntegerField(
+    economy_available = models.PositiveIntegerField(
         _('صندلی‌های اکونومی موجود'),
         validators=[MinValueValidator(0)],
         default=0,
     )
-    business_available = models.IntegerField(
+    business_available = models.PositiveIntegerField(
         _('صندلی‌های بیزینس موجود'),
         validators=[MinValueValidator(0)],
         default=0,
     )
-    first_class_available = models.IntegerField(
+    first_class_available = models.PositiveIntegerField(
         _('صندلی‌های فرست کلاس موجود'),
         validators=[MinValueValidator(0)],
         default=0,
+    )
+    
+    # Metadata
+    metadata = models.JSONField(
+        _('اطلاعات اضافی'),
+        default=dict,
+        blank=True,
+        help_text=_('اطلاعات اضافی به صورت JSON (مثل شرایط آب و هوا، تاخیرات و...)'),
     )
     
     # Status
@@ -266,11 +332,14 @@ class Flight(models.Model):
         verbose_name_plural = _('پروازها')
         ordering = ['departure_time']
         indexes = [
+            models.Index(fields=['uuid']),
             models.Index(fields=['flight_number']),
             models.Index(fields=['origin', 'destination']),
             models.Index(fields=['departure_time']),
+            models.Index(fields=['departure_date']),
             models.Index(fields=['status']),
-            models.Index(fields=['origin', 'destination', 'departure_time']),
+            models.Index(fields=['origin', 'destination', 'departure_date']),
+            models.Index(fields=['status', 'departure_date']),
         ]
     
     def __str__(self):
@@ -289,3 +358,13 @@ class Flight(models.Model):
         """Get price for cabin class"""
         from .utils import get_price_for_cabin
         return get_price_for_cabin(self, cabin_class)
+    
+    def save(self, *args, **kwargs):
+        """Auto-populate date fields from datetime"""
+        if self.departure_time and not self.departure_date:
+            self.departure_date = self.departure_time.date()
+            self.departure_time_only = self.departure_time.time()
+        if self.arrival_time and not self.arrival_date:
+            self.arrival_date = self.arrival_time.date()
+            self.arrival_time_only = self.arrival_time.time()
+        super().save(*args, **kwargs)

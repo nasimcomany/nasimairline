@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'notifications',
     'pilots',
     'security',
+    'blog',  # Blog and SEO content management
     'main',  # اپ قبلی
 ]
 

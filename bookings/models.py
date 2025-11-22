@@ -1,6 +1,7 @@
 """
 Models for bookings app
 """
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
@@ -34,6 +35,17 @@ class Booking(models.Model):
     """
     Booking model representing flight bookings
     """
+    # UUID for external references
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
+    
     booking_reference = models.CharField(
         _('کد رزرو'),
         max_length=10,
@@ -116,10 +128,22 @@ class Booking(models.Model):
         choices=BOOKING_SOURCE_CHOICES,
         default=BOOKING_SOURCE_WEB,
     )
+    booking_ip = models.GenericIPAddressField(
+        _('آی‌پی رزرو'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
     special_requests = models.TextField(
         _('درخواست‌های ویژه'),
         null=True,
         blank=True,
+    )
+    metadata = models.JSONField(
+        _('اطلاعات اضافی'),
+        default=dict,
+        blank=True,
+        help_text=_('اطلاعات اضافی رزرو به صورت JSON'),
     )
     cancellation_reason = models.TextField(
         _('دلیل لغو'),
@@ -143,10 +167,12 @@ class Booking(models.Model):
         verbose_name_plural = _('رزروها')
         ordering = ['-created_at']
         indexes = [
+            models.Index(fields=['uuid']),
             models.Index(fields=['booking_reference']),
             models.Index(fields=['user', 'status']),
             models.Index(fields=['flight', 'status']),
             models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['booking_ip']),
         ]
     
     def __str__(self):

@@ -1,6 +1,7 @@
 """
 Models for security app
 """
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from flights.models import Flight
@@ -18,6 +19,15 @@ class SecurityInfo(models.Model):
     """
     SecurityInfo model for flight security information
     """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
     flight = models.OneToOneField(
         Flight,
         on_delete=models.CASCADE,
@@ -66,6 +76,15 @@ class SecurityAlert(models.Model):
     """
     SecurityAlert model for security alerts
     """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
     flight = models.ForeignKey(
         Flight,
         on_delete=models.CASCADE,

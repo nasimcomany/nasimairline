@@ -1,6 +1,7 @@
 """
 Models for payments app
 """
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
@@ -28,6 +29,17 @@ class Payment(models.Model):
     """
     Payment model representing payments
     """
+    # UUID for external references
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        null=True,  # موقتاً برای migration
+        blank=True,
+        db_index=True,
+    )
+    
     transaction_id = models.CharField(
         _('شناسه تراکنش'),
         max_length=50,
@@ -98,6 +110,14 @@ class Payment(models.Model):
         blank=True,
     )
     
+    # IP Tracking
+    payment_ip = models.GenericIPAddressField(
+        _('آی‌پی پرداخت'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    
     # Error Information
     error_message = models.TextField(
         _('پیام خطا'),
@@ -138,10 +158,12 @@ class Payment(models.Model):
         verbose_name_plural = _('پرداخت‌ها')
         ordering = ['-created_at']
         indexes = [
+            models.Index(fields=['uuid']),
             models.Index(fields=['transaction_id']),
             models.Index(fields=['user', 'status']),
             models.Index(fields=['status', 'created_at']),
             models.Index(fields=['gateway', 'status']),
+            models.Index(fields=['payment_ip']),
         ]
     
     def __str__(self):
@@ -171,6 +193,13 @@ class Transaction(models.Model):
     """
     Transaction model for payment transactions
     """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
     payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
@@ -239,6 +268,7 @@ class Transaction(models.Model):
         verbose_name_plural = _('تراکنش‌ها')
         ordering = ['-created_at']
         indexes = [
+            models.Index(fields=['uuid']),
             models.Index(fields=['transaction_id']),
             models.Index(fields=['payment', 'transaction_type']),
             models.Index(fields=['status', 'created_at']),
