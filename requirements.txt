@@ -30,3 +30,6 @@ celery==5.3.4
 # Validation
 django-phonenumber-field==7.1.0
 phonenumbers==8.13.27
+
+# Rich Text Editor for SEO
+django-ckeditor==6.7.0

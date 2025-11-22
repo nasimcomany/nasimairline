@@ -4,7 +4,7 @@ Admin configuration for blog app
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
-from .models import Article, Category, Tag, Comment, SEOData
+from .models import Article, Category, Tag, Comment, SEOData, InternalLink, ExternalLink, Backlink
 
 
 @admin.register(Category)
@@ -74,6 +74,37 @@ class SEODataInline(admin.StackedInline):
     )
 
 
+class InternalLinkInline(admin.TabularInline):
+    """
+    Inline admin for Internal Links
+    """
+    model = InternalLink
+    fk_name = 'source_article'
+    extra = 1
+    fields = ['target_article', 'anchor_text', 'link_position', 'is_follow']
+    autocomplete_fields = ['target_article']
+
+
+class ExternalLinkInline(admin.TabularInline):
+    """
+    Inline admin for External Links
+    """
+    model = ExternalLink
+    extra = 1
+    fields = ['url', 'anchor_text', 'domain', 'is_follow', 'is_sponsored', 'link_position']
+
+
+class BacklinkInline(admin.TabularInline):
+    """
+    Inline admin for Backlinks (read-only)
+    """
+    model = Backlink
+    extra = 0
+    fields = ['source_url', 'source_domain', 'anchor_text', 'domain_authority', 'link_type', 'status']
+    readonly_fields = ['source_url', 'source_domain', 'anchor_text', 'domain_authority', 'link_type', 'status', 'discovered_at']
+    can_delete = False
+
+
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     """
@@ -81,7 +112,8 @@ class ArticleAdmin(admin.ModelAdmin):
     """
     list_display = [
         'title', 'author', 'category', 'status', 'is_featured', 'is_pinned',
-        'view_count', 'reading_time', 'published_at', 'seo_score'
+        'view_count', 'reading_time', 'word_count', 'h2_count', 
+        'internal_link_count', 'external_link_count', 'published_at', 'seo_score'
     ]
     list_filter = [
         'status', 'article_type', 'is_featured', 'is_pinned', 
@@ -91,7 +123,12 @@ class ArticleAdmin(admin.ModelAdmin):
     list_editable = ['status', 'is_featured', 'is_pinned']
     prepopulated_fields = {'slug': ('title',)}
     autocomplete_fields = ['author', 'category', 'tags']
-    readonly_fields = ['uuid', 'view_count', 'reading_time', 'created_at', 'updated_at']
+    readonly_fields = [
+        'uuid', 'view_count', 'reading_time', 'word_count', 'content_length',
+        'h1_title', 'h2_count', 'h3_count', 'h4_count',
+        'internal_link_count', 'external_link_count', 'backlink_count',
+        'keyword_density', 'created_at', 'updated_at'
+    ]
     date_hierarchy = 'published_at'
     
     fieldsets = (
@@ -107,12 +144,25 @@ class ArticleAdmin(admin.ModelAdmin):
         ('SEO - مهم برای گوگل', {
             'fields': (
                 'meta_title', 'meta_description', 'meta_keywords', 
-                'seo_priority', 'canonical_url'
+                'seo_priority', 'canonical_url', 'keyword_density'
             ),
             'description': 'این فیلدها برای ایندکس شدن در گوگل بسیار مهم هستند'
         }),
         ('Open Graph & Social Media', {
             'fields': ('og_title', 'og_description', 'og_image'),
+            'classes': ('collapse',),
+        }),
+        ('ساختار محتوا (Headings)', {
+            'fields': ('h1_title', 'h2_count', 'h3_count', 'h4_count'),
+            'description': 'ساختار هدینگ‌ها برای SEO بسیار مهم است',
+            'classes': ('collapse',),
+        }),
+        ('لینک‌ها', {
+            'fields': ('internal_link_count', 'external_link_count', 'backlink_count'),
+            'classes': ('collapse',),
+        }),
+        ('تحلیل محتوا', {
+            'fields': ('word_count', 'content_length', 'reading_time'),
             'classes': ('collapse',),
         }),
         ('وضعیت و نمایش', {
@@ -122,7 +172,7 @@ class ArticleAdmin(admin.ModelAdmin):
             )
         }),
         ('آمار', {
-            'fields': ('view_count', 'reading_time'),
+            'fields': ('view_count',),
             'classes': ('collapse',),
         }),
         ('اطلاعات اضافی', {
@@ -131,27 +181,47 @@ class ArticleAdmin(admin.ModelAdmin):
         }),
     )
     
-    inlines = [SEODataInline]
+    inlines = [SEODataInline, InternalLinkInline, ExternalLinkInline, BacklinkInline]
     
     def seo_score(self, obj):
-        """Calculate and display SEO score"""
+        """Calculate and display comprehensive SEO score"""
         score = 0
+        
+        # Basic SEO (40 points)
         if obj.meta_title:
-            score += 20
-        if obj.meta_description:
-            score += 20
-        if obj.meta_keywords:
             score += 10
+        if obj.meta_description:
+            score += 10
+        if obj.meta_keywords:
+            score += 5
+        if obj.canonical_url:
+            score += 5
+        if obj.excerpt:
+            score += 5
+        if obj.h1_title:
+            score += 5
+        
+        # Content Quality (30 points)
+        if obj.word_count >= 300:
+            score += 10
+        elif obj.word_count >= 200:
+            score += 5
+        if obj.h2_count >= 2:
+            score += 10
+        if obj.keyword_density >= 1.0 and obj.keyword_density <= 3.0:
+            score += 10
+        
+        # Media & Images (15 points)
         if obj.featured_image:
             score += 10
         if obj.image_alt:
+            score += 5
+        
+        # Links (15 points)
+        if obj.internal_link_count >= 2:
             score += 10
-        if obj.canonical_url:
-            score += 10
-        if obj.og_title and obj.og_description:
-            score += 10
-        if obj.excerpt:
-            score += 10
+        if obj.external_link_count >= 1:
+            score += 5
         
         color = 'green' if score >= 80 else 'orange' if score >= 50 else 'red'
         return format_html(
@@ -228,6 +298,66 @@ class CommentAdmin(admin.ModelAdmin):
         updated = queryset.update(status='SPAM')
         self.message_user(request, f'{updated} نظر به عنوان اسپم علامت‌گذاری شد.')
     mark_as_spam.short_description = 'علامت‌گذاری به عنوان اسپم'
+
+
+@admin.register(InternalLink)
+class InternalLinkAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for InternalLink model
+    """
+    list_display = ['source_article', 'target_article', 'anchor_text', 'link_position', 'is_follow', 'created_at']
+    list_filter = ['link_position', 'is_follow', 'created_at']
+    search_fields = ['source_article__title', 'target_article__title', 'anchor_text']
+    autocomplete_fields = ['source_article', 'target_article']
+    readonly_fields = ['uuid', 'created_at', 'updated_at']
+
+
+@admin.register(ExternalLink)
+class ExternalLinkAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for ExternalLink model
+    """
+    list_display = ['article', 'domain', 'anchor_text', 'is_follow', 'is_sponsored', 'link_position', 'created_at']
+    list_filter = ['is_follow', 'is_sponsored', 'link_position', 'domain', 'created_at']
+    search_fields = ['article__title', 'url', 'domain', 'anchor_text']
+    autocomplete_fields = ['article']
+    readonly_fields = ['uuid', 'created_at', 'updated_at']
+
+
+@admin.register(Backlink)
+class BacklinkAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for Backlink model
+    """
+    list_display = [
+        'target_article', 'source_domain', 'anchor_text', 
+        'domain_authority', 'link_type', 'status', 'discovered_at'
+    ]
+    list_filter = ['link_type', 'status', 'is_follow', 'domain_authority', 'discovered_at']
+    search_fields = ['target_article__title', 'source_url', 'source_domain', 'anchor_text']
+    autocomplete_fields = ['target_article']
+    readonly_fields = ['uuid', 'discovered_at', 'last_checked']
+    date_hierarchy = 'discovered_at'
+    
+    actions = ['mark_as_active', 'mark_as_broken', 'mark_as_removed']
+    
+    def mark_as_active(self, request, queryset):
+        """Mark selected backlinks as active"""
+        updated = queryset.update(status='active')
+        self.message_user(request, f'{updated} بک لینک فعال شد.')
+    mark_as_active.short_description = 'فعال کردن بک لینک‌های انتخاب شده'
+    
+    def mark_as_broken(self, request, queryset):
+        """Mark selected backlinks as broken"""
+        updated = queryset.update(status='broken')
+        self.message_user(request, f'{updated} بک لینک به عنوان شکسته علامت‌گذاری شد.')
+    mark_as_broken.short_description = 'علامت‌گذاری به عنوان شکسته'
+    
+    def mark_as_removed(self, request, queryset):
+        """Mark selected backlinks as removed"""
+        updated = queryset.update(status='removed')
+        self.message_user(request, f'{updated} بک لینک به عنوان حذف شده علامت‌گذاری شد.')
+    mark_as_removed.short_description = 'علامت‌گذاری به عنوان حذف شده'
 
 
 @admin.register(SEOData)

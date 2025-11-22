@@ -2,11 +2,13 @@
 Models for blog app - Professional SEO-focused content management
 """
 import uuid
+import re
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from ckeditor.fields import RichTextField
 from .managers import ArticleManager, CategoryManager, TagManager, CommentManager
 from .constants import (
     ARTICLE_STATUS_CHOICES,
@@ -187,7 +189,67 @@ class Article(models.Model):
         max_length=500,
         help_text=_('خلاصه مقاله (حداکثر 500 کاراکتر)'),
     )
-    content = models.TextField(_('محتوای کامل'))
+    content = RichTextField(_('محتوای کامل'), help_text=_('محتوای کامل مقاله با ویرایشگر پیشرفته'))
+    
+    # Heading Structure for SEO
+    h1_title = models.CharField(
+        _('عنوان H1'),
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text=_('عنوان اصلی مقاله (H1) - برای SEO بسیار مهم است'),
+    )
+    h2_count = models.PositiveIntegerField(
+        _('تعداد H2'),
+        default=0,
+        help_text=_('تعداد هدینگ‌های H2 در محتوا'),
+    )
+    h3_count = models.PositiveIntegerField(
+        _('تعداد H3'),
+        default=0,
+        help_text=_('تعداد هدینگ‌های H3 در محتوا'),
+    )
+    h4_count = models.PositiveIntegerField(
+        _('تعداد H4'),
+        default=0,
+        help_text=_('تعداد هدینگ‌های H4 در محتوا'),
+    )
+    
+    # Link Statistics
+    internal_link_count = models.PositiveIntegerField(
+        _('تعداد لینک داخلی'),
+        default=0,
+        help_text=_('تعداد لینک‌های داخلی در مقاله'),
+    )
+    external_link_count = models.PositiveIntegerField(
+        _('تعداد لینک خارجی'),
+        default=0,
+        help_text=_('تعداد لینک‌های خارجی در مقاله'),
+    )
+    backlink_count = models.PositiveIntegerField(
+        _('تعداد بک لینک'),
+        default=0,
+        help_text=_('تعداد بک لینک‌های دریافت شده'),
+    )
+    
+    # SEO Analysis
+    keyword_density = models.DecimalField(
+        _('چگالی کلمه کلیدی'),
+        max_digits=5,
+        decimal_places=2,
+        default=0.0,
+        help_text=_('چگالی کلمه کلیدی اصلی (درصد)'),
+    )
+    content_length = models.PositiveIntegerField(
+        _('طول محتوا'),
+        default=0,
+        help_text=_('تعداد کاراکترهای محتوا'),
+    )
+    word_count = models.PositiveIntegerField(
+        _('تعداد کلمات'),
+        default=0,
+        help_text=_('تعداد کلمات در محتوا'),
+    )
     
     # Author
     author = models.ForeignKey(
@@ -556,3 +618,255 @@ class SEOData(models.Model):
     
     def __str__(self):
         return f"SEO Data for {self.article.title}"
+
+
+class InternalLink(models.Model):
+    """
+    Internal link model for SEO - Links to other articles/pages
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    source_article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name='internal_links',
+        verbose_name=_('مقاله مبدأ'),
+        db_index=True,
+    )
+    
+    target_article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name='internal_backlinks',
+        verbose_name=_('مقاله مقصد'),
+        db_index=True,
+    )
+    
+    anchor_text = models.CharField(
+        _('متن لنگر'),
+        max_length=200,
+        help_text=_('متن لینک که کاربر می‌بیند'),
+    )
+    
+    link_position = models.CharField(
+        _('موقعیت لینک'),
+        max_length=20,
+        choices=[
+            ('content', _('در محتوا')),
+            ('excerpt', _('در خلاصه')),
+            ('related', _('در مقالات مرتبط')),
+        ],
+        default='content',
+    )
+    
+    is_follow = models.BooleanField(
+        _('Follow Link'),
+        default=True,
+        help_text=_('آیا لینک follow باشد یا nofollow'),
+    )
+    
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('لینک داخلی')
+        verbose_name_plural = _('لینک‌های داخلی')
+        unique_together = [['source_article', 'target_article', 'anchor_text']]
+        indexes = [
+            models.Index(fields=['source_article', 'target_article']),
+            models.Index(fields=['is_follow']),
+        ]
+    
+    def __str__(self):
+        return f"{self.source_article.title} → {self.target_article.title}"
+
+
+class ExternalLink(models.Model):
+    """
+    External link model for SEO - Links to external websites
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name='external_links',
+        verbose_name=_('مقاله'),
+        db_index=True,
+    )
+    
+    url = models.URLField(
+        _('آدرس URL'),
+        max_length=500,
+        help_text=_('آدرس کامل لینک خارجی'),
+    )
+    
+    anchor_text = models.CharField(
+        _('متن لنگر'),
+        max_length=200,
+        help_text=_('متن لینک که کاربر می‌بیند'),
+    )
+    
+    domain = models.CharField(
+        _('دامنه'),
+        max_length=200,
+        db_index=True,
+        help_text=_('دامنه لینک خارجی'),
+    )
+    
+    is_follow = models.BooleanField(
+        _('Follow Link'),
+        default=False,
+        help_text=_('لینک‌های خارجی معمولاً nofollow هستند'),
+    )
+    
+    is_sponsored = models.BooleanField(
+        _('لینک اسپانسر شده'),
+        default=False,
+        help_text=_('آیا لینک اسپانسر شده است'),
+    )
+    
+    link_position = models.CharField(
+        _('موقعیت لینک'),
+        max_length=20,
+        choices=[
+            ('content', _('در محتوا')),
+            ('excerpt', _('در خلاصه')),
+            ('footer', _('در فوتر')),
+        ],
+        default='content',
+    )
+    
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('لینک خارجی')
+        verbose_name_plural = _('لینک‌های خارجی')
+        indexes = [
+            models.Index(fields=['article', 'domain']),
+            models.Index(fields=['is_follow', 'is_sponsored']),
+        ]
+    
+    def __str__(self):
+        return f"{self.article.title} → {self.domain}"
+
+
+class Backlink(models.Model):
+    """
+    Backlink model for SEO - External sites linking to our articles
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    target_article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name='backlinks',
+        verbose_name=_('مقاله مقصد'),
+        db_index=True,
+    )
+    
+    source_url = models.URLField(
+        _('آدرس منبع'),
+        max_length=500,
+        unique=True,
+        help_text=_('آدرس کامل صفحه‌ای که به ما لینک داده'),
+    )
+    
+    source_domain = models.CharField(
+        _('دامنه منبع'),
+        max_length=200,
+        db_index=True,
+        help_text=_('دامنه سایت منبع'),
+    )
+    
+    anchor_text = models.CharField(
+        _('متن لنگر'),
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text=_('متن لینک در صفحه منبع'),
+    )
+    
+    domain_authority = models.PositiveIntegerField(
+        _('Domain Authority'),
+        null=True,
+        blank=True,
+        help_text=_('Domain Authority سایت منبع (0-100)'),
+    )
+    
+    is_follow = models.BooleanField(
+        _('Follow Link'),
+        default=True,
+        help_text=_('آیا لینک follow است'),
+    )
+    
+    link_type = models.CharField(
+        _('نوع لینک'),
+        max_length=20,
+        choices=[
+            ('dofollow', _('DoFollow')),
+            ('nofollow', _('NoFollow')),
+            ('sponsored', _('Sponsored')),
+            ('ugc', _('User Generated Content')),
+        ],
+        default='dofollow',
+    )
+    
+    status = models.CharField(
+        _('وضعیت'),
+        max_length=20,
+        choices=[
+            ('active', _('فعال')),
+            ('broken', _('شکسته')),
+            ('removed', _('حذف شده')),
+        ],
+        default='active',
+        db_index=True,
+    )
+    
+    discovered_at = models.DateTimeField(
+        _('تاریخ کشف'),
+        auto_now_add=True,
+    )
+    last_checked = models.DateTimeField(
+        _('آخرین بررسی'),
+        auto_now=True,
+    )
+    
+    notes = models.TextField(
+        _('یادداشت‌ها'),
+        null=True,
+        blank=True,
+        help_text=_('یادداشت‌های مربوط به این بک لینک'),
+    )
+    
+    class Meta:
+        verbose_name = _('بک لینک')
+        verbose_name_plural = _('بک لینک‌ها')
+        indexes = [
+            models.Index(fields=['target_article', 'status']),
+            models.Index(fields=['source_domain', 'domain_authority']),
+            models.Index(fields=['link_type', 'is_follow']),
+        ]
+    
+    def __str__(self):
+        return f"{self.source_domain} → {self.target_article.title}"
