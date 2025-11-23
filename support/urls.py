@@ -1,0 +1,24 @@
+"""
+URLs for support app
+"""
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import (
+    TicketViewSet,
+    TicketMessageViewSet,
+    TicketAttachmentViewSet,
+    TicketCategoryViewSet,
+)
+
+app_name = 'support'
+
+router = DefaultRouter()
+router.register(r'tickets', TicketViewSet, basename='ticket')
+router.register(r'messages', TicketMessageViewSet, basename='message')
+router.register(r'attachments', TicketAttachmentViewSet, basename='attachment')
+router.register(r'categories', TicketCategoryViewSet, basename='category')
+
+urlpatterns = [
+    path('', include(router.urls)),
+]
+
