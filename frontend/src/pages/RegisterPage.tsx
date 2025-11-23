@@ -47,11 +47,12 @@ const RegisterPage: React.FC = () => {
 
     try {
       await dispatch(registerUser({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         email: formData.email,
-        phone: formData.phone,
-        password: formData.password
+        phone_number: formData.phone,
+        password: formData.password,
+        password_confirm: formData.password
       })).unwrap();
       navigate('/dashboard');
     } catch (error) {

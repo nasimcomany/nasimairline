@@ -88,19 +88,19 @@ const Header: React.FC = () => {
                     <UserIcon className="h-8 w-8 text-gray-400" />
                     <div className="text-right">
                       <p className="text-sm font-medium text-gray-900">
-                        {user?.firstName} {user?.lastName}
+                        {user?.first_name} {user?.last_name}
                       </p>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getMembershipBadge(user?.membershipLevel || 'bronze')}`}>
-                        {user?.membershipLevel === 'bronze' && 'برنزی'}
-                        {user?.membershipLevel === 'silver' && 'نقره‌ای'}
-                        {user?.membershipLevel === 'gold' && 'طلایی'}
-                        {user?.membershipLevel === 'platinum' && 'پلاتینیوم'}
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getMembershipBadge(user?.membership_level?.toLowerCase() || 'bronze')}`}>
+                        {user?.membership_level?.toLowerCase() === 'bronze' && 'برنزی'}
+                        {user?.membership_level?.toLowerCase() === 'silver' && 'نقره‌ای'}
+                        {user?.membership_level?.toLowerCase() === 'gold' && 'طلایی'}
+                        {user?.membership_level?.toLowerCase() === 'platinum' && 'پلاتینیوم'}
                       </span>
                     </div>
                   </div>
                   
                   <div className="flex items-center space-x-2 space-x-reverse">
-                    <span className="text-sm text-gray-500">{user?.points} امتیاز</span>
+                    <span className="text-sm text-gray-500">{user?.loyalty_points || 0} امتیاز</span>
                     <button
                       onClick={handleLogout}
                       className="text-sm text-gray-500 hover:text-gray-700"

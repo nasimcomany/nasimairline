@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { authService, LoginCredentials, RegisterData } from '../../services/authService';
 
 interface User {
   id: number;
@@ -39,8 +40,6 @@ const initialState: AuthState = {
   loading: false,
   error: null,
 };
-
-import { authService, LoginCredentials, RegisterData } from '../../services/authService';
 
 export const loginUser = createAsyncThunk(
   'auth/login',

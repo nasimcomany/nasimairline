@@ -25,7 +25,8 @@ const GlassmorphismHeader: React.FC = () => {
     { id: 'gallery', title: 'گالری', path: '/gallery' },
     { id: 'news', title: 'اخبار', path: '/news' },
     { id: 'membership', title: 'عضویت', path: '/membership' },
-    { id: 'support', title: 'پشتیبانی', path: '/support' }
+    { id: 'support', title: 'پشتیبانی', path: '/support' },
+    { id: 'tickets', title: 'تیکتینگ', path: '/tickets' }
   ];
 
   const currentSlideIndex = slides.findIndex(slide => slide.path === location.pathname);

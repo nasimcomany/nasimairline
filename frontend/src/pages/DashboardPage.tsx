@@ -39,7 +39,7 @@ const DashboardPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">داشبورد کاربری</h1>
-          <p className="text-gray-600">خوش آمدید، {user?.firstName} {user?.lastName}</p>
+          <p className="text-gray-600">خوش آمدید، {user?.first_name} {user?.last_name}</p>
         </div>
 
         {/* User Info Card */}
@@ -50,16 +50,16 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-gray-900">
-                {user?.firstName} {user?.lastName}
+                {user?.first_name} {user?.last_name}
               </h2>
               <p className="text-gray-600">{user?.email}</p>
-              <p className="text-gray-600">{user?.phone}</p>
+              <p className="text-gray-600">{user?.phone_number || '-'}</p>
             </div>
             <div className="text-right">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getMembershipBadge(user?.membershipLevel || 'bronze')}`}>
-                {getMembershipName(user?.membershipLevel || 'bronze')}
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getMembershipBadge(user?.membership_level?.toLowerCase() || 'bronze')}`}>
+                {getMembershipName(user?.membership_level?.toLowerCase() || 'bronze')}
               </span>
-              <p className="text-sm text-gray-500 mt-2">{user?.points} امتیاز</p>
+              <p className="text-sm text-gray-500 mt-2">{user?.loyalty_points || 0} امتیاز</p>
             </div>
           </div>
         </div>
