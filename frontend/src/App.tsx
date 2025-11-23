@@ -17,6 +17,7 @@ import DestinationsPage from './pages/DestinationsPage';
 import OffersPage from './pages/OffersPage';
 import MembershipPage from './pages/MembershipPage';
 import SupportPage from './pages/SupportPage';
+import TicketPage from './pages/TicketPage';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
               <Route path="/offers" element={<OffersPage />} />
               <Route path="/membership" element={<MembershipPage />} />
               <Route path="/support" element={<SupportPage />} />
+              <Route path="/tickets" element={<TicketPage />} />
             </Routes>
           </div>
         </Router>

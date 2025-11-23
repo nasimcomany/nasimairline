@@ -5,9 +5,10 @@ The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -15,6 +16,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 from .admin_site import limited_admin_site
+from .views import ReactAppView
 
 # API Router for API root view
 api_router = DefaultRouter()
@@ -50,6 +52,18 @@ urlpatterns = [
     
     # CKEditor
     path('ckeditor/', include('ckeditor_uploader.urls')),
+    
+    # Serve static files from React build
+    re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+    re_path(r'^.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$', serve, {
+        'document_root': settings.STATIC_ROOT,
+    }),
+]
+
+# Serve React app for all other routes (SPA)
+# This must be last to catch all unmatched routes
+urlpatterns += [
+    re_path(r'^(?!api|admin|limited-admin|ckeditor|media|static).*$', ReactAppView.as_view(), name='react-app'),
 ]
 
 # Serve media files in development

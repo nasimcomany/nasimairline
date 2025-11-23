@@ -146,8 +146,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# React Frontend Build Directory
+FRONTEND_BUILD_DIR = os.path.join(BASE_DIR, 'frontend', 'build')
+
+# Additional static files directories (only if build exists)
+STATICFILES_DIRS = []
+if os.path.exists(FRONTEND_BUILD_DIR):
+    static_dir = os.path.join(FRONTEND_BUILD_DIR, 'static')
+    if os.path.exists(static_dir):
+        STATICFILES_DIRS.append(static_dir)
 
 # Media files
 MEDIA_URL = '/media/'

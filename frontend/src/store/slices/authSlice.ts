@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 interface User {
-  id: string;
+  id: number;
   email: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  membershipLevel: 'bronze' | 'silver' | 'gold' | 'platinum';
-  points: number;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
+  membership_level: string;
+  loyalty_points: number;
+  uuid?: string;
 }
 
 interface AuthState {
@@ -18,55 +19,58 @@ interface AuthState {
   error: string | null;
 }
 
+// Load user from localStorage on init
+const loadUserFromStorage = (): User | null => {
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      return JSON.parse(userStr);
+    }
+  } catch (error) {
+    console.error('Error loading user from storage:', error);
+  }
+  return null;
+};
+
 const initialState: AuthState = {
-  user: null,
-  token: localStorage.getItem('token'),
-  isAuthenticated: false,
+  user: loadUserFromStorage(),
+  token: localStorage.getItem('access_token'),
+  isAuthenticated: !!localStorage.getItem('access_token'),
   loading: false,
   error: null,
 };
 
+import { authService, LoginCredentials, RegisterData } from '../../services/authService';
+
 export const loginUser = createAsyncThunk(
   'auth/login',
-  async (credentials: { email: string; password: string }) => {
-    const response = await fetch('/api/auth/login/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Login failed');
+  async (credentials: LoginCredentials, { rejectWithValue }) => {
+    try {
+      const data = await authService.login(credentials);
+      // Store tokens
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.detail || 'ورود ناموفق بود');
     }
-    
-    return response.json();
   }
 );
 
 export const registerUser = createAsyncThunk(
   'auth/register',
-  async (userData: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-  }) => {
-    const response = await fetch('/api/auth/register/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Registration failed');
+  async (userData: RegisterData, { rejectWithValue }) => {
+    try {
+      const data = await authService.register(userData);
+      // Store tokens
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.detail || 'ثبت‌نام ناموفق بود');
     }
-    
-    return response.json();
   }
 );
 
@@ -78,10 +82,14 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('token');
+      authService.logout();
     },
     clearError: (state) => {
       state.error = null;
+    },
+    setUser: (state, action) => {
+      state.user = action.payload;
+      state.isAuthenticated = !!action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -93,13 +101,14 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.token = action.payload.access;
         state.isAuthenticated = true;
-        localStorage.setItem('token', action.payload.token);
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Login failed';
+        state.error = typeof action.payload === 'string' ? action.payload : 'ورود ناموفق بود';
+        state.isAuthenticated = false;
       })
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
@@ -108,16 +117,17 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.token = action.payload.access;
         state.isAuthenticated = true;
-        localStorage.setItem('token', action.payload.token);
+        state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Registration failed';
+        state.error = typeof action.payload === 'string' ? action.payload : 'ثبت‌نام ناموفق بود';
+        state.isAuthenticated = false;
       });
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, setUser } = authSlice.actions;
 export default authSlice.reducer;
