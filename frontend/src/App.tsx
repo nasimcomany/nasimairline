@@ -18,6 +18,7 @@ import OffersPage from './pages/OffersPage';
 import MembershipPage from './pages/MembershipPage';
 import SupportPage from './pages/SupportPage';
 import TicketPage from './pages/TicketPage';
+import ChatWidget from './components/Chat/ChatWidget';
 
 function App() {
   return (
@@ -43,6 +44,8 @@ function App() {
               <Route path="/support" element={<SupportPage />} />
               <Route path="/tickets" element={<TicketPage />} />
             </Routes>
+            {/* Chat Widget - Available on all pages */}
+            <ChatWidget />
           </div>
         </Router>
       </LanguageProvider>

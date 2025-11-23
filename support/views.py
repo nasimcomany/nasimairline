@@ -8,7 +8,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.conf import settings
-from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory
+from django.db import models
+from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage
 from .permissions import IsTicketOwnerOrStaff
 from .serializers import (
     TicketSerializer,
@@ -18,6 +19,8 @@ from .serializers import (
     TicketMessageSerializer,
     TicketAttachmentSerializer,
     TicketCategorySerializer,
+    ChatMessageSerializer,
+    ChatMessageCreateSerializer,
 )
 from .permissions import IsTicketOwnerOrStaff, IsStaffOrReadOnly
 
@@ -311,3 +314,119 @@ def security_contact_info(request):
         'department': 'حراست',
         'message': 'برای ارتباط با حراست با شماره بالا تماس بگیرید.'
     })
+
+
+class ChatMessageViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for ChatMessage - Online chat support
+    """
+    queryset = ChatMessage.objects.all()
+    permission_classes = [permissions.AllowAny]  # Allow both authenticated and guest users
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['is_staff', 'is_read', 'session_id']
+    ordering_fields = ['created_at']
+    ordering = ['created_at']
+    
+    def get_serializer_class(self):
+        """Use different serializer for create"""
+        if self.action == 'create':
+            return ChatMessageCreateSerializer
+        return ChatMessageSerializer
+    
+    def get_queryset(self):
+        """Filter messages based on user or session"""
+        queryset = super().get_queryset()
+        
+        # اگر کاربر لاگین باشد، پیام‌های خودش و پیام‌های پرسنل را ببیند
+        if self.request.user.is_authenticated:
+            return queryset.filter(
+                models.Q(user=self.request.user) | models.Q(is_staff=True)
+            )
+        
+        # اگر کاربر مهمان باشد، بر اساس session_id فیلتر می‌کنیم
+        session_id = self.request.query_params.get('session_id')
+        if session_id:
+            return queryset.filter(
+                models.Q(session_id=session_id) | models.Q(is_staff=True)
+            )
+        
+        # اگر session_id نباشد، فقط پیام‌های پرسنل را نشان می‌دهیم
+        return queryset.filter(is_staff=True)
+    
+    def perform_create(self, serializer):
+        """Set user, IP, and session when creating message"""
+        request = self.request
+        
+        # اگر کاربر لاگین باشد
+        if request.user.is_authenticated:
+            serializer.save(
+                user=request.user,
+                message_ip=self._get_client_ip(request),
+                is_staff=request.user.is_staff,
+            )
+        else:
+            # برای کاربران مهمان
+            session_id = request.data.get('session_id') or self._generate_session_id(request)
+            serializer.save(
+                message_ip=self._get_client_ip(request),
+                session_id=session_id,
+            )
+    
+    def _get_client_ip(self, request):
+        """Get client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+    
+    def _generate_session_id(self, request):
+        """Generate session ID for guest users"""
+        import uuid
+        # Try to get existing session ID from request
+        session_id = request.data.get('session_id')
+        if not session_id:
+            # Generate new session ID
+            session_id = str(uuid.uuid4())
+        return session_id
+    
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def recent(self, request):
+        """
+        Get recent messages (for polling)
+        """
+        # Get last message timestamp from query params
+        last_message_time = request.query_params.get('last_message_time')
+        
+        queryset = self.get_queryset()
+        
+        # Filter messages after last_message_time
+        if last_message_time:
+            try:
+                from django.utils.dateparse import parse_datetime
+                last_time = parse_datetime(last_message_time)
+                if last_time:
+                    queryset = queryset.filter(created_at__gt=last_time)
+            except:
+                pass
+        
+        # Get last 50 messages
+        queryset = queryset[:50]
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def mark_read(self, request):
+        """
+        Mark messages as read (staff only)
+        """
+        message_ids = request.data.get('message_ids', [])
+        if message_ids:
+            ChatMessage.objects.filter(
+                uuid__in=message_ids,
+                is_read=False
+            ).update(is_read=True)
+        
+        return Response({'status': 'success'})

@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
-from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory
+from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage
 
 
 @admin.register(TicketCategory)
@@ -268,3 +268,44 @@ class TicketAttachmentAdmin(admin.ModelAdmin):
             size /= 1024.0
         return f"{size:.1f} TB"
     file_size_display.short_description = _('حجم فایل')
+
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    """
+    Admin for ChatMessage
+    """
+    list_display = ['uuid', 'sender_display', 'message_preview', 'is_staff', 'is_read', 'session_id', 'created_at']
+    list_filter = ['is_staff', 'is_read', 'created_at']
+    search_fields = ['message', 'guest_name', 'guest_email', 'session_id']
+    list_editable = ['is_read']
+    readonly_fields = ['uuid', 'created_at', 'updated_at', 'message_ip']
+    
+    fieldsets = (
+        (_('اطلاعات پایه'), {
+            'fields': ('uuid', 'user', 'guest_name', 'guest_email', 'session_id')
+        }),
+        (_('پیام'), {
+            'fields': ('message', 'is_staff', 'is_read')
+        }),
+        (_('اطلاعات فنی'), {
+            'fields': ('message_ip', 'metadata')
+        }),
+        (_('تاریخ‌ها'), {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
+    
+    def sender_display(self, obj):
+        """Display sender information"""
+        if obj.user:
+            return f"{obj.user.get_full_name() or obj.user.email} (کاربر)"
+        return f"{obj.guest_name or 'مهمان'} (مهمان)"
+    sender_display.short_description = _('فرستنده')
+    
+    def message_preview(self, obj):
+        """Display message preview"""
+        if len(obj.message) > 50:
+            return obj.message[:50] + '...'
+        return obj.message
+    message_preview.short_description = _('پیش‌نمایش پیام')

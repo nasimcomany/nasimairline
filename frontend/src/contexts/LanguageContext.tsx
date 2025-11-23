@@ -148,6 +148,16 @@ const translations = {
     'support.faqs.payment.security.question': 'آیا پرداخت امن است؟',
     'support.faqs.payment.security.answer': 'بله، تمام پرداخت‌ها با بالاترین استانداردهای امنیتی انجام می‌شود.',
     
+    // Chat
+    'chat.title': 'چت آنلاین پشتیبانی',
+    'chat.subtitle': 'ما آماده پاسخگویی هستیم',
+    'chat.loading': 'در حال بارگذاری...',
+    'chat.noMessages': 'هنوز پیامی ارسال نشده است',
+    'chat.staff': 'پشتیبانی',
+    'chat.guestName': 'نام شما',
+    'chat.guestEmail': 'ایمیل شما',
+    'chat.placeholder': 'پیام خود را بنویسید...',
+    
     // Stats
     'home.stats.destinations': 'مقصد',
     'home.stats.happyPassengers': 'مسافر راضی',
@@ -825,6 +835,16 @@ const translations = {
     'support.faqs.payment.methods.answer': 'البطاقات المصرفية، الدفع عبر الإنترنت والدفع في المطار.',
     'support.faqs.payment.security.question': 'هل الدفع آمن؟',
     'support.faqs.payment.security.answer': 'نعم، جميع المدفوعات تتم بأعلى معايير الأمان.',
+    
+    // Chat
+    'chat.title': 'دردشة الدعم عبر الإنترنت',
+    'chat.subtitle': 'نحن جاهزون للرد',
+    'chat.loading': 'جاري التحميل...',
+    'chat.noMessages': 'لم يتم إرسال أي رسالة بعد',
+    'chat.staff': 'الدعم',
+    'chat.guestName': 'اسمك',
+    'chat.guestEmail': 'بريدك الإلكتروني',
+    'chat.placeholder': 'اكتب رسالتك...',
   },
   en: {
     // Navigation
@@ -1231,6 +1251,16 @@ const translations = {
     'support.faqs.payment.methods.answer': 'Bank cards, online payment, and payment at the airport.',
     'support.faqs.payment.security.question': 'Is payment secure?',
     'support.faqs.payment.security.answer': 'Yes, all payments are made with the highest security standards.',
+    
+    // Chat
+    'chat.title': 'Online Support Chat',
+    'chat.subtitle': 'We are ready to help',
+    'chat.loading': 'Loading...',
+    'chat.noMessages': 'No messages yet',
+    'chat.staff': 'Support',
+    'chat.guestName': 'Your Name',
+    'chat.guestEmail': 'Your Email',
+    'chat.placeholder': 'Type your message...',
   },
 };
 

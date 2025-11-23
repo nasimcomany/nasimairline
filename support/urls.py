@@ -8,6 +8,7 @@ from .views import (
     TicketMessageViewSet,
     TicketAttachmentViewSet,
     TicketCategoryViewSet,
+    ChatMessageViewSet,
     security_contact_info,
 )
 
@@ -18,6 +19,7 @@ router.register(r'tickets', TicketViewSet, basename='ticket')
 router.register(r'messages', TicketMessageViewSet, basename='message')
 router.register(r'attachments', TicketAttachmentViewSet, basename='attachment')
 router.register(r'categories', TicketCategoryViewSet, basename='category')
+router.register(r'chat', ChatMessageViewSet, basename='chat')
 
 urlpatterns = [
     path('', include(router.urls)),
