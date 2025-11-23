@@ -2,7 +2,7 @@
 Serializers for support app
 """
 from rest_framework import serializers
-from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory
+from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage
 from accounts.serializers import UserSerializer
 
 
@@ -197,6 +197,78 @@ class TicketUpdateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Ticket
+
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for chat messages
+    """
+    sender_name = serializers.SerializerMethodField()
+    sender_email = serializers.SerializerMethodField()
+    formatted_time = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ChatMessage
+        fields = [
+            'uuid',
+            'user',
+            'guest_name',
+            'guest_email',
+            'message',
+            'is_staff',
+            'is_read',
+            'session_id',
+            'sender_name',
+            'sender_email',
+            'formatted_time',
+            'created_at',
+        ]
+        read_only_fields = ['uuid', 'created_at', 'is_read', 'sender_name', 'sender_email', 'formatted_time']
+    
+    def get_sender_name(self, obj):
+        """Get sender name"""
+        return obj.get_sender_name()
+    
+    def get_sender_email(self, obj):
+        """Get sender email"""
+        return obj.get_sender_email()
+    
+    def get_formatted_time(self, obj):
+        """Get formatted time"""
+        from django.utils import timezone
+        from django.utils.dateformat import format
+        
+        # Format: HH:MM
+        return obj.created_at.strftime('%H:%M')
+
+
+class ChatMessageCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating chat messages
+    """
+    class Meta:
+        model = ChatMessage
+        fields = [
+            'message',
+            'guest_name',
+            'guest_email',
+        ]
+    
+    def validate(self, attrs):
+        """Validate that either user is authenticated or guest info is provided"""
+        request = self.context.get('request')
+        
+        # اگر کاربر لاگین باشد، نیازی به guest_name و guest_email نیست
+        if request and request.user.is_authenticated:
+            return attrs
+        
+        # اگر کاربر لاگین نباشد، باید guest_name یا guest_email داشته باشد
+        if not attrs.get('guest_name') and not attrs.get('guest_email'):
+            raise serializers.ValidationError(
+                "برای کاربران مهمان، لطفاً نام یا ایمیل را وارد کنید."
+            )
+        
+        return attrs
         fields = [
             'status', 'priority', 'assigned_to',
             'category', 'ticket_category'

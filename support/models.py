@@ -562,3 +562,125 @@ class TicketAttachment(models.Model):
                 self.file_type = 'DOCUMENT'
         
         super().save(*args, **kwargs)
+
+
+class ChatMessage(models.Model):
+    """
+    Online chat message model for real-time customer support
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='chat_messages',
+        verbose_name=_('کاربر'),
+        db_index=True,
+        null=True,
+        blank=True,
+        help_text=_('اگر کاربر لاگین باشد، این فیلد پر می‌شود'),
+    )
+    
+    # برای کاربران غیر لاگین
+    guest_name = models.CharField(
+        _('نام مهمان'),
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_('نام کاربر برای مهمانان (غیر لاگین)'),
+    )
+    
+    guest_email = models.EmailField(
+        _('ایمیل مهمان'),
+        null=True,
+        blank=True,
+        help_text=_('ایمیل کاربر برای مهمانان (غیر لاگین)'),
+    )
+    
+    message = models.TextField(
+        _('پیام'),
+        help_text=_('متن پیام چت'),
+    )
+    
+    is_staff = models.BooleanField(
+        _('پیام از پرسنل'),
+        default=False,
+        db_index=True,
+        help_text=_('اگر فعال باشد، این پیام از پرسنل پشتیبانی است'),
+    )
+    
+    is_read = models.BooleanField(
+        _('خوانده شده'),
+        default=False,
+        db_index=True,
+    )
+    
+    # IP Tracking
+    message_ip = models.GenericIPAddressField(
+        _('آی‌پی ارسال پیام'),
+        null=True,
+        blank=True,
+    )
+    
+    # Session ID برای ردیابی چت‌های مهمان
+    session_id = models.CharField(
+        _('شناسه نشست'),
+        max_length=255,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text=_('شناسه نشست برای ردیابی چت‌های مهمان'),
+    )
+    
+    # Metadata
+    metadata = models.JSONField(
+        _('اطلاعات اضافی'),
+        default=dict,
+        blank=True,
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(
+        _('تاریخ ایجاد'),
+        auto_now_add=True,
+        db_index=True,
+    )
+    
+    updated_at = models.DateTimeField(
+        _('تاریخ به‌روزرسانی'),
+        auto_now=True,
+    )
+    
+    class Meta:
+        verbose_name = _('پیام چت')
+        verbose_name_plural = _('پیام‌های چت')
+        ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['session_id', 'created_at']),
+            models.Index(fields=['is_staff', 'is_read']),
+            models.Index(fields=['created_at']),
+        ]
+    
+    def __str__(self):
+        if self.user:
+            return f"Chat message from {self.user.email}"
+        return f"Chat message from {self.guest_name or 'Guest'}"
+    
+    def get_sender_name(self):
+        """Get sender name"""
+        if self.user:
+            return self.user.get_full_name() or self.user.email
+        return self.guest_name or 'مهمان'
+    
+    def get_sender_email(self):
+        """Get sender email"""
+        if self.user:
+            return self.user.email
+        return self.guest_email or ''
