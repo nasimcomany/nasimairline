@@ -2,11 +2,12 @@
 Views for support app
 """
 from rest_framework import viewsets, status, permissions, serializers
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
+from django.conf import settings
 from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory
 from .permissions import IsTicketOwnerOrStaff
 from .serializers import (
@@ -286,3 +287,27 @@ class TicketAttachmentViewSet(viewsets.ModelViewSet):
                 serializer.save(ticket=ticket)
             except Ticket.DoesNotExist:
                 raise serializers.ValidationError('تیکت یافت نشد.')
+    
+    def _get_client_ip(self, request):
+        """Get client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def security_contact_info(request):
+    """
+    Get security contact phone number
+    This endpoint returns the phone number for security department
+    """
+    phone = getattr(settings, 'SECURITY_CONTACT_PHONE', '021123456789')
+    return Response({
+        'phone': phone,
+        'department': 'حراست',
+        'message': 'برای ارتباط با حراست با شماره بالا تماس بگیرید.'
+    })

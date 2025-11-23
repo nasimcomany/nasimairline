@@ -8,6 +8,7 @@ from .views import (
     TicketMessageViewSet,
     TicketAttachmentViewSet,
     TicketCategoryViewSet,
+    security_contact_info,
 )
 
 app_name = 'support'
@@ -20,5 +21,6 @@ router.register(r'categories', TicketCategoryViewSet, basename='category')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('security/contact/', security_contact_info, name='security-contact'),
 ]
 
