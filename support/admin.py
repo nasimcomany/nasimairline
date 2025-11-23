@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
+from django.db import models
 from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage
 
 
@@ -273,13 +274,14 @@ class TicketAttachmentAdmin(admin.ModelAdmin):
 @admin.register(ChatMessage)
 class ChatMessageAdmin(admin.ModelAdmin):
     """
-    Admin for ChatMessage
+    Admin for ChatMessage with reply functionality
     """
     list_display = ['uuid', 'sender_display', 'message_preview', 'is_staff', 'is_read', 'session_id', 'created_at']
     list_filter = ['is_staff', 'is_read', 'created_at']
     search_fields = ['message', 'guest_name', 'guest_email', 'session_id']
     list_editable = ['is_read']
-    readonly_fields = ['uuid', 'created_at', 'updated_at', 'message_ip']
+    readonly_fields = ['uuid', 'created_at', 'updated_at', 'message_ip', 'chat_history']
+    change_form_template = 'admin/support/chatmessage/change_form.html'
     
     fieldsets = (
         (_('اطلاعات پایه'), {
@@ -288,8 +290,13 @@ class ChatMessageAdmin(admin.ModelAdmin):
         (_('پیام'), {
             'fields': ('message', 'is_staff', 'is_read')
         }),
+        (_('تاریخچه چت'), {
+            'fields': ('chat_history',),
+            'description': _('تمام پیام‌های این چت در زیر نمایش داده می‌شود. می‌توانید از فرم زیر پاسخ دهید.')
+        }),
         (_('اطلاعات فنی'), {
-            'fields': ('message_ip', 'metadata')
+            'fields': ('message_ip', 'metadata'),
+            'classes': ('collapse',)
         }),
         (_('تاریخ‌ها'), {
             'fields': ('created_at', 'updated_at')
@@ -309,3 +316,151 @@ class ChatMessageAdmin(admin.ModelAdmin):
             return obj.message[:50] + '...'
         return obj.message
     message_preview.short_description = _('پیش‌نمایش پیام')
+    
+    def chat_history(self, obj):
+        """Display chat history for this session"""
+        if not obj.pk:
+            return _('ابتدا پیام را ذخیره کنید')
+        
+        # دریافت تمام پیام‌های این session
+        from .models import ChatMessage
+        
+        if obj.user:
+            # اگر کاربر لاگین باشد
+            messages = ChatMessage.objects.filter(
+                models.Q(user=obj.user) | models.Q(is_staff=True, session_id=obj.session_id)
+            ).order_by('created_at')
+        else:
+            # اگر مهمان باشد
+            messages = ChatMessage.objects.filter(
+                session_id=obj.session_id
+            ).order_by('created_at')
+        
+        # نمایش تاریخچه در template
+        return None  # این فیلد فقط برای نمایش در template استفاده می‌شود
+    
+    chat_history.short_description = _('تاریخچه چت')
+    
+    def get_urls(self):
+        """Add custom URL for reply action"""
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<path:object_id>/reply/',
+                self.admin_site.admin_view(self.reply_view),
+                name='support_chatmessage_reply',
+            ),
+        ]
+        return custom_urls + urls
+    
+    def reply_view(self, request, object_id):
+        """Handle reply to chat message"""
+        from django.shortcuts import get_object_or_404, redirect
+        from django.contrib import messages
+        from .models import ChatMessage
+        
+        chat_message = get_object_or_404(ChatMessage, pk=object_id)
+        
+        if request.method == 'POST':
+            reply_text = request.POST.get('reply_message', '').strip()
+            
+            if not reply_text:
+                messages.error(request, _('لطفاً متن پاسخ را وارد کنید.'))
+                return redirect('admin:support_chatmessage_change', object_id)
+            
+            # ایجاد پیام پاسخ
+            # پیدا کردن session_id صحیح برای پاسخ
+            reply_session_id = None
+            
+            # اول: استفاده از session_id پیام اصلی (اگر وجود داشته باشد)
+            if chat_message.session_id:
+                reply_session_id = chat_message.session_id
+            else:
+                # اگر session_id وجود نداشته باشد، از پیام‌های دیگر این session استفاده می‌کنیم
+                if chat_message.user:
+                    # برای کاربران لاگین: پیدا کردن session_id از پیام‌های قبلی این کاربر
+                    user_messages = ChatMessage.objects.filter(
+                        user=chat_message.user
+                    ).exclude(session_id__isnull=True).exclude(session_id='').order_by('-created_at')
+                    
+                    if user_messages.exists():
+                        # استفاده از session_id پیام‌های قبلی
+                        reply_session_id = user_messages.first().session_id
+                    else:
+                        # اگر هیچ session_id وجود نداشته باشد، یک session_id بر اساس user_id ایجاد می‌کنیم
+                        import uuid
+                        reply_session_id = f"user_{chat_message.user.id}_{uuid.uuid4().hex[:8]}"
+                else:
+                    # برای مهمانان: اگر session_id وجود نداشته باشد، نمی‌توانیم پاسخ دهیم
+                    # (اما این حالت نباید اتفاق بیفتد چون مهمانان همیشه session_id دارند)
+                    messages.error(request, _('خطا: session_id برای این پیام یافت نشد.'))
+                    return redirect('admin:support_chatmessage_change', object_id)
+            
+            # اطمینان از اینکه session_id تنظیم شده است
+            if not reply_session_id:
+                messages.error(request, _('خطا: نتوانستیم session_id را تعیین کنیم.'))
+                return redirect('admin:support_chatmessage_change', object_id)
+            
+            reply = ChatMessage.objects.create(
+                message=reply_text,
+                is_staff=True,
+                is_read=True,
+                user=None,  # پیام از پرسنل است
+                session_id=reply_session_id,
+                message_ip=self._get_client_ip(request),
+            )
+            
+            messages.success(request, _('پاسخ شما با موفقیت ارسال شد.'))
+            return redirect('admin:support_chatmessage_change', object_id)
+        
+        return redirect('admin:support_chatmessage_change', object_id)
+    
+    def _get_client_ip(self, request):
+        """Get client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+    
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        """Override to add chat history to context"""
+        extra_context = extra_context or {}
+        
+        if object_id:
+            from .models import ChatMessage
+            
+            try:
+                chat_message = ChatMessage.objects.get(pk=object_id)
+                
+                # دریافت تمام پیام‌های این session
+                if chat_message.user:
+                    # اگر کاربر لاگین باشد: پیام‌های کاربر + پیام‌های پرسنل
+                    # اگر session_id وجود داشته باشد، از آن استفاده می‌کنیم
+                    if chat_message.session_id:
+                        messages = ChatMessage.objects.filter(
+                            models.Q(user=chat_message.user) | 
+                            (models.Q(is_staff=True) & models.Q(session_id=chat_message.session_id))
+                        ).order_by('created_at')
+                    else:
+                        # اگر session_id نداشته باشد، فقط پیام‌های کاربر را نشان می‌دهیم
+                        messages = ChatMessage.objects.filter(
+                            user=chat_message.user
+                        ).order_by('created_at')
+                else:
+                    # اگر مهمان باشد: بر اساس session_id
+                    if chat_message.session_id:
+                        messages = ChatMessage.objects.filter(
+                            session_id=chat_message.session_id
+                        ).order_by('created_at')
+                    else:
+                        messages = ChatMessage.objects.filter(pk=object_id)
+                
+                extra_context['chat_messages'] = messages
+                extra_context['current_message'] = chat_message
+            except ChatMessage.DoesNotExist:
+                pass
+        
+        return super().changeform_view(request, object_id, form_url, extra_context)

@@ -1,9 +1,14 @@
 """
 Utility functions for support app
 """
+import requests
+import logging
 from django.utils import timezone
 from datetime import datetime
+from django.conf import settings
 from .constants import TICKET_SOURCE_NIRA
+
+logger = logging.getLogger(__name__)
 
 
 def generate_ticket_reference():
@@ -104,4 +109,107 @@ def create_ticket_from_nira(nira_data):
     )
     
     return ticket
+
+
+def send_whatsapp_message(phone_number, message):
+    """
+    Send WhatsApp message using configured API
+    
+    Args:
+        phone_number: Phone number in international format (e.g., +989123456789)
+        message: Message text to send
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    whatsapp_api_url = getattr(settings, 'WHATSAPP_API_URL', None)
+    whatsapp_api_key = getattr(settings, 'WHATSAPP_API_KEY', None)
+    whatsapp_phone_id = getattr(settings, 'WHATSAPP_PHONE_ID', None)
+    
+    # اگر تنظیمات واتساپ وجود نداشته باشد، فقط لاگ می‌کنیم
+    if not whatsapp_api_url or not whatsapp_api_key:
+        logger.warning("WhatsApp API settings not configured. Skipping WhatsApp notification.")
+        return False
+    
+    try:
+        # این یک مثال کلی است - باید بر اساس API واقعی که استفاده می‌کنید تنظیم شود
+        # برای مثال، می‌توانید از Twilio WhatsApp API استفاده کنید:
+        # https://www.twilio.com/docs/whatsapp
+        
+        # یا از API های ایرانی مثل کاوه نگار، پیامک گستر، و غیره
+        
+        headers = {
+            'Authorization': f'Bearer {whatsapp_api_key}',
+            'Content-Type': 'application/json',
+        }
+        
+        # فرمت پیام بر اساس API انتخابی
+        payload = {
+            'to': phone_number,
+            'message': message,
+        }
+        
+        # اگر از Twilio استفاده می‌کنید:
+        # payload = {
+        #     'To': f'whatsapp:{phone_number}',
+        #     'From': f'whatsapp:{whatsapp_phone_id}',
+        #     'Body': message,
+        # }
+        
+        response = requests.post(
+            whatsapp_api_url,
+            json=payload,
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code in [200, 201]:
+            logger.info(f"WhatsApp message sent successfully to {phone_number}")
+            return True
+        else:
+            logger.error(f"Failed to send WhatsApp message. Status: {response.status_code}, Response: {response.text}")
+            return False
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error sending WhatsApp message: {e}", exc_info=True)
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error sending WhatsApp message: {e}", exc_info=True)
+        return False
+
+
+def send_chat_notification_whatsapp(chat_message):
+    """
+    Send WhatsApp notification to admin when a new chat message is received from user/guest
+    
+    Args:
+        chat_message: ChatMessage instance
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    # دریافت شماره تماس ادمین از تنظیمات
+    admin_whatsapp_number = getattr(settings, 'ADMIN_WHATSAPP_NUMBER', None)
+    
+    if not admin_whatsapp_number:
+        logger.warning("ADMIN_WHATSAPP_NUMBER not configured. Skipping WhatsApp notification.")
+        return False
+    
+    # اگر پیام از پرسنل باشد، اعلان ارسال نمی‌کنیم
+    if chat_message.is_staff:
+        return False
+    
+    # آماده‌سازی پیام
+    sender_name = chat_message.get_sender_name()
+    message_preview = chat_message.message[:100] + '...' if len(chat_message.message) > 100 else chat_message.message
+    
+    whatsapp_message = f"""🔔 پیام جدید در چت آنلاین
+
+فرستنده: {sender_name}
+پیام: {message_preview}
+
+برای مشاهده و پاسخ به پیام به پنل ادمین مراجعه کنید:
+http://127.0.0.1:8000/admin/support/chatmessage/{chat_message.id}/change/"""
+    
+    return send_whatsapp_message(admin_whatsapp_number, whatsapp_message)
 

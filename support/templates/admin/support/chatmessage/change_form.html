@@ -1,0 +1,66 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static %}
+
+{% block field_sets %}
+    {{ block.super }}
+    
+    {% if chat_messages %}
+    <div class="module aligned" style="margin-top: 20px;">
+        <h2>{% trans "تاریخچه چت" %}</h2>
+        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
+            {% for msg in chat_messages %}
+                <div style="margin-bottom: 15px; padding: 10px; background-color: {% if msg.is_staff %}#e3f2fd{% else %}#fff{% endif %}; border-radius: 5px; border-left: 4px solid {% if msg.is_staff %}#2196F3{% else %}#4CAF50{% endif %};">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong>
+                            {% if msg.is_staff %}
+                                <span style="color: #2196F3;">👤 پرسنل</span>
+                            {% else %}
+                                <span style="color: #4CAF50;">
+                                    {% if msg.user %}
+                                        {{ msg.user.get_full_name|default:msg.user.email }}
+                                    {% else %}
+                                        {{ msg.guest_name|default:"مهمان" }}
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                        </strong>
+                        <span style="color: #666; font-size: 12px;">{{ msg.created_at|date:"Y/m/d H:i" }}</span>
+                    </div>
+                    <div style="color: #333; white-space: pre-wrap;">{{ msg.message }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if original.pk %}
+    <div class="module aligned" style="margin-top: 20px;">
+        <h2>{% trans "ارسال پاسخ" %}</h2>
+        <form method="post" action="{% url 'admin:support_chatmessage_reply' original.pk %}" style="background-color: #f9f9f9; padding: 15px; border-radius: 5px;">
+            {% csrf_token %}
+            <div style="margin-bottom: 10px;">
+                <label for="reply_message" style="display: block; margin-bottom: 5px; font-weight: bold;">
+                    {% trans "متن پاسخ:" %}
+                </label>
+                <textarea 
+                    id="reply_message" 
+                    name="reply_message" 
+                    rows="4" 
+                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;"
+                    required
+                    placeholder="{% trans 'متن پاسخ خود را اینجا بنویسید...' %}"
+                ></textarea>
+            </div>
+            <button 
+                type="submit" 
+                style="background-color: #2196F3; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;"
+                onmouseover="this.style.backgroundColor='#1976D2'"
+                onmouseout="this.style.backgroundColor='#2196F3'"
+            >
+                {% trans "ارسال پاسخ" %}
+            </button>
+        </form>
+    </div>
+    {% endif %}
+{% endblock %}
+

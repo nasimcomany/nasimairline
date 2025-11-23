@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import Ticket, TicketMessage
+from .models import Ticket, TicketMessage, ChatMessage
 from .constants import (
     TICKET_STATUS_IN_PROGRESS,
     TICKET_STATUS_WAITING_CUSTOMER,
@@ -15,6 +15,7 @@ from .constants import (
     MESSAGE_TYPE_CUSTOMER,
     TICKET_CATEGORY_SECURITY,  # حراست - فقط شماره تماس
 )
+from .utils import send_chat_notification_whatsapp
 
 
 @receiver(pre_save, sender=Ticket)
@@ -164,4 +165,20 @@ def sync_ticket_with_nira(sender, instance, created, **kwargs):
     # TODO: Implement Nira API integration
     # This will be called when Nira integration is ready
     pass
+
+
+@receiver(post_save, sender=ChatMessage)
+def send_whatsapp_notification_on_chat_message(sender, instance, created, **kwargs):
+    """
+    Send WhatsApp notification to admin when a new chat message is received from user/guest
+    Uses threading for async notification to improve response time
+    """
+    if created and not instance.is_staff:
+        # ارسال واتساپ به صورت async برای بهبود سرعت
+        whatsapp_thread = threading.Thread(
+            target=send_chat_notification_whatsapp,
+            args=(instance,),
+            daemon=True
+        )
+        whatsapp_thread.start()
 

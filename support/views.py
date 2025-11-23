@@ -337,21 +337,38 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         """Filter messages based on user or session"""
         queryset = super().get_queryset()
         
-        # اگر کاربر لاگین باشد، پیام‌های خودش و پیام‌های پرسنل را ببیند
+        # اگر کاربر لاگین باشد، پیام‌های خودش و پیام‌های پرسنل مربوط به او را ببیند
         if self.request.user.is_authenticated:
-            return queryset.filter(
-                models.Q(user=self.request.user) | models.Q(is_staff=True)
-            )
+            # دریافت session_id از query params (اگر frontend ارسال کرده باشد)
+            session_id = self.request.query_params.get('session_id')
+            
+            if session_id:
+                # اگر session_id در query params باشد، فقط پیام‌های با همان session_id را نشان می‌دهیم
+                return queryset.filter(session_id=session_id)
+            else:
+                # اگر session_id نباشد، تمام پیام‌های کاربر را نشان می‌دهیم
+                # و پیام‌های پرسنل که session_id آنها با session_id پیام‌های کاربر مطابقت دارد
+                user_messages = queryset.filter(user=self.request.user).exclude(session_id__isnull=True).exclude(session_id='')
+                session_ids = list(user_messages.values_list('session_id', flat=True).distinct())
+                
+                if session_ids:
+                    # پیام‌های کاربر + پیام‌های پرسنل با session_id مشابه
+                    return queryset.filter(
+                        models.Q(user=self.request.user) | 
+                        (models.Q(is_staff=True) & models.Q(session_id__in=session_ids))
+                    )
+                else:
+                    # اگر session_id وجود نداشته باشد، فقط پیام‌های کاربر را نشان می‌دهیم
+                    return queryset.filter(user=self.request.user)
         
         # اگر کاربر مهمان باشد، بر اساس session_id فیلتر می‌کنیم
         session_id = self.request.query_params.get('session_id')
         if session_id:
-            return queryset.filter(
-                models.Q(session_id=session_id) | models.Q(is_staff=True)
-            )
+            # همه پیام‌های با session_id مشابه (چه از کاربر چه از پرسنل)
+            return queryset.filter(session_id=session_id)
         
-        # اگر session_id نباشد، فقط پیام‌های پرسنل را نشان می‌دهیم
-        return queryset.filter(is_staff=True)
+        # اگر session_id نباشد، هیچ پیامی نشان نمی‌دهیم (برای مهمانان)
+        return queryset.none()
     
     def perform_create(self, serializer):
         """Set user, IP, and session when creating message"""
@@ -359,10 +376,19 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         
         # اگر کاربر لاگین باشد
         if request.user.is_authenticated:
+            # برای کاربران لاگین، session_id را از request می‌گیریم یا یک session_id منحصر به فرد ایجاد می‌کنیم
+            session_id = request.data.get('session_id')
+            if not session_id:
+                # ایجاد session_id منحصر به فرد برای کاربر (بر اساس user_id)
+                import uuid
+                # استفاده از user_id برای ایجاد session_id یکتا
+                session_id = f"user_{request.user.id}_{uuid.uuid4().hex[:8]}"
+            
             serializer.save(
                 user=request.user,
                 message_ip=self._get_client_ip(request),
                 is_staff=request.user.is_staff,
+                session_id=session_id,
             )
         else:
             # برای کاربران مهمان

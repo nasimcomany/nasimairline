@@ -33,3 +33,6 @@ phonenumbers==8.13.27
 
 # Rich Text Editor for SEO
 django-ckeditor==6.7.0
+
+# HTTP Requests (for WhatsApp API)
+requests==2.31.0

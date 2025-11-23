@@ -223,7 +223,7 @@ class ChatMessageSerializer(serializers.ModelSerializer):
             'formatted_time',
             'created_at',
         ]
-        read_only_fields = ['uuid', 'created_at', 'is_read', 'sender_name', 'sender_email', 'formatted_time']
+        read_only_fields = ['uuid', 'created_at', 'is_read', 'sender_name', 'sender_email', 'formatted_time', 'session_id']
     
     def get_sender_name(self, obj):
         """Get sender name"""

@@ -340,6 +340,14 @@ SUPPORT_EMAIL_MAPPING = {
 # Security Contact Information (حراست)
 SECURITY_CONTACT_PHONE = os.environ.get('SECURITY_CONTACT_PHONE', '021123456789')
 
+# WhatsApp Configuration (برای اعلان‌های چت)
+# برای استفاده از واتساپ، باید API key و URL سرویس واتساپ خود را تنظیم کنید
+# می‌توانید از سرویس‌های مختلف مثل Twilio، کاوه نگار، پیامک گستر و غیره استفاده کنید
+WHATSAPP_API_URL = os.environ.get('WHATSAPP_API_URL', '')  # URL API واتساپ
+WHATSAPP_API_KEY = os.environ.get('WHATSAPP_API_KEY', '')  # API Key
+WHATSAPP_PHONE_ID = os.environ.get('WHATSAPP_PHONE_ID', '')  # Phone ID (برای Twilio)
+ADMIN_WHATSAPP_NUMBER = os.environ.get('ADMIN_WHATSAPP_NUMBER', '+989379146130')  # شماره واتساپ ادمین (مثال: +989123456789)
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',

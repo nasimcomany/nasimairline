@@ -46,17 +46,16 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   
   // Generate or get session ID
   useEffect(() => {
-    if (!isAuthenticated && !sessionId) {
-      // Generate session ID for guest users
-      const newSessionId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      setSessionId(newSessionId);
-      // Store in localStorage
-      localStorage.setItem('chat_session_id', newSessionId);
-    } else if (!isAuthenticated) {
-      // Try to get from localStorage
+    if (!sessionId) {
+      // Try to get from localStorage first (for both authenticated and guest users)
       const storedSessionId = localStorage.getItem('chat_session_id');
       if (storedSessionId) {
         setSessionId(storedSessionId);
+      } else if (!isAuthenticated) {
+        // Generate session ID for guest users only if not in localStorage
+        const newSessionId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        setSessionId(newSessionId);
+        localStorage.setItem('chat_session_id', newSessionId);
       }
     }
   }, [isAuthenticated, sessionId]);
@@ -101,13 +100,28 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     try {
       setIsLoading(true);
       const params: any = {};
-      if (!isAuthenticated && sessionId) {
+      // برای کاربران لاگین و مهمان، session_id را ارسال می‌کنیم
+      if (sessionId) {
         params.session_id = sessionId;
       }
       
       const response = await api.get('/support/chat/', { params });
       const data = Array.isArray(response.data) ? response.data : response.data.results || [];
       setMessages(data);
+      
+      // استخراج session_id از پیام‌ها (اگر sessionId نداریم یا تغییر کرده)
+      if (data.length > 0) {
+        // بررسی تمام پیام‌ها برای یافتن session_id
+        for (const msg of data) {
+          const msgAny = msg as any;
+          if (msgAny.session_id && msgAny.session_id !== sessionId) {
+            setSessionId(msgAny.session_id);
+            // ذخیره در localStorage
+            localStorage.setItem('chat_session_id', msgAny.session_id);
+            break;
+          }
+        }
+      }
       
       // Set last message time
       if (data.length > 0) {
@@ -123,7 +137,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   const loadNewMessages = async () => {
     try {
       const params: any = {};
-      if (!isAuthenticated && sessionId) {
+      // برای کاربران لاگین و مهمان، session_id را ارسال می‌کنیم
+      if (sessionId) {
         params.session_id = sessionId;
       }
       if (lastMessageTime) {
@@ -134,7 +149,12 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       const data = Array.isArray(response.data) ? response.data : response.data.results || [];
       
       if (data.length > 0) {
-        setMessages(prev => [...prev, ...data]);
+        // اضافه کردن پیام‌های جدید به لیست موجود (بدون تکرار)
+        setMessages(prev => {
+          const existingUuids = new Set(prev.map(m => m.uuid));
+          const newMessages = data.filter((m: any) => !existingUuids.has(m.uuid));
+          return [...prev, ...newMessages];
+        });
         setLastMessageTime(data[data.length - 1].created_at);
       }
     } catch (error) {
@@ -165,10 +185,20 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
         if (guestEmail) payload.guest_email = guestEmail;
       }
       
-      await api.post('/support/chat/', payload);
+      const response = await api.post('/support/chat/', payload);
+      
+      // استخراج session_id از response (اگر backend برگرداند)
+      const responseData = response.data;
+      if (responseData && responseData.session_id) {
+        if (responseData.session_id !== sessionId) {
+          setSessionId(responseData.session_id);
+          // ذخیره در localStorage
+          localStorage.setItem('chat_session_id', responseData.session_id);
+        }
+      }
       
       setNewMessage('');
-      // Reload messages to get the new one
+      // Reload messages to get the new one (با session_id جدید)
       await loadMessages();
     } catch (error: any) {
       console.error('Error sending message:', error);
