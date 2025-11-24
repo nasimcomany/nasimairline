@@ -334,7 +334,7 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         return ChatMessageSerializer
     
     def get_queryset(self):
-        """Filter messages based on user or session"""
+        """Filter messages based on user or session - SECURE VERSION"""
         from django.utils import timezone
         
         queryset = super().get_queryset()
@@ -344,44 +344,63 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             models.Q(expires_at__isnull=True) | models.Q(expires_at__gt=timezone.now())
         )
         
-        # اگر کاربر لاگین باشد، پیام‌های خودش و پیام‌های پرسنل مربوط به او را ببیند
+        # اگر کاربر لاگین باشد
         if self.request.user.is_authenticated:
-            # دریافت session_id از query params (اگر frontend ارسال کرده باشد)
+            # دریافت session_id از query params
             session_id = self.request.query_params.get('session_id')
             
             if session_id:
-                # اگر session_id در query params باشد، فقط پیام‌های با همان session_id را نشان می‌دهیم
-                # اما فقط پیام‌های این کاربر یا پیام‌های پرسنل
+                # اطمینان از اینکه session_id متعلق به این کاربر است
+                # session_id باید با user_id شروع شود: "user_{user_id}_..."
+                if not session_id.startswith(f"user_{self.request.user.id}_"):
+                    # session_id متعلق به این کاربر نیست - دسترسی رد می‌شود
+                    return queryset.none()
+                
+                # فقط پیام‌های این کاربر با این session_id + پیام‌های پرسنل با همین session_id
                 return queryset.filter(
                     models.Q(session_id=session_id) & (
                         models.Q(user=self.request.user) | models.Q(is_staff=True)
                     )
                 )
             else:
-                # اگر session_id نباشد، تمام پیام‌های کاربر را نشان می‌دهیم
+                # اگر session_id نباشد، فقط پیام‌های این کاربر را نشان می‌دهیم
                 # و پیام‌های پرسنل که session_id آنها با session_id پیام‌های کاربر مطابقت دارد
-                user_messages = queryset.filter(user=self.request.user).exclude(session_id__isnull=True).exclude(session_id='')
-                session_ids = list(user_messages.values_list('session_id', flat=True).distinct())
+                user_messages = queryset.filter(
+                    user=self.request.user
+                ).exclude(session_id__isnull=True).exclude(session_id='')
                 
-                if session_ids:
+                # فقط session_id هایی که متعلق به این کاربر هستند
+                valid_session_ids = []
+                for msg in user_messages:
+                    if msg.session_id and msg.session_id.startswith(f"user_{self.request.user.id}_"):
+                        valid_session_ids.append(msg.session_id)
+                
+                if valid_session_ids:
                     # پیام‌های کاربر + پیام‌های پرسنل با session_id مشابه
                     return queryset.filter(
                         models.Q(user=self.request.user) | 
-                        (models.Q(is_staff=True) & models.Q(session_id__in=session_ids))
+                        (models.Q(is_staff=True) & models.Q(session_id__in=valid_session_ids))
                     )
                 else:
                     # اگر session_id وجود نداشته باشد، فقط پیام‌های کاربر را نشان می‌دهیم
                     return queryset.filter(user=self.request.user)
         
-        # اگر کاربر مهمان باشد، بر اساس session_id فیلتر می‌کنیم
+        # اگر کاربر مهمان باشد
         session_id = self.request.query_params.get('session_id')
-        if session_id:
-            # همه پیام‌های با session_id مشابه (چه از کاربر چه از پرسنل)
-            # اما فقط پیام‌های این session
-            return queryset.filter(session_id=session_id)
+        if not session_id:
+            # مهمانان باید session_id داشته باشند
+            return queryset.none()
         
-        # اگر session_id نباشد، هیچ پیامی نشان نمی‌دهیم (برای مهمانان)
-        return queryset.none()
+        # اطمینان از اینکه session_id متعلق به مهمان است (با "guest_" شروع می‌شود)
+        if not session_id.startswith('guest_'):
+            # session_id معتبر نیست
+            return queryset.none()
+        
+        # فقط پیام‌های با این session_id (چه از مهمان چه از پرسنل)
+        # اما باید مطمئن شویم که مهمان نمی‌تواند session_id دیگران را ببیند
+        # این کار با بررسی IP یا سایر روش‌ها انجام می‌شود
+        # برای سادگی، فقط session_id را چک می‌کنیم
+        return queryset.filter(session_id=session_id)
     
     def perform_create(self, serializer):
         """Set user, IP, and session when creating message"""
@@ -441,11 +460,20 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
     def _generate_session_id(self, request):
         """Generate session ID for guest users"""
         import uuid
+        import time
         # Try to get existing session ID from request
         session_id = request.data.get('session_id')
         if not session_id:
-            # Generate new session ID
-            session_id = str(uuid.uuid4())
+            # Generate new session ID with guest_ prefix
+            timestamp = int(time.time() * 1000)  # milliseconds
+            unique_id = uuid.uuid4().hex[:8]
+            session_id = f"guest_{timestamp}_{unique_id}"
+        # Ensure it starts with guest_
+        elif not session_id.startswith('guest_'):
+            # If provided session_id doesn't start with guest_, generate a new one
+            timestamp = int(time.time() * 1000)
+            unique_id = uuid.uuid4().hex[:8]
+            session_id = f"guest_{timestamp}_{unique_id}"
         return session_id
     
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])

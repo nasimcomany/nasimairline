@@ -246,12 +246,15 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
     """
     Serializer for creating chat messages
     """
+    session_id = serializers.CharField(required=False, allow_blank=True)
+    
     class Meta:
         model = ChatMessage
         fields = [
             'message',
             'guest_name',
             'guest_email',
+            'session_id',
         ]
     
     def validate(self, attrs):
@@ -269,8 +272,4 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
             )
         
         return attrs
-        fields = [
-            'status', 'priority', 'assigned_to',
-            'category', 'ticket_category'
-        ]
 

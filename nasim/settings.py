@@ -304,8 +304,10 @@ SIMPLE_JWT = {
 
 # CORS Settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React frontend
-    "http://127.0.0.1:3000",
+    "http://localhost:3000",  # React dev server
+    "http://127.0.0.1:3000",  # React dev server
+    "http://localhost:8000",  # Django served frontend
+    "http://127.0.0.1:8000",  # Django served frontend
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -358,7 +360,12 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-csrf-token',
 ]
+
+# Allow all origins in development (for testing)
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
 
 # Redis Cache Configuration (برای استفاده در آینده)
 # موقتاً غیرفعال شده تا زمانی که django-redis نصب شود

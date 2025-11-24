@@ -38,77 +38,38 @@
         </div>
     </div>
     {% endif %}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+    {{ block.super }}
     
     {% if original.pk %}
-    <div class="module aligned" style="margin-top: 20px;">
+    <div class="module aligned" style="margin-top: 20px; border-top: 2px solid #ddd; padding-top: 20px; clear: both;">
         <h2>{% trans "ارسال پاسخ" %}</h2>
-        <form method="post" action="{% url 'admin:support_chatmessage_reply' original.pk %}" style="background-color: #f9f9f9; padding: 15px; border-radius: 5px;" id="reply_form">
+        <form method="post" id="reply_form">
             {% csrf_token %}
             <div style="margin-bottom: 10px;">
-                <label for="reply_message" style="display: block; margin-bottom: 5px; font-weight: bold;">
+                <label for="reply_text" style="display: block; margin-bottom: 5px; font-weight: bold;">
                     {% trans "متن پاسخ:" %}
                 </label>
                 <textarea 
-                    id="reply_message" 
-                    name="reply_message" 
+                    id="reply_text" 
+                    name="reply_text" 
                     rows="4" 
                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;"
                     required
                     placeholder="{% trans 'متن پاسخ خود را اینجا بنویسید...' %}"
                 ></textarea>
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input 
-                        type="checkbox" 
-                        id="is_staff_reply" 
-                        name="is_staff_reply" 
-                        checked
-                        style="margin-left: 8px; width: 18px; height: 18px; cursor: pointer;"
-                    />
-                    <span style="font-weight: bold; color: #2196F3;">
-                        {% trans "پیام از پرسنل" %}
-                    </span>
-                </label>
-                <small style="display: block; color: #666; margin-top: 5px; margin-right: 26px;">
-                    {% trans "تیک این گزینه را فعال کنید تا پیام به عنوان پاسخ از پرسنل ارسال شود." %}
-                </small>
-            </div>
             <button 
                 type="submit" 
-                id="submit_reply_btn"
+                name="_reply"
+                value="1"
                 style="background-color: #2196F3; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;"
             >
                 {% trans "ارسال پاسخ" %}
             </button>
         </form>
-        <script>
-            (function() {
-                var form = document.getElementById('reply_form');
-                if (form) {
-                    form.addEventListener('submit', function(e) {
-                        var textarea = document.getElementById('reply_message');
-                        if (!textarea || !textarea.value.trim()) {
-                            e.preventDefault();
-                            alert('لطفاً متن پاسخ را وارد کنید.');
-                            return false;
-                        }
-                        var isStaffCheckbox = document.getElementById('is_staff_reply');
-                        if (!isStaffCheckbox || !isStaffCheckbox.checked) {
-                            e.preventDefault();
-                            alert('لطفاً تیک "پیام از پرسنل" را فعال کنید.');
-                            return false;
-                        }
-                        var btn = document.getElementById('submit_reply_btn');
-                        if (btn) {
-                            btn.disabled = true;
-                            btn.textContent = 'در حال ارسال...';
-                        }
-                    });
-                }
-            })();
-        </script>
     </div>
     {% endif %}
 {% endblock %}
-
