@@ -280,7 +280,7 @@ class ChatMessageAdmin(admin.ModelAdmin):
     list_filter = ['is_staff', 'is_read', 'created_at']
     search_fields = ['message', 'guest_name', 'guest_email', 'session_id']
     list_editable = ['is_read']
-    readonly_fields = ['uuid', 'created_at', 'updated_at', 'message_ip', 'chat_history']
+    readonly_fields = ['uuid', 'created_at', 'updated_at', 'message_ip', 'chat_history', 'is_staff']
     change_form_template = 'admin/support/chatmessage/change_form.html'
     
     fieldsets = (
@@ -288,14 +288,18 @@ class ChatMessageAdmin(admin.ModelAdmin):
             'fields': ('uuid', 'user', 'guest_name', 'guest_email', 'session_id')
         }),
         (_('پیام'), {
-            'fields': ('message', 'is_staff', 'is_read')
+            'fields': ('message', 'is_read')
+        }),
+        (_('اطلاعات پیام'), {
+            'fields': ('is_staff',),
+            'description': _('این فیلد فقط برای نمایش است و قابل ویرایش نیست. برای ارسال پاسخ از فرم زیر استفاده کنید.')
         }),
         (_('تاریخچه چت'), {
             'fields': ('chat_history',),
             'description': _('تمام پیام‌های این چت در زیر نمایش داده می‌شود. می‌توانید از فرم زیر پاسخ دهید.')
         }),
         (_('اطلاعات فنی'), {
-            'fields': ('message_ip', 'metadata'),
+            'fields': ('message_ip', 'metadata', 'expires_at'),
             'classes': ('collapse',)
         }),
         (_('تاریخ‌ها'), {
@@ -359,15 +363,34 @@ class ChatMessageAdmin(admin.ModelAdmin):
         from django.shortcuts import get_object_or_404, redirect
         from django.contrib import messages
         from .models import ChatMessage
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        logger.info(f"Reply view called for object_id={object_id}, method={request.method}")
         
         chat_message = get_object_or_404(ChatMessage, pk=object_id)
+        logger.info(f"Chat message found: session_id={chat_message.session_id}, user={chat_message.user}")
         
         if request.method == 'POST':
+            logger.info("POST request received")
             reply_text = request.POST.get('reply_message', '').strip()
+            is_staff_reply = request.POST.get('is_staff_reply') == 'on'  # checkbox value
             
             if not reply_text:
                 messages.error(request, _('لطفاً متن پاسخ را وارد کنید.'))
-                return redirect('admin:support_chatmessage_change', object_id)
+                from django.http import HttpResponseRedirect
+                from django.urls import reverse
+                return HttpResponseRedirect(
+                    reverse('admin:support_chatmessage_change', args=[object_id])
+                )
+            
+            if not is_staff_reply:
+                messages.error(request, _('لطفاً تیک "پیام از پرسنل" را فعال کنید.'))
+                from django.http import HttpResponseRedirect
+                from django.urls import reverse
+                return HttpResponseRedirect(
+                    reverse('admin:support_chatmessage_change', args=[object_id])
+                )
             
             # ایجاد پیام پاسخ
             # پیدا کردن session_id صحیح برای پاسخ
@@ -395,12 +418,20 @@ class ChatMessageAdmin(admin.ModelAdmin):
                     # برای مهمانان: اگر session_id وجود نداشته باشد، نمی‌توانیم پاسخ دهیم
                     # (اما این حالت نباید اتفاق بیفتد چون مهمانان همیشه session_id دارند)
                     messages.error(request, _('خطا: session_id برای این پیام یافت نشد.'))
-                    return redirect('admin:support_chatmessage_change', object_id)
+                    from django.http import HttpResponseRedirect
+                    from django.urls import reverse
+                    return HttpResponseRedirect(
+                        reverse('admin:support_chatmessage_change', args=[object_id])
+                    )
             
             # اطمینان از اینکه session_id تنظیم شده است
             if not reply_session_id:
                 messages.error(request, _('خطا: نتوانستیم session_id را تعیین کنیم.'))
-                return redirect('admin:support_chatmessage_change', object_id)
+                from django.http import HttpResponseRedirect
+                from django.urls import reverse
+                return HttpResponseRedirect(
+                    reverse('admin:support_chatmessage_change', args=[object_id])
+                )
             
             # تعیین expiry time برای پاسخ ادمین (مطابق با پیام کاربر)
             from django.utils import timezone
@@ -413,25 +444,41 @@ class ChatMessageAdmin(admin.ModelAdmin):
             else:
                 expires_at = timezone.now() + timedelta(hours=24)
             
-            reply = ChatMessage.objects.create(
-                message=reply_text,
-                is_staff=True,  # حتماً باید True باشد
-                is_read=True,
-                user=None,  # پیام از پرسنل است
-                session_id=reply_session_id,
-                message_ip=self._get_client_ip(request),
-                expires_at=expires_at,
+            try:
+                logger.info(f"Creating reply with session_id={reply_session_id}, expires_at={expires_at}")
+                reply = ChatMessage.objects.create(
+                    message=reply_text,
+                    is_staff=True,  # حتماً باید True باشد
+                    is_read=True,
+                    user=None,  # پیام از پرسنل است
+                    session_id=reply_session_id,
+                    message_ip=self._get_client_ip(request),
+                    expires_at=expires_at,
+                )
+                
+                logger.info(f"Admin reply created successfully: uuid={reply.uuid}, session_id={reply.session_id}, is_staff={reply.is_staff}")
+                
+                # بررسی اینکه پیام واقعاً ایجاد شد
+                created_reply = ChatMessage.objects.get(uuid=reply.uuid)
+                logger.info(f"Verified reply exists: uuid={created_reply.uuid}, message={created_reply.message[:50]}")
+                
+                messages.success(request, _('پاسخ شما با موفقیت ارسال شد.'))
+            except Exception as e:
+                logger.error(f"Error creating admin reply: {e}", exc_info=True)
+                messages.error(request, _('خطا در ارسال پاسخ: {}').format(str(e)))
+            
+            # استفاده از HttpResponseRedirect برای اطمینان از redirect
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect(
+                reverse('admin:support_chatmessage_change', args=[object_id])
             )
-            
-            # Debug: چاپ اطلاعات پیام ایجاد شده
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.info(f"Admin reply created: session_id={reply_session_id}, is_staff={reply.is_staff}, uuid={reply.uuid}, message_preview={reply_text[:50]}")
-            
-            messages.success(request, _('پاسخ شما با موفقیت ارسال شد.'))
-            return redirect('admin:support_chatmessage_change', object_id)
         
-        return redirect('admin:support_chatmessage_change', object_id)
+        # اگر GET request باشد، به صفحه تغییر redirect می‌کنیم
+        from django.http import HttpResponseRedirect
+        from django.urls import reverse
+        return HttpResponseRedirect(
+            reverse('admin:support_chatmessage_change', args=[object_id])
+        )
     
     def _get_client_ip(self, request):
         """Get client IP address"""
@@ -452,26 +499,39 @@ class ChatMessageAdmin(admin.ModelAdmin):
             try:
                 chat_message = ChatMessage.objects.get(pk=object_id)
                 
-                # دریافت تمام پیام‌های این session
+                # دریافت تمام پیام‌های این session (فقط پیام‌های منقضی نشده)
+                from django.utils import timezone
+                
                 if chat_message.user:
                     # اگر کاربر لاگین باشد: پیام‌های کاربر + پیام‌های پرسنل
                     # اگر session_id وجود داشته باشد، از آن استفاده می‌کنیم
                     if chat_message.session_id:
                         messages = ChatMessage.objects.filter(
-                            models.Q(user=chat_message.user) | 
-                            (models.Q(is_staff=True) & models.Q(session_id=chat_message.session_id))
+                            (models.Q(user=chat_message.user) | 
+                             (models.Q(is_staff=True) & models.Q(session_id=chat_message.session_id))) &
+                            (models.Q(expires_at__isnull=True) | models.Q(expires_at__gt=timezone.now()))
                         ).order_by('created_at')
                     else:
                         # اگر session_id نداشته باشد، فقط پیام‌های کاربر را نشان می‌دهیم
                         messages = ChatMessage.objects.filter(
-                            user=chat_message.user
-                        ).order_by('created_at')
+                            user=chat_message.user,
+                            expires_at__isnull=True
+                        ) | ChatMessage.objects.filter(
+                            user=chat_message.user,
+                            expires_at__gt=timezone.now()
+                        )
+                        messages = messages.order_by('created_at')
                 else:
                     # اگر مهمان باشد: بر اساس session_id
                     if chat_message.session_id:
                         messages = ChatMessage.objects.filter(
-                            session_id=chat_message.session_id
-                        ).order_by('created_at')
+                            session_id=chat_message.session_id,
+                            expires_at__isnull=True
+                        ) | ChatMessage.objects.filter(
+                            session_id=chat_message.session_id,
+                            expires_at__gt=timezone.now()
+                        )
+                        messages = messages.order_by('created_at')
                     else:
                         messages = ChatMessage.objects.filter(pk=object_id)
                 
