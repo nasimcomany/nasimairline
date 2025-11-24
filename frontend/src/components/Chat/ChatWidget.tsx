@@ -19,8 +19,10 @@ interface ChatMessage {
   sender_name: string;
   sender_email: string;
   is_staff: boolean;
+  is_read: boolean;
   formatted_time: string;
   created_at: string;
+  session_id?: string;
 }
 
 interface ChatWidgetProps {
@@ -69,11 +71,11 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   
   // Polling for new messages
   useEffect(() => {
-    if (isOpen) {
-      // Start polling every 3 seconds
+    if (isOpen && sessionId) {
+      // Start polling every 2 seconds (کاهش فاصله برای دریافت سریع‌تر)
       pollingIntervalRef.current = setInterval(() => {
         loadNewMessages();
-      }, 3000);
+      }, 2000);
       
       return () => {
         if (pollingIntervalRef.current) {
@@ -85,7 +87,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
         clearInterval(pollingIntervalRef.current);
       }
     }
-  }, [isOpen, lastMessageTime, sessionId]);
+  }, [isOpen, sessionId]);
   
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -109,6 +111,14 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       
       const response = await api.get('/support/chat/', { params });
       const data = Array.isArray(response.data) ? response.data : response.data.results || [];
+      
+      // Debug: چاپ داده‌های دریافتی
+      console.log('Loaded messages:', data.map((m: any) => ({
+        uuid: m.uuid,
+        is_staff: m.is_staff,
+        session_id: m.session_id,
+        sender_name: m.sender_name
+      })));
       
       // استخراج session_id از پیام‌ها (اگر sessionId نداریم یا تغییر کرده)
       let newSessionId = currentSessionId;
@@ -161,9 +171,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   const loadNewMessages = async () => {
     try {
       const params: any = {};
-      // برای کاربران لاگین و مهمان، session_id را ارسال می‌کنیم
-      if (sessionId) {
-        params.session_id = sessionId;
+      // استفاده از sessionId از localStorage یا state
+      const currentSessionId = sessionId || localStorage.getItem('chat_session_id') || '';
+      if (currentSessionId) {
+        params.session_id = currentSessionId;
       }
       if (lastMessageTime) {
         params.last_message_time = lastMessageTime;
@@ -172,14 +183,34 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       const response = await api.get('/support/chat/recent/', { params });
       const data = Array.isArray(response.data) ? response.data : response.data.results || [];
       
+      // Debug: چاپ پیام‌های جدید (فقط در حالت development)
+      if (process.env.NODE_ENV === 'development' && data.length > 0) {
+        console.log('New messages from polling:', data.map((m: any) => ({
+          uuid: m.uuid,
+          is_staff: m.is_staff,
+          session_id: m.session_id,
+          sender_name: m.sender_name
+        })));
+      }
+      
       if (data.length > 0) {
         // اضافه کردن پیام‌های جدید به لیست موجود (بدون تکرار)
         setMessages(prev => {
           const existingUuids = new Set(prev.map(m => m.uuid));
           const newMessages = data.filter((m: any) => !existingUuids.has(m.uuid));
-          return [...prev, ...newMessages];
+          if (newMessages.length > 0) {
+            // مرتب‌سازی پیام‌های جدید و اضافه کردن به لیست
+            const allMessages = [...prev, ...newMessages];
+            allMessages.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+            // به‌روزرسانی lastMessageTime با آخرین پیام
+            const sorted = [...allMessages].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            if (sorted.length > 0) {
+              setLastMessageTime(sorted[0].created_at);
+            }
+            return allMessages;
+          }
+          return prev;
         });
-        setLastMessageTime(data[data.length - 1].created_at);
       }
     } catch (error) {
       console.error('Error loading new messages:', error);
@@ -289,33 +320,52 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
                 {t('chat.noMessages')}
               </div>
             ) : (
-              messages.map((msg) => (
+              messages.map((msg) => {
+                // اطمینان از اینکه is_staff به درستی boolean است
+                // اگر user وجود دارد و is_staff true نیست، باید false باشد
+                // اگر user وجود ندارد (مهمان) و is_staff true نیست، باید false باشد
+                const isStaffMessage = Boolean(msg.is_staff);
+                return (
                 <div
                   key={msg.uuid}
-                  className={`flex ${msg.is_staff ? 'justify-start' : 'justify-end'}`}
+                  className={`flex ${isStaffMessage ? 'justify-start' : 'justify-end'}`}
                 >
                   <div
                     className={`max-w-[80%] rounded-lg p-3 ${
-                      msg.is_staff
+                      isStaffMessage
                         ? 'bg-blue-100 text-gray-800'
                         : 'bg-blue-600 text-white'
                     }`}
                   >
-                    <div className="text-xs mb-1 opacity-75">
-                      {msg.is_staff ? (
-                        <span>{t('chat.staff')}</span>
-                      ) : (
-                        <span>{msg.sender_name}</span>
+                    <div className="text-xs mb-1 opacity-75 flex items-center justify-between">
+                      <div>
+                        {isStaffMessage ? (
+                          <span>{t('chat.staff')}</span>
+                        ) : (
+                          <span>{msg.sender_name}</span>
+                        )}
+                        <span className="mx-2">•</span>
+                        <span>{msg.formatted_time}</span>
+                      </div>
+                      {!isStaffMessage && msg.is_read && (
+                        <div className="flex items-center text-green-600" title="خوانده شده">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          <svg className="w-3 h-3 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-[10px] mr-1">خوانده شد</span>
+                        </div>
                       )}
-                      <span className="mx-2">•</span>
-                      <span>{msg.formatted_time}</span>
                     </div>
                     <div className="text-sm whitespace-pre-wrap break-words">
                       {msg.message}
                     </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
             <div ref={messagesEndRef} />
           </div>

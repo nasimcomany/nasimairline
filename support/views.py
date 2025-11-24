@@ -335,7 +335,14 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Filter messages based on user or session"""
+        from django.utils import timezone
+        
         queryset = super().get_queryset()
+        
+        # فیلتر کردن پیام‌های منقضی شده
+        queryset = queryset.filter(
+            models.Q(expires_at__isnull=True) | models.Q(expires_at__gt=timezone.now())
+        )
         
         # اگر کاربر لاگین باشد، پیام‌های خودش و پیام‌های پرسنل مربوط به او را ببیند
         if self.request.user.is_authenticated:
@@ -344,7 +351,12 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             
             if session_id:
                 # اگر session_id در query params باشد، فقط پیام‌های با همان session_id را نشان می‌دهیم
-                return queryset.filter(session_id=session_id)
+                # اما فقط پیام‌های این کاربر یا پیام‌های پرسنل
+                return queryset.filter(
+                    models.Q(session_id=session_id) & (
+                        models.Q(user=self.request.user) | models.Q(is_staff=True)
+                    )
+                )
             else:
                 # اگر session_id نباشد، تمام پیام‌های کاربر را نشان می‌دهیم
                 # و پیام‌های پرسنل که session_id آنها با session_id پیام‌های کاربر مطابقت دارد
@@ -365,6 +377,7 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         session_id = self.request.query_params.get('session_id')
         if session_id:
             # همه پیام‌های با session_id مشابه (چه از کاربر چه از پرسنل)
+            # اما فقط پیام‌های این session
             return queryset.filter(session_id=session_id)
         
         # اگر session_id نباشد، هیچ پیامی نشان نمی‌دهیم (برای مهمانان)
@@ -372,6 +385,9 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Set user, IP, and session when creating message"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
         request = self.request
         
         # اگر کاربر لاگین باشد
@@ -384,18 +400,33 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
                 # استفاده از user_id برای ایجاد session_id یکتا
                 session_id = f"user_{request.user.id}_{uuid.uuid4().hex[:8]}"
             
+            # برای کاربران عضو: is_staff باید False باشد (مگر اینکه واقعاً staff باشند و از پنل ادمین پیام بفرستند)
+            # اما چون این از frontend است، همیشه False است
+            is_staff_value = False  # کاربران عادی از frontend همیشه False هستند
+            
+            # Expiry: 72 ساعت برای کاربران عضو
+            expires_at = timezone.now() + timedelta(hours=72)
+            
             serializer.save(
                 user=request.user,
                 message_ip=self._get_client_ip(request),
-                is_staff=request.user.is_staff,
+                is_staff=is_staff_value,  # همیشه False برای کاربران عادی
                 session_id=session_id,
+                expires_at=expires_at,
             )
         else:
             # برای کاربران مهمان
             session_id = request.data.get('session_id') or self._generate_session_id(request)
+            
+            # برای مهمانان: is_staff همیشه False است
+            # Expiry: تا زمانی که از سایت خارج نشده (24 ساعت - می‌توان بعداً با session tracking بهبود داد)
+            expires_at = timezone.now() + timedelta(hours=24)
+            
             serializer.save(
                 message_ip=self._get_client_ip(request),
                 session_id=session_id,
+                is_staff=False,  # مهمانان همیشه False هستند
+                expires_at=expires_at,
             )
     
     def _get_client_ip(self, request):
@@ -436,6 +467,9 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(created_at__gt=last_time)
             except:
                 pass
+        
+        # مرتب‌سازی بر اساس created_at
+        queryset = queryset.order_by('created_at')
         
         # Get last 50 messages
         queryset = queryset[:50]

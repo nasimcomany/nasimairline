@@ -657,6 +657,15 @@ class ChatMessage(models.Model):
         auto_now=True,
     )
     
+    # Expiry time برای پاک کردن خودکار پیام‌ها
+    expires_at = models.DateTimeField(
+        _('تاریخ انقضا'),
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text=_('پیام‌های مهمان تا زمانی که از سایت خارج نشده ذخیره می‌شوند. پیام‌های کاربران عضو 72 ساعت ذخیره می‌شوند.'),
+    )
+    
     class Meta:
         verbose_name = _('پیام چت')
         verbose_name_plural = _('پیام‌های چت')
@@ -684,3 +693,10 @@ class ChatMessage(models.Model):
         if self.user:
             return self.user.email
         return self.guest_email or ''
+    
+    def is_expired(self):
+        """Check if message is expired"""
+        if not self.expires_at:
+            return False
+        from django.utils import timezone
+        return timezone.now() > self.expires_at

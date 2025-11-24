@@ -402,14 +402,31 @@ class ChatMessageAdmin(admin.ModelAdmin):
                 messages.error(request, _('خطا: نتوانستیم session_id را تعیین کنیم.'))
                 return redirect('admin:support_chatmessage_change', object_id)
             
+            # تعیین expiry time برای پاسخ ادمین (مطابق با پیام کاربر)
+            from django.utils import timezone
+            from datetime import timedelta
+            
+            # اگر پیام کاربر expiry دارد، از همان استفاده می‌کنیم
+            # در غیر این صورت، 72 ساعت برای کاربران عضو و 24 ساعت برای مهمانان
+            if chat_message.user:
+                expires_at = timezone.now() + timedelta(hours=72)
+            else:
+                expires_at = timezone.now() + timedelta(hours=24)
+            
             reply = ChatMessage.objects.create(
                 message=reply_text,
-                is_staff=True,
+                is_staff=True,  # حتماً باید True باشد
                 is_read=True,
                 user=None,  # پیام از پرسنل است
                 session_id=reply_session_id,
                 message_ip=self._get_client_ip(request),
+                expires_at=expires_at,
             )
+            
+            # Debug: چاپ اطلاعات پیام ایجاد شده
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Admin reply created: session_id={reply_session_id}, is_staff={reply.is_staff}, uuid={reply.uuid}, message_preview={reply_text[:50]}")
             
             messages.success(request, _('پاسخ شما با موفقیت ارسال شد.'))
             return redirect('admin:support_chatmessage_change', object_id)

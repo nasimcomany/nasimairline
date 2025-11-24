@@ -182,3 +182,25 @@ def send_whatsapp_notification_on_chat_message(sender, instance, created, **kwar
         )
         whatsapp_thread.start()
 
+
+def cleanup_expired_chat_messages():
+    """
+    Cleanup expired chat messages
+    This function should be called periodically (e.g., via cron job or Celery task)
+    """
+    from django.utils import timezone
+    from .models import ChatMessage
+    
+    # حذف پیام‌های منقضی شده
+    expired_count = ChatMessage.objects.filter(
+        expires_at__isnull=False,
+        expires_at__lt=timezone.now()
+    ).delete()[0]
+    
+    if expired_count > 0:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Cleaned up {expired_count} expired chat messages")
+    
+    return expired_count
+
