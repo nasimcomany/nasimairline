@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import GlassmorphismHeader from '../components/Layout/GlassmorphismHeader';
 import FlightSearchForm from '../components/FlightSearch/FlightSearchForm';
+import WeatherWidget from '../components/Weather/WeatherWidget';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
   PaperAirplaneIcon, 
@@ -1727,6 +1728,11 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Weather Section */}
+      <section id="weather" className="relative z-10 py-20 bg-gradient-to-b from-transparent to-black/30">
+        <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
+      </section>
 
       {/* Footer */}
       <footer className="relative z-10 bg-black/50 backdrop-blur-xl border-t border-white/10 py-16">

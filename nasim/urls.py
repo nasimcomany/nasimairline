@@ -10,6 +10,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve
 from rest_framework.routers import DefaultRouter
+import os
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -55,6 +56,10 @@ urlpatterns = [
     
     # Serve static files from React build
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+    # Serve images from React build
+    re_path(r'^images/(?P<path>.*)$', serve, {
+        'document_root': os.path.join(settings.FRONTEND_BUILD_DIR, 'images') if os.path.exists(settings.FRONTEND_BUILD_DIR) else os.path.join(settings.BASE_DIR, 'frontend', 'public', 'images'),
+    }),
     re_path(r'^.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$', serve, {
         'document_root': settings.STATIC_ROOT,
     }),

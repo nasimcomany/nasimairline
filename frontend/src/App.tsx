@@ -19,6 +19,7 @@ import MembershipPage from './pages/MembershipPage';
 import SupportPage from './pages/SupportPage';
 import TicketPage from './pages/TicketPage';
 import ChatWidget from './components/Chat/ChatWidget';
+import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
 
 function App() {
   return (
@@ -46,6 +47,8 @@ function App() {
             </Routes>
             {/* Chat Widget - Available on all pages */}
             <ChatWidget />
+            {/* Scroll to Top Button - Available on all pages */}
+            <ScrollToTopButton />
           </div>
         </Router>
       </LanguageProvider>
