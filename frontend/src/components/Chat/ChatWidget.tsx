@@ -60,12 +60,12 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     }
   }, [isAuthenticated, sessionId]);
   
-  // Load initial messages
+  // Load initial messages when chat opens
   useEffect(() => {
     if (isOpen) {
       loadMessages();
     }
-  }, [isOpen, sessionId]);
+  }, [isOpen]);
   
   // Polling for new messages
   useEffect(() => {
@@ -100,32 +100,56 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     try {
       setIsLoading(true);
       const params: any = {};
-      // برای کاربران لاگین و مهمان، session_id را ارسال می‌کنیم
-      if (sessionId) {
-        params.session_id = sessionId;
+      
+      // استفاده از sessionId از localStorage یا state
+      let currentSessionId = sessionId || localStorage.getItem('chat_session_id') || '';
+      if (currentSessionId) {
+        params.session_id = currentSessionId;
       }
       
       const response = await api.get('/support/chat/', { params });
       const data = Array.isArray(response.data) ? response.data : response.data.results || [];
-      setMessages(data);
       
       // استخراج session_id از پیام‌ها (اگر sessionId نداریم یا تغییر کرده)
+      let newSessionId = currentSessionId;
       if (data.length > 0) {
         // بررسی تمام پیام‌ها برای یافتن session_id
         for (const msg of data) {
           const msgAny = msg as any;
-          if (msgAny.session_id && msgAny.session_id !== sessionId) {
-            setSessionId(msgAny.session_id);
-            // ذخیره در localStorage
-            localStorage.setItem('chat_session_id', msgAny.session_id);
+          if (msgAny.session_id) {
+            newSessionId = msgAny.session_id;
+            if (newSessionId !== currentSessionId) {
+              setSessionId(newSessionId);
+              localStorage.setItem('chat_session_id', newSessionId);
+            }
             break;
           }
         }
       }
       
-      // Set last message time
-      if (data.length > 0) {
-        setLastMessageTime(data[data.length - 1].created_at);
+      // اگر sessionId تغییر کرد، دوباره درخواست بزن تا همه پیام‌ها را بگیریم
+      if (newSessionId && newSessionId !== currentSessionId) {
+        params.session_id = newSessionId;
+        const retryResponse = await api.get('/support/chat/', { params });
+        const retryData = Array.isArray(retryResponse.data) ? retryResponse.data : retryResponse.data.results || [];
+        // مرتب‌سازی بر اساس created_at
+        retryData.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        setMessages(retryData);
+        
+        // Set last message time
+        if (retryData.length > 0) {
+          setLastMessageTime(retryData[retryData.length - 1].created_at);
+        }
+      } else {
+        // استفاده از داده‌های دریافت شده
+        // مرتب‌سازی بر اساس created_at
+        data.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        setMessages(data);
+        
+        // Set last message time
+        if (data.length > 0) {
+          setLastMessageTime(data[data.length - 1].created_at);
+        }
       }
     } catch (error) {
       console.error('Error loading messages:', error);
