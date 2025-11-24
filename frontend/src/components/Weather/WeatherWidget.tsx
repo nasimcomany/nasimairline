@@ -20,7 +20,7 @@ interface WeatherWidgetProps {
 const WeatherWidget: React.FC<WeatherWidgetProps> = ({ 
   cities = ['Tehran', 'Mashhad', 'Kish', 'Abadan'] 
 }) => {
-  const { language, t, fontClass } = useLanguage();
+  const { language, fontClass } = useLanguage();
   const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
 
   // City names in different languages
