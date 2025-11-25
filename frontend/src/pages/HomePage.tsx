@@ -39,7 +39,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const HomePage: React.FC = () => {
-  const { t, fontClass } = useLanguage();
+  const { t, fontClass, language } = useLanguage();
   const [isLoaded, setIsLoaded] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -158,7 +158,7 @@ const HomePage: React.FC = () => {
       country: t('destinations.iran'),
       flights: t('destinations.dailyFlights'),
       price: `${t('destinations.from')} $120`,
-      image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+      image: '/images/tehran.jpg',
       gradient: 'from-blue-500 to-blue-700'
     },
     {
@@ -168,7 +168,7 @@ const HomePage: React.FC = () => {
       country: t('destinations.iran'),
       flights: t('destinations.dailyFlights'),
       price: `${t('destinations.from')} $95`,
-      image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+      image: '/images/mashhad.jpeg',
       gradient: 'from-orange-500 to-orange-700'
     },
     {
@@ -644,10 +644,11 @@ const HomePage: React.FC = () => {
       <section className="relative z-10 min-h-[90vh] flex flex-col">
         {/* Hero Image Background - Airplane Cabin */}
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-x-0 top-0 bg-cover bg-center"
           style={{
             backgroundImage: 'url(/images/tstnasim.jpg)',
-            backgroundPosition: 'center center'
+            backgroundPosition: 'center center',
+            bottom: '120px' // 12cm shorter from bottom (120px)
           }}
         >
           <div className="absolute inset-0 bg-black/10"></div>
@@ -720,49 +721,103 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* Skywards Banner Section - Emirates Style */}
+      <section className="relative z-10 bg-gray-900 py-8">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Left Side - Badges */}
+            <div className="flex items-center gap-2">
+              {/* Blue Badge */}
+              <div className="w-16 h-16 rounded-full bg-blue-500 flex flex-col items-center justify-center shadow-lg" style={{ 
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                transform: 'rotate(-5deg)'
+              }}>
+                <div className="text-white text-xs font-bold">BLUE</div>
+              </div>
+              {/* Silver Badge */}
+              <div className="w-16 h-16 rounded-full bg-gray-300 flex flex-col items-center justify-center shadow-lg -ml-2" style={{ 
+                background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
+                transform: 'rotate(2deg)'
+              }}>
+                <div className="text-gray-700 text-xs font-bold">SILVER</div>
+              </div>
+              {/* Gold Badge */}
+              <div className="w-16 h-16 rounded-full bg-yellow-400 flex flex-col items-center justify-center shadow-lg -ml-2" style={{ 
+                background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                transform: 'rotate(-3deg)'
+              }}>
+                <div className="text-white text-xs font-bold">GOLD</div>
+              </div>
+              {/* Platinum Badge */}
+              <div className="w-16 h-16 rounded-full bg-gray-400 flex flex-col items-center justify-center shadow-lg -ml-2" style={{ 
+                background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+                transform: 'rotate(4deg)'
+              }}>
+                <div className="text-white text-xs font-bold">PLATINUM</div>
+              </div>
+            </div>
+
+            {/* Center - Text */}
+            <div className="flex-1 text-center md:text-left">
+              <h3 className={`text-2xl md:text-3xl font-bold text-white mb-2 ${fontClass}`}>
+                {t('loyalty.joinSkywards') || 'Join Emirates Skywards'}
+              </h3>
+              <p className={`text-gray-300 text-sm md:text-base ${fontClass}`}>
+                {t('loyalty.skywardsDescription') || 'Become an Emirates Skywards member and start enjoying flight rewards, upgrades and more'}
+              </p>
+            </div>
+
+            {/* Right Side - Button */}
+            <button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap">
+              {t('loyalty.joinNow') || 'Join now'}
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Destinations Section - Emirates Style */}
       <section className="relative z-10 py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-8">
-            <h2 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`}>
-              {t('destinations.featured') || 'مقاصد ویژه'}
+          <div className="text-center mb-12">
+            <h2 className={`text-3xl md:text-4xl font-bold text-gray-900 mb-2 ${fontClass}`}>
+              {t('destinations.featured') || 'Featured destinations'}
             </h2>
           </div>
           
-          {/* Two Large Destination Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Two Large Destination Cards - Emirates Style */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {destinations.slice(0, 2).map((destination) => (
-              <div key={destination.id} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-                <div className="relative h-80 overflow-hidden">
+              <div key={destination.id} className="bg-white overflow-hidden group cursor-pointer">
+                {/* Image */}
+                <div className="relative h-96 overflow-hidden">
                   <img 
                     src={destination.image} 
                     alt={destination.name}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
+                {/* Content */}
                 <div className="p-6 bg-white">
-                  <p className={`text-gray-500 text-xs uppercase tracking-wider mb-2 ${fontClass}`}>
+                  <p className={`text-gray-500 text-xs uppercase tracking-widest mb-3 ${fontClass}`} style={{ 
+                    letterSpacing: '2px',
+                    fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit'
+                  }}>
                     {destination.country}
                   </p>
-                  <h3 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`}>
+                  <h3 className={`text-4xl font-bold text-gray-900 mb-4 ${fontClass}`} style={{ 
+                    fontWeight: 700,
+                    fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit'
+                  }}>
                     {destination.name}
                   </h3>
-                  <p className={`text-gray-600 ${fontClass}`}>
-                    {t('destinations.discover') || 'کشف کنید'}
+                  <p className={`text-gray-700 text-base ${fontClass}`} style={{ 
+                    fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit'
+                  }}>
+                    {t('destinations.discoverForYourself') || 'Discover for yourself'}
                   </p>
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Bottom Links */}
-          <div className="flex items-center justify-between mt-6">
-            <button className={`border border-gray-300 bg-white hover:bg-gray-50 px-6 py-3 rounded transition-colors ${fontClass}`}>
-              {t('destinations.moreDestinations') || 'مقاصد بیشتر'}
-            </button>
-            <a href="#" className={`text-blue-600 hover:text-blue-700 underline ${fontClass}`}>
-              {t('destinations.inspiredByRouteMap') || 'از نقشه مسیرهای ما الهام بگیرید >'}
-            </a>
           </div>
         </div>
       </section>
