@@ -145,8 +145,10 @@ const translations = {
     'auth.phonePlaceholder': 'شماره تلفن خود را وارد کنید',
     
     // Homepage
-    'home.hero.title': 'به نسیم ایر خوش آمدید',
-    'home.hero.subtitle': 'سفر راحت و امن به تمام مقاصد',
+    'home.hero.subtitle': 'It\'s arrived, the',
+    'home.hero.title': 'PREMIUM ECONOMY',
+    'home.hero.description': 'you\'ve been waiting for',
+    'nav.search': 'SEARCH',
     'home.features.diverseFlights': 'پروازهای متنوع',
     'home.features.diverseFlightsDesc': 'انتخاب از بین هزاران پرواز داخلی و بین‌المللی',
     'home.features.hotelBooking': 'رزرو هتل',
@@ -615,8 +617,10 @@ const translations = {
     'auth.phonePlaceholder': 'أدخل رقم هاتفك',
     
     // Homepage
-    'home.hero.title': 'مرحباً بك في نسيم إير',
-    'home.hero.subtitle': 'سفر مريح وآمن إلى جميع الوجهات',
+    'home.hero.subtitle': 'It\'s arrived, the',
+    'home.hero.title': 'PREMIUM ECONOMY',
+    'home.hero.description': 'you\'ve been waiting for',
+    'nav.search': 'SEARCH',
     'home.features.diverseFlights': 'رحلات متنوعة',
     'home.features.diverseFlightsDesc': 'اختر من بين آلاف الرحلات الداخلية والدولية',
     'home.features.hotelBooking': 'حجز فندق',
@@ -1085,8 +1089,10 @@ const translations = {
     'auth.phonePlaceholder': 'Enter your phone number',
     
     // Homepage
-    'home.hero.title': 'Welcome to Nasim Air',
-    'home.hero.subtitle': 'Comfortable and safe travel to all destinations',
+    'home.hero.subtitle': 'It\'s arrived, the',
+    'home.hero.title': 'PREMIUM ECONOMY',
+    'home.hero.description': 'you\'ve been waiting for',
+    'nav.search': 'SEARCH',
     'home.features.diverseFlights': 'Diverse Flights',
     'home.features.diverseFlightsDesc': 'Choose from thousands of domestic and international flights',
     'home.features.hotelBooking': 'Hotel Booking',

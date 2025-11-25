@@ -94,52 +94,53 @@ const EmiratesHeader: React.FC = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-gray-900 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Bar */}
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 space-x-reverse">
-            <img 
-              src="/images/favpng_9ba01589d5c7c5e413ee0b9efe7bd497.png" 
-              alt="نسیم ایر" 
-              className="h-10 w-10 object-contain"
-            />
-            <div>
-              <div className={`text-xl font-bold text-gray-900 ${fontClass}`}>
-                {language === 'fa' ? 'نسیم ایر' : language === 'ar' ? 'نسيم إير' : 'Nasim Air'}
+          {/* Logo - Red background like Emirates */}
+          <Link to="/" className="flex items-center">
+            <div className="bg-red-600 px-3 py-2 flex items-center">
+              <div className={`text-white font-bold text-lg ${fontClass}`} style={{ fontFamily: language === 'fa' || language === 'ar' ? 'inherit' : 'Arial, sans-serif' }}>
+                {language === 'fa' ? 'نسیم ایر' : language === 'ar' ? 'نسيم إير' : 'NASIM'}
               </div>
-              <div className={`text-xs text-gray-500 ${fontClass}`}>
-                NASIM AIR
+            </div>
+            <div className="ml-2">
+              <div className={`text-sm text-white font-light tracking-wider ${fontClass}`} style={{ fontFamily: 'Arial, sans-serif' }}>
+                AIR
               </div>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1 space-x-reverse">
+          {/* Desktop Navigation - White text */}
+          <nav className="hidden lg:flex items-center space-x-1 space-x-reverse h-full">
             {menuItems.map((item) => (
               <div
                 key={item.key}
-                className="relative"
+                className="relative h-full flex items-center"
                 onMouseEnter={() => handleMouseEnter(item.key)}
                 onMouseLeave={handleMouseLeave}
               >
                 <Link
                   to={item.path}
-                  className={`px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors ${fontClass}`}
+                  className={`px-4 py-2 text-sm font-medium text-white hover:text-gray-300 transition-colors h-full flex items-center ${fontClass}`}
+                  style={{ 
+                    borderBottom: activeDropdown === item.key ? '2px solid white' : '2px solid transparent',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}
                 >
                   {item.label}
-                  <ChevronDownIcon className="inline-block w-4 h-4 mr-1" />
                 </Link>
                 
                 {/* Dropdown Menu */}
                 {activeDropdown === item.key && item.dropdown && (
-                  <div className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50`}>
+                  <div className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-0 w-56 bg-white rounded-b-lg shadow-lg border-t-2 border-red-600 py-2 z-50`}>
                     {item.dropdown.map((subItem, index) => (
                       <Link
                         key={index}
                         to={subItem.path}
-                        className={`block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
+                        className={`block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 transition-colors ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
                         onClick={() => setActiveDropdown(null)}
                       >
                         {subItem.label}
@@ -151,42 +152,45 @@ const EmiratesHeader: React.FC = () => {
             ))}
           </nav>
 
-          {/* Right Side Actions */}
-          <div className="hidden lg:flex items-center space-x-4 space-x-reverse">
+          {/* Right Side Actions - White text */}
+          <div className="hidden lg:flex items-center space-x-6 space-x-reverse">
+            {/* Global/Language */}
+            <button className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`} style={{ textTransform: 'uppercase' }}>
+              {language === 'fa' ? 'فارسی' : language === 'ar' ? 'العربية' : 'GLOBAL'}
+            </button>
+
             {/* Search */}
-            <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <button className="text-white hover:text-gray-300 transition-colors">
               <MagnifyingGlassIcon className="w-5 h-5" />
             </button>
+            <span className={`text-white text-sm font-medium ${fontClass}`} style={{ textTransform: 'uppercase' }}>
+              {t('nav.search') || 'SEARCH'}
+            </span>
 
             {/* Login/User */}
             {isAuthenticated ? (
               <Link
                 to="/dashboard"
-                className={`px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors ${fontClass}`}
+                className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`}
+                style={{ textTransform: 'uppercase' }}
               >
-                {user?.first_name || t('nav.loginUsers')}
+                {user?.first_name || t('nav.login') || 'LOG IN'}
               </Link>
             ) : (
               <Link
                 to="/login"
-                className={`px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors ${fontClass}`}
+                className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`}
+                style={{ textTransform: 'uppercase' }}
               >
-                {t('nav.loginUsers') || 'ورود'}
+                {t('nav.login') || 'LOG IN'}
               </Link>
             )}
-
-            {/* Language Selector */}
-            <div className="flex items-center space-x-2 space-x-reverse border-r border-gray-300 pr-4">
-              <span className={`text-sm text-gray-600 ${fontClass}`}>
-                {language === 'fa' ? 'فا' : language === 'ar' ? 'ع' : 'EN'}
-              </span>
-            </div>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 text-gray-600 hover:text-gray-900"
+            className="lg:hidden p-2 text-white hover:text-gray-300"
           >
             {isMenuOpen ? (
               <XMarkIcon className="w-6 h-6" />
@@ -198,13 +202,13 @@ const EmiratesHeader: React.FC = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 py-4">
+          <div className="lg:hidden border-t border-gray-700 py-4 bg-gray-900">
             <nav className="space-y-2">
               {menuItems.map((item) => (
                 <div key={item.key}>
                   <Link
                     to={item.path}
-                    className={`block px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors ${fontClass}`}
+                    className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.label}
@@ -215,7 +219,7 @@ const EmiratesHeader: React.FC = () => {
                         <Link
                           key={index}
                           to={subItem.path}
-                          className={`block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors ${fontClass}`}
+                          className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors ${fontClass}`}
                           onClick={() => setIsMenuOpen(false)}
                         >
                           {subItem.label}
@@ -226,22 +230,22 @@ const EmiratesHeader: React.FC = () => {
                 </div>
               ))}
               
-              <div className="border-t border-gray-200 pt-4 mt-4">
+              <div className="border-t border-gray-700 pt-4 mt-4">
                 {isAuthenticated ? (
                   <Link
                     to="/dashboard"
-                    className={`block px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors ${fontClass}`}
+                    className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {user?.first_name || t('nav.loginUsers')}
+                    {user?.first_name || t('nav.login')}
                   </Link>
                 ) : (
                   <Link
                     to="/login"
-                    className={`block px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors ${fontClass}`}
+                    className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {t('nav.loginUsers') || 'ورود'}
+                    {t('nav.login') || 'LOG IN'}
                   </Link>
                 )}
               </div>

@@ -641,37 +641,80 @@ const HomePage: React.FC = () => {
       <EmiratesHeader />
 
       {/* Hero Section with Flight Search - Emirates Style */}
-      <section className="relative z-10 min-h-[700px] flex flex-col justify-end pb-8">
-        {/* Hero Image Background */}
+      <section className="relative z-10 min-h-[90vh] flex flex-col">
+        {/* Hero Image Background - Airplane Cabin */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url(/images/airport-crew.jpg)'
+            backgroundImage: 'url(/images/tstnasim.jpg)',
+            backgroundPosition: 'center center'
           }}
         >
-          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/10"></div>
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
-          {/* Promotional Text - Like Emirates */}
-          <div className="mb-12 text-center">
-            <p className={`text-white text-xl italic mb-4 ${fontClass}`}>
-              {t('home.hero.subtitle') || 'It\'s arrived, the'}
+        <div className="relative z-10 flex-1 flex flex-col">
+          {/* "FLY BETTER" in top right corner - Script font */}
+          <div className="absolute top-8 right-8 z-20">
+            <p 
+              className="text-white text-4xl font-bold"
+              style={{ 
+                fontFamily: 'Brush Script MT, Brush Script, cursive',
+                transform: 'rotate(-5deg)',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+              }}
+            >
+              FLY BETTER
             </p>
-            <h1 className={`text-7xl md:text-8xl font-bold text-white mb-4 ${fontClass}`}>
-              {t('home.hero.title') || 'PREMIUM ECONOMY'}
-            </h1>
-            <p className={`text-white text-xl italic mb-6 ${fontClass}`}>
-              {t('home.hero.description') || 'you\'ve been waiting for'}
-            </p>
-            <button className="bg-red-600 hover:bg-red-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
-              {t('common.learnMore') || 'بیشتر بدانید'}
-            </button>
+          </div>
+
+          {/* Promotional Text - Centered */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center max-w-4xl px-6">
+              <p 
+                className={`text-white text-2xl md:text-3xl italic mb-4 ${fontClass}`}
+                style={{ 
+                  fontWeight: 300,
+                  letterSpacing: '1px'
+                }}
+              >
+                {t('home.hero.subtitle') || 'It\'s arrived, the'}
+              </p>
+              <h1 
+                className={`text-6xl md:text-8xl lg:text-9xl font-bold text-white mb-4 ${fontClass}`}
+                style={{ 
+                  fontFamily: 'Arial, sans-serif',
+                  fontWeight: 900,
+                  letterSpacing: '-2px',
+                  lineHeight: '1.1'
+                }}
+              >
+                {t('home.hero.title') || 'PREMIUM ECONOMY'}
+              </h1>
+              <p 
+                className={`text-white text-2xl md:text-3xl italic mb-8 ${fontClass}`}
+                style={{ 
+                  fontWeight: 300,
+                  letterSpacing: '1px'
+                }}
+              >
+                {t('home.hero.description') || 'you\'ve been waiting for'}
+              </p>
+              <button 
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
+                style={{ 
+                  letterSpacing: '0.5px',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+                }}
+              >
+                {t('common.learnMore') || 'Learn more'}
+              </button>
+            </div>
           </div>
 
           {/* Flight Search Form at Bottom */}
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto w-full px-6 pb-8">
             <EmiratesFlightSearchForm />
           </div>
         </div>
@@ -1856,8 +1899,8 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Weather Section */}
-      <section id="weather" className="relative z-10 py-20 bg-gradient-to-b from-transparent to-black/30">
+      {/* Weather Section - Your Custom Feature */}
+      <section id="weather" className="relative z-10 py-16 bg-white">
         <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
       </section>
 

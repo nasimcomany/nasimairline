@@ -56,52 +56,68 @@ const EmiratesFlightSearchForm: React.FC = () => {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-lg shadow-2xl">
+    <div className="bg-white/95 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden">
       {/* Tabs */}
       <div className="flex border-b border-gray-200">
         <button
           onClick={() => setActiveTab('search')}
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
             activeTab === 'search'
-              ? 'text-red-600 border-b-2 border-red-600'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'text-red-600 border-b-2 border-red-600 bg-white'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
+          style={{ 
+            textTransform: 'none',
+            fontSize: '14px'
+          }}
         >
           <PaperAirplaneIcon className="w-5 h-5" />
-          {t('nav.bookFlights') || 'جستجوی پرواز'}
+          {t('nav.bookFlights') || 'Search flights'}
         </button>
         <button
           onClick={() => setActiveTab('manage')}
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
             activeTab === 'manage'
-              ? 'text-red-600 border-b-2 border-red-600'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'text-red-600 border-b-2 border-red-600 bg-white'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
+          style={{ 
+            textTransform: 'none',
+            fontSize: '14px'
+          }}
         >
           <TagIcon className="w-5 h-5" />
-          {t('nav.manageBooking') || 'مدیریت رزرو / چک این'}
+          {t('nav.manageBooking') || 'Manage booking / Check in'}
         </button>
         <button
           onClick={() => setActiveTab('whatson')}
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
             activeTab === 'whatson'
-              ? 'text-red-600 border-b-2 border-red-600'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'text-red-600 border-b-2 border-red-600 bg-white'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
+          style={{ 
+            textTransform: 'none',
+            fontSize: '14px'
+          }}
         >
           <PaperAirplaneIcon className="w-5 h-5" />
-          {t('nav.whatsOnFlight') || 'آنچه در پرواز شماست'}
+          {t('nav.whatsOnFlight') || 'What\'s on your flight'}
         </button>
         <button
           onClick={() => setActiveTab('status')}
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
             activeTab === 'status'
-              ? 'text-red-600 border-b-2 border-red-600'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'text-red-600 border-b-2 border-red-600 bg-white'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
+          style={{ 
+            textTransform: 'none',
+            fontSize: '14px'
+          }}
         >
           <ClockIcon className="w-5 h-5" />
-          {t('nav.flightStatus') || 'وضعیت پرواز'}
+          {t('nav.flightStatus') || 'Flight status'}
         </button>
       </div>
 
@@ -111,24 +127,25 @@ const EmiratesFlightSearchForm: React.FC = () => {
           <div className="flex gap-4 items-end">
             {/* Origin */}
             <div className="flex-1">
-              <label className={`block text-sm font-medium text-gray-700 mb-2 ${fontClass}`}>
-                {t('home.flightSearch.from') || 'فرودگاه مبدا'}
+              <label className={`block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wide ${fontClass}`}>
+                {t('home.flightSearch.from') || 'Departure airport'}
               </label>
               <div className="relative">
-                <MapPinIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <MapPinIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
                   name="origin"
                   value={formData.origin}
                   onChange={handleInputChange}
-                  placeholder={t('home.flightSearch.cityOrAirport') || 'شهر یا فرودگاه'}
-                  className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
+                  placeholder={t('home.flightSearch.cityOrAirport') || 'City or airport'}
+                  className="w-full pr-10 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-white"
+                  style={{ paddingRight: '2.5rem', paddingLeft: '2.5rem' }}
                 />
                 {formData.origin && (
                   <button
                     type="button"
                     onClick={clearOrigin}
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
                   >
                     <XMarkIcon className="w-5 h-5" />
                   </button>
@@ -138,18 +155,19 @@ const EmiratesFlightSearchForm: React.FC = () => {
 
             {/* Destination */}
             <div className="flex-1">
-              <label className={`block text-sm font-medium text-gray-700 mb-2 ${fontClass}`}>
-                {t('home.flightSearch.to') || 'فرودگاه مقصد'}
+              <label className={`block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wide ${fontClass}`}>
+                {t('home.flightSearch.to') || 'Arrival airport'}
               </label>
               <div className="relative">
-                <MapPinIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <MapPinIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
                   name="destination"
                   value={formData.destination}
                   onChange={handleInputChange}
-                  placeholder={t('home.flightSearch.cityOrAirport') || 'شهر یا فرودگاه'}
-                  className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
+                  placeholder={t('home.flightSearch.cityOrAirport') || 'City or airport'}
+                  className="w-full pr-10 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-white"
+                  style={{ paddingRight: '2.5rem', paddingLeft: '2.5rem' }}
                 />
               </div>
             </div>
@@ -157,16 +175,24 @@ const EmiratesFlightSearchForm: React.FC = () => {
             {/* Continue Button */}
             <button
               type="submit"
-              className="bg-red-600 hover:bg-red-700 text-white font-medium px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
+              style={{ 
+                minWidth: '120px',
+                height: '48px'
+              }}
             >
-              {t('common.continue') || 'ادامه'}
+              {t('common.continue') || 'Continue'}
             </button>
           </div>
 
           {/* Advanced Search Link */}
           <div className="mt-4">
-            <a href="#" className={`text-red-600 hover:text-red-700 text-sm ${fontClass}`}>
-              {t('home.flightSearch.advancedSearch') || 'جستجوی پیشرفته: چند مقصد، کدهای تخفیف، flydubai و خطوط هوایی شریک >'}
+            <a 
+              href="#" 
+              className={`text-red-600 hover:text-red-700 text-sm ${fontClass}`}
+              style={{ textDecoration: 'none' }}
+            >
+              {t('home.flightSearch.advancedSearch') || 'Advanced search: multi-city, promo codes, flydubai and partner airlines >'}
             </a>
           </div>
         </form>
