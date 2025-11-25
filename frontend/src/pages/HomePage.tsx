@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import GlassmorphismHeader from '../components/Layout/GlassmorphismHeader';
+import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import FlightSearchForm from '../components/FlightSearch/FlightSearchForm';
 import WeatherWidget from '../components/Weather/WeatherWidget';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -661,10 +661,69 @@ const HomePage: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
       </div>
 
-      <GlassmorphismHeader />
+      <EmiratesHeader />
 
-      {/* Booking Section */}
-      <section id="booking" className="relative z-10 pt-24 pb-8">
+      {/* Hero Section with Flight Search - Emirates Style */}
+      <section className="relative z-10 pt-32 pb-20 min-h-[600px] flex items-center">
+        <div className="max-w-6xl mx-auto px-6 w-full">
+          {/* Flight Search Form - Large and Centered */}
+          <div className="max-w-4xl mx-auto">
+            <FlightSearchForm className="shadow-2xl" />
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Fares Section - Emirates Style */}
+      <section className="relative z-10 py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`}>
+              {t('offers.title') || 'پیشنهادات ویژه'}
+            </h2>
+            <p className={`text-gray-600 ${fontClass}`}>
+              {t('offers.subtitle') || 'بهترین قیمت‌ها برای سفر شما'}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {offers.slice(0, 4).map((offer) => (
+              <div key={offer.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-gray-200">
+                <div className={`h-32 bg-gradient-to-r ${offer.gradient} flex items-center justify-center`}>
+                  <offer.icon className="h-12 w-12 text-white" />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className={`text-lg font-semibold text-gray-900 ${fontClass}`}>
+                      {offer.title}
+                    </h3>
+                    <span className={`bg-red-500 text-white text-xs font-bold px-2 py-1 rounded ${fontClass}`}>
+                      {offer.discount}
+                    </span>
+                  </div>
+                  <p className={`text-gray-600 text-sm mb-4 ${fontClass}`}>
+                    {offer.description}
+                  </p>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <span className={`text-gray-400 line-through text-sm ${fontClass}`}>
+                        {offer.originalPrice}
+                      </span>
+                      <span className={`text-gray-900 font-bold text-lg mr-2 ${fontClass}`}>
+                        {offer.newPrice}
+                      </span>
+                    </div>
+                  </div>
+                  <button className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors ${fontClass} text-sm`}>
+                    {t('common.view') || 'مشاهده'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Old Booking Section - Remove this */}
+      <section className="hidden">
         <div className="max-w-3xl mx-auto px-6">
           
           {/* Header */}
@@ -1142,20 +1201,20 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Destinations Section */}
-      <section id="destinations" className="relative z-10 py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-6">
-            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
+      {/* Destinations Section - Emirates Style */}
+      <section id="destinations" className="relative z-10 py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`}>
               {t('destinations.title')}
             </h2>
-            <p className={`text-blue-200 text-xs ${fontClass}`}>
+            <p className={`text-gray-600 ${fontClass}`}>
               {t('destinations.subtitle')}
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {destinations.map((destination) => (
-              <div key={destination.id} className="group bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden border border-white/20 shadow-xl hover:bg-white/20 transition-all duration-300 hover:scale-105">
+              <div key={destination.id} className="group bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-200">
                 <div className="relative h-32 overflow-hidden">
                   <img 
                     src={destination.image} 
@@ -1174,23 +1233,23 @@ const HomePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="p-4">
+                <div className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className={`text-lg font-semibold text-white ${fontClass}`}>
+                    <h3 className={`text-lg font-semibold text-gray-900 ${fontClass}`}>
                       {destination.name}
                     </h3>
-                    <div className={`text-white/60 text-xs ${fontClass}`}>
+                    <div className={`text-gray-500 text-xs ${fontClass}`}>
                       {destination.flights}
                     </div>
                   </div>
-                  <p className={`text-white/70 text-sm mb-3 ${fontClass}`}>
+                  <p className={`text-gray-600 text-sm mb-3 ${fontClass}`}>
                     {destination.description}
                   </p>
                   <div className="flex items-center justify-between">
-                    <div className={`text-white font-semibold text-sm ${fontClass}`}>
+                    <div className={`text-gray-900 font-semibold text-sm ${fontClass}`}>
                       {destination.price}
                     </div>
-                    <button className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-1.5 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-xs`}>
+                    <button className={`bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded-lg transition-colors ${fontClass} text-xs`}>
                       {t('common.view')}
                     </button>
                   </div>
