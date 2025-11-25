@@ -654,17 +654,20 @@ const HomePage: React.FC = () => {
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
-          {/* Promotional Text (Optional - can be removed if not needed) */}
-          <div className="mb-8 text-center">
-            <p className={`text-white text-lg italic mb-2 ${fontClass}`}>
-              {t('home.hero.subtitle') || 'به نسیم ایر خوش آمدید'}
+          {/* Promotional Text - Like Emirates */}
+          <div className="mb-12 text-center">
+            <p className={`text-white text-xl italic mb-4 ${fontClass}`}>
+              {t('home.hero.subtitle') || 'It\'s arrived, the'}
             </p>
-            <h1 className={`text-6xl md:text-7xl font-bold text-white mb-2 ${fontClass}`}>
+            <h1 className={`text-7xl md:text-8xl font-bold text-white mb-4 ${fontClass}`}>
               {t('home.hero.title') || 'PREMIUM ECONOMY'}
             </h1>
-            <p className={`text-white text-lg italic ${fontClass}`}>
-              {t('home.hero.description') || 'تجربه پرواز شما را متحول می‌کند'}
+            <p className={`text-white text-xl italic mb-6 ${fontClass}`}>
+              {t('home.hero.description') || 'you\'ve been waiting for'}
             </p>
+            <button className="bg-red-600 hover:bg-red-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+              {t('common.learnMore') || 'بیشتر بدانید'}
+            </button>
           </div>
 
           {/* Flight Search Form at Bottom */}
@@ -1439,8 +1442,8 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Offers Section */}
-      <section id="offers" className="relative z-10 py-20">
+      {/* Offers Section - Hidden (already shown in Featured Destinations) */}
+      <section id="offers" className="relative z-10 py-20 hidden">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
             <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
@@ -1502,8 +1505,8 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section id="gallery" className="relative z-10 py-20">
+      {/* Gallery Section - Hidden (not in Emirates design) */}
+      <section id="gallery" className="relative z-10 py-20 hidden">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
             <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
@@ -1548,8 +1551,8 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* News Section */}
-      <section id="news" className="relative z-10 py-20">
+      {/* News Section - Hidden (not in Emirates design) */}
+      <section id="news" className="relative z-10 py-20 hidden">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
             <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
