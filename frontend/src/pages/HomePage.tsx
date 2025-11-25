@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
-import FlightSearchForm from '../components/FlightSearch/FlightSearchForm';
+import EmiratesFlightSearchForm from '../components/FlightSearch/EmiratesFlightSearchForm';
 import WeatherWidget from '../components/Weather/WeatherWidget';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
@@ -637,87 +637,86 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background image */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url(/images/airport-crew.jpg)'
-        }}
-      >
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/30"></div>
-        
-        {/* Runway lights effect */}
-        <div className="absolute bottom-0 left-0 right-0 h-32">
-          <div className="flex justify-between px-8">
-            {[...Array(20)].map((_, i) => (
-              <div key={i} className="w-1 h-20 bg-yellow-400/60 blur-sm"></div>
-            ))}
-          </div>
-        </div>
-        
-        {/* Misty atmosphere */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-      </div>
-
+    <div className="min-h-screen bg-white">
       <EmiratesHeader />
 
       {/* Hero Section with Flight Search - Emirates Style */}
-      <section className="relative z-10 pt-32 pb-20 min-h-[600px] flex items-center">
-        <div className="max-w-6xl mx-auto px-6 w-full">
-          {/* Flight Search Form - Large and Centered */}
-          <div className="max-w-4xl mx-auto">
-            <FlightSearchForm className="shadow-2xl" />
+      <section className="relative z-10 min-h-[700px] flex flex-col justify-end pb-8">
+        {/* Hero Image Background */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(/images/airport-crew.jpg)'
+          }}
+        >
+          <div className="absolute inset-0 bg-black/20"></div>
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
+          {/* Promotional Text (Optional - can be removed if not needed) */}
+          <div className="mb-8 text-center">
+            <p className={`text-white text-lg italic mb-2 ${fontClass}`}>
+              {t('home.hero.subtitle') || 'به نسیم ایر خوش آمدید'}
+            </p>
+            <h1 className={`text-6xl md:text-7xl font-bold text-white mb-2 ${fontClass}`}>
+              {t('home.hero.title') || 'PREMIUM ECONOMY'}
+            </h1>
+            <p className={`text-white text-lg italic ${fontClass}`}>
+              {t('home.hero.description') || 'تجربه پرواز شما را متحول می‌کند'}
+            </p>
+          </div>
+
+          {/* Flight Search Form at Bottom */}
+          <div className="max-w-6xl mx-auto">
+            <EmiratesFlightSearchForm />
           </div>
         </div>
       </section>
 
-      {/* Featured Fares Section - Emirates Style */}
+      {/* Featured Destinations Section - Emirates Style */}
       <section className="relative z-10 py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
             <h2 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`}>
-              {t('offers.title') || 'پیشنهادات ویژه'}
+              {t('destinations.featured') || 'مقاصد ویژه'}
             </h2>
-            <p className={`text-gray-600 ${fontClass}`}>
-              {t('offers.subtitle') || 'بهترین قیمت‌ها برای سفر شما'}
-            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {offers.slice(0, 4).map((offer) => (
-              <div key={offer.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-gray-200">
-                <div className={`h-32 bg-gradient-to-r ${offer.gradient} flex items-center justify-center`}>
-                  <offer.icon className="h-12 w-12 text-white" />
+          
+          {/* Two Large Destination Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {destinations.slice(0, 2).map((destination) => (
+              <div key={destination.id} className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                <div className="relative h-80 overflow-hidden">
+                  <img 
+                    src={destination.image} 
+                    alt={destination.name}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  />
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className={`text-lg font-semibold text-gray-900 ${fontClass}`}>
-                      {offer.title}
-                    </h3>
-                    <span className={`bg-red-500 text-white text-xs font-bold px-2 py-1 rounded ${fontClass}`}>
-                      {offer.discount}
-                    </span>
-                  </div>
-                  <p className={`text-gray-600 text-sm mb-4 ${fontClass}`}>
-                    {offer.description}
+                <div className="p-6 bg-white">
+                  <p className={`text-gray-500 text-xs uppercase tracking-wider mb-2 ${fontClass}`}>
+                    {destination.country}
                   </p>
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <span className={`text-gray-400 line-through text-sm ${fontClass}`}>
-                        {offer.originalPrice}
-                      </span>
-                      <span className={`text-gray-900 font-bold text-lg mr-2 ${fontClass}`}>
-                        {offer.newPrice}
-                      </span>
-                    </div>
-                  </div>
-                  <button className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors ${fontClass} text-sm`}>
-                    {t('common.view') || 'مشاهده'}
-                  </button>
+                  <h3 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`}>
+                    {destination.name}
+                  </h3>
+                  <p className={`text-gray-600 ${fontClass}`}>
+                    {t('destinations.discover') || 'کشف کنید'}
+                  </p>
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Bottom Links */}
+          <div className="flex items-center justify-between mt-6">
+            <button className={`border border-gray-300 bg-white hover:bg-gray-50 px-6 py-3 rounded transition-colors ${fontClass}`}>
+              {t('destinations.moreDestinations') || 'مقاصد بیشتر'}
+            </button>
+            <a href="#" className={`text-blue-600 hover:text-blue-700 underline ${fontClass}`}>
+              {t('destinations.inspiredByRouteMap') || 'از نقشه مسیرهای ما الهام بگیرید >'}
+            </a>
           </div>
         </div>
       </section>
@@ -993,8 +992,105 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Flight Search Section */}
-      <section id="flights" className="relative z-10 py-20">
+      {/* Skywards+ Section - Emirates Style */}
+      <section className="relative z-10 py-24 bg-white overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(/images/airport-crew.jpg)'
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="max-w-2xl">
+            <p className={`text-white text-sm uppercase tracking-wider mb-2 ${fontClass}`}>
+              SKYWARDS+
+            </p>
+            <h2 className={`text-4xl md:text-5xl font-bold text-white mb-4 ${fontClass}`}>
+              {t('loyalty.enhanceBenefits') || 'مزایای خود را با Skywards+ افزایش دهید'}
+            </h2>
+            <p className={`text-white text-lg mb-6 ${fontClass}`}>
+              {t('loyalty.choosePackages') || 'از بین 3 بسته انتخاب کنید که شامل آنچه دوست دارید است، از دسترسی به لانژ فرودگاه و بار اضافی، تا نرخ‌های انحصاری Cash+Miles و تخفیف‌ها.'}
+            </p>
+            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-8 py-3 rounded-lg transition-colors">
+              {t('common.learnMore') || 'بیشتر بدانید'}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Experience Section - Emirates Style */}
+      <section id="experience" className="relative z-10 py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-2">
+            <p className={`text-gray-500 text-sm uppercase tracking-wider text-center ${fontClass}`}>
+              {t('nav.experience') || 'FLYING WITH EMIRATES'}
+            </p>
+          </div>
+          <div className="text-center mb-8">
+            <h2 className={`text-4xl md:text-5xl font-bold text-gray-900 mb-4 ${fontClass}`}>
+              {t('experience.makeIncredible') || 'سفر خود را فوق‌العاده کنید'}
+            </h2>
+            <p className={`text-gray-600 text-lg ${fontClass}`}>
+              {t('experience.subtitle') || 'تجربه Emirates را کاوش کنید و سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید.'}
+            </p>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Large Left Card */}
+            <div className="lg:col-span-2 bg-white rounded-lg overflow-hidden shadow-lg border border-gray-200">
+              <div className="relative h-96">
+                <img 
+                  src="/images/airport-crew.jpg" 
+                  alt="Discover Dubai"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <p className={`text-gray-500 text-xs uppercase tracking-wider mb-2 ${fontClass}`}>
+                  {t('destinations.dubai') || 'DUBAI AND THE UAE'}
+                </p>
+                <h3 className={`text-3xl font-bold text-gray-900 mb-4 ${fontClass}`}>
+                  {t('destinations.discoverDubai') || 'کشف دبی'}
+                </h3>
+                <a href="#" className={`text-red-600 hover:text-red-700 underline font-medium ${fontClass}`}>
+                  {t('common.learnMore') || 'بیشتر بدانید'}
+                </a>
+              </div>
+            </div>
+
+            {/* Right Side - 2x2 Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+              {services.slice(0, 4).map((service, idx) => (
+                <div key={service.id} className="bg-white rounded-lg overflow-hidden shadow-lg border border-gray-200 relative">
+                  <div className="relative h-48">
+                    <div className={`absolute inset-0 bg-gradient-to-r ${service.gradient} opacity-80`}></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <service.icon className="h-16 w-16 text-white" />
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <p className={`text-gray-500 text-xs uppercase tracking-wider mb-2 ${fontClass}`}>
+                      {t('experience.cabinFeatures') || 'CABIN FEATURES'}
+                    </p>
+                    <h3 className={`text-xl font-bold text-gray-900 mb-2 ${fontClass}`}>
+                      {service.title}
+                    </h3>
+                    <a href="#" className={`text-red-600 hover:text-red-700 underline text-sm ${fontClass}`}>
+                      {t('common.learnMore') || 'بیشتر بدانید'}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Old Flight Search Section - Remove */}
+      <section className="hidden">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
             <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
@@ -1170,39 +1266,8 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section id="home" className="relative z-10 py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-            {[
-              { number: '500+', label: t('home.stats.destinations'), icon: GlobeAltIcon },
-              { number: '1M+', label: t('home.stats.happyPassengers'), icon: HeartIcon },
-              { number: '24/7', label: t('home.stats.support'), icon: ClockIcon },
-              { number: '99%', label: t('home.stats.customerSatisfaction'), icon: StarIcon }
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="group bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden border border-white/20 shadow-xl hover:bg-white/20 transition-all duration-300"
-              >
-                <div className="p-6">
-                  <div className="relative mb-4">
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-3 mx-auto w-fit">
-                      <stat.icon className="h-8 w-8 text-white" />
-                    </div>
-                  </div>
-                  <div className="text-3xl md:text-4xl font-black text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                    {stat.number}
-                  </div>
-                  <div className={`text-white/70 text-sm font-medium ${fontClass}`}>{stat.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Destinations Section - Emirates Style */}
-      <section id="destinations" className="relative z-10 py-16 bg-gray-50">
+      {/* Destinations Section - Additional (if needed) */}
+      <section id="destinations" className="relative z-10 py-16 bg-white hidden">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
             <h2 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`}>
@@ -1260,8 +1325,8 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Membership Section */}
-      <section id="membership" className="relative z-10 py-20">
+      {/* Membership Section - Hidden (can be shown if needed) */}
+      <section id="membership" className="relative z-10 py-20 hidden">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
             <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
@@ -1330,8 +1395,8 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section id="services" className="relative z-10 py-20">
+      {/* Services Section - Hidden (replaced by Experience) */}
+      <section id="services" className="relative z-10 py-20 hidden">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-6">
             <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
@@ -1793,59 +1858,58 @@ const HomePage: React.FC = () => {
         <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 bg-black/50 backdrop-blur-xl border-t border-white/10 py-16">
+      {/* Footer - Emirates Style */}
+      <footer className="relative z-10 bg-gray-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* About Us Column */}
             <div>
-              <div className="flex items-center space-x-4 mb-4">
-                <img 
-                  src="/images/favpng_9ba01589d5c7c5e413ee0b9efe7bd497.png" 
-                  alt="نسیم ایر" 
-                  className="w-12 h-12 object-contain"
-                />
-                  <div className="text-white">
-                  <div className={`text-lg font-medium ${fontClass} text-white`}>
-                    {t('common.nasimAir')}
-                  </div>
-                  <div className={`text-xs text-blue-200 font-light tracking-wider ${fontClass}`}>
-                    NASIM AIR
-                  </div>
-                </div>
-              </div>
-              <p className={`text-white/70 leading-relaxed ${fontClass}`}>
-                {t('footer.description')}
-              </p>
-            </div>
-            <div>
-              <h4 className={`text-xl font-semibold mb-6 text-white ${fontClass}`}>{t('footer.services.title')}</h4>
-              <ul className="space-y-3 text-white/70">
-                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.services.domesticFlights')}</span></li>
-                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.services.internationalFlights')}</span></li>
-                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.services.hotelBooking')}</span></li>
-                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.services.travelPackages')}</span></li>
+              <h4 className={`text-lg font-bold mb-6 ${fontClass}`}>{t('nav.about') || 'درباره ما'}</h4>
+              <ul className="space-y-3 text-gray-300">
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.about') || 'درباره ما'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.careers') || 'فرصت‌های شغلی'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.mediaCenter') || 'مرکز رسانه'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.ourPlanet') || 'سیاره ما'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.ourPeople') || 'مردم ما'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.ourCommunities') || 'جوامع ما'}</a></li>
               </ul>
             </div>
+
+            {/* Help Column */}
             <div>
-              <h4 className={`text-xl font-semibold mb-6 text-white ${fontClass}`}>{t('footer.support.title')}</h4>
-              <ul className="space-y-3 text-white/70">
-                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.support.helpCenter')}</span></li>
-                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.support.contactUs')}</span></li>
-                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.support.faq')}</span></li>
-                <li><span className={`hover:text-blue-400 transition-colors cursor-pointer ${fontClass}`}>{t('footer.support.terms')}</span></li>
+              <h4 className={`text-lg font-bold mb-6 ${fontClass}`}>{t('nav.help') || 'کمک'}</h4>
+              <ul className="space-y-3 text-gray-300">
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.helpCenter') || 'مرکز کمک'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.travelUpdates') || 'به‌روزرسانی‌های سفر'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.specialAssistance') || 'کمک ویژه'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.faq') || 'سوالات متداول'}</a></li>
               </ul>
             </div>
+
+            {/* Book Column */}
             <div>
-              <h4 className={`text-xl font-semibold mb-6 text-white ${fontClass}`}>{t('footer.contact.title')}</h4>
-              <div className={`space-y-3 text-white/70 ${fontClass}`}>
-                <p>📞 {t('footer.contact.phone')}: {t('footer.contact.phoneValue')}</p>
-                <p>✉️ {t('footer.contact.email')}: {t('footer.contact.emailValue')}</p>
-                <p>📍 {t('footer.contact.address')}: {t('footer.contact.addressValue')}</p>
-              </div>
+              <h4 className={`text-lg font-bold mb-6 ${fontClass}`}>{t('nav.book') || 'رزرو'}</h4>
+              <ul className="space-y-3 text-gray-300">
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.bookFlights') || 'رزرو پرواز'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.travelServices') || 'خدمات سفر'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.transportation') || 'حمل و نقل'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.planningTrip') || 'برنامه‌ریزی سفر'}</a></li>
+              </ul>
+            </div>
+
+            {/* Manage Column */}
+            <div>
+              <h4 className={`text-lg font-bold mb-6 ${fontClass}`}>{t('nav.manage') || 'مدیریت'}</h4>
+              <ul className="space-y-3 text-gray-300">
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.checkIn') || 'چک این'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.manageBooking') || 'مدیریت رزرو'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.chauffeurDrive') || 'راننده شخصی'}</a></li>
+                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.flightStatus') || 'وضعیت پرواز'}</a></li>
+              </ul>
             </div>
           </div>
-          <div className={`border-t border-white/10 mt-12 pt-8 text-center text-white/50 ${fontClass}`}>
-            <p>&copy; 2024 {t('common.nasimAir')} {t('footer.copyright')}.</p>
+          <div className={`border-t border-gray-700 mt-12 pt-8 text-center text-gray-400 ${fontClass}`}>
+            <p>&copy; 2024 {t('common.nasimAir')} {t('footer.copyright') || 'تمام حقوق محفوظ است'}.</p>
           </div>
         </div>
       </footer>
