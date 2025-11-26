@@ -652,7 +652,7 @@ const HomePage: React.FC = () => {
           }}
         >
           <div className="absolute inset-0 bg-black/10"></div>
-        </div>
+      </div>
 
         {/* Hero Content */}
         <div className="relative z-10 flex-1 flex flex-col">
@@ -660,7 +660,7 @@ const HomePage: React.FC = () => {
           <div className="absolute top-8 right-8 z-20">
             <p 
               className="text-white text-4xl font-bold"
-              style={{ 
+            style={{
                 fontFamily: 'Brush Script MT, Brush Script, cursive',
                 transform: 'rotate(-5deg)',
                 textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
@@ -668,7 +668,7 @@ const HomePage: React.FC = () => {
             >
               FLY BETTER
             </p>
-          </div>
+      </div>
 
           {/* Promotional Text - Centered */}
           <div className="flex-1 flex items-center justify-center">
@@ -717,8 +717,8 @@ const HomePage: React.FC = () => {
           {/* Flight Search Form at Bottom */}
           <div className="max-w-6xl mx-auto w-full px-6 pb-8">
             <EmiratesFlightSearchForm />
-          </div>
-        </div>
+              </div>
+            </div>
       </section>
 
       {/* Skywards Banner Section - Emirates Style */}
@@ -776,43 +776,99 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Destinations Section - Emirates Style */}
-      <section className="relative z-10 py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className={`text-3xl md:text-4xl font-bold text-gray-900 mb-2 ${fontClass}`}>
+      <section className="relative z-10 py-12 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Title - Smaller and minimal */}
+          <div className="text-center mb-8">
+            <h2 className={`text-2xl md:text-3xl font-bold text-gray-900 ${fontClass}`} style={{ 
+              fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit',
+              fontWeight: 700,
+              letterSpacing: language === 'en' ? '0' : 'normal',
+              marginBottom: '0'
+            }}>
               {t('destinations.featured') || 'Featured destinations'}
             </h2>
           </div>
           
-          {/* Two Large Destination Cards - Emirates Style */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Two Compact Destination Cards - Minimal Emirates Style */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {destinations.slice(0, 2).map((destination) => (
-              <div key={destination.id} className="bg-white overflow-hidden group cursor-pointer">
-                {/* Image */}
-                <div className="relative h-96 overflow-hidden">
+              <div 
+                key={destination.id} 
+                className="bg-white overflow-hidden group cursor-pointer transition-all duration-300"
+                style={{ 
+                  borderRadius: '6px',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                  opacity: 0.95
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.12)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.opacity = '1';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.opacity = '0.95';
+                }}
+              >
+                {/* Image - Much smaller, minimal space */}
+                <div className="relative w-full overflow-hidden" style={{ 
+                  height: '180px', // Much smaller image
+                  borderRadius: '6px 6px 0 0'
+                }}>
                   <img 
                     src={destination.image} 
                     alt={destination.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    style={{ 
+                      objectPosition: 'center center'
+                    }}
                   />
                 </div>
-                {/* Content */}
-                <div className="p-6 bg-white">
-                  <p className={`text-gray-500 text-xs uppercase tracking-widest mb-3 ${fontClass}`} style={{ 
-                    letterSpacing: '2px',
-                    fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit'
-                  }}>
+                
+                {/* Content - Compact and minimal */}
+                <div className="bg-white px-5 py-4">
+                  {/* Country - Very small, light gray */}
+                  <p 
+                    className={`text-gray-400 mb-2 ${fontClass}`} 
+                    style={{ 
+                      letterSpacing: language === 'en' ? '1.5px' : '0.3px',
+                      fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit',
+                      textTransform: language === 'en' ? 'uppercase' : 'none',
+                      fontWeight: 400,
+                      lineHeight: '1.3',
+                      fontSize: '10px'
+                    }}
+                  >
                     {destination.country}
                   </p>
-                  <h3 className={`text-4xl font-bold text-gray-900 mb-4 ${fontClass}`} style={{ 
-                    fontWeight: 700,
-                    fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit'
-                  }}>
+                  
+                  {/* City Name - Medium size, bold */}
+                  <h3 
+                    className={`text-2xl md:text-3xl font-bold text-gray-900 mb-2 ${fontClass}`} 
+                    style={{ 
+                      fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit',
+                      fontWeight: 700,
+                      lineHeight: '1.2',
+                      letterSpacing: language === 'en' ? '-0.3px' : 'normal',
+                      marginBottom: '8px'
+                    }}
+                  >
                     {destination.name}
                   </h3>
-                  <p className={`text-gray-700 text-base ${fontClass}`} style={{ 
-                    fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit'
-                  }}>
+                  
+                  {/* Discover text - Small */}
+                  <p 
+                    className={`text-gray-600 ${fontClass}`} 
+                    style={{ 
+                      fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit',
+                      fontWeight: 400,
+                      lineHeight: '1.4',
+                      fontSize: '13px'
+                    }}
+                  >
                     {t('destinations.discoverForYourself') || 'Discover for yourself'}
                   </p>
                 </div>
@@ -1097,7 +1153,7 @@ const HomePage: React.FC = () => {
       <section className="relative z-10 py-24 bg-white overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{
+                style={{
             backgroundImage: 'url(/images/airport-crew.jpg)'
           }}
         >
@@ -1128,7 +1184,7 @@ const HomePage: React.FC = () => {
             <p className={`text-gray-500 text-sm uppercase tracking-wider text-center ${fontClass}`}>
               {t('nav.experience') || 'FLYING WITH EMIRATES'}
             </p>
-          </div>
+                    </div>
           <div className="text-center mb-8">
             <h2 className={`text-4xl md:text-5xl font-bold text-gray-900 mb-4 ${fontClass}`}>
               {t('experience.makeIncredible') || 'سفر خود را فوق‌العاده کنید'}
@@ -1136,7 +1192,7 @@ const HomePage: React.FC = () => {
             <p className={`text-gray-600 text-lg ${fontClass}`}>
               {t('experience.subtitle') || 'تجربه Emirates را کاوش کنید و سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید.'}
             </p>
-          </div>
+                  </div>
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1155,7 +1211,7 @@ const HomePage: React.FC = () => {
                 </p>
                 <h3 className={`text-3xl font-bold text-gray-900 mb-4 ${fontClass}`}>
                   {t('destinations.discoverDubai') || 'کشف دبی'}
-                </h3>
+                  </h3>
                 <a href="#" className={`text-red-600 hover:text-red-700 underline font-medium ${fontClass}`}>
                   {t('common.learnMore') || 'بیشتر بدانید'}
                 </a>
@@ -1789,7 +1845,7 @@ const HomePage: React.FC = () => {
                 {category.name}
               </button>
             ))}
-          </div>
+                    </div>
 
           {/* FAQ Items */}
           <div className="space-y-4">
@@ -1805,8 +1861,8 @@ const HomePage: React.FC = () => {
                       {faq.answer}
                     </p>
                   </div>
+                  </div>
                 </div>
-              </div>
             ))}
           </div>
         </div>
@@ -1881,10 +1937,10 @@ const HomePage: React.FC = () => {
                           </button>
                         );
                       })}
-                    </div>
-                  ))}
-                </div>
               </div>
+            ))}
+          </div>
+        </div>
             </div>
             <div className="flex gap-4 justify-center mt-6">
               <button onClick={() => setShowSeatModal(false)} className="bg-slate-600 text-white px-6 py-3 rounded-lg ${fontClass}">لغو</button>
@@ -2007,8 +2063,8 @@ const HomePage: React.FC = () => {
                 <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.chauffeurDrive') || 'راننده شخصی'}</a></li>
                 <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.flightStatus') || 'وضعیت پرواز'}</a></li>
               </ul>
+              </div>
             </div>
-          </div>
           <div className={`border-t border-gray-700 mt-12 pt-8 text-center text-gray-400 ${fontClass}`}>
             <p>&copy; 2024 {t('common.nasimAir')} {t('footer.copyright') || 'تمام حقوق محفوظ است'}.</p>
           </div>
