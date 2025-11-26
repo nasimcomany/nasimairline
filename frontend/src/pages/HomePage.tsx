@@ -172,6 +172,46 @@ const HomePage: React.FC = () => {
       gradient: 'from-orange-500 to-orange-700'
     },
     {
+      id: 7,
+      name: t('destinations.kish.name'),
+      description: t('destinations.kish.desc'),
+      country: t('destinations.iran'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $85`,
+      image: '/images/kish.jpg',
+      gradient: 'from-cyan-500 to-cyan-700'
+    },
+    {
+      id: 8,
+      name: t('destinations.abadan.name'),
+      description: t('destinations.abadan.desc'),
+      country: t('destinations.iran'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $90`,
+      image: '/images/abadan1.jpg',
+      gradient: 'from-green-500 to-green-700'
+    },
+    {
+      id: 9,
+      name: t('destinations.tabriz.name'),
+      description: t('destinations.tabriz.desc'),
+      country: t('destinations.iran'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $100`,
+      image: '/images/tabriz.jpg',
+      gradient: 'from-red-500 to-red-700'
+    },
+    {
+      id: 10,
+      name: t('destinations.isfahan.name'),
+      description: t('destinations.isfahan.desc'),
+      country: t('destinations.iran'),
+      flights: t('destinations.dailyFlights'),
+      price: `${t('destinations.from')} $105`,
+      image: '/images/isfahan.jpg',
+      gradient: 'from-blue-500 to-blue-700'
+    },
+    {
       id: 3,
       name: t('destinations.shiraz.name'),
       description: t('destinations.shiraz.desc'),
@@ -721,54 +761,76 @@ const HomePage: React.FC = () => {
             </div>
       </section>
 
-      {/* Skywards Banner Section - Emirates Style */}
-      <section className="relative z-10 bg-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Left Side - Badges */}
-            <div className="flex items-center gap-2">
-              {/* Blue Badge */}
-              <div className="w-16 h-16 rounded-full bg-blue-500 flex flex-col items-center justify-center shadow-lg" style={{ 
-                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                transform: 'rotate(-5deg)'
-              }}>
-                <div className="text-white text-xs font-bold">BLUE</div>
+      {/* Skywards Banner Section - Minimal Emirates Style */}
+      <section className="relative z-10 py-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div 
+            className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
+            style={{
+              borderRadius: '12px', // Curve from all sides
+              overflow: 'visible' // Allow badges to extend outside
+            }}
+          >
+            {/* Left Side - Badges - Larger with 3D effect extending out */}
+            <div className="flex items-center relative" style={{ marginLeft: '-20px', zIndex: 10 }}>
+              {/* Silver Badge - Larger, 3D, extending out */}
+              <div 
+                className="rounded-full flex flex-col items-center justify-center relative"
+                style={{ 
+                  width: '64px',
+                  height: '64px',
+                  background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
+                  transform: 'rotate(2deg) translateZ(0)',
+                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.4)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  marginRight: '-8px' // Overlap to create connected effect
+                }}
+              >
+                <div className="text-gray-700 text-[9px] font-bold">SILVER</div>
               </div>
-              {/* Silver Badge */}
-              <div className="w-16 h-16 rounded-full bg-gray-300 flex flex-col items-center justify-center shadow-lg -ml-2" style={{ 
-                background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
-                transform: 'rotate(2deg)'
-              }}>
-                <div className="text-gray-700 text-xs font-bold">SILVER</div>
+              {/* Gold Badge - Larger, 3D, extending out */}
+              <div 
+                className="rounded-full flex flex-col items-center justify-center relative"
+                style={{ 
+                  width: '64px',
+                  height: '64px',
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                  transform: 'rotate(-3deg) translateZ(0)',
+                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.4)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  marginRight: '-8px' // Overlap to create connected effect
+                }}
+              >
+                <div className="text-white text-[9px] font-bold">GOLD</div>
               </div>
-              {/* Gold Badge */}
-              <div className="w-16 h-16 rounded-full bg-yellow-400 flex flex-col items-center justify-center shadow-lg -ml-2" style={{ 
-                background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-                transform: 'rotate(-3deg)'
-              }}>
-                <div className="text-white text-xs font-bold">GOLD</div>
-              </div>
-              {/* Platinum Badge */}
-              <div className="w-16 h-16 rounded-full bg-gray-400 flex flex-col items-center justify-center shadow-lg -ml-2" style={{ 
-                background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
-                transform: 'rotate(4deg)'
-              }}>
-                <div className="text-white text-xs font-bold">PLATINUM</div>
+              {/* Platinum Badge - Larger, 3D, extending out */}
+              <div 
+                className="rounded-full flex flex-col items-center justify-center relative"
+                style={{ 
+                  width: '64px',
+                  height: '64px',
+                  background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+                  transform: 'rotate(4deg) translateZ(0)',
+                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.4)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                }}
+              >
+                <div className="text-white text-[9px] font-bold">PLATINUM</div>
               </div>
             </div>
 
-            {/* Center - Text */}
+            {/* Center - Text - Smaller */}
             <div className="flex-1 text-center md:text-left">
-              <h3 className={`text-2xl md:text-3xl font-bold text-white mb-2 ${fontClass}`}>
+              <h3 className={`text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`}>
                 {t('loyalty.joinSkywards') || 'Join Emirates Skywards'}
               </h3>
-              <p className={`text-gray-300 text-sm md:text-base ${fontClass}`}>
+              <p className={`text-gray-400 text-xs md:text-sm ${fontClass}`}>
                 {t('loyalty.skywardsDescription') || 'Become an Emirates Skywards member and start enjoying flight rewards, upgrades and more'}
               </p>
             </div>
 
-            {/* Right Side - Button */}
-            <button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap">
+            {/* Right Side - Button - Smaller */}
+            <button className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-sm">
               {t('loyalty.joinNow') || 'Join now'}
             </button>
           </div>
@@ -778,21 +840,48 @@ const HomePage: React.FC = () => {
       {/* Featured Destinations Section - Emirates Style */}
       <section className="relative z-10 py-12 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Title - Smaller and minimal */}
+          {/* Title - Smaller and minimal - Same style as country text but larger size */}
           <div className="text-center mb-8">
-            <h2 className={`text-2xl md:text-3xl font-bold text-gray-900 ${fontClass}`} style={{ 
-              fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit',
-              fontWeight: 700,
-              letterSpacing: language === 'en' ? '0' : 'normal',
-              marginBottom: '0'
+            <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
+              fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+              fontWeight: language === 'fa' ? 300 : 400,
+              letterSpacing: language === 'en' ? '1.5px' : '0.2px',
+              marginBottom: '0',
+              color: language === 'fa' ? '#9ca3af' : '#9ca3af', // Soft gray like country text
+              opacity: 0.85,
+              textTransform: language === 'en' ? 'uppercase' : 'none',
+              fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
             }}>
-              {t('destinations.featured') || 'Featured destinations'}
+              {language === 'fa' ? (
+                <>
+                  مقصدهای ویژه در ایران{' '}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    زیبا
+                    <img 
+                      src="/images/iran.png" 
+                      alt="ایران" 
+                      style={{ 
+                        width: '1em', 
+                        height: '1em', 
+                        display: 'inline-block',
+                        verticalAlign: 'middle',
+                        objectFit: 'contain'
+                      }} 
+                    />
+                  </span>
+                </>
+              ) : (
+                t('destinations.featured') || 'Featured destinations'
+              )}
             </h2>
           </div>
           
-          {/* Two Compact Destination Cards - Minimal Emirates Style */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {destinations.slice(0, 2).map((destination) => (
+          {/* Six Compact Destination Cards - Minimal Emirates Style */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {destinations.filter(d => [1, 2, 7, 8, 9, 10].includes(d.id)).map((destination) => (
               <div 
                 key={destination.id} 
                 className="bg-white overflow-hidden group cursor-pointer transition-all duration-300"
@@ -800,17 +889,21 @@ const HomePage: React.FC = () => {
                   borderRadius: '6px',
                   border: '1px solid rgba(0, 0, 0, 0.08)',
                   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                  opacity: 0.95
+                  opacity: 0.95,
+                  transform: 'translateY(0)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1)';
                   e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
                   e.currentTarget.style.opacity = '0.95';
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
                 }}
               >
                 {/* Image - Much smaller, minimal space */}
@@ -821,55 +914,76 @@ const HomePage: React.FC = () => {
                   <img 
                     src={destination.image} 
                     alt={destination.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-opacity duration-300"
                     style={{ 
-                      objectPosition: 'center center'
+                      objectPosition: 'center center',
+                      transition: 'opacity 0.3s ease'
                     }}
                   />
                 </div>
                 
                 {/* Content - Compact and minimal */}
                 <div className="bg-white px-5 py-4">
-                  {/* Country - Very small, light gray */}
+                  {/* Country - Very small, soft light gray, centered */}
                   <p 
-                    className={`text-gray-400 mb-2 ${fontClass}`} 
+                    className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
-                      letterSpacing: language === 'en' ? '1.5px' : '0.3px',
-                      fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit',
+                      letterSpacing: language === 'en' ? '1.5px' : '0.2px',
+                      fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
                       textTransform: language === 'en' ? 'uppercase' : 'none',
-                      fontWeight: 400,
-                      lineHeight: '1.3',
-                      fontSize: '10px'
+                      fontWeight: language === 'fa' ? 300 : 400,
+                      lineHeight: '1.4',
+                      fontSize: '9px',
+                      color: language === 'fa' ? '#9ca3af' : '#9ca3af', // Soft gray
+                      opacity: 0.85
                     }}
                   >
                     {destination.country}
                   </p>
                   
-                  {/* City Name - Medium size, bold */}
+                  {/* City Name - Refined size, attractive Persian font, centered */}
                   <h3 
-                    className={`text-2xl md:text-3xl font-bold text-gray-900 mb-2 ${fontClass}`} 
+                    className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
-                      fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit',
-                      fontWeight: 700,
-                      lineHeight: '1.2',
+                      fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+                      fontWeight: language === 'fa' ? 600 : 700,
+                      lineHeight: language === 'fa' ? '1.3' : '1.2',
                       letterSpacing: language === 'en' ? '-0.3px' : 'normal',
-                      marginBottom: '8px'
+                      marginBottom: '10px',
+                      fontSize: language === 'fa' ? '20px' : '24px',
+                      color: language === 'fa' ? '#374151' : '#111827', // Soft dark gray for Persian
+                      fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal'
                     }}
                   >
                     {destination.name}
                   </h3>
                   
-                  {/* Discover text - Small */}
+                  {/* Short beautiful description about the city - Small, minimal, soft gray, centered */}
                   <p 
-                    className={`text-gray-600 ${fontClass}`} 
+                    className={`text-center ${fontClass}`} 
                     style={{ 
-                      fontFamily: language === 'en' ? 'Arial, sans-serif' : 'inherit',
-                      fontWeight: 400,
-                      lineHeight: '1.4',
-                      fontSize: '13px'
+                      fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+                      fontWeight: language === 'fa' ? 300 : 400,
+                      lineHeight: '1.5',
+                      fontSize: language === 'fa' ? '11px' : '13px',
+                      color: language === 'fa' ? '#6b7280' : '#4b5563', // Soft medium gray
+                      opacity: language === 'fa' ? 0.9 : 1
                     }}
                   >
-                    {t('destinations.discoverForYourself') || 'Discover for yourself'}
+                    {destination.id === 1 
+                      ? (language === 'fa' ? 'شهر هزار رنگ و هزار داستان' : language === 'ar' ? 'مدينة الألوان والأساطير' : 'City of a thousand colors and stories')
+                      : destination.id === 2
+                      ? (language === 'fa' ? 'مهمان‌نواز و روحانی' : language === 'ar' ? 'مضياف وروحاني' : 'Welcoming and spiritual')
+                      : destination.id === 7
+                      ? (language === 'fa' ? 'جزیره رویایی و تفریحی' : language === 'ar' ? 'جزيرة الأحلام والترفيه' : 'Dreamy and recreational island')
+                      : destination.id === 8
+                      ? (language === 'fa' ? 'شهر مقاومت و افتخار' : language === 'ar' ? 'مدينة المقاومة والفخر' : 'City of resistance and honor')
+                      : destination.id === 9
+                      ? (language === 'fa' ? 'شهر تاریخ و معماری اصیل' : language === 'ar' ? 'مدينة التاريخ والعمارة الأصيلة' : 'City of history and authentic architecture')
+                      : destination.id === 10
+                      ? (language === 'fa' ? 'نصف جهان، شهر هنر و زیبایی' : language === 'ar' ? 'نصف العالم، مدينة الفن والجمال' : 'Half of the world, city of art and beauty')
+                      : destination.description
+                    }
                   </p>
                 </div>
               </div>
