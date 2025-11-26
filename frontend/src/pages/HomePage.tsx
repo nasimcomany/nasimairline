@@ -743,7 +743,7 @@ const HomePage: React.FC = () => {
                 {t('home.hero.description') || 'you\'ve been waiting for'}
               </p>
               <button 
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
                 style={{ 
                   letterSpacing: '0.5px',
                   boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
@@ -762,8 +762,8 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Skywards Banner Section - Minimal Emirates Style */}
-      <section className="relative z-10 py-4">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 py-4" style={{ overflow: 'visible' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
             className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
             style={{
@@ -771,67 +771,116 @@ const HomePage: React.FC = () => {
               overflow: 'visible' // Allow badges to extend outside
             }}
           >
-            {/* Left Side - Badges - Larger with 3D effect extending out */}
-            <div className="flex items-center relative" style={{ marginLeft: '-20px', zIndex: 10 }}>
-              {/* Silver Badge - Larger, 3D, extending out */}
+            {/* Right Side - Badges - 3D effect extending out from top and bottom */}
+            <div 
+              className="flex items-center" 
+              style={{ 
+                position: 'absolute',
+                right: '-20px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+                height: '0' // Don't affect parent height
+              }}
+            >
+              {/* Silver Badge - 3D, extending out from top and bottom */}
               <div 
-                className="rounded-full flex flex-col items-center justify-center relative"
+                className="rounded-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '64px',
-                  height: '64px',
+                  width: '100px', // Size to protrude from top and bottom
+                  height: '100px', // Size to protrude from top and bottom
                   background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
-                  transform: 'rotate(2deg) translateZ(0)',
-                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.4)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  marginRight: '-8px' // Overlap to create connected effect
+                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  marginRight: '-12px', // Overlap to create connected effect
+                  transform: 'rotate(2deg) translateZ(0)' // Rotate only
                 }}
               >
-                <div className="text-gray-700 text-[9px] font-bold">SILVER</div>
+                <div 
+                  className="text-gray-700 font-bold"
+                  style={{
+                    fontSize: '11px',
+                    writingMode: 'vertical-rl',
+                    textOrientation: 'mixed',
+                    letterSpacing: '1.2px'
+                  }}
+                >
+                  SILVER
+                </div>
               </div>
-              {/* Gold Badge - Larger, 3D, extending out */}
+              {/* Gold Badge - 3D, extending out from top and bottom */}
               <div 
-                className="rounded-full flex flex-col items-center justify-center relative"
+                className="rounded-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '64px',
-                  height: '64px',
+                  width: '100px', // Size to protrude from top and bottom
+                  height: '100px', // Size to protrude from top and bottom
                   background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-                  transform: 'rotate(-3deg) translateZ(0)',
-                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.4)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  marginRight: '-8px' // Overlap to create connected effect
+                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  marginRight: '-12px', // Overlap to create connected effect
+                  transform: 'rotate(-3deg) translateZ(0)' // Rotate only
                 }}
               >
-                <div className="text-white text-[9px] font-bold">GOLD</div>
+                <div 
+                  className="text-white font-bold"
+                  style={{
+                    fontSize: '11px',
+                    writingMode: 'vertical-rl',
+                    textOrientation: 'mixed',
+                    letterSpacing: '1.2px'
+                  }}
+                >
+                  GOLD
+                </div>
               </div>
-              {/* Platinum Badge - Larger, 3D, extending out */}
+              {/* Platinum Badge - 3D, extending out from top and bottom */}
               <div 
-                className="rounded-full flex flex-col items-center justify-center relative"
+                className="rounded-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '64px',
-                  height: '64px',
+                  width: '100px', // Size to protrude from top and bottom
+                  height: '100px', // Size to protrude from top and bottom
                   background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
-                  transform: 'rotate(4deg) translateZ(0)',
-                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.4)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  transform: 'rotate(4deg) translateZ(0)' // Rotate only
                 }}
               >
-                <div className="text-white text-[9px] font-bold">PLATINUM</div>
+                <div 
+                  className="text-white font-bold"
+                  style={{
+                    fontSize: '11px',
+                    writingMode: 'vertical-rl',
+                    textOrientation: 'mixed',
+                    letterSpacing: '1.2px'
+                  }}
+                >
+                  PLATINUM
+                </div>
               </div>
             </div>
 
             {/* Center - Text - Smaller */}
-            <div className="flex-1 text-center md:text-left">
-              <h3 className={`text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`}>
-                {t('loyalty.joinSkywards') || 'Join Emirates Skywards'}
+            <div className="flex-1 text-center md:text-left" style={{ paddingRight: '120px' }}>
+              <h3 className={`text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
+                fontFamily: "'Vazirmatn', sans-serif",
+                direction: 'rtl'
+              }}>
+                عضویت در برنامه وفاداری نسیم ایر
               </h3>
-              <p className={`text-gray-400 text-xs md:text-sm ${fontClass}`}>
-                {t('loyalty.skywardsDescription') || 'Become an Emirates Skywards member and start enjoying flight rewards, upgrades and more'}
+              <p className={`text-gray-400 text-xs md:text-sm ${fontClass}`} style={{ 
+                fontFamily: "'Vazirmatn', sans-serif",
+                direction: 'rtl'
+              }}>
+                عضو برنامه وفاداری نسیم ایر شوید و از پاداش‌های پرواز، امتیازات ویژه و مزایای بیشتر لذت ببرید
               </p>
             </div>
 
-            {/* Right Side - Button - Smaller */}
-            <button className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-sm">
-              {t('loyalty.joinNow') || 'Join now'}
+            {/* Left Side - Button - Smaller */}
+            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-sm" style={{ 
+              fontFamily: "'Vazirmatn', sans-serif",
+              direction: 'rtl'
+            }}>
+              همین حالا عضو شوید
             </button>
           </div>
         </div>
@@ -1264,10 +1313,10 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Skywards+ Section - Emirates Style */}
-      <section className="relative z-10 py-24 bg-white overflow-hidden">
+      <section className="relative z-10 py-16 bg-white overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-                style={{
+          style={{
             backgroundImage: 'url(/images/airport-crew.jpg)'
           }}
         >
@@ -1275,16 +1324,31 @@ const HomePage: React.FC = () => {
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <div className="max-w-2xl">
-            <p className={`text-white text-sm uppercase tracking-wider mb-2 ${fontClass}`}>
-              SKYWARDS+
+            <p className={`text-white text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
+              fontFamily: "'Vazirmatn', sans-serif",
+              direction: 'rtl',
+              textTransform: 'none'
+            }}>
+              برنامه وفاداری نسیم ایر
             </p>
-            <h2 className={`text-4xl md:text-5xl font-bold text-white mb-4 ${fontClass}`}>
-              {t('loyalty.enhanceBenefits') || 'مزایای خود را با Skywards+ افزایش دهید'}
+            <h2 className={`text-4xl md:text-5xl font-bold text-white mb-4 ${fontClass}`} style={{ 
+              fontFamily: "'Vazirmatn', sans-serif",
+              direction: 'rtl',
+              fontWeight: 700
+            }}>
+              مزایای خود را با برنامه وفاداری نسیم ایر افزایش دهید
             </h2>
-            <p className={`text-white text-lg mb-6 ${fontClass}`}>
-              {t('loyalty.choosePackages') || 'از بین 3 بسته انتخاب کنید که شامل آنچه دوست دارید است، از دسترسی به لانژ فرودگاه و بار اضافی، تا نرخ‌های انحصاری Cash+Miles و تخفیف‌ها.'}
+            <p className={`text-white text-lg mb-6 ${fontClass}`} style={{ 
+              fontFamily: "'Vazirmatn', sans-serif",
+              direction: 'rtl',
+              lineHeight: '1.8'
+            }}>
+              هواپیمایی نسیم ایر با افتخار ارائه‌دهنده خدمات پروازی با کیفیت و ایمن در مسیرهای داخلی و بین‌المللی است. با عضویت در برنامه وفاداری ما، از امتیازات ویژه، پاداش‌های پروازی، دسترسی به لانژ فرودگاه، بار اضافی و نرخ‌های انحصاری بهره‌مند شوید. ما با تکیه بر سال‌ها تجربه و تعهد به رضایت مسافران، سفری راحت، امن و به‌یادماندنی را برای شما فراهم می‌کنیم.
             </p>
-            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-8 py-3 rounded-lg transition-colors">
+            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-8 py-3 rounded-lg transition-colors" style={{ 
+              fontFamily: "'Vazirmatn', sans-serif",
+              direction: 'rtl'
+            }}>
               {t('common.learnMore') || 'بیشتر بدانید'}
             </button>
           </div>
@@ -1312,21 +1376,44 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Large Left Card */}
             <div className="lg:col-span-2 bg-white rounded-lg overflow-hidden shadow-lg border border-gray-200">
-              <div className="relative h-96">
+              <div className="relative" style={{ 
+                height: '454px' // 384px (h-96) + 20px (2cm top) + 50px (5cm bottom)
+              }}>
                 <img 
                   src="/images/airport-crew.jpg" 
-                  alt="Discover Dubai"
+                  alt="هواپیمایی نسیم ایر"
                   className="w-full h-full object-cover"
+                  style={{
+                    objectPosition: 'center center'
+                  }}
                 />
               </div>
               <div className="p-6">
-                <p className={`text-gray-500 text-xs uppercase tracking-wider mb-2 ${fontClass}`}>
-                  {t('destinations.dubai') || 'DUBAI AND THE UAE'}
+                <p className={`text-gray-500 text-xs uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
+                  fontFamily: "'Vazirmatn', sans-serif",
+                  direction: 'rtl',
+                  textTransform: 'none'
+                }}>
+                  هواپیمایی نسیم ایر
                 </p>
-                <h3 className={`text-3xl font-bold text-gray-900 mb-4 ${fontClass}`}>
-                  {t('destinations.discoverDubai') || 'کشف دبی'}
-                  </h3>
-                <a href="#" className={`text-red-600 hover:text-red-700 underline font-medium ${fontClass}`}>
+                <h3 className={`text-3xl font-bold text-gray-900 mb-4 ${fontClass}`} style={{ 
+                  fontFamily: "'Vazirmatn', sans-serif",
+                  direction: 'rtl',
+                  fontWeight: 700
+                }}>
+                  تجربه پروازی بی‌نظیر با استانداردهای جهانی
+                </h3>
+                <p className={`text-gray-600 text-base mb-4 ${fontClass}`} style={{ 
+                  fontFamily: "'Vazirmatn', sans-serif",
+                  direction: 'rtl',
+                  lineHeight: '1.8'
+                }}>
+                  هواپیمایی نسیم ایر با افتخار ارائه‌دهنده خدمات پروازی با کیفیت و ایمن در مسیرهای داخلی و بین‌المللی است. ما با تکیه بر سال‌ها تجربه و تعهد به رضایت مسافران، سفری راحت، امن و به‌یادماندنی را برای شما فراهم می‌کنیم. تیم حرفه‌ای ما با استفاده از ناوگان مدرن و خدمات پیشرفته، در هر لحظه از سفر در کنار شماست تا تجربه‌ای فراموش‌نشدنی را رقم بزنیم.
+                </p>
+                <a href="#" className={`text-red-600 hover:text-red-700 underline font-medium ${fontClass}`} style={{ 
+                  fontFamily: "'Vazirmatn', sans-serif",
+                  direction: 'rtl'
+                }}>
                   {t('common.learnMore') || 'بیشتر بدانید'}
                 </a>
               </div>

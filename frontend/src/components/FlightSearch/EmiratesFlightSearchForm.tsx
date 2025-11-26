@@ -175,7 +175,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
             {/* Continue Button */}
             <button
               type="submit"
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
               style={{ 
                 minWidth: '120px',
                 height: '48px'
