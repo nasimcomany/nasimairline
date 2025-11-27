@@ -35,7 +35,9 @@ import {
   TicketIcon,
   ClipboardDocumentIcon,
   ArrowPathIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
 const HomePage: React.FC = () => {
@@ -44,6 +46,13 @@ const HomePage: React.FC = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('general');
+  
+  // Hero Slider state
+  // برای اضافه کردن تصاویر: تصاویر خود را در پوشه frontend/public/images قرار دهید
+  // سپس مسیر آن‌ها را به این آرایه اضافه کنید. مثال:
+  // const heroImages = ['/images/tstnasim.jpg', '/images/image2.jpg', '/images/image3.jpg', '/images/image4.jpg', '/images/image5.jpg'];
+  const heroImages = ['/images/tstnasim.jpg']; // تصاویر هر 12 ثانیه به صورت افقی تغییر می‌کنند
+  const [currentHeroImageIndex, setCurrentHeroImageIndex] = useState(0);
 
   // Flight Search state
   const [tripType, setTripType] = useState<'round' | 'oneway' | 'multi'>('round');
@@ -103,6 +112,15 @@ const HomePage: React.FC = () => {
     if (!flightInfo.to) setFlightInfo(prev => ({ ...prev, to: t('home.flightSearch.defaultTo') }));
     if (!flightInfo.passengers) setFlightInfo(prev => ({ ...prev, passengers: t('home.flightSearch.defaultPassengers') }));
   }, [t]);
+
+  // Hero Slider auto-play
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 12000); // 12 seconds
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
 
   const features = [
     {
@@ -684,15 +702,39 @@ const HomePage: React.FC = () => {
       <section className="relative z-10 min-h-[90vh] flex flex-col">
         {/* Hero Image Background - Airplane Cabin */}
         <div 
-          className="absolute inset-x-0 top-0 bg-cover bg-center"
+          className="absolute inset-x-0 top-0 bg-cover bg-center transition-opacity duration-1000"
           style={{
-            backgroundImage: 'url(/images/tstnasim.jpg)',
+            backgroundImage: `url(${heroImages[currentHeroImageIndex]})`,
             backgroundPosition: 'center center',
             bottom: '120px' // 12cm shorter from bottom (120px)
           }}
         >
           <div className="absolute inset-0 bg-black/10"></div>
-      </div>
+        </div>
+
+        {/* Navigation Arrows - Minimal and Elegant */}
+        <button
+          onClick={() => setCurrentHeroImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
+          className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group"
+          style={{
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+          }}
+          aria-label="Previous image"
+        >
+          <ChevronLeftIcon className="w-6 h-6 text-white group-hover:text-white/90 transition-colors" />
+        </button>
+        <button
+          onClick={() => setCurrentHeroImageIndex((prev) => (prev + 1) % heroImages.length)}
+          className="absolute right-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group"
+          style={{
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+          }}
+          aria-label="Next image"
+        >
+          <ChevronRightIcon className="w-6 h-6 text-white group-hover:text-white/90 transition-colors" />
+        </button>
 
         {/* Hero Content */}
         <div className="relative z-10 flex-1 flex flex-col">

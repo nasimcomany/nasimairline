@@ -13,9 +13,10 @@ import { useLanguage } from '../../contexts/LanguageContext';
 const EmiratesHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
-  const { language, t, fontClass } = useLanguage();
+  const { language, t, fontClass, setLanguage } = useLanguage();
 
   const menuItems = [
     {
@@ -142,9 +143,9 @@ const EmiratesHeader: React.FC = () => {
 
             {/* Right Side Actions - White text */}
             <div className="hidden lg:flex items-center space-x-6 space-x-reverse relative">
-              {/* Red Flag Section - Next to "فارسی" */}
+              {/* Blue Flag Section - Next to "فارسی" */}
               <div 
-                className={`bg-red-600 flex flex-col items-center justify-end absolute ${language === 'en' ? 'right-full' : 'left-full'}`}
+                className={`bg-blue-600 flex flex-col items-center justify-end absolute ${language === 'en' ? 'right-full' : 'left-full'}`}
                 style={{ 
                   width: '80px', // Narrower from sides
                   height: '130px', // Longer from bottom
@@ -152,7 +153,7 @@ const EmiratesHeader: React.FC = () => {
                   marginRight: language === 'en' ? '0' : '12px',
                   marginLeft: language === 'en' ? '12px' : '0',
                   padding: '8px',
-                  paddingBottom: '12px', // Extra padding at bottom
+                  paddingBottom: 'calc(-150px + 1cm)', // Extra padding at bottom + 2cm
                   boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
                   zIndex: 60
                 }}
@@ -164,18 +165,66 @@ const EmiratesHeader: React.FC = () => {
                     alt="نسیم ایر" 
                     className="object-contain"
                     style={{ 
-                      width: '70px', // 2.5x larger (80px × 2.5 = 200px)
+                      width: '100px',
                       height: 'auto',
-                      maxWidth: '70px'
+                      maxWidth: '100px'
                     }}
                   />
                 </Link>
               </div>
 
-              {/* Global/Language */}
-              <button className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`} style={{ textTransform: 'uppercase' }}>
-                {language === 'fa' ? 'فارسی' : language === 'ar' ? 'العربية' : 'GLOBAL'}
-              </button>
+              {/* Global/Language Dropdown */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setIsLanguageDropdownOpen(true)}
+                onMouseLeave={() => setIsLanguageDropdownOpen(false)}
+              >
+                <button 
+                  className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`} 
+                  style={{ textTransform: 'uppercase' }}
+                >
+                  {language === 'fa' ? 'فارسی' : language === 'ar' ? 'العربية' : 'GLOBAL'}
+                </button>
+                
+                {/* Language Dropdown Menu */}
+                {isLanguageDropdownOpen && (
+                  <div className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50`}>
+                    <button
+                      onClick={() => {
+                        setLanguage('fa');
+                        setIsLanguageDropdownOpen(false);
+                      }}
+                      className={`w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors ${fontClass} ${
+                        language === 'fa' ? 'bg-blue-50 text-blue-600 font-semibold' : ''
+                      }`}
+                    >
+                      فارسی
+                    </button>
+                    <button
+                      onClick={() => {
+                        setLanguage('ar');
+                        setIsLanguageDropdownOpen(false);
+                      }}
+                      className={`w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors ${fontClass} ${
+                        language === 'ar' ? 'bg-blue-50 text-blue-600 font-semibold' : ''
+                      }`}
+                    >
+                      العربية
+                    </button>
+                    <button
+                      onClick={() => {
+                        setLanguage('en');
+                        setIsLanguageDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors ${fontClass} ${
+                        language === 'en' ? 'bg-blue-50 text-blue-600 font-semibold' : ''
+                      }`}
+                    >
+                      English
+                    </button>
+                  </div>
+                )}
+              </div>
 
             {/* Search */}
             <button className="text-white hover:text-gray-300 transition-colors">
