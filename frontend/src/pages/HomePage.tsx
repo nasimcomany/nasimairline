@@ -712,129 +712,120 @@ const HomePage: React.FC = () => {
             bottom: '120px' // 12cm shorter from bottom (120px)
           }}
         >
-          {/* Slider Wrapper - All images side by side */}
-          <div 
-            className="flex h-full transition-transform duration-1000 ease-in-out"
+          {/* Slider - All images positioned absolutely */}
+          {/* Image 1: tstnasim.jpg */}
+          <div
+            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
             style={{
-              transform: `translateX(-${currentHeroImageIndex * 100}vw)`,
-              width: '500vw', // 5 images × 100vw each
-              height: '100%'
+              transform: `translateX(${0 - currentHeroImageIndex * 100}%)`,
+              left: '0%'
             }}
           >
-            {/* Image 1: tstnasim.jpg */}
-            <div
-              className="h-full flex-shrink-0 relative"
+            <img
+              src="/images/tstnasim.jpg"
+              alt="Hero image 1"
+              className="w-full h-full object-cover"
               style={{
-                width: '100vw',
-                minWidth: '100vw'
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                display: 'block'
               }}
-            >
-              <img
-                src="/images/tstnasim.jpg"
-                alt="Hero image 1"
-                className="w-full h-full object-cover"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center center',
-                  display: 'block'
-                }}
-              />
-              <div className="absolute inset-0 bg-black/10"></div>
-            </div>
-            
-            {/* Image 2: tstnasim2.jpg */}
-            <div
-              className="h-full flex-shrink-0 relative"
+            />
+            <div className="absolute inset-0 bg-black/10"></div>
+          </div>
+          
+          {/* Image 2: tstnasim2.jpg */}
+          <div
+            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
+            style={{
+              transform: `translateX(${100 - currentHeroImageIndex * 100}%)`,
+              left: '0%'
+            }}
+          >
+            <img
+              src="/images/tstnasim2.jpg"
+              alt="Hero image 2"
+              className="w-full h-full object-cover"
               style={{
-                width: '100vw',
-                minWidth: '100vw'
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                display: 'block'
               }}
-            >
-              <img
-                src="/images/tstnasim2.jpg"
-                alt="Hero image 2"
-                className="w-full h-full object-cover"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center center',
-                  display: 'block'
-                }}
-              />
-              <div className="absolute inset-0 bg-black/10"></div>
-            </div>
-            
-            {/* Image 3: tstnasim3.jpg */}
-            <div
-              className="h-full flex-shrink-0 relative"
+            />
+            <div className="absolute inset-0 bg-black/10"></div>
+          </div>
+          
+          {/* Image 3: tstnasim3.jpg */}
+          <div
+            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
+            style={{
+              transform: `translateX(${200 - currentHeroImageIndex * 100}%)`,
+              left: '0%'
+            }}
+          >
+            <img
+              src="/images/tstnasim3.jpg"
+              alt="Hero image 3"
+              className="w-full h-full object-cover"
               style={{
-                width: '100vw',
-                minWidth: '100vw'
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                display: 'block'
               }}
-            >
-              <img
-                src="/images/tstnasim3.jpg"
-                alt="Hero image 3"
-                className="w-full h-full object-cover"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center center',
-                  display: 'block'
-                }}
-              />
-              <div className="absolute inset-0 bg-black/10"></div>
-            </div>
-            
-            {/* Image 4: tstnasim4.jpg */}
-            <div
-              className="h-full flex-shrink-0 relative"
+            />
+            <div className="absolute inset-0 bg-black/10"></div>
+          </div>
+          
+          {/* Image 4: tstnasim4.jpg */}
+          <div
+            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
+            style={{
+              transform: `translateX(${300 - currentHeroImageIndex * 100}%)`,
+              left: '0%'
+            }}
+          >
+            <img
+              src="/images/tstnasim4.jpg"
+              alt="Hero image 4"
+              className="w-full h-full object-cover"
               style={{
-                width: '100vw',
-                minWidth: '100vw'
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                display: 'block'
               }}
-            >
-              <img
-                src="/images/tstnasim4.jpg"
-                alt="Hero image 4"
-                className="w-full h-full object-cover"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center center',
-                  display: 'block'
-                }}
-              />
-              <div className="absolute inset-0 bg-black/10"></div>
-            </div>
-            
-            {/* Image 5: tstnasim5.jpg */}
-            <div
-              className="h-full flex-shrink-0 relative"
+            />
+            <div className="absolute inset-0 bg-black/10"></div>
+          </div>
+          
+          {/* Image 5: tstnasim5.jpg */}
+          <div
+            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
+            style={{
+              transform: `translateX(${400 - currentHeroImageIndex * 100}%)`,
+              left: '0%'
+            }}
+          >
+            <img
+              src="/images/tstnasim5.jpg"
+              alt="Hero image 5"
+              className="w-full h-full object-cover"
               style={{
-                width: '100vw',
-                minWidth: '100vw'
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                display: 'block'
               }}
-            >
-              <img
-                src="/images/tstnasim5.jpg"
-                alt="Hero image 5"
-                className="w-full h-full object-cover"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center center',
-                  display: 'block'
-                }}
-              />
-              <div className="absolute inset-0 bg-black/10"></div>
-            </div>
+            />
+            <div className="absolute inset-0 bg-black/10"></div>
           </div>
         </div>
 
