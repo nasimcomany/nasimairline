@@ -63,7 +63,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           onClick={() => setActiveTab('search')}
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
             activeTab === 'search'
-              ? 'text-red-600 border-b-2 border-red-600 bg-white'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
           style={{ 
@@ -78,7 +78,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           onClick={() => setActiveTab('manage')}
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
             activeTab === 'manage'
-              ? 'text-red-600 border-b-2 border-red-600 bg-white'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
           style={{ 
@@ -93,7 +93,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           onClick={() => setActiveTab('whatson')}
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
             activeTab === 'whatson'
-              ? 'text-red-600 border-b-2 border-red-600 bg-white'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
           style={{ 
@@ -108,7 +108,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           onClick={() => setActiveTab('status')}
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
             activeTab === 'status'
-              ? 'text-red-600 border-b-2 border-red-600 bg-white'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
           style={{ 
@@ -138,7 +138,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
                   value={formData.origin}
                   onChange={handleInputChange}
                   placeholder={t('home.flightSearch.cityOrAirport') || 'City or airport'}
-                  className="w-full pr-10 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-white"
+                  className="w-full pr-10 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
                   style={{ paddingRight: '2.5rem', paddingLeft: '2.5rem' }}
                 />
                 {formData.origin && (
@@ -166,7 +166,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
                   value={formData.destination}
                   onChange={handleInputChange}
                   placeholder={t('home.flightSearch.cityOrAirport') || 'City or airport'}
-                  className="w-full pr-10 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm bg-white"
+                  className="w-full pr-10 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
                   style={{ paddingRight: '2.5rem', paddingLeft: '2.5rem' }}
                 />
               </div>
@@ -189,7 +189,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           <div className="mt-4">
             <a 
               href="#" 
-              className={`text-red-600 hover:text-red-700 text-sm ${fontClass}`}
+              className={`text-blue-600 hover:text-blue-700 text-sm ${fontClass}`}
               style={{ textDecoration: 'none' }}
             >
               {t('home.flightSearch.advancedSearch') || 'Advanced search: multi-city, promo codes, flydubai and partner airlines >'}
