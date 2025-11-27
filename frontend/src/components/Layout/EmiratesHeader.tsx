@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -14,6 +14,7 @@ const EmiratesHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+  const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
   const { language, t, fontClass, setLanguage } = useLanguage();
@@ -94,6 +95,15 @@ const EmiratesHeader: React.FC = () => {
     setActiveDropdown(null);
   };
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (languageDropdownTimeoutRef.current) {
+        clearTimeout(languageDropdownTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 relative">
       <div className="flex h-16 relative">
@@ -124,12 +134,12 @@ const EmiratesHeader: React.FC = () => {
                 
                 {/* Dropdown Menu */}
                 {activeDropdown === item.key && item.dropdown && (
-                  <div className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-0 w-56 bg-white rounded-b-lg shadow-lg border-t-2 border-red-600 py-2 z-50`}>
+                  <div className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-0 w-56 bg-gray-800 rounded-b-lg shadow-lg border-t-2 border-blue-600 py-2 z-50`}>
                     {item.dropdown.map((subItem, index) => (
                       <Link
                         key={index}
                         to={subItem.path}
-                        className={`block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 transition-colors ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
+                        className={`block px-4 py-2 text-sm text-white hover:bg-gray-700 hover:text-blue-400 transition-colors ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
                         onClick={() => setActiveDropdown(null)}
                       >
                         {subItem.label}
@@ -176,26 +186,47 @@ const EmiratesHeader: React.FC = () => {
               {/* Global/Language Dropdown */}
               <div 
                 className="relative"
-                onMouseEnter={() => setIsLanguageDropdownOpen(true)}
-                onMouseLeave={() => setIsLanguageDropdownOpen(false)}
+                onMouseEnter={() => {
+                  if (languageDropdownTimeoutRef.current) {
+                    clearTimeout(languageDropdownTimeoutRef.current);
+                  }
+                  setIsLanguageDropdownOpen(true);
+                }}
+                onMouseLeave={() => {
+                  languageDropdownTimeoutRef.current = setTimeout(() => {
+                    setIsLanguageDropdownOpen(false);
+                  }, 200); // 200ms delay before closing
+                }}
               >
                 <button 
                   className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`} 
                   style={{ textTransform: 'uppercase' }}
                 >
-                  {language === 'fa' ? 'فارسی' : language === 'ar' ? 'العربية' : 'GLOBAL'}
+                  فارسی
                 </button>
                 
                 {/* Language Dropdown Menu */}
                 {isLanguageDropdownOpen && (
-                  <div className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50`}>
+                  <div 
+                    className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-gray-800 rounded-lg shadow-lg border border-gray-700 py-2 z-50`}
+                    onMouseEnter={() => {
+                      if (languageDropdownTimeoutRef.current) {
+                        clearTimeout(languageDropdownTimeoutRef.current);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      languageDropdownTimeoutRef.current = setTimeout(() => {
+                        setIsLanguageDropdownOpen(false);
+                      }, 200);
+                    }}
+                  >
                     <button
                       onClick={() => {
                         setLanguage('fa');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors ${fontClass} ${
-                        language === 'fa' ? 'bg-blue-50 text-blue-600 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-white hover:bg-gray-700 hover:text-blue-400 transition-colors ${fontClass} ${
+                        language === 'fa' ? 'bg-gray-700 text-blue-400 font-semibold' : ''
                       }`}
                     >
                       فارسی
@@ -205,8 +236,8 @@ const EmiratesHeader: React.FC = () => {
                         setLanguage('ar');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors ${fontClass} ${
-                        language === 'ar' ? 'bg-blue-50 text-blue-600 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-white hover:bg-gray-700 hover:text-blue-400 transition-colors ${fontClass} ${
+                        language === 'ar' ? 'bg-gray-700 text-blue-400 font-semibold' : ''
                       }`}
                     >
                       العربية
@@ -216,8 +247,8 @@ const EmiratesHeader: React.FC = () => {
                         setLanguage('en');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors ${fontClass} ${
-                        language === 'en' ? 'bg-blue-50 text-blue-600 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-white hover:bg-gray-700 hover:text-blue-400 transition-colors ${fontClass} ${
+                        language === 'en' ? 'bg-gray-700 text-blue-400 font-semibold' : ''
                       }`}
                     >
                       English

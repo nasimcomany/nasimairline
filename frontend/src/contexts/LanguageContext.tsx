@@ -149,6 +149,7 @@ const translations = {
     'auth.phonePlaceholder': 'شماره تلفن خود را وارد کنید',
     
     // Homepage
+    'home.hero.flyBetter': 'پرواز بهتر',
     'home.hero.subtitle': 'It\'s arrived, the',
     'home.hero.title': 'PREMIUM ECONOMY',
     'home.hero.description': 'you\'ve been waiting for',
@@ -633,6 +634,7 @@ const translations = {
     'auth.phonePlaceholder': 'أدخل رقم هاتفك',
     
     // Homepage
+    'home.hero.flyBetter': 'طيران أفضل',
     'home.hero.subtitle': 'It\'s arrived, the',
     'home.hero.title': 'PREMIUM ECONOMY',
     'home.hero.description': 'you\'ve been waiting for',
@@ -1117,6 +1119,7 @@ const translations = {
     'auth.phonePlaceholder': 'Enter your phone number',
     
     // Homepage
+    'home.hero.flyBetter': 'FLY BETTER',
     'home.hero.subtitle': 'It\'s arrived, the',
     'home.hero.title': 'PREMIUM ECONOMY',
     'home.hero.description': 'you\'ve been waiting for',

@@ -48,10 +48,14 @@ const HomePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('general');
   
   // Hero Slider state
-  // برای اضافه کردن تصاویر: تصاویر خود را در پوشه frontend/public/images قرار دهید
-  // سپس مسیر آن‌ها را به این آرایه اضافه کنید. مثال:
-  // const heroImages = ['/images/tstnasim.jpg', '/images/image2.jpg', '/images/image3.jpg', '/images/image4.jpg', '/images/image5.jpg'];
-  const heroImages = ['/images/tstnasim.jpg']; // تصاویر هر 12 ثانیه به صورت افقی تغییر می‌کنند
+  // تصاویر هر 12 ثانیه به صورت افقی تغییر می‌کنند
+  const heroImages = [
+    '/images/tstnasim.jpg',
+    '/images/tstnasim2.jpg',
+    '/images/tstnasim3.jpg',
+    '/images/tstnasim4.jpg',
+    '/images/tstnasim5.jpg'
+  ];
   const [currentHeroImageIndex, setCurrentHeroImageIndex] = useState(0);
 
   // Flight Search state
@@ -699,17 +703,55 @@ const HomePage: React.FC = () => {
       <EmiratesHeader />
 
       {/* Hero Section with Flight Search - Emirates Style */}
-      <section className="relative z-10 min-h-[90vh] flex flex-col">
-        {/* Hero Image Background - Airplane Cabin */}
+      <section className="relative z-10 min-h-[90vh] flex flex-col overflow-hidden">
+        {/* Hero Image Background - Slider Container */}
         <div 
-          className="absolute inset-x-0 top-0 bg-cover bg-center transition-opacity duration-1000"
+          className="absolute inset-x-0 top-0 overflow-hidden"
           style={{
-            backgroundImage: `url(${heroImages[currentHeroImageIndex]})`,
-            backgroundPosition: 'center center',
-            bottom: '120px' // 12cm shorter from bottom (120px)
+            bottom: '120px', // 12cm shorter from bottom (120px)
+            height: 'calc(100vh - 120px)',
+            minHeight: 'calc(90vh - 120px)',
+            width: '100%'
           }}
         >
-          <div className="absolute inset-0 bg-black/10"></div>
+          {/* Slider Wrapper - Moves horizontally */}
+          <div 
+            className="h-full transition-transform duration-1000 ease-in-out"
+            style={{
+              transform: `translateX(-${currentHeroImageIndex * 100}%)`,
+              display: 'flex',
+              width: `${heroImages.length * 100}%`
+            }}
+          >
+            {heroImages.map((image, index) => (
+              <div
+                key={index}
+                className="h-full relative"
+                style={{
+                  width: `${100 / heroImages.length}%`,
+                  flexShrink: 0,
+                  flexBasis: `${100 / heroImages.length}%`
+                }}
+              >
+                <img
+                  src={image}
+                  alt={`Hero image ${index + 1}`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center center',
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    console.error(`Failed to load image: ${image}`);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/10"></div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Navigation Arrows - Minimal and Elegant */}
@@ -748,7 +790,7 @@ const HomePage: React.FC = () => {
                 textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
               }}
             >
-              FLY BETTER
+              {t('home.hero.flyBetter') || 'FLY BETTER'}
             </p>
       </div>
 
