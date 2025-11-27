@@ -703,54 +703,138 @@ const HomePage: React.FC = () => {
       <EmiratesHeader />
 
       {/* Hero Section with Flight Search - Emirates Style */}
-      <section className="relative z-10 min-h-[90vh] flex flex-col overflow-hidden">
+      <section className="relative z-10 min-h-[90vh] flex flex-col">
         {/* Hero Image Background - Slider Container */}
         <div 
           className="absolute inset-x-0 top-0 overflow-hidden"
           style={{
-            bottom: '120px', // 12cm shorter from bottom (120px)
-            height: 'calc(100vh - 120px)',
-            minHeight: 'calc(90vh - 120px)',
-            width: '100%'
+            backgroundPosition: 'center center',
+            bottom: '120px' // 12cm shorter from bottom (120px)
           }}
         >
-          {/* Slider Wrapper - Moves horizontally */}
+          {/* Slider Wrapper - All images side by side */}
           <div 
-            className="h-full transition-transform duration-1000 ease-in-out"
+            className="flex h-full transition-transform duration-1000 ease-in-out"
             style={{
-              transform: `translateX(-${currentHeroImageIndex * 100}%)`,
-              display: 'flex',
-              width: `${heroImages.length * 100}%`
+              transform: `translateX(-${currentHeroImageIndex * 100}vw)`,
+              width: '500vw', // 5 images × 100vw each
+              height: '100%'
             }}
           >
-            {heroImages.map((image, index) => (
-              <div
-                key={index}
-                className="h-full relative"
+            {/* Image 1: tstnasim.jpg */}
+            <div
+              className="h-full flex-shrink-0 relative"
+              style={{
+                width: '100vw',
+                minWidth: '100vw'
+              }}
+            >
+              <img
+                src="/images/tstnasim.jpg"
+                alt="Hero image 1"
+                className="w-full h-full object-cover"
                 style={{
-                  width: `${100 / heroImages.length}%`,
-                  flexShrink: 0,
-                  flexBasis: `${100 / heroImages.length}%`
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                  display: 'block'
                 }}
-              >
-                <img
-                  src={image}
-                  alt={`Hero image ${index + 1}`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'center center',
-                    display: 'block'
-                  }}
-                  onError={(e) => {
-                    console.error(`Failed to load image: ${image}`);
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-                <div className="absolute inset-0 bg-black/10"></div>
-              </div>
-            ))}
+              />
+              <div className="absolute inset-0 bg-black/10"></div>
+            </div>
+            
+            {/* Image 2: tstnasim2.jpg */}
+            <div
+              className="h-full flex-shrink-0 relative"
+              style={{
+                width: '100vw',
+                minWidth: '100vw'
+              }}
+            >
+              <img
+                src="/images/tstnasim2.jpg"
+                alt="Hero image 2"
+                className="w-full h-full object-cover"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                  display: 'block'
+                }}
+              />
+              <div className="absolute inset-0 bg-black/10"></div>
+            </div>
+            
+            {/* Image 3: tstnasim3.jpg */}
+            <div
+              className="h-full flex-shrink-0 relative"
+              style={{
+                width: '100vw',
+                minWidth: '100vw'
+              }}
+            >
+              <img
+                src="/images/tstnasim3.jpg"
+                alt="Hero image 3"
+                className="w-full h-full object-cover"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                  display: 'block'
+                }}
+              />
+              <div className="absolute inset-0 bg-black/10"></div>
+            </div>
+            
+            {/* Image 4: tstnasim4.jpg */}
+            <div
+              className="h-full flex-shrink-0 relative"
+              style={{
+                width: '100vw',
+                minWidth: '100vw'
+              }}
+            >
+              <img
+                src="/images/tstnasim4.jpg"
+                alt="Hero image 4"
+                className="w-full h-full object-cover"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                  display: 'block'
+                }}
+              />
+              <div className="absolute inset-0 bg-black/10"></div>
+            </div>
+            
+            {/* Image 5: tstnasim5.jpg */}
+            <div
+              className="h-full flex-shrink-0 relative"
+              style={{
+                width: '100vw',
+                minWidth: '100vw'
+              }}
+            >
+              <img
+                src="/images/tstnasim5.jpg"
+                alt="Hero image 5"
+                className="w-full h-full object-cover"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center center',
+                  display: 'block'
+                }}
+              />
+              <div className="absolute inset-0 bg-black/10"></div>
+            </div>
           </div>
         </div>
 
