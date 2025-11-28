@@ -1514,94 +1514,102 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Experience Section - Emirates Style */}
-      <section id="experience" className="relative z-10 py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-2">
-            <p className={`text-gray-500 text-sm uppercase tracking-wider text-center ${fontClass}`}>
-              {t('nav.experience') || 'FLYING WITH EMIRATES'}
-            </p>
-                    </div>
-          <div className="text-center mb-8">
-            <h2 className={`text-4xl md:text-5xl font-bold text-gray-900 mb-4 ${fontClass}`}>
-              {t('experience.makeIncredible') || 'سفر خود را فوق‌العاده کنید'}
-            </h2>
-            <p className={`text-gray-600 text-lg ${fontClass}`}>
-              {t('experience.subtitle') || 'تجربه Emirates را کاوش کنید و سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید.'}
-            </p>
-                  </div>
-
-          {/* Main Content Grid */}
+      {/* Featured Destinations Section - Images Only (No Text) */}
+      <section className="relative z-10 py-12 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Large Left Card */}
-            <div className="lg:col-span-2 bg-white rounded-lg overflow-hidden shadow-lg border border-gray-200">
-              <div className="relative" style={{ 
-                height: '454px' // 384px (h-96) + 20px (2cm top) + 50px (5cm bottom)
-              }}>
-                <img 
-                  src="/images/airport-crew.jpg" 
-                  alt="هواپیمایی نسیم ایر"
-                  className="w-full h-full object-cover"
-                  style={{
-                    objectPosition: 'center center'
+            {/* 4 Small Images - Left Side (1/3 width, 2x2 grid) - First in order */}
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-6 order-1 lg:order-1">
+              {destinations.filter(d => [2, 7, 8, 9].includes(d.id)).map((destination) => (
+                <div 
+                  key={destination.id} 
+                  className="bg-white overflow-hidden group cursor-pointer transition-all duration-300"
+                  style={{ 
+                    borderRadius: '6px',
+                    border: '1px solid rgba(0, 0, 0, 0.08)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                    opacity: 0.95,
+                    transform: 'translateY(0)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
-                />
-              </div>
-              <div className="p-6">
-                <p className={`text-gray-500 text-xs uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
-                  fontFamily: "'Vazirmatn', sans-serif",
-                  direction: 'rtl',
-                  textTransform: 'none'
-                }}>
-                  هواپیمایی نسیم ایر
-                </p>
-                <h3 className={`text-3xl font-bold text-gray-900 mb-4 ${fontClass}`} style={{ 
-                  fontFamily: "'Vazirmatn', sans-serif",
-                  direction: 'rtl',
-                  fontWeight: 700
-                }}>
-                  تجربه پروازی بی‌نظیر با استانداردهای جهانی
-                </h3>
-                <p className={`text-gray-600 text-base mb-4 ${fontClass}`} style={{ 
-                  fontFamily: "'Vazirmatn', sans-serif",
-                  direction: 'rtl',
-                  lineHeight: '1.8'
-                }}>
-                  هواپیمایی نسیم ایر با افتخار ارائه‌دهنده خدمات پروازی با کیفیت و ایمن در مسیرهای داخلی و بین‌المللی است. ما با تکیه بر سال‌ها تجربه و تعهد به رضایت مسافران، سفری راحت، امن و به‌یادماندنی را برای شما فراهم می‌کنیم. تیم حرفه‌ای ما با استفاده از ناوگان مدرن و خدمات پیشرفته، در هر لحظه از سفر در کنار شماست تا تجربه‌ای فراموش‌نشدنی را رقم بزنیم.
-                </p>
-                <a href="#" className={`text-red-600 hover:text-red-700 underline font-medium ${fontClass}`} style={{ 
-                  fontFamily: "'Vazirmatn', sans-serif",
-                  direction: 'rtl'
-                }}>
-                  {t('common.learnMore') || 'بیشتر بدانید'}
-                </a>
-              </div>
-            </div>
-
-            {/* Right Side - 2x2 Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
-              {services.slice(0, 4).map((service, idx) => (
-                <div key={service.id} className="bg-white rounded-lg overflow-hidden shadow-lg border border-gray-200 relative">
-                  <div className="relative h-48">
-                    <div className={`absolute inset-0 bg-gradient-to-r ${service.gradient} opacity-80`}></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <service.icon className="h-16 w-16 text-white" />
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <p className={`text-gray-500 text-xs uppercase tracking-wider mb-2 ${fontClass}`}>
-                      {t('experience.cabinFeatures') || 'CABIN FEATURES'}
-                    </p>
-                    <h3 className={`text-xl font-bold text-gray-900 mb-2 ${fontClass}`}>
-                      {service.title}
-                    </h3>
-                    <a href="#" className={`text-red-600 hover:text-red-700 underline text-sm ${fontClass}`}>
-                      {t('common.learnMore') || 'بیشتر بدانید'}
-                    </a>
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1)';
+                    e.currentTarget.style.opacity = '1';
+                    e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                    e.currentTarget.style.opacity = '0.95';
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  }}
+                >
+                  {/* Small Image - Full height, no empty space */}
+                  <div className="relative w-full overflow-hidden" style={{ 
+                    height: '100%',
+                    minHeight: '250px',
+                    borderRadius: '6px'
+                  }}>
+                    <img 
+                      src={destination.image} 
+                      alt={destination.name}
+                      className="w-full h-full object-cover transition-opacity duration-300"
+                      style={{ 
+                        objectPosition: 'center center',
+                        transition: 'opacity 0.3s ease',
+                        minHeight: '250px'
+                      }}
+                    />
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Large Image - Right Side (2/3 width) - Second in order */}
+            {destinations.filter(d => d.id === 1).map((destination) => (
+              <div 
+                key={destination.id} 
+                className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
+                style={{ 
+                  borderRadius: '6px',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                  opacity: 0.95,
+                  transform: 'translateY(0)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.opacity = '0.95';
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                }}
+              >
+                {/* Large Image */}
+                <div className="relative w-full overflow-hidden" style={{ 
+                  height: '500px',
+                  borderRadius: '6px'
+                }}>
+                  <img 
+                    src={destination.image} 
+                    alt={destination.name}
+                    className="w-full h-full object-cover transition-opacity duration-300"
+                    style={{ 
+                      objectPosition: 'center center',
+                      transition: 'opacity 0.3s ease'
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
