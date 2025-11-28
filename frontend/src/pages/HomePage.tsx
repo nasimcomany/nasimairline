@@ -1516,100 +1516,244 @@ const HomePage: React.FC = () => {
 
       {/* Featured Destinations Section - Images Only (No Text) */}
       <section className="relative z-10 py-12 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 4 Small Images - Left Side (1/3 width, 2x2 grid) - First in order */}
-            <div className="grid grid-cols-2 lg:grid-cols-2 gap-6 order-1 lg:order-1">
-              {destinations.filter(d => [2, 7, 8, 9].includes(d.id)).map((destination) => (
-                <div 
-                  key={destination.id} 
-                  className="bg-white overflow-hidden group cursor-pointer transition-all duration-300"
-                  style={{ 
-                    borderRadius: '6px',
-                    border: '1px solid rgba(0, 0, 0, 0.08)',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                    opacity: 0.95,
-                    transform: 'translateY(0)',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
-                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1)';
-                    e.currentTarget.style.opacity = '1';
-                    e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
-                    e.currentTarget.style.opacity = '0.95';
-                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                  }}
-                >
-                  {/* Small Image - Full height, no empty space */}
-                  <div className="relative w-full overflow-hidden" style={{ 
-                    height: '100%',
-                    minHeight: '250px',
-                    borderRadius: '6px'
-                  }}>
-                    <img 
-                      src={destination.image} 
-                      alt={destination.name}
-                      className="w-full h-full object-cover transition-opacity duration-300"
-                      style={{ 
-                        objectPosition: 'center center',
-                        transition: 'opacity 0.3s ease',
-                        minHeight: '250px'
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Large Image - Right Side (2/3 width) - Second in order */}
-            {destinations.filter(d => d.id === 1).map((destination) => (
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 justify-center items-center" style={{ perspective: '1000px' }}>
+            {/* 4 Small Images - Left Side (2/3 width, 2x2 grid) - First in order */}
+            <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-2 gap-1 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible' }}>
+              {/* Image 1 - two.png - Left page of book */}
               <div 
-                key={destination.id} 
-                className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
+                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
                   borderRadius: '6px',
-                  border: '1px solid rgba(0, 0, 0, 0.08)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                  border: '0.5px solid #d1d5db',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                   opacity: 0.95,
                   transform: 'translateY(0)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'right center',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: '68%',
+                  maxWidth: '100%',
+                  marginRight: '170px'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
                   e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
+                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(-15deg) translateZ(20px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
                   e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
                 }}
               >
-                {/* Large Image */}
                 <div className="relative w-full overflow-hidden" style={{ 
-                  height: '500px',
+                  height: 'calc((500px - 24px) / 2)',
                   borderRadius: '6px'
                 }}>
                   <img 
-                    src={destination.image} 
-                    alt={destination.name}
-                    className="w-full h-full object-cover transition-opacity duration-300"
+                    src="/images/two.png" 
+                    alt="Image 1"
+                    className="w-full h-full object-contain transition-opacity duration-300"
                     style={{ 
                       objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease'
+                      transition: 'opacity 0.3s ease',
+                      height: '100%',
+                      width: '100%',
+                      imageRendering: '-webkit-optimize-contrast'
                     }}
                   />
                 </div>
               </div>
-            ))}
+
+              {/* Image 2 - three.png - Right page of book */}
+              <div 
+                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
+                style={{ 
+                  borderRadius: '6px',
+                  border: '0.5px solid #d1d5db',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                  opacity: 0.95,
+                  transform: 'translateY(0)',
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'left center',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: '68%',
+                  maxWidth: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(15deg) translateZ(20px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                  e.currentTarget.style.opacity = '0.95';
+                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                }}
+              >
+                <div className="relative w-full overflow-hidden" style={{ 
+                  height: 'calc((500px - 24px) / 2)',
+                  borderRadius: '6px'
+                }}>
+                  <img 
+                    src="/images/three.png" 
+                    alt="Image 2"
+                    className="w-full h-full object-contain transition-opacity duration-300"
+                    style={{ 
+                      objectPosition: 'center center',
+                      transition: 'opacity 0.3s ease',
+                      height: '100%',
+                      width: '100%',
+                      imageRendering: '-webkit-optimize-contrast'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Image 3 - four.png - Left page of book */}
+              <div 
+                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
+                style={{ 
+                  borderRadius: '6px',
+                  border: '0.5px solid #d1d5db',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                  opacity: 0.95,
+                  transform: 'translateY(0)',
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'right center',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: '68%',
+                  maxWidth: '100%',
+                  marginRight: '170px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(-15deg) translateZ(20px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                  e.currentTarget.style.opacity = '0.95';
+                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                }}
+              >
+                <div className="relative w-full overflow-hidden" style={{ 
+                  height: 'calc((500px - 24px) / 2)',
+                  borderRadius: '6px'
+                }}>
+                  <img 
+                    src="/images/four.png" 
+                    alt="Image 3"
+                    className="w-full h-full object-contain transition-opacity duration-300"
+                    style={{ 
+                      objectPosition: 'center center',
+                      transition: 'opacity 0.3s ease',
+                      height: '100%',
+                      width: '100%',
+                      imageRendering: '-webkit-optimize-contrast'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Image 4 - five.png - Right page of book */}
+              <div 
+                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
+                style={{ 
+                  borderRadius: '6px',
+                  border: '0.5px solid #d1d5db',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                  opacity: 0.95,
+                  transform: 'translateY(0)',
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'left center',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: '68%',
+                  maxWidth: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(15deg) translateZ(20px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                  e.currentTarget.style.opacity = '0.95';
+                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                }}
+              >
+                <div className="relative w-full overflow-hidden" style={{ 
+                  height: 'calc((500px - 24px) / 2)',
+                  borderRadius: '6px'
+                }}>
+                  <img 
+                    src="/images/five.png" 
+                    alt="Image 4"
+                    className="w-full h-full object-contain transition-opacity duration-300"
+                    style={{ 
+                      objectPosition: 'center center',
+                      transition: 'opacity 0.3s ease',
+                      height: '100%',
+                      width: '100%',
+                      imageRendering: '-webkit-optimize-contrast'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Large Image - Right Side (2/5 width) - Second in order */}
+            <div 
+              className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
+              style={{ 
+                borderRadius: '6px',
+                border: '0.5px solid #d1d5db',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                opacity: 0.95,
+                transform: 'translateY(0)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                marginLeft: '-33px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#d1d5db';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#d1d5db';
+                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                e.currentTarget.style.opacity = '0.95';
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              }}
+            >
+              {/* Large Image - Using one.png */}
+              <div className="relative w-full overflow-hidden" style={{ 
+                height: '500px',
+                borderRadius: '6px'
+              }}>
+                <img 
+                  src="/images/one.png" 
+                  alt="Featured destination"
+                  className="w-full h-full object-contain transition-opacity duration-300"
+                  style={{ 
+                    objectPosition: 'center center',
+                    transition: 'opacity 0.3s ease',
+                    imageRendering: '-webkit-optimize-contrast'
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
