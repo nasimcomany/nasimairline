@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
+import { logout } from '../../store/slices/authSlice';
 import { 
   Bars3Icon, 
   XMarkIcon,
@@ -16,8 +17,14 @@ const EmiratesHeader: React.FC = () => {
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { language, t, fontClass, setLanguage } = useLanguage();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
 
   const menuItems = [
     {
@@ -265,23 +272,32 @@ const EmiratesHeader: React.FC = () => {
               {t('nav.search') || 'SEARCH'}
             </span>
 
-            {/* Login/User */}
+            {/* Login/Register/Logout */}
             {isAuthenticated ? (
-              <Link
-                to="/dashboard"
+              <button
+                onClick={handleLogout}
                 className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`}
                 style={{ textTransform: 'uppercase' }}
               >
-                {user?.first_name || t('nav.login') || 'LOG IN'}
-              </Link>
+                خروج
+              </button>
             ) : (
-              <Link
-                to="/login"
-                className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`}
-                style={{ textTransform: 'uppercase' }}
-              >
-                {t('nav.login') || 'LOG IN'}
-              </Link>
+              <>
+                <Link
+                  to="/login"
+                  className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`}
+                  style={{ textTransform: 'uppercase' }}
+                >
+                  {t('nav.login') || 'ورود'}
+                </Link>
+                <Link
+                  to="/register"
+                  className={`text-white text-sm font-medium hover:text-gray-300 transition-colors ${fontClass}`}
+                  style={{ textTransform: 'uppercase' }}
+                >
+                  ثبت‌نام
+                </Link>
+              </>
             )}
           </div>
 
@@ -332,21 +348,32 @@ const EmiratesHeader: React.FC = () => {
                 
                 <div className="border-t border-gray-700 pt-4 mt-4">
                   {isAuthenticated ? (
-                    <Link
-                      to="/dashboard"
-                      className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                      onClick={() => setIsMenuOpen(false)}
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className={`w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                     >
-                      {user?.first_name || t('nav.login')}
-                    </Link>
+                      خروج
+                    </button>
                   ) : (
-                    <Link
-                      to="/login"
-                      className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {t('nav.login') || 'LOG IN'}
-                    </Link>
+                    <>
+                      <Link
+                        to="/login"
+                        className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {t('nav.login') || 'ورود'}
+                      </Link>
+                      <Link
+                        to="/register"
+                        className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        ثبت‌نام
+                      </Link>
+                    </>
                   )}
                 </div>
               </nav>
