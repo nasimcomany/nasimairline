@@ -46,6 +46,7 @@ const HomePage: React.FC = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('general');
+  const [selectedFAQ, setSelectedFAQ] = useState<string | null>(null);
   
   // Hero Slider state
   // تصاویر هر 12 ثانیه به صورت افقی تغییر می‌کنند
@@ -2500,62 +2501,457 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Weather Section - Your Custom Feature */}
-      <section id="weather" className="relative z-10 pt-4 pb-8 bg-white">
+      <section id="weather" className="relative z-10 pt-4 pb-12 bg-white" style={{ marginTop: '-55px' }}>
         <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
       </section>
 
-      {/* Footer - Emirates Style */}
-      <footer className="relative z-10 bg-gray-800 text-white py-16">
+      {/* FAQ Section - Circular Cards */}
+      <section id="faq" className="relative z-10 py-12 bg-white" style={{ marginTop: '-85px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* About Us Column */}
-            <div>
-              <h4 className={`text-lg font-bold mb-6 ${fontClass}`}>{t('nav.about') || 'درباره ما'}</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.about') || 'درباره ما'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.careers') || 'فرصت‌های شغلی'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.mediaCenter') || 'مرکز رسانه'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.ourPlanet') || 'سیاره ما'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.ourPeople') || 'مردم ما'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.ourCommunities') || 'جوامع ما'}</a></li>
-              </ul>
+          {/* Title Section - Same style as other sections */}
+          <div className="text-center mb-8">
+            <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
+              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+              fontWeight: language === 'fa' ? 300 : 400,
+              letterSpacing: language === 'en' ? '1.5px' : '0.2px',
+              marginBottom: '0',
+              color: '#9ca3af',
+              opacity: 0.85,
+              textTransform: language === 'en' ? 'uppercase' : 'none',
+              fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+            </h2>
+            <p style={{ 
+              fontSize: '16.5px',
+              fontWeight: language === 'fa' ? 300 : 400,
+              letterSpacing: '0.2px',
+              marginBottom: '0',
+              color: '#9ca3af',
+              opacity: 0.85,
+              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+            }}>
+              {language === 'fa' 
+                ? 'پاسخ به سوالات متداول شما درباره نسیم ایر' 
+                : language === 'ar' 
+                ? 'إجابات على الأسئلة الشائعة حول نسيم إير' 
+                : 'Answers to frequently asked questions about Nasim Air'}
+            </p>
+          </div>
+
+          {/* Circular Cards Grid - Minimal and Compact */}
+          <div className="flex flex-wrap justify-center items-center gap-1 md:gap-2 max-w-4xl mx-auto">
+            {/* Card 1: رزرو پرواز */}
+            <div 
+              className="flex flex-col items-center group cursor-pointer flex-shrink-0"
+              onClick={() => setSelectedFAQ('booking')}
+            >
+              <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
+                <img 
+                  src="/images/airplane-clouds-night_864588-19786.jpg" 
+                  alt={language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span 
+                className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
+                style={{
+                  color: '#000',
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}
+              >
+                {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
+              </span>
             </div>
 
-            {/* Help Column */}
-            <div>
-              <h4 className={`text-lg font-bold mb-6 ${fontClass}`}>{t('nav.help') || 'کمک'}</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.helpCenter') || 'مرکز کمک'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.travelUpdates') || 'به‌روزرسانی‌های سفر'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.specialAssistance') || 'کمک ویژه'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.faq') || 'سوالات متداول'}</a></li>
-              </ul>
+            {/* Card 2: خدمات مسافران */}
+            <div 
+              className="flex flex-col items-center group cursor-pointer flex-shrink-0"
+              onClick={() => setSelectedFAQ('services')}
+            >
+              <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
+                <img 
+                  src="/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg" 
+                  alt={language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span 
+                className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
+                style={{
+                  color: '#000',
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}
+              >
+                {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
+              </span>
             </div>
 
-            {/* Book Column */}
-            <div>
-              <h4 className={`text-lg font-bold mb-6 ${fontClass}`}>{t('nav.book') || 'رزرو'}</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.bookFlights') || 'رزرو پرواز'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.travelServices') || 'خدمات سفر'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.transportation') || 'حمل و نقل'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.planningTrip') || 'برنامه‌ریزی سفر'}</a></li>
-              </ul>
+            {/* Card 3: اطلاعات پرواز */}
+            <div 
+              className="flex flex-col items-center group cursor-pointer flex-shrink-0"
+              onClick={() => setSelectedFAQ('flight-info')}
+            >
+              <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
+                <img 
+                  src="/images/airport-crew.jpg" 
+                  alt={language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span 
+                className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
+                style={{
+                  color: '#000',
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}
+              >
+                {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
+              </span>
             </div>
 
-            {/* Manage Column */}
-            <div>
-              <h4 className={`text-lg font-bold mb-6 ${fontClass}`}>{t('nav.manage') || 'مدیریت'}</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.checkIn') || 'چک این'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.manageBooking') || 'مدیریت رزرو'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('footer.chauffeurDrive') || 'راننده شخصی'}</a></li>
-                <li><a href="#" className={`hover:text-white transition-colors ${fontClass}`}>{t('nav.flightStatus') || 'وضعیت پرواز'}</a></li>
-              </ul>
+            {/* Card 4: پشتیبانی و تماس */}
+            <div 
+              className="flex flex-col items-center group cursor-pointer flex-shrink-0"
+              onClick={() => setSelectedFAQ('support')}
+            >
+              <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
+                <img 
+                  src="/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg" 
+                  alt={language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span 
+                className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
+                style={{
+                  color: '#000',
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}
+              >
+                {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Modal */}
+      {selectedFAQ && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSelectedFAQ(null)}
+          ></div>
+          <div className="relative bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="bg-gray-900 px-6 py-4 border-b border-gray-700 flex items-center justify-between">
+              <h3 className={`text-xl font-semibold text-white ${fontClass}`} style={{
+                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              }}>
+                {selectedFAQ === 'booking' && (language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking')}
+                {selectedFAQ === 'services' && (language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services')}
+                {selectedFAQ === 'flight-info' && (language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information')}
+                {selectedFAQ === 'support' && (language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact')}
+              </h3>
+              <button
+                onClick={() => setSelectedFAQ(null)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="px-6 py-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="space-y-6">
+                {selectedFAQ === 'booking' && (
+                  <>
+                    <div>
+                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' ? 'چگونه می‌توانم پرواز خود را رزرو کنم؟' : language === 'ar' ? 'كيف يمكنني حجز رحلتي؟' : 'How can I book my flight?'}
+                      </h4>
+                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' 
+                          ? 'شما می‌توانید به راحتی از طریق وب‌سایت نسیم ایر، اپلیکیشن موبایل یا تماس با مرکز رزرواسیون ما پرواز خود را رزرو کنید. ما با مجوز رسمی از سازمان هواپیمایی کشوری و دارای نماد اعتماد الکترونیکی هستیم و تمامی تراکنش‌های شما به صورت امن انجام می‌شود.'
+                          : language === 'ar'
+                          ? 'يمكنك بسهولة حجز رحلتك من خلال موقع نسيم إير الإلكتروني أو تطبيق الهاتف المحمول أو الاتصال بمركز الحجز لدينا. نحن مرخصون رسمياً من منظمة الطيران المدني ونتحلى بشارة الثقة الإلكترونية، وجميع معاملاتك تتم بأمان.'
+                          : 'You can easily book your flight through Nasim Air website, mobile app, or by contacting our reservation center. We are officially licensed by the Civil Aviation Organization and have an electronic trust badge, and all your transactions are secure.'}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' ? 'آیا امکان تغییر یا لغو رزرو وجود دارد؟' : language === 'ar' ? 'هل يمكن تغيير أو إلغاء الحجز؟' : 'Can I change or cancel my booking?'}
+                      </h4>
+                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa'
+                          ? 'بله، شما می‌توانید با توجه به قوانین و شرایط بلیط خود، تغییرات یا لغو را از طریق پنل کاربری یا تماس با پشتیبانی انجام دهید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای رضایت شما انجام می‌دهیم.'
+                          : language === 'ar'
+                          ? 'نعم، يمكنك إجراء التغييرات أو الإلغاء من خلال لوحة المستخدم أو الاتصال بالدعم وفقاً لقواعد وشروط تذكرتك. كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإرضائك.'
+                          : 'Yes, you can make changes or cancellations through your user panel or by contacting support, according to your ticket rules and conditions. As a trusted Iranian airline, we do our best to satisfy you.'}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {selectedFAQ === 'services' && (
+                  <>
+                    <div>
+                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' ? 'چه خدماتی در طول پرواز ارائه می‌شود؟' : language === 'ar' ? 'ما هي الخدمات المقدمة أثناء الرحلة؟' : 'What services are provided during the flight?'}
+                      </h4>
+                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa'
+                          ? 'نسیم ایر با افتخار خدمات متنوعی از جمله پذیرایی، اینترنت وای‌فای، سرگرمی‌های پرواز و خدمات ویژه برای مسافران VIP ارائه می‌دهد. تمامی خدمت‌رسانان ما آموزش‌دیده و متعهد به ارائه بهترین تجربه سفر برای شما هستند.'
+                          : language === 'ar'
+                          ? 'تقدم نسيم إير بفخر خدمات متنوعة تشمل الضيافة والإنترنت اللاسلكي ووسائل الترفيه وخدمات خاصة لركاب VIP. جميع موظفينا مدربون وملتزمون بتقديم أفضل تجربة سفر لك.'
+                          : 'Nasim Air proudly provides various services including catering, WiFi internet, in-flight entertainment, and special services for VIP passengers. All our staff are trained and committed to providing you with the best travel experience.'}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' ? 'آیا امکان حمل بار اضافی وجود دارد؟' : language === 'ar' ? 'هل يمكن نقل أمتعة إضافية؟' : 'Can I carry extra baggage?'}
+                      </h4>
+                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa'
+                          ? 'بله، شما می‌توانید با پرداخت هزینه اضافی، بار اضافی حمل کنید. اطلاعات دقیق در مورد وزن و ابعاد مجاز را می‌توانید در وب‌سایت ما مشاهده کنید. ما به عنوان یک ایرلاین معتبر، تمام قوانین بین‌المللی را رعایت می‌کنیم.'
+                          : language === 'ar'
+                          ? 'نعم، يمكنك نقل أمتعة إضافية مقابل دفع رسوم إضافية. يمكنك الاطلاع على معلومات دقيقة حول الوزن والأبعاد المسموحة على موقعنا. كشركة طيران موثوقة، نلتزم بجميع القوانين الدولية.'
+                          : 'Yes, you can carry extra baggage for an additional fee. You can find detailed information about allowed weight and dimensions on our website. As a trusted airline, we comply with all international regulations.'}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {selectedFAQ === 'flight-info' && (
+                  <>
+                    <div>
+                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' ? 'چگونه می‌توانم وضعیت پرواز خود را بررسی کنم؟' : language === 'ar' ? 'كيف يمكنني التحقق من حالة رحلتي؟' : 'How can I check my flight status?'}
+                      </h4>
+                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa'
+                          ? 'شما می‌توانید از طریق وب‌سایت نسیم ایر، اپلیکیشن موبایل یا با وارد کردن شماره پرواز در بخش "وضعیت پرواز" اطلاعات دقیق پرواز خود را مشاهده کنید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای اطلاع‌رسانی به موقع انجام می‌دهیم.'
+                          : language === 'ar'
+                          ? 'يمكنك الاطلاع على معلومات دقيقة لرحلتك من خلال موقع نسيم إير أو تطبيق الهاتف المحمول أو بإدخال رقم الرحلة في قسم "حالة الرحلة". كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإعلامك في الوقت المناسب.'
+                          : 'You can view detailed information about your flight through the Nasim Air website, mobile app, or by entering the flight number in the "Flight Status" section. As a trusted Iranian airline, we do our best to inform you in a timely manner.'}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' ? 'چه زمانی باید در فرودگاه حاضر شوم؟' : language === 'ar' ? 'متى يجب أن أكون في المطار؟' : 'When should I arrive at the airport?'}
+                      </h4>
+                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa'
+                          ? 'برای پروازهای داخلی حداقل 90 دقیقه و برای پروازهای بین‌المللی حداقل 3 ساعت قبل از زمان پرواز در فرودگاه حاضر شوید. نسیم ایر با رعایت تمام استانداردهای امنیتی و ایمنی، تجربه سفر امنی را برای شما فراهم می‌کند.'
+                          : language === 'ar'
+                          ? 'للرحلات الداخلية، يجب أن تكون في المطار قبل 90 دقيقة على الأقل، وللرحلات الدولية قبل 3 ساعات على الأقل من وقت الرحلة. تلتزم نسيم إير بجميع معايير الأمن والسلامة لتوفير تجربة سفر آمنة لك.'
+                          : 'For domestic flights, arrive at least 90 minutes before, and for international flights, at least 3 hours before the flight time. Nasim Air, complying with all security and safety standards, provides you with a safe travel experience.'}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {selectedFAQ === 'support' && (
+                  <>
+                    <div>
+                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' ? 'چگونه می‌توانم با پشتیبانی نسیم ایر تماس بگیرم؟' : language === 'ar' ? 'كيف يمكنني الاتصال بدعم نسيم إير؟' : 'How can I contact Nasim Air support?'}
+                      </h4>
+                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa'
+                          ? 'شما می‌توانید از طریق شماره تلفن 021-91000000، ایمیل support@nasimair.ir یا چت آنلاین در وب‌سایت با تیم پشتیبانی ما در ارتباط باشید. تیم پشتیبانی نسیم ایر 24/7 آماده پاسخگویی به سوالات شماست. ما به عنوان یک ایرلاین معتبر ایرانی با نماد اعتماد الکترونیکی، متعهد به ارائه بهترین خدمات به شما هستیم.'
+                          : language === 'ar'
+                          ? 'يمكنك التواصل مع فريق الدعم لدينا عبر الهاتف 021-91000000 أو البريد الإلكتروني support@nasimair.ir أو الدردشة المباشرة على الموقع. فريق دعم نسيم إير جاهز للرد على استفساراتك على مدار الساعة. كشركة طيران إيرانية موثوقة بشارة الثقة الإلكترونية، ملتزمون بتقديم أفضل الخدمات لك.'
+                          : 'You can contact our support team via phone 021-91000000, email support@nasimair.ir, or online chat on the website. Nasim Air support team is available 24/7 to answer your questions. As a trusted Iranian airline with an electronic trust badge, we are committed to providing you with the best services.'}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa' ? 'آیا نسیم ایر دارای مجوز و اعتبار است؟' : language === 'ar' ? 'هل تمتلك نسيم إير ترخيصاً ومصداقية؟' : 'Is Nasim Air licensed and credible?'}
+                      </h4>
+                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {language === 'fa'
+                          ? 'بله، نسیم ایر با مجوز رسمی از سازمان هواپیمایی کشوری فعالیت می‌کند و دارای نماد اعتماد الکترونیکی (اینماد) است. ما تمام استانداردهای ایمنی و امنیتی بین‌المللی را رعایت می‌کنیم و به عنوان یک ایرلاین معتبر ایرانی، سال‌هاست که خدمات پروازی ایمن و با کیفیت ارائه می‌دهیم.'
+                          : language === 'ar'
+                          ? 'نعم، تعمل نسيم إير بترخيص رسمي من منظمة الطيران المدني وتحمل شارة الثقة الإلكترونية. نلتزم بجميع معايير الأمن والسلامة الدولية وكشركة طيران إيرانية موثوقة، نقدم منذ سنوات خدمات طيران آمنة وعالية الجودة.'
+                          : 'Yes, Nasim Air operates with an official license from the Civil Aviation Organization and has an electronic trust badge. We comply with all international safety and security standards, and as a trusted Iranian airline, we have been providing safe and quality flight services for years.'}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-          <div className={`border-t border-gray-700 mt-12 pt-8 text-center text-gray-400 ${fontClass}`}>
-            <p>&copy; 2024 {t('common.nasimAir')} {t('footer.copyright') || 'تمام حقوق محفوظ است'}.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Footer - Same Style as Header */}
+      <footer className="relative z-10 bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* درباره نسیم ایر Column */}
+            <div>
+              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              }}>{language === 'fa' ? 'درباره نسیم ایر' : language === 'ar' ? 'حول نسيم إير' : 'About Nasim Air'}</h4>
+              <ul className="space-y-3">
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'تاریخچه نسیم ایر' : language === 'ar' ? 'تاريخ نسيم إير' : 'Nasim Air History'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'مجوز سازمان هواپیمایی' : language === 'ar' ? 'ترخيص منظمة الطيران' : 'Aviation License'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'فرصت‌های شغلی' : language === 'ar' ? 'فرص العمل' : 'Careers'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'تماس با ما' : language === 'ar' ? 'اتصل بنا' : 'Contact Us'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'مرکز رسانه' : language === 'ar' ? 'مركز الإعلام' : 'Media Center'}</a></li>
+              </ul>
+            </div>
+
+            {/* خدمات Column */}
+            <div>
+              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              }}>{language === 'fa' ? 'خدمات' : language === 'ar' ? 'الخدمات' : 'Services'}</h4>
+              <ul className="space-y-3">
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'رزرو پرواز داخلی' : language === 'ar' ? 'حجز رحلة داخلية' : 'Domestic Flights'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'رزرو پرواز بین‌المللی' : language === 'ar' ? 'حجز رحلة دولية' : 'International Flights'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'بار اضافی' : language === 'ar' ? 'أمتعة إضافية' : 'Extra Baggage'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'خدمات ویژه' : language === 'ar' ? 'خدمات خاصة' : 'Special Services'}</a></li>
+              </ul>
+            </div>
+
+            {/* اطلاعات پرواز Column */}
+            <div>
+              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              }}>{language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}</h4>
+              <ul className="space-y-3">
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'وضعیت پرواز' : language === 'ar' ? 'حالة الرحلة' : 'Flight Status'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'مقصدهای پروازی' : language === 'ar' ? 'الوجهات' : 'Destinations'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'چک این آنلاین' : language === 'ar' ? 'تسجيل الوصول عبر الإنترنت' : 'Online Check-in'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'مدیریت رزرو' : language === 'ar' ? 'إدارة الحجز' : 'Manage Booking'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}</a></li>
+              </ul>
+            </div>
+
+            {/* مجوزها و اعتبارات Column */}
+            <div>
+              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              }}>{language === 'fa' ? 'مجوزها و اعتبارات' : language === 'ar' ? 'التراخيص والاعتمادات' : 'Licenses & Credentials'}</h4>
+              <ul className="space-y-3">
+                <li><a href="https://www.enamad.ir" target="_blank" rel="noopener noreferrer" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'نماد اعتماد الکترونیکی (اینماد)' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge (Enamad)'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO License'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'استانداردهای ایمنی' : language === 'ar' ? 'معايير السلامة' : 'Safety Standards'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'گواهینامه‌های بین‌المللی' : language === 'ar' ? 'الشهادات الدولية' : 'International Certificates'}</a></li>
+                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>{language === 'fa' ? 'حریم خصوصی و امنیت' : language === 'ar' ? 'الخصوصية والأمان' : 'Privacy & Security'}</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className={`border-t border-gray-700 mt-12 pt-8 ${fontClass}`} style={{
+            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+          }}>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm font-medium text-white text-center md:text-right">
+                &copy; 2024 {t('common.nasimAir')} {t('footer.copyright') || 'تمام حقوق محفوظ است'}.
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <a 
+                  href="https://www.enamad.ir" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
+                >
+                  <ShieldCheckIcon className="w-5 h-5" />
+                  <span>{language === 'fa' ? 'نماد اعتماد الکترونیکی' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge'}</span>
+                </a>
+                <span className="text-gray-500">|</span>
+                <span className="text-sm text-gray-400">
+                  {language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO Licensed'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
