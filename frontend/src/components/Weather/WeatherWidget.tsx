@@ -124,9 +124,23 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
   return (
     <div className="w-full py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className={`text-3xl font-bold text-center mb-8 ${fontClass}`}>
-          {language === 'fa' ? 'وضعیت آب و هوا' : language === 'ar' ? 'حالة الطقس' : 'Weather Status'}
-        </h2>
+        <div className="text-center mb-8">
+          <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
+            fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+            fontWeight: language === 'fa' ? 300 : 400,
+            letterSpacing: language === 'en' ? '1.5px' : '0.2px',
+            marginBottom: '0',
+            color: language === 'fa' ? '#9ca3af' : '#9ca3af',
+            opacity: 0.85,
+            textTransform: language === 'en' ? 'uppercase' : 'none',
+            fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            {language === 'fa' ? 'وضعیت آب و هوا' : language === 'ar' ? 'حالة الطقس' : 'Weather Status'}
+          </h2>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {weatherData.map((weather, index) => (

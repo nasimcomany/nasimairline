@@ -7,6 +7,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Estedad:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
+/* Persian Calligraphy Font (Nastaliq) - Real Nastaliq Font */
+/* Download IranNastaliq font from fontchi.com or fontiran.com and place in public/fonts folder */
+@font-face {
+  font-family: 'IranNastaliq';
+  src: url('./fonts/IranNastaliq.woff2') format('woff2'),
+       url('./fonts/IranNastaliq.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Using Google Fonts Nastaliq alternative - Amiri for calligraphy style */
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 * {
   margin: 0;
   padding: 0;

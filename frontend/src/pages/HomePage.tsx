@@ -1517,6 +1517,81 @@ const HomePage: React.FC = () => {
       {/* Featured Destinations Section - Images Only (No Text) */}
       <section className="relative z-10 py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Title Section - Same style as Section 2 */}
+          <div className="text-center mb-8">
+            <div style={{ 
+              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+              color: '#9ca3af',
+              opacity: 0.85
+            }}>
+              {/* First line - Small and Bold */}
+              <p style={{ 
+                fontSize: '16.5px',
+                fontWeight: 700,
+                letterSpacing: '0.2px',
+                marginBottom: '8px',
+                color: '#9ca3af',
+                opacity: 0.85,
+                fontFamily: "'IranNastaliq', 'Nastaliq', 'Al Qalam Taj Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif",
+                fontStyle: 'normal',
+                fontVariant: 'normal',
+                textDecoration: 'none'
+              }}>
+                پرواز با هواپیمایی نسیم ایر
+              </p>
+              
+              {/* Second line - Large */}
+              <h2 style={{ 
+                fontSize: '42px',
+                fontWeight: language === 'fa' ? 300 : 400,
+                letterSpacing: '0.2px',
+                marginBottom: '12px',
+                color: '#9ca3af',
+                opacity: 0.85,
+                fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <img 
+                  src="/images/nasim1.png" 
+                  alt="نسیم ایر" 
+                  style={{ 
+                    width: '2em', 
+                    height: '2em', 
+                    display: 'inline-block',
+                    verticalAlign: 'middle',
+                    objectFit: 'contain'
+                  }} 
+                />
+                نسیم ایر را تجربه کنید
+                <img 
+                  src="/images/nasim1.png" 
+                  alt="نسیم ایر" 
+                  style={{ 
+                    width: '2em', 
+                    height: '2em', 
+                    display: 'inline-block',
+                    verticalAlign: 'middle',
+                    objectFit: 'contain'
+                  }} 
+                />
+              </h2>
+              
+              {/* Third line - Small */}
+              <p style={{ 
+                fontSize: '16.5px',
+                fontWeight: language === 'fa' ? 300 : 400,
+                letterSpacing: '0.2px',
+                marginBottom: '0',
+                color: '#9ca3af',
+                opacity: 0.85
+              }}>
+                سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید.
+              </p>
+            </div>
+          </div>
+          
           {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 justify-center items-center" style={{ perspective: '1000px' }}>
             {/* 4 Small Images - Left Side (2/3 width, 2x2 grid) - First in order */}
@@ -2425,7 +2500,7 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Weather Section - Your Custom Feature */}
-      <section id="weather" className="relative z-10 py-16 bg-white">
+      <section id="weather" className="relative z-10 py-8 bg-white">
         <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
       </section>
 
