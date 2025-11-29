@@ -2500,7 +2500,7 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Weather Section - Your Custom Feature */}
-      <section id="weather" className="relative z-10 py-8 bg-white">
+      <section id="weather" className="relative z-10 pt-4 pb-8 bg-white">
         <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
       </section>
 
