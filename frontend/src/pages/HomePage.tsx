@@ -1720,21 +1720,20 @@ const HomePage: React.FC = () => {
                 border: '0.5px solid #d1d5db',
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                 opacity: 0.95,
-                transform: 'translateY(0)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                marginLeft: '-33px'
+                transform: 'translateY(0) translateX(40px)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = '#d1d5db';
                 e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
                 e.currentTarget.style.opacity = '1';
-                e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
+                e.currentTarget.style.transform = 'translateY(-4px) translateX(60px) scale(1.01)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = '#d1d5db';
                 e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
                 e.currentTarget.style.opacity = '0.95';
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.transform = 'translateY(0) translateX(70px) scale(1)';
               }}
             >
               {/* Large Image - Using one.png */}
@@ -1749,7 +1748,8 @@ const HomePage: React.FC = () => {
                   style={{ 
                     objectPosition: 'center center',
                     transition: 'opacity 0.3s ease',
-                    imageRendering: '-webkit-optimize-contrast'
+                    imageRendering: '-webkit-optimize-contrast',
+                    transform: 'translateY(15px)'
                   }}
                 />
               </div>
@@ -2277,104 +2277,6 @@ const HomePage: React.FC = () => {
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Support Section */}
-      <section id="support" className="relative z-10 py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-6">
-            <h2 className={`text-2xl font-bold text-white mb-1 ${fontClass}`}>
-              {t('support.title')}
-            </h2>
-            <p className={`text-blue-200 text-xs ${fontClass}`}>
-              {t('support.subtitle')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {supportMethods.map((method) => (
-              <div key={method.id} className="group bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden border border-white/20 shadow-xl hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                <div className={`h-20 bg-gradient-to-r ${method.gradient} flex items-center justify-center`}>
-                  <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
-                    <method.icon className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className={`text-lg font-semibold text-white mb-2 ${fontClass}`}>
-                    {method.title}
-                  </h3>
-                  <p className={`text-white/70 text-sm mb-3 ${fontClass}`}>
-                    {method.description}
-                  </p>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 mb-3">
-                    <div className={`text-white font-bold text-lg ${fontClass}`}>
-                      {method.contact}
-                    </div>
-                  </div>
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between">
-                      <span className={`text-white/60 text-xs ${fontClass}`}>{t('support.availability')}:</span>
-                      <span className={`text-green-400 text-xs ${fontClass}`}>{method.availability}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className={`text-white/60 text-xs ${fontClass}`}>{t('support.responseTime')}:</span>
-                      <span className={`text-blue-400 text-xs ${fontClass}`}>{method.responseTime}</span>
-                    </div>
-                  </div>
-                  <button className={`w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass} text-xs`}>
-                    {t('support.contactUs')}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* FAQ Section */}
-          <div className="text-center mb-6 mt-12">
-            <h2 className={`text-xl font-bold text-white mb-2 ${fontClass}`}>
-              {t('support.faq')}
-            </h2>
-            <p className={`text-blue-200 text-sm ${fontClass}`}>
-              {t('support.faqSubtitle')}
-            </p>
-          </div>
-
-          {/* FAQ Categories */}
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
-            {faqCategories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${fontClass} ${
-                  selectedCategory === category.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                <category.icon className="h-4 w-4" />
-                {category.name}
-              </button>
-            ))}
-                    </div>
-
-          {/* FAQ Items */}
-          <div className="space-y-4">
-            {faqs[selectedCategory as keyof typeof faqs].map((faq, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 shadow-xl">
-                <div className="flex items-start gap-3">
-                  <QuestionMarkCircleIcon className="h-5 w-5 text-blue-400 mt-1 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="text-white font-semibold mb-2 ${fontClass}">
-                      {faq.question}
-                    </h3>
-                    <p className="text-white/70 text-sm ${fontClass}">
-                      {faq.answer}
-                    </p>
-                  </div>
-                  </div>
-                </div>
             ))}
           </div>
         </div>
