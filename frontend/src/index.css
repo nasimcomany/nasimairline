@@ -18,6 +18,16 @@
   font-display: swap;
 }
 
+/* DigiHamishe Bold Font */
+@font-face {
+  font-family: 'DigiHamisheBold';
+  src: url('./fonts/DigiHamisheBold.otf') format('opentype'),
+       url('./fonts/DigiHamisheBold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Using Google Fonts Nastaliq alternative - Amiri for calligraphy style */
 @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 

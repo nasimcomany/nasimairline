@@ -856,61 +856,46 @@ const HomePage: React.FC = () => {
 
         {/* Hero Content */}
         <div className="relative z-10 flex-1 flex flex-col">
-          {/* "FLY BETTER" in top right corner - Script font */}
-          <div className="absolute top-8 right-8 z-20">
-            <p 
-              className="text-white text-4xl font-bold"
-            style={{
-                fontFamily: 'Brush Script MT, Brush Script, cursive',
-                transform: 'rotate(-5deg)',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-              }}
-            >
-              {t('home.hero.flyBetter') || 'FLY BETTER'}
-            </p>
-      </div>
-
           {/* Promotional Text - Centered */}
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-4xl px-6">
-              <p 
-                className={`text-white text-2xl md:text-3xl italic mb-4 ${fontClass}`}
-                style={{ 
-                  fontWeight: 300,
-                  letterSpacing: '1px'
-                }}
-              >
-                {t('home.hero.subtitle') || 'It\'s arrived, the'}
-              </p>
               <h1 
-                className={`text-6xl md:text-8xl lg:text-9xl font-bold text-white mb-4 ${fontClass}`}
+                className="text-white mb-6"
                 style={{ 
-                  fontFamily: 'Arial, sans-serif',
-                  fontWeight: 900,
-                  letterSpacing: '-2px',
-                  lineHeight: '1.1'
+                  fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                  fontSize: 'clamp(2.5rem, 8vw, 5rem)',
+                  fontWeight: 'bold',
+                  lineHeight: '1.2',
+                  textShadow: '2px 2px 8px rgba(0,0,0,0.5)',
+                  direction: 'rtl'
                 }}
               >
-                {t('home.hero.title') || 'PREMIUM ECONOMY'}
+                پرواز با نسیم ایر
               </h1>
               <p 
-                className={`text-white text-2xl md:text-3xl italic mb-8 ${fontClass}`}
+                className="text-white mb-8"
                 style={{ 
-                  fontWeight: 300,
-                  letterSpacing: '1px'
+                  fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                  fontSize: 'clamp(1.2rem, 3vw, 2rem)',
+                  fontWeight: 'bold',
+                  lineHeight: '1.5',
+                  textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
+                  direction: 'rtl'
                 }}
               >
-                {t('home.hero.description') || 'you\'ve been waiting for'}
+                سفری امن، راحت و به‌یادماندنی به مقاصد داخلی و بین‌المللی
               </p>
-              <button 
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
-                style={{ 
-                  letterSpacing: '0.5px',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
-                }}
-              >
-                {t('common.learnMore') || 'Learn more'}
-              </button>
+              <div className="flex justify-center">
+                <button 
+                  className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
+                  style={{ 
+                    letterSpacing: '0.5px',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+                  }}
+                >
+                  {t('common.learnMore') || 'بیشتر بدانید'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1854,7 +1839,7 @@ const HomePage: React.FC = () => {
                   onClick={() => setTripType('round')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${fontClass} transition-all duration-300 ${
                     tripType === 'round'
-                      ? 'bg-blue-200 text-blue-900'
+                      ? 'bg-blue-900 text-white'
                       : 'bg-blue-900/50 text-white hover:bg-blue-800/50'
                   }`}
                 >
@@ -1864,7 +1849,7 @@ const HomePage: React.FC = () => {
                   onClick={() => setTripType('oneway')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${fontClass} transition-all duration-300 ${
                     tripType === 'oneway'
-                      ? 'bg-blue-200 text-blue-900'
+                      ? 'bg-blue-900 text-white'
                       : 'bg-blue-900/50 text-white hover:bg-blue-800/50'
                   }`}
                 >
@@ -1874,7 +1859,7 @@ const HomePage: React.FC = () => {
                   onClick={() => setTripType('multi')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${fontClass} transition-all duration-300 ${
                     tripType === 'multi'
-                      ? 'bg-blue-200 text-blue-900'
+                      ? 'bg-blue-900 text-white'
                       : 'bg-blue-900/50 text-white hover:bg-blue-800/50'
                   }`}
                 >
@@ -2002,7 +1987,7 @@ const HomePage: React.FC = () => {
 
               {/* Search button */}
               <div className="flex justify-center">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <button className="bg-blue-900 hover:bg-blue-800 text-white p-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                   <PaperAirplaneIcon className="w-6 h-6" />
                 </button>
               </div>

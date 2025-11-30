@@ -276,7 +276,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       {/* Chat Button - Fixed Position */}
       <button
         onClick={handleToggleChat}
-        className={`fixed bottom-6 ${language === 'en' ? 'right-6' : 'left-6'} z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110 ${
+        className={`fixed bottom-6 ${language === 'en' ? 'right-6' : 'left-6'} z-50 bg-blue-900 hover:bg-blue-800 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110 ${
           isOpen ? 'hidden' : 'block'
         }`}
         aria-label="Open Chat"
@@ -291,7 +291,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
           className={`fixed bottom-6 ${language === 'en' ? 'right-6' : 'left-6'} z-50 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] bg-white rounded-lg shadow-2xl flex flex-col border border-gray-200`}
         >
           {/* Chat Header */}
-          <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+          <div className="bg-blue-900 text-white p-4 rounded-t-lg flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-lg">
                 {t('chat.title')}
@@ -400,13 +400,13 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={t('chat.placeholder')}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
                 disabled={isLoading}
               />
               <button
                 type="submit"
                 disabled={isLoading || !newMessage.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PaperAirplaneIcon className="w-5 h-5" />
               </button>
