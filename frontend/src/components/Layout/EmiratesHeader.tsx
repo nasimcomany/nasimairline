@@ -265,7 +265,7 @@ const EmiratesHeader: React.FC = () => {
                                 if (label.includes('عضویت') || label.includes('Join')) return <StarIcon className="w-7 h-7 text-yellow-500" />;
                                 if (label.includes('کسب') || label.includes('Earn')) return <CurrencyDollarIcon className="w-7 h-7 text-green-600" />;
                                 if (label.includes('استفاده') || label.includes('Spend')) return <TrophyIcon className="w-7 h-7 text-amber-600" />;
-                                if (label.includes('شریک') || label.includes('Partner')) return <UserGroupIcon className="w-7 h-7 text-blue-600" />;
+                                if (label.includes('شریک') || label.includes('شرکا') || label.includes('Partner')) return <UserGroupIcon className="w-7 h-7 text-blue-600" />;
                               }
                               if (key === 'about') {
                                 return <BuildingOfficeIcon className="w-7 h-7 text-gray-700" />;
@@ -315,7 +315,7 @@ const EmiratesHeader: React.FC = () => {
             <div className="hidden lg:flex items-center space-x-6 space-x-reverse relative">
               {/* Blue Flag Section - Next to "فارسی" */}
               <div 
-                className={`bg-blue-600 flex flex-col items-center justify-end absolute ${language === 'en' ? 'right-full' : 'left-full'}`}
+                className={`bg-blue-900 flex flex-col items-center justify-end absolute ${language === 'en' ? 'right-full' : 'left-full'}`}
                 style={{ 
                   width: '80px', // Narrower from sides
                   height: '130px', // Longer from bottom

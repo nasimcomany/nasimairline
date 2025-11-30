@@ -2834,7 +2834,7 @@ const HomePage: React.FC = () => {
               }}>{language === 'fa' ? 'درباره نسیم ایر' : language === 'ar' ? 'حول نسيم إير' : 'About Nasim Air'}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2842,17 +2842,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <DocumentTextIcon className="w-4 h-4 text-black" />
+                    <DocumentTextIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'تاریخچه نسیم ایر' : language === 'ar' ? 'تاريخ نسيم إير' : 'Nasim Air History'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2860,17 +2860,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <ShieldCheckIcon className="w-4 h-4 text-black" />
+                    <ShieldCheckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'مجوز سازمان هواپیمایی' : language === 'ar' ? 'ترخيص منظمة الطيران' : 'Aviation License'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2878,17 +2878,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <UserGroupIcon className="w-4 h-4 text-black" />
+                    <UserGroupIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'فرصت‌های شغلی' : language === 'ar' ? 'فرص العمل' : 'Careers'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2896,17 +2896,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <PhoneIcon className="w-4 h-4 text-black" />
+                    <PhoneIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'تماس با ما' : language === 'ar' ? 'اتصل بنا' : 'Contact Us'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2914,12 +2914,12 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <NewspaperIcon className="w-4 h-4 text-black" />
+                    <NewspaperIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'مرکز رسانه' : language === 'ar' ? 'مركز الإعلام' : 'Media Center'}
                   </a>
                 </li>
@@ -2935,7 +2935,7 @@ const HomePage: React.FC = () => {
               }}>{language === 'fa' ? 'خدمات' : language === 'ar' ? 'الخدمات' : 'Services'}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2943,17 +2943,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <PaperAirplaneIcon className="w-4 h-4 text-black" />
+                    <PaperAirplaneIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'رزرو پرواز داخلی' : language === 'ar' ? 'حجز رحلة داخلية' : 'Domestic Flights'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2961,17 +2961,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <GlobeAltIcon className="w-4 h-4 text-black" />
+                    <GlobeAltIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'رزرو پرواز بین‌المللی' : language === 'ar' ? 'حجز رحلة دولية' : 'International Flights'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2979,17 +2979,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <UserIcon className="w-4 h-4 text-black" />
+                    <UserIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -2997,17 +2997,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <TruckIcon className="w-4 h-4 text-black" />
+                    <TruckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'بار اضافی' : language === 'ar' ? 'أمتعة إضافية' : 'Extra Baggage'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3015,12 +3015,12 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#fff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <SparklesIcon className="w-4 h-4 text-black" />
+                    <SparklesIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'خدمات ویژه' : language === 'ar' ? 'خدمات خاصة' : 'Special Services'}
                   </a>
                 </li>
