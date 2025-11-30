@@ -114,8 +114,8 @@ const EmiratesHeader: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 relative">
       <div className="flex h-16 relative">
-        {/* Dark Navigation Section */}
-        <div className="flex-1 bg-gray-900 flex items-center justify-between">
+        {/* Dark Navigation Section - Glassmorphism */}
+        <div className="flex-1 bg-gray-900/80 backdrop-blur-lg border-b border-white/10 shadow-lg flex items-center justify-between">
           <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
 
           {/* Desktop Navigation - White text */}
@@ -141,7 +141,7 @@ const EmiratesHeader: React.FC = () => {
                 
                 {/* Dropdown Menu */}
                 {activeDropdown === item.key && item.dropdown && (
-                  <div className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-0 w-56 bg-gray-800 rounded-b-lg shadow-lg border-t-2 border-blue-600 py-2 z-50`}>
+                  <div className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-0 w-56 bg-gray-800/90 backdrop-blur-lg rounded-b-lg shadow-xl border-t-2 border-blue-600 border border-white/10 py-2 z-50`}>
                     {item.dropdown.map((subItem, index) => (
                       <Link
                         key={index}
@@ -215,7 +215,7 @@ const EmiratesHeader: React.FC = () => {
                 {/* Language Dropdown Menu */}
                 {isLanguageDropdownOpen && (
                   <div 
-                    className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-gray-800 rounded-lg shadow-lg border border-gray-700 py-2 z-50`}
+                    className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-gray-800/90 backdrop-blur-lg rounded-lg shadow-xl border border-white/10 py-2 z-50`}
                     onMouseEnter={() => {
                       if (languageDropdownTimeoutRef.current) {
                         clearTimeout(languageDropdownTimeoutRef.current);

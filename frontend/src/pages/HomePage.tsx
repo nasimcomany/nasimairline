@@ -2821,8 +2821,8 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Footer - Same Style as Header */}
-      <footer className="relative z-10 bg-gray-900 text-white py-16">
+      {/* Footer - Same Style as Header - Glassmorphism */}
+      <footer className="relative z-10 bg-gray-900/80 backdrop-blur-lg border-t border-white/10 shadow-lg text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* درباره نسیم ایر Column */}
