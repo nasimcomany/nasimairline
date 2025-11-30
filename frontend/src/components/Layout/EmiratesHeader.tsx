@@ -183,7 +183,7 @@ const EmiratesHeader: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 relative">
-      <div className="flex h-16 relative">
+      <div className="flex h-20 relative">
         {/* Dark Navigation Section - Glassmorphism */}
         <div className="flex-1 bg-white/5 backdrop-blur-xl border-b border-white/20 shadow-2xl flex items-center justify-between">
           <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -199,7 +199,7 @@ const EmiratesHeader: React.FC = () => {
               >
                 <Link
                   to={item.path}
-                  className={`px-4 py-2 text-sm font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
+                  className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
                   style={{ 
                     borderBottom: activeDropdown === item.key ? '2px solid #000' : '2px solid transparent',
                     textTransform: 'uppercase',
@@ -216,12 +216,13 @@ const EmiratesHeader: React.FC = () => {
                     }
                   }}
                 >
-                  {item.key === 'book' && <TicketIcon className="w-4 h-4 text-black" />}
-                  {item.key === 'manage' && <ClipboardDocumentIcon className="w-4 h-4 text-black" />}
-                  {item.key === 'experience' && <SparklesIcon className="w-4 h-4 text-black" />}
-                  {item.key === 'wherewefly' && <MapPinIcon className="w-4 h-4 text-black" />}
-                  {item.key === 'about' && <BuildingOfficeIcon className="w-4 h-4 text-black" />}
-                  {item.key === 'help' && <QuestionMarkCircleIcon className="w-4 h-4 text-black" />}
+                  {item.key === 'book' && <TicketIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'manage' && <ClipboardDocumentIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'experience' && <SparklesIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'wherewefly' && <MapPinIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'loyalty' && <StarIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'about' && <BuildingOfficeIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'help' && <QuestionMarkCircleIcon className="w-5 h-5 text-black" />}
                   {item.label}
                 </Link>
                 
@@ -312,18 +313,17 @@ const EmiratesHeader: React.FC = () => {
           </nav>
 
             {/* Right Side Actions - White text */}
-            <div className="hidden lg:flex items-center space-x-6 space-x-reverse relative">
+            <div className="hidden lg:flex items-center space-x-2 space-x-reverse relative">
               {/* Blue Flag Section - Next to "فارسی" */}
               <div 
-                className={`bg-blue-900 flex flex-col items-center justify-end absolute ${language === 'en' ? 'right-full' : 'left-full'}`}
+                className={`bg-blue-900 flex flex-col items-center justify-end absolute`}
                 style={{ 
-                  width: '80px', // Narrower from sides
-                  height: '130px', // Longer from bottom
-                  top: '-40px', // 4cm higher (40px)
-                  marginRight: language === 'en' ? '0' : '12px',
-                  marginLeft: language === 'en' ? '12px' : '0',
+                  width: '125px', // Wider
+                  height: '160px', // Longer from bottom
+                  top: '-30px', // 4cm higher (40px)
+                  ...(language === 'en' ? { right: 'calc(100% - 1px)' } : { left: 'calc(100% - 1px)' }), // 50cm (500px) closer to center
                   padding: '8px',
-                  paddingBottom: 'calc(-150px + 1cm)', // Extra padding at bottom + 2cm
+                  paddingBottom: '-150px', // More padding at bottom
                   boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
                   zIndex: 60
                 }}
@@ -335,9 +335,10 @@ const EmiratesHeader: React.FC = () => {
                     alt="نسیم ایر" 
                     className="object-contain"
                     style={{ 
-                      width: '100px',
+                      width: '165px',
                       height: 'auto',
-                      maxWidth: '100px'
+                      maxWidth: '165px',
+                      transform: 'translateY(15px)' // Move down
                     }}
                   />
                 </Link>
