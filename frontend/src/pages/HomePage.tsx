@@ -2821,8 +2821,8 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Footer - Same Style as Header - Glassmorphism */}
-      <footer className="relative z-10 bg-gray-900/80 backdrop-blur-lg border-t border-white/10 shadow-lg text-white py-16">
+      {/* Footer - Emirates Style */}
+      <footer className="relative z-10 bg-gray-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* درباره نسیم ایر Column */}
@@ -2833,21 +2833,96 @@ const HomePage: React.FC = () => {
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'درباره نسیم ایر' : language === 'ar' ? 'حول نسيم إير' : 'About Nasim Air'}</h4>
               <ul className="space-y-3">
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'تاریخچه نسیم ایر' : language === 'ar' ? 'تاريخ نسيم إير' : 'Nasim Air History'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'مجوز سازمان هواپیمایی' : language === 'ar' ? 'ترخيص منظمة الطيران' : 'Aviation License'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'فرصت‌های شغلی' : language === 'ar' ? 'فرص العمل' : 'Careers'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'تماس با ما' : language === 'ar' ? 'اتصل بنا' : 'Contact Us'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'مرکز رسانه' : language === 'ar' ? 'مركز الإعلام' : 'Media Center'}</a></li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <DocumentTextIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'تاریخچه نسیم ایر' : language === 'ar' ? 'تاريخ نسيم إير' : 'Nasim Air History'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <ShieldCheckIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'مجوز سازمان هواپیمایی' : language === 'ar' ? 'ترخيص منظمة الطيران' : 'Aviation License'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <UserGroupIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'فرصت‌های شغلی' : language === 'ar' ? 'فرص العمل' : 'Careers'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <PhoneIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'تماس با ما' : language === 'ar' ? 'اتصل بنا' : 'Contact Us'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <NewspaperIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'مرکز رسانه' : language === 'ar' ? 'مركز الإعلام' : 'Media Center'}
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -2859,21 +2934,96 @@ const HomePage: React.FC = () => {
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'خدمات' : language === 'ar' ? 'الخدمات' : 'Services'}</h4>
               <ul className="space-y-3">
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'رزرو پرواز داخلی' : language === 'ar' ? 'حجز رحلة داخلية' : 'Domestic Flights'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'رزرو پرواز بین‌المللی' : language === 'ar' ? 'حجز رحلة دولية' : 'International Flights'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'بار اضافی' : language === 'ar' ? 'أمتعة إضافية' : 'Extra Baggage'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'خدمات ویژه' : language === 'ar' ? 'خدمات خاصة' : 'Special Services'}</a></li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <PaperAirplaneIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'رزرو پرواز داخلی' : language === 'ar' ? 'حجز رحلة داخلية' : 'Domestic Flights'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <GlobeAltIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'رزرو پرواز بین‌المللی' : language === 'ar' ? 'حجز رحلة دولية' : 'International Flights'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <UserIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <TruckIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'بار اضافی' : language === 'ar' ? 'أمتعة إضافية' : 'Extra Baggage'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-black hover:text-black transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '4px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}>
+                    <SparklesIcon className="w-4 h-4 text-black" />
+                    {language === 'fa' ? 'خدمات ویژه' : language === 'ar' ? 'خدمات خاصة' : 'Special Services'}
+                  </a>
+                </li>
               </ul>
             </div>
 
