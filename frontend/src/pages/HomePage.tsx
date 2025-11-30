@@ -885,25 +885,319 @@ const HomePage: React.FC = () => {
               >
                 سفری امن، راحت و به‌یادماندنی به مقاصد داخلی و بین‌المللی
               </p>
-              <div className="flex justify-center">
-                <button 
-                  className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
-                  style={{ 
-                    letterSpacing: '0.5px',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
-                  }}
-                >
-                  {t('common.learnMore') || 'بیشتر بدانید'}
-                </button>
-              </div>
             </div>
           </div>
 
           {/* Flight Search Form at Bottom */}
           <div className="max-w-6xl mx-auto w-full px-6 pb-8">
+            <div className="flex justify-center mb-0">
+              <button 
+                className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
+                style={{ 
+                  letterSpacing: '0.5px',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                  marginBottom: '0'
+                }}
+              >
+                {t('common.learnMore') || 'بیشتر بدانید'}
+              </button>
+            </div>
             <EmiratesFlightSearchForm />
               </div>
             </div>
+      </section>
+
+      {/* Elegant Quote Section */}
+      <section className="relative z-10 py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '3rem' }}>
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center">
+            <h2 
+              className="text-gray-500 flex items-center justify-center gap-3 whitespace-nowrap"
+              style={{ 
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontSize: 'clamp(1rem, 2.5vw, 1.8rem)',
+                fontWeight: 'bold',
+                lineHeight: '1.4',
+                letterSpacing: '0.3px'
+              }}
+            >
+              <span style={{ direction: 'rtl' }}>
+                سفری امن، <span className="text-gray-900" style={{ fontWeight: 900 }}>راحت</span> و به یادماندنی
+              </span>
+              <span className="text-gray-400 mx-2" style={{ fontSize: 'clamp(1rem, 2.5vw, 1.8rem)' }}>|</span>
+              <span style={{ direction: 'ltr' }}>
+                A safe, <span className="text-gray-900" style={{ fontWeight: 900 }}>comfortable</span> and memorable trip
+              </span>
+            </h2>
+          </div>
+        </div>
+      </section>
+
+      {/* Special Services Section */}
+      <section className="relative z-10 py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Section Title */}
+          <div className="text-center mb-12">
+            <h2 
+              className="text-gray-900"
+              style={{ 
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+                fontWeight: 'bold',
+                lineHeight: '1.4',
+                letterSpacing: '0.5px',
+                direction: 'rtl'
+              }}
+            >
+              خدمات ویژه نسیم ایر
+            </h2>
+          </div>
+
+          {/* Services Grid - Memory Book Style - 3D Connected Pages */}
+          <div className="flex items-center justify-center gap-2 flex-wrap" style={{ perspective: '1200px' }}>
+            {/* Service 1: Seat Selection */}
+            <div 
+              className="relative group cursor-pointer"
+              style={{
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              <div
+                className="bg-white overflow-hidden transition-all duration-500"
+                style={{
+                  width: '280px',
+                  minHeight: '420px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)',
+                  transform: 'rotateY(-8deg) translateX(-15px)',
+                  transformOrigin: 'left center',
+                  marginRight: '-10px',
+                  zIndex: 1
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'rotateY(-12deg) translateX(15px) translateY(-12px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.12)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'rotateY(-8deg) translateX(15px) translateY(0px) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)';
+                }}
+              >
+                {/* Image Section */}
+                <div className="relative h-56 overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100">
+                  <img 
+                    src="/images/seat-selection.jpg" 
+                    alt="انتخاب صندلی"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+                {/* Text Section */}
+                <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+                  <p 
+                    className="text-gray-800 text-center"
+                    style={{ 
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontSize: '1.4rem',
+                      fontWeight: 'bold',
+                      direction: 'rtl'
+                    }}
+                  >
+                    انتخاب صندلی
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Service 2: Extra Baggage */}
+            <div 
+              className="relative group cursor-pointer"
+              style={{
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              <div
+                className="bg-white overflow-hidden transition-all duration-500"
+                style={{
+                  width: '280px',
+                  minHeight: '420px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)',
+                  transform: 'rotateY(-4deg)',
+                  transformOrigin: 'center center',
+                  marginLeft: '-10px',
+                  zIndex: 2
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'rotateY(-6deg) translateY(-12px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.12)';
+                  e.currentTarget.style.zIndex = '10';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'rotateY(-4deg) translateY(0px) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.zIndex = '2';
+                }}
+              >
+                {/* Image Section */}
+                <div className="relative h-56 overflow-hidden bg-gradient-to-br from-green-50 to-green-100">
+                  <img 
+                    src="/images/extra-baggage.jpg" 
+                    alt="خرید اضافه بار"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+                {/* Text Section */}
+                <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+                  <p 
+                    className="text-gray-800 text-center"
+                    style={{ 
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontSize: '1.4rem',
+                      fontWeight: 'bold',
+                      direction: 'rtl'
+                    }}
+                  >
+                    خرید اضافه بار
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Service 3: Pet Travel */}
+            <div 
+              className="relative group cursor-pointer"
+              style={{
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              <div
+                className="bg-white overflow-hidden transition-all duration-500"
+                style={{
+                  width: '280px',
+                  minHeight: '420px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)',
+                  transform: 'rotateY(4deg)',
+                  transformOrigin: 'center center',
+                  marginLeft: '-10px',
+                  zIndex: 2
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'rotateY(6deg) translateY(-12px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.12)';
+                  e.currentTarget.style.zIndex = '10';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'rotateY(4deg) translateY(0px) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.zIndex = '2';
+                }}
+              >
+                {/* Image Section */}
+                <div className="relative h-56 overflow-hidden bg-gradient-to-br from-amber-50 to-amber-100">
+                  <img 
+                    src="/images/pet-travel.jpg" 
+                    alt="سفر با حیوان خانگی"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+                {/* Text Section */}
+                <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+                  <p 
+                    className="text-gray-800 text-center"
+                    style={{ 
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontSize: '1.4rem',
+                      fontWeight: 'bold',
+                      direction: 'rtl'
+                    }}
+                  >
+                    سفر با حیوان خانگی
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Service 4: Wheelchair Request */}
+            <div 
+              className="relative group cursor-pointer"
+              style={{
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              <div
+                className="bg-white overflow-hidden transition-all duration-500"
+                style={{
+                  width: '280px',
+                  minHeight: '420px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)',
+                  transform: 'rotateY(8deg)',
+                  transformOrigin: 'right center',
+                  marginLeft: '-10px',
+                  zIndex: 1
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'rotateY(12deg) translateY(-12px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.12)';
+                  e.currentTarget.style.zIndex = '10';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'rotateY(8deg) translateY(0px) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.zIndex = '1';
+                }}
+              >
+                {/* Image Section */}
+                <div className="relative h-56 overflow-hidden bg-gradient-to-br from-purple-50 to-purple-100">
+                  <img 
+                    src="/images/wheelchair.jpg" 
+                    alt="درخواست ویلچر"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+                {/* Text Section */}
+                <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+                  <p 
+                    className="text-gray-800 text-center"
+                    style={{ 
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontSize: '1.4rem',
+                      fontWeight: 'bold',
+                      direction: 'rtl'
+                    }}
+                  >
+                    درخواست ویلچر
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Skywards Banner Section - Minimal Emirates Style */}
