@@ -989,7 +989,7 @@ const HomePage: React.FC = () => {
                 {/* Image Section */}
                 <div className="relative h-56 overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100">
                   <img 
-                    src="/images/seat-selection.jpg" 
+                    src="/images/chair.jpeg" 
                     alt="انتخاب صندلی"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
@@ -1050,7 +1050,7 @@ const HomePage: React.FC = () => {
                 {/* Image Section */}
                 <div className="relative h-56 overflow-hidden bg-gradient-to-br from-green-50 to-green-100">
                   <img 
-                    src="/images/extra-baggage.jpg" 
+                    src="/images/overload.jpeg" 
                     alt="خرید اضافه بار"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
@@ -1111,7 +1111,7 @@ const HomePage: React.FC = () => {
                 {/* Image Section */}
                 <div className="relative h-56 overflow-hidden bg-gradient-to-br from-amber-50 to-amber-100">
                   <img 
-                    src="/images/pet-travel.jpg" 
+                    src="/images/TravelingWithPets.jpg" 
                     alt="سفر با حیوان خانگی"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
@@ -1172,7 +1172,7 @@ const HomePage: React.FC = () => {
                 {/* Image Section */}
                 <div className="relative h-56 overflow-hidden bg-gradient-to-br from-purple-50 to-purple-100">
                   <img 
-                    src="/images/wheelchair.jpg" 
+                    src="/images/travelwheelchair.jpeg" 
                     alt="درخواست ویلچر"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
@@ -1196,6 +1196,43 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Elegant Quote Section - Repeated with Airline Logo */}
+      <section className="relative z-10 py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '3rem' }}>
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center">
+            <p 
+              className="text-gray-700 flex items-center justify-center gap-3 whitespace-nowrap flex-wrap"
+              style={{ 
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontSize: 'clamp(1rem, 2.5vw, 1.8rem)',
+                fontWeight: 'normal',
+                lineHeight: '1.4',
+                letterSpacing: '0.5px',
+                direction: 'ltr'
+              }}
+            >
+              <span style={{ fontWeight: 'bold' }}>Excellence in every flight</span>
+              <span className="text-gray-400 mx-1">|</span>
+              <span style={{ fontWeight: 'normal', color: '#6b7280' }}>Trusted by Millions</span>
+              <svg 
+                width="32" 
+                height="32" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-blue-900"
+                style={{ flexShrink: 0 }}
+              >
+                <path 
+                  d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" 
+                  fill="currentColor"
+                />
+              </svg>
+            </p>
           </div>
         </div>
       </section>
@@ -1301,13 +1338,13 @@ const HomePage: React.FC = () => {
             {/* Center - Text - Smaller */}
             <div className="flex-1 text-center md:text-left" style={{ paddingRight: '120px' }}>
               <h3 className={`text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
-                fontFamily: "'Vazirmatn', sans-serif",
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 direction: 'rtl'
               }}>
                 عضویت در برنامه وفاداری نسیم ایر
               </h3>
               <p className={`text-gray-400 text-xs md:text-sm ${fontClass}`} style={{ 
-                fontFamily: "'Vazirmatn', sans-serif",
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 direction: 'rtl'
               }}>
                 عضو برنامه وفاداری نسیم ایر شوید و از پاداش‌های پرواز، امتیازات ویژه و مزایای بیشتر لذت ببرید
@@ -1316,10 +1353,53 @@ const HomePage: React.FC = () => {
 
             {/* Left Side - Button - Smaller */}
             <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-sm" style={{ 
-              fontFamily: "'Vazirmatn', sans-serif",
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: 'rtl'
             }}>
               همین حالا عضو شوید
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Skywards+ Section - Emirates Style */}
+      <section className="relative z-10 py-16 bg-white overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(/images/airport-crew.jpg)'
+          }}
+        >
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="max-w-2xl">
+            <p className={`text-white text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              direction: 'rtl',
+              textTransform: 'none'
+            }}>
+              برنامه وفاداری نسیم ایر
+            </p>
+            <h2 className={`text-4xl md:text-5xl font-bold text-white mb-4 ${fontClass}`} style={{ 
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              direction: 'rtl',
+              fontWeight: 700
+            }}>
+              مزایای خود را با برنامه وفاداری نسیم ایر افزایش دهید
+            </h2>
+            <p className={`text-white text-lg mb-6 ${fontClass}`} style={{ 
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              direction: 'rtl',
+              lineHeight: '1.8'
+            }}>
+              هواپیمایی نسیم ایر با افتخار ارائه‌دهنده خدمات پروازی با کیفیت و ایمن در مسیرهای داخلی و بین‌المللی است. با عضویت در برنامه وفاداری ما، از امتیازات ویژه، پاداش‌های پروازی، دسترسی به لانژ فرودگاه، بار اضافی و نرخ‌های انحصاری بهره‌مند شوید. ما با تکیه بر سال‌ها تجربه و تعهد به رضایت مسافران، سفری راحت، امن و به‌یادماندنی را برای شما فراهم می‌کنیم.
+            </p>
+            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-8 py-3 rounded-lg transition-colors" style={{ 
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              direction: 'rtl'
+            }}>
+              {t('common.learnMore') || 'بیشتر بدانید'}
             </button>
           </div>
         </div>
@@ -1331,12 +1411,12 @@ const HomePage: React.FC = () => {
           {/* Title - Smaller and minimal - Same style as country text but larger size */}
           <div className="text-center mb-8">
             <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
-              fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               fontWeight: language === 'fa' ? 300 : 400,
               letterSpacing: language === 'en' ? '1.5px' : '0.2px',
               marginBottom: '0',
-              color: language === 'fa' ? '#9ca3af' : '#9ca3af', // Soft gray like country text
-              opacity: 0.85,
+              color: '#000000', // Black color
+              opacity: 1,
               textTransform: language === 'en' ? 'uppercase' : 'none',
               fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
               display: 'inline-flex',
@@ -1417,7 +1497,7 @@ const HomePage: React.FC = () => {
                     className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
                       letterSpacing: language === 'en' ? '1.5px' : '0.2px',
-                      fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                       textTransform: language === 'en' ? 'uppercase' : 'none',
                       fontWeight: language === 'fa' ? 300 : 400,
                       lineHeight: '1.4',
@@ -1433,7 +1513,7 @@ const HomePage: React.FC = () => {
                   <h3 
                     className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
-                      fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                       fontWeight: language === 'fa' ? 600 : 700,
                       lineHeight: language === 'fa' ? '1.3' : '1.2',
                       letterSpacing: language === 'en' ? '-0.3px' : 'normal',
@@ -1450,7 +1530,7 @@ const HomePage: React.FC = () => {
                   <p 
                     className={`text-center ${fontClass}`} 
                     style={{ 
-                      fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                       fontWeight: language === 'fa' ? 300 : 400,
                       lineHeight: '1.5',
                       fontSize: language === 'fa' ? '11px' : '13px',
@@ -1746,49 +1826,6 @@ const HomePage: React.FC = () => {
             {/* Submit button */}
             <button className={`w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${fontClass}`}>
               {t('booking.completeBooking')}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Skywards+ Section - Emirates Style */}
-      <section className="relative z-10 py-16 bg-white overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: 'url(/images/airport-crew.jpg)'
-          }}
-        >
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
-          <div className="max-w-2xl">
-            <p className={`text-white text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
-              fontFamily: "'Vazirmatn', sans-serif",
-              direction: 'rtl',
-              textTransform: 'none'
-            }}>
-              برنامه وفاداری نسیم ایر
-            </p>
-            <h2 className={`text-4xl md:text-5xl font-bold text-white mb-4 ${fontClass}`} style={{ 
-              fontFamily: "'Vazirmatn', sans-serif",
-              direction: 'rtl',
-              fontWeight: 700
-            }}>
-              مزایای خود را با برنامه وفاداری نسیم ایر افزایش دهید
-            </h2>
-            <p className={`text-white text-lg mb-6 ${fontClass}`} style={{ 
-              fontFamily: "'Vazirmatn', sans-serif",
-              direction: 'rtl',
-              lineHeight: '1.8'
-            }}>
-              هواپیمایی نسیم ایر با افتخار ارائه‌دهنده خدمات پروازی با کیفیت و ایمن در مسیرهای داخلی و بین‌المللی است. با عضویت در برنامه وفاداری ما، از امتیازات ویژه، پاداش‌های پروازی، دسترسی به لانژ فرودگاه، بار اضافی و نرخ‌های انحصاری بهره‌مند شوید. ما با تکیه بر سال‌ها تجربه و تعهد به رضایت مسافران، سفری راحت، امن و به‌یادماندنی را برای شما فراهم می‌کنیم.
-            </p>
-            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-8 py-3 rounded-lg transition-colors" style={{ 
-              fontFamily: "'Vazirmatn', sans-serif",
-              direction: 'rtl'
-            }}>
-              {t('common.learnMore') || 'بیشتر بدانید'}
             </button>
           </div>
         </div>
