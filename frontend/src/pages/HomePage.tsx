@@ -1405,157 +1405,323 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Destinations Section - Emirates Style */}
+      {/* Featured Destinations Section - Images Only (No Text) */}
       <section className="relative z-10 py-12 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Title - Smaller and minimal - Same style as country text but larger size */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Title Section - Same style as Section 2 */}
           <div className="text-center mb-8">
-            <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
+            <div style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              fontWeight: language === 'fa' ? 300 : 400,
-              letterSpacing: language === 'en' ? '1.5px' : '0.2px',
-              marginBottom: '0',
-              color: '#000000', // Black color
-              opacity: 1,
-              textTransform: language === 'en' ? 'uppercase' : 'none',
-              fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
+              color: '#000000',
+              opacity: 1
             }}>
-              {language === 'fa' ? (
-                <>
-                  مقصدهای ویژه در ایران{' '}
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    زیبا
-                    <img 
-                      src="/images/iran.png" 
-                      alt="ایران" 
-                      style={{ 
-                        width: '1em', 
-                        height: '1em', 
-                        display: 'inline-block',
-                        verticalAlign: 'middle',
-                        objectFit: 'contain'
-                      }} 
-                    />
-                  </span>
-                </>
-              ) : (
-                t('destinations.featured') || 'Featured destinations'
-              )}
-            </h2>
+              {/* First line - Small and Bold */}
+              <p style={{ 
+                fontSize: '16.5px',
+                fontWeight: 700,
+                letterSpacing: '0.2px',
+                marginBottom: '8px',
+                color: '#000000',
+                opacity: 1,
+                fontFamily: "'IranNastaliq', 'Nastaliq', 'Al Qalam Taj Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif",
+                fontStyle: 'normal',
+                fontVariant: 'normal',
+                textDecoration: 'none'
+              }}>
+                پرواز با هواپیمایی نسیم ایر
+              </p>
+              
+              {/* Second line - Large */}
+              <h2 style={{ 
+                fontSize: '42px',
+                fontWeight: language === 'fa' ? 300 : 400,
+                letterSpacing: '0.2px',
+                marginBottom: '12px',
+                color: '#000000',
+                opacity: 1,
+                fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+              }}>
+                <img 
+                  src="/images/nasim1.png" 
+                  alt="نسیم ایر" 
+                  style={{ 
+                    width: '2em', 
+                    height: '2em', 
+                    display: 'inline-block',
+                    verticalAlign: 'middle',
+                    objectFit: 'contain'
+                  }} 
+                />
+                نسیم ایر را تجربه کنید
+                <img 
+                  src="/images/nasim1.png" 
+                  alt="نسیم ایر" 
+                  style={{ 
+                    width: '2em', 
+                    height: '2em', 
+                    display: 'inline-block',
+                    verticalAlign: 'middle',
+                    objectFit: 'contain'
+                  }} 
+                />
+              </h2>
+              
+              {/* Third line - Small */}
+              <p style={{ 
+                fontSize: '16.5px',
+                fontWeight: language === 'fa' ? 300 : 400,
+                letterSpacing: '0.2px',
+                marginBottom: '0',
+                color: '#000000',
+                opacity: 1,
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+              }}>
+                سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید.
+              </p>
+            </div>
           </div>
           
-          {/* Six Compact Destination Cards - Minimal Emirates Style */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {destinations.filter(d => [1, 2, 7, 8, 9, 10].includes(d.id)).map((destination) => (
+          {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 justify-center items-center" style={{ perspective: '1000px' }}>
+            {/* 4 Small Images - Left Side (2/3 width, 2x2 grid) - First in order */}
+            <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-2 gap-1 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible' }}>
+              {/* Image 1 - two.png - Left page of book */}
               <div 
-                key={destination.id} 
-                className="bg-white overflow-hidden group cursor-pointer transition-all duration-300"
+                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
                   borderRadius: '6px',
-                  border: '1px solid rgba(0, 0, 0, 0.08)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                  border: '0.5px solid #d1d5db',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                   opacity: 0.95,
                   transform: 'translateY(0)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'right center',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: '68%',
+                  maxWidth: '100%',
+                  marginRight: '170px'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
                   e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
+                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(-15deg) translateZ(20px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
                   e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
                 }}
               >
-                {/* Image - Much smaller, minimal space */}
                 <div className="relative w-full overflow-hidden" style={{ 
-                  height: '180px', // Much smaller image
-                  borderRadius: '6px 6px 0 0'
+                  height: 'calc((500px - 24px) / 2)',
+                  borderRadius: '6px'
                 }}>
                   <img 
-                    src={destination.image} 
-                    alt={destination.name}
-                    className="w-full h-full object-cover transition-opacity duration-300"
+                    src="/images/two.png" 
+                    alt="Image 1"
+                    className="w-full h-full object-contain transition-opacity duration-300"
                     style={{ 
                       objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease'
+                      transition: 'opacity 0.3s ease',
+                      height: '100%',
+                      width: '100%',
+                      imageRendering: '-webkit-optimize-contrast'
                     }}
                   />
                 </div>
-                
-                {/* Content - Compact and minimal */}
-                <div className="bg-white px-5 py-4">
-                  {/* Country - Very small, soft light gray, centered */}
-                  <p 
-                    className={`mb-2 text-center ${fontClass}`} 
+              </div>
+
+              {/* Image 2 - three.png - Right page of book */}
+              <div 
+                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
+                style={{ 
+                  borderRadius: '6px',
+                  border: '0.5px solid #d1d5db',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                  opacity: 0.95,
+                  transform: 'translateY(0)',
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'left center',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: '68%',
+                  maxWidth: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(15deg) translateZ(20px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                  e.currentTarget.style.opacity = '0.95';
+                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                }}
+              >
+                <div className="relative w-full overflow-hidden" style={{ 
+                  height: 'calc((500px - 24px) / 2)',
+                  borderRadius: '6px'
+                }}>
+                  <img 
+                    src="/images/three.png" 
+                    alt="Image 2"
+                    className="w-full h-full object-contain transition-opacity duration-300"
                     style={{ 
-                      letterSpacing: language === 'en' ? '1.5px' : '0.2px',
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      textTransform: language === 'en' ? 'uppercase' : 'none',
-                      fontWeight: language === 'fa' ? 300 : 400,
-                      lineHeight: '1.4',
-                      fontSize: '9px',
-                      color: language === 'fa' ? '#9ca3af' : '#9ca3af', // Soft gray
-                      opacity: 0.85
+                      objectPosition: 'center center',
+                      transition: 'opacity 0.3s ease',
+                      height: '100%',
+                      width: '100%',
+                      imageRendering: '-webkit-optimize-contrast'
                     }}
-                  >
-                    {destination.country}
-                  </p>
-                  
-                  {/* City Name - Refined size, attractive Persian font, centered */}
-                  <h3 
-                    className={`mb-2 text-center ${fontClass}`} 
-                    style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      fontWeight: language === 'fa' ? 600 : 700,
-                      lineHeight: language === 'fa' ? '1.3' : '1.2',
-                      letterSpacing: language === 'en' ? '-0.3px' : 'normal',
-                      marginBottom: '10px',
-                      fontSize: language === 'fa' ? '20px' : '24px',
-                      color: language === 'fa' ? '#374151' : '#111827', // Soft dark gray for Persian
-                      fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal'
-                    }}
-                  >
-                    {destination.name}
-                  </h3>
-                  
-                  {/* Short beautiful description about the city - Small, minimal, soft gray, centered */}
-                  <p 
-                    className={`text-center ${fontClass}`} 
-                    style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      fontWeight: language === 'fa' ? 300 : 400,
-                      lineHeight: '1.5',
-                      fontSize: language === 'fa' ? '11px' : '13px',
-                      color: language === 'fa' ? '#6b7280' : '#4b5563', // Soft medium gray
-                      opacity: language === 'fa' ? 0.9 : 1
-                    }}
-                  >
-                    {destination.id === 1 
-                      ? (language === 'fa' ? 'شهر هزار رنگ و هزار داستان' : language === 'ar' ? 'مدينة الألوان والأساطير' : 'City of a thousand colors and stories')
-                      : destination.id === 2
-                      ? (language === 'fa' ? 'مهمان‌نواز و روحانی' : language === 'ar' ? 'مضياف وروحاني' : 'Welcoming and spiritual')
-                      : destination.id === 7
-                      ? (language === 'fa' ? 'جزیره رویایی و تفریحی' : language === 'ar' ? 'جزيرة الأحلام والترفيه' : 'Dreamy and recreational island')
-                      : destination.id === 8
-                      ? (language === 'fa' ? 'شهر مقاومت و افتخار' : language === 'ar' ? 'مدينة المقاومة والفخر' : 'City of resistance and honor')
-                      : destination.id === 9
-                      ? (language === 'fa' ? 'شهر تاریخ و معماری اصیل' : language === 'ar' ? 'مدينة التاريخ والعمارة الأصيلة' : 'City of history and authentic architecture')
-                      : destination.id === 10
-                      ? (language === 'fa' ? 'نصف جهان، شهر هنر و زیبایی' : language === 'ar' ? 'نصف العالم، مدينة الفن والجمال' : 'Half of the world, city of art and beauty')
-                      : destination.description
-                    }
-                  </p>
+                  />
                 </div>
               </div>
-            ))}
+
+              {/* Image 3 - four.png - Left page of book */}
+              <div 
+                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
+                style={{ 
+                  borderRadius: '6px',
+                  border: '0.5px solid #d1d5db',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                  opacity: 0.95,
+                  transform: 'translateY(0)',
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'right center',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: '68%',
+                  maxWidth: '100%',
+                  marginRight: '170px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(-15deg) translateZ(20px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                  e.currentTarget.style.opacity = '0.95';
+                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                }}
+              >
+                <div className="relative w-full overflow-hidden" style={{ 
+                  height: 'calc((500px - 24px) / 2)',
+                  borderRadius: '6px'
+                }}>
+                  <img 
+                    src="/images/four.png" 
+                    alt="Image 3"
+                    className="w-full h-full object-contain transition-opacity duration-300"
+                    style={{ 
+                      objectPosition: 'center center',
+                      transition: 'opacity 0.3s ease',
+                      height: '100%',
+                      width: '100%',
+                      imageRendering: '-webkit-optimize-contrast'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Image 4 - five.png - Right page of book */}
+              <div 
+                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
+                style={{ 
+                  borderRadius: '6px',
+                  border: '0.5px solid #d1d5db',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                  opacity: 0.95,
+                  transform: 'translateY(0)',
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'left center',
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                  width: '68%',
+                  maxWidth: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(15deg) translateZ(20px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                  e.currentTarget.style.opacity = '0.95';
+                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                }}
+              >
+                <div className="relative w-full overflow-hidden" style={{ 
+                  height: 'calc((500px - 24px) / 2)',
+                  borderRadius: '6px'
+                }}>
+                  <img 
+                    src="/images/five.png" 
+                    alt="Image 4"
+                    className="w-full h-full object-contain transition-opacity duration-300"
+                    style={{ 
+                      objectPosition: 'center center',
+                      transition: 'opacity 0.3s ease',
+                      height: '100%',
+                      width: '100%',
+                      imageRendering: '-webkit-optimize-contrast'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Large Image - Right Side (2/5 width) - Second in order */}
+            <div 
+              className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
+              style={{ 
+                borderRadius: '6px',
+                border: '0.5px solid #d1d5db',
+                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                opacity: 0.95,
+                transform: 'translateY(0) translateX(40px)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#d1d5db';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.transform = 'translateY(-4px) translateX(60px) scale(1.01)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#d1d5db';
+                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                e.currentTarget.style.opacity = '0.95';
+                e.currentTarget.style.transform = 'translateY(0) translateX(70px) scale(1)';
+              }}
+            >
+              {/* Large Image - Using one.png */}
+              <div className="relative w-full overflow-hidden" style={{ 
+                height: '500px',
+                borderRadius: '6px'
+              }}>
+                <img 
+                  src="/images/one.png" 
+                  alt="Featured destination"
+                  className="w-full h-full object-contain transition-opacity duration-300"
+                  style={{ 
+                    objectPosition: 'center center',
+                    transition: 'opacity 0.3s ease',
+                    imageRendering: '-webkit-optimize-contrast',
+                    transform: 'translateY(15px)'
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1831,321 +1997,157 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Destinations Section - Images Only (No Text) */}
+      {/* Featured Destinations Section - Emirates Style */}
       <section className="relative z-10 py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Title Section - Same style as Section 2 */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Title - Smaller and minimal - Same style as country text but larger size */}
           <div className="text-center mb-8">
-            <div style={{ 
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-              color: '#9ca3af',
-              opacity: 0.85
+            <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              fontWeight: language === 'fa' ? 300 : 400,
+              letterSpacing: language === 'en' ? '1.5px' : '0.2px',
+              marginBottom: '0',
+              color: '#000000', // Black color
+              opacity: 1,
+              textTransform: language === 'en' ? 'uppercase' : 'none',
+              fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
             }}>
-              {/* First line - Small and Bold */}
-              <p style={{ 
-                fontSize: '16.5px',
-                fontWeight: 700,
-                letterSpacing: '0.2px',
-                marginBottom: '8px',
-                color: '#9ca3af',
-                opacity: 0.85,
-                fontFamily: "'IranNastaliq', 'Nastaliq', 'Al Qalam Taj Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif",
-                fontStyle: 'normal',
-                fontVariant: 'normal',
-                textDecoration: 'none'
-              }}>
-                پرواز با هواپیمایی نسیم ایر
-              </p>
-              
-              {/* Second line - Large */}
-              <h2 style={{ 
-                fontSize: '42px',
-                fontWeight: language === 'fa' ? 300 : 400,
-                letterSpacing: '0.2px',
-                marginBottom: '12px',
-                color: '#9ca3af',
-                opacity: 0.85,
-                fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <img 
-                  src="/images/nasim1.png" 
-                  alt="نسیم ایر" 
-                  style={{ 
-                    width: '2em', 
-                    height: '2em', 
-                    display: 'inline-block',
-                    verticalAlign: 'middle',
-                    objectFit: 'contain'
-                  }} 
-                />
-                نسیم ایر را تجربه کنید
-                <img 
-                  src="/images/nasim1.png" 
-                  alt="نسیم ایر" 
-                  style={{ 
-                    width: '2em', 
-                    height: '2em', 
-                    display: 'inline-block',
-                    verticalAlign: 'middle',
-                    objectFit: 'contain'
-                  }} 
-                />
-              </h2>
-              
-              {/* Third line - Small */}
-              <p style={{ 
-                fontSize: '16.5px',
-                fontWeight: language === 'fa' ? 300 : 400,
-                letterSpacing: '0.2px',
-                marginBottom: '0',
-                color: '#9ca3af',
-                opacity: 0.85
-              }}>
-                سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید.
-              </p>
-            </div>
+              {language === 'fa' ? (
+                <>
+                  مقصدهای ویژه در ایران{' '}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    زیبا
+                    <img 
+                      src="/images/iran.png" 
+                      alt="ایران" 
+                      style={{ 
+                        width: '1em', 
+                        height: '1em', 
+                        display: 'inline-block',
+                        verticalAlign: 'middle',
+                        objectFit: 'contain'
+                      }} 
+                    />
+                  </span>
+                </>
+              ) : (
+                t('destinations.featured') || 'Featured destinations'
+              )}
+            </h2>
           </div>
           
-          {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 justify-center items-center" style={{ perspective: '1000px' }}>
-            {/* 4 Small Images - Left Side (2/3 width, 2x2 grid) - First in order */}
-            <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-2 gap-1 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible' }}>
-              {/* Image 1 - two.png - Left page of book */}
+          {/* Six Compact Destination Cards - Minimal Emirates Style */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {destinations.filter(d => [1, 2, 7, 8, 9, 10].includes(d.id)).map((destination) => (
               <div 
-                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
+                key={destination.id} 
+                className="bg-white overflow-hidden group cursor-pointer transition-all duration-300"
                 style={{ 
                   borderRadius: '6px',
-                  border: '0.5px solid #d1d5db',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
                   opacity: 0.95,
                   transform: 'translateY(0)',
-                  transformStyle: 'preserve-3d',
-                  transformOrigin: 'right center',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  width: '68%',
-                  maxWidth: '100%',
-                  marginRight: '170px'
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1)';
                   e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(-15deg) translateZ(20px)';
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
                   e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
                 }}
               >
+                {/* Image - Much smaller, minimal space */}
                 <div className="relative w-full overflow-hidden" style={{ 
-                  height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '6px'
+                  height: '180px', // Much smaller image
+                  borderRadius: '6px 6px 0 0'
                 }}>
                   <img 
-                    src="/images/two.png" 
-                    alt="Image 1"
-                    className="w-full h-full object-contain transition-opacity duration-300"
+                    src={destination.image} 
+                    alt={destination.name}
+                    className="w-full h-full object-cover transition-opacity duration-300"
                     style={{ 
                       objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease',
-                      height: '100%',
-                      width: '100%',
-                      imageRendering: '-webkit-optimize-contrast'
+                      transition: 'opacity 0.3s ease'
                     }}
                   />
                 </div>
-              </div>
-
-              {/* Image 2 - three.png - Right page of book */}
-              <div 
-                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                style={{ 
-                  borderRadius: '6px',
-                  border: '0.5px solid #d1d5db',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                  opacity: 0.95,
-                  transform: 'translateY(0)',
-                  transformStyle: 'preserve-3d',
-                  transformOrigin: 'left center',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  width: '68%',
-                  maxWidth: '100%'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(15deg) translateZ(20px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                  e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
-                }}
-              >
-                <div className="relative w-full overflow-hidden" style={{ 
-                  height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '6px'
-                }}>
-                  <img 
-                    src="/images/three.png" 
-                    alt="Image 2"
-                    className="w-full h-full object-contain transition-opacity duration-300"
+                
+                {/* Content - Compact and minimal */}
+                <div className="bg-white px-5 py-4">
+                  {/* Country - Very small, soft light gray, centered */}
+                  <p 
+                    className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
-                      objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease',
-                      height: '100%',
-                      width: '100%',
-                      imageRendering: '-webkit-optimize-contrast'
+                      letterSpacing: language === 'en' ? '1.5px' : '0.2px',
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      textTransform: language === 'en' ? 'uppercase' : 'none',
+                      fontWeight: language === 'fa' ? 300 : 400,
+                      lineHeight: '1.4',
+                      fontSize: '9px',
+                      color: language === 'fa' ? '#9ca3af' : '#9ca3af', // Soft gray
+                      opacity: 0.85
                     }}
-                  />
+                  >
+                    {destination.country}
+                  </p>
+                  
+                  {/* City Name - Refined size, attractive Persian font, centered */}
+                  <h3 
+                    className={`mb-2 text-center ${fontClass}`} 
+                    style={{ 
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontWeight: language === 'fa' ? 600 : 700,
+                      lineHeight: language === 'fa' ? '1.3' : '1.2',
+                      letterSpacing: language === 'en' ? '-0.3px' : 'normal',
+                      marginBottom: '10px',
+                      fontSize: language === 'fa' ? '20px' : '24px',
+                      color: language === 'fa' ? '#374151' : '#111827', // Soft dark gray for Persian
+                      fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal'
+                    }}
+                  >
+                    {destination.name}
+                  </h3>
+                  
+                  {/* Short beautiful description about the city - Small, minimal, soft gray, centered */}
+                  <p 
+                    className={`text-center ${fontClass}`} 
+                    style={{ 
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontWeight: language === 'fa' ? 300 : 400,
+                      lineHeight: '1.5',
+                      fontSize: language === 'fa' ? '11px' : '13px',
+                      color: language === 'fa' ? '#6b7280' : '#4b5563', // Soft medium gray
+                      opacity: language === 'fa' ? 0.9 : 1
+                    }}
+                  >
+                    {destination.id === 1 
+                      ? (language === 'fa' ? 'شهر هزار رنگ و هزار داستان' : language === 'ar' ? 'مدينة الألوان والأساطير' : 'City of a thousand colors and stories')
+                      : destination.id === 2
+                      ? (language === 'fa' ? 'مهمان‌نواز و روحانی' : language === 'ar' ? 'مضياف وروحاني' : 'Welcoming and spiritual')
+                      : destination.id === 7
+                      ? (language === 'fa' ? 'جزیره رویایی و تفریحی' : language === 'ar' ? 'جزيرة الأحلام والترفيه' : 'Dreamy and recreational island')
+                      : destination.id === 8
+                      ? (language === 'fa' ? 'شهر مقاومت و افتخار' : language === 'ar' ? 'مدينة المقاومة والفخر' : 'City of resistance and honor')
+                      : destination.id === 9
+                      ? (language === 'fa' ? 'شهر تاریخ و معماری اصیل' : language === 'ar' ? 'مدينة التاريخ والعمارة الأصيلة' : 'City of history and authentic architecture')
+                      : destination.id === 10
+                      ? (language === 'fa' ? 'نصف جهان، شهر هنر و زیبایی' : language === 'ar' ? 'نصف العالم، مدينة الفن والجمال' : 'Half of the world, city of art and beauty')
+                      : destination.description
+                    }
+                  </p>
                 </div>
               </div>
-
-              {/* Image 3 - four.png - Left page of book */}
-              <div 
-                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                style={{ 
-                  borderRadius: '6px',
-                  border: '0.5px solid #d1d5db',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                  opacity: 0.95,
-                  transform: 'translateY(0)',
-                  transformStyle: 'preserve-3d',
-                  transformOrigin: 'right center',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  width: '68%',
-                  maxWidth: '100%',
-                  marginRight: '170px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(-15deg) translateZ(20px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                  e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
-                }}
-              >
-                <div className="relative w-full overflow-hidden" style={{ 
-                  height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '6px'
-                }}>
-                  <img 
-                    src="/images/four.png" 
-                    alt="Image 3"
-                    className="w-full h-full object-contain transition-opacity duration-300"
-                    style={{ 
-                      objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease',
-                      height: '100%',
-                      width: '100%',
-                      imageRendering: '-webkit-optimize-contrast'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Image 4 - five.png - Right page of book */}
-              <div 
-                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                style={{ 
-                  borderRadius: '6px',
-                  border: '0.5px solid #d1d5db',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                  opacity: 0.95,
-                  transform: 'translateY(0)',
-                  transformStyle: 'preserve-3d',
-                  transformOrigin: 'left center',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  width: '68%',
-                  maxWidth: '100%'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(15deg) translateZ(20px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                  e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
-                }}
-              >
-                <div className="relative w-full overflow-hidden" style={{ 
-                  height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '6px'
-                }}>
-                  <img 
-                    src="/images/five.png" 
-                    alt="Image 4"
-                    className="w-full h-full object-contain transition-opacity duration-300"
-                    style={{ 
-                      objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease',
-                      height: '100%',
-                      width: '100%',
-                      imageRendering: '-webkit-optimize-contrast'
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Large Image - Right Side (2/5 width) - Second in order */}
-            <div 
-              className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
-              style={{ 
-                borderRadius: '6px',
-                border: '0.5px solid #d1d5db',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                opacity: 0.95,
-                transform: 'translateY(0) translateX(40px)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#d1d5db';
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                e.currentTarget.style.opacity = '1';
-                e.currentTarget.style.transform = 'translateY(-4px) translateX(60px) scale(1.01)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#d1d5db';
-                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                e.currentTarget.style.opacity = '0.95';
-                e.currentTarget.style.transform = 'translateY(0) translateX(70px) scale(1)';
-              }}
-            >
-              {/* Large Image - Using one.png */}
-              <div className="relative w-full overflow-hidden" style={{ 
-                height: '500px',
-                borderRadius: '6px'
-              }}>
-                <img 
-                  src="/images/one.png" 
-                  alt="Featured destination"
-                  className="w-full h-full object-contain transition-opacity duration-300"
-                  style={{ 
-                    objectPosition: 'center center',
-                    transition: 'opacity 0.3s ease',
-                    imageRendering: '-webkit-optimize-contrast',
-                    transform: 'translateY(15px)'
-                  }}
-                />
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -2827,12 +2829,12 @@ const HomePage: React.FC = () => {
           {/* Title Section - Same style as other sections */}
           <div className="text-center mb-8">
             <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               fontWeight: language === 'fa' ? 300 : 400,
               letterSpacing: language === 'en' ? '1.5px' : '0.2px',
               marginBottom: '0',
-              color: '#9ca3af',
-              opacity: 0.85,
+              color: '#000000',
+              opacity: 1,
               textTransform: language === 'en' ? 'uppercase' : 'none',
               fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
               display: 'inline-flex',
@@ -2846,9 +2848,9 @@ const HomePage: React.FC = () => {
               fontWeight: language === 'fa' ? 300 : 400,
               letterSpacing: '0.2px',
               marginBottom: '0',
-              color: '#9ca3af',
-              opacity: 0.85,
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              color: '#000000',
+              opacity: 1,
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif'
             }}>
               {language === 'fa' 
                 ? 'پاسخ به سوالات متداول شما درباره نسیم ایر' 
@@ -2875,8 +2877,8 @@ const HomePage: React.FC = () => {
               <span 
                 className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
                 style={{
-                  color: '#000',
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  color: '#000000',
+                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
                 }}
               >
                 {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
@@ -2898,8 +2900,8 @@ const HomePage: React.FC = () => {
               <span 
                 className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
                 style={{
-                  color: '#000',
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  color: '#000000',
+                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
                 }}
               >
                 {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
@@ -2921,8 +2923,8 @@ const HomePage: React.FC = () => {
               <span 
                 className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
                 style={{
-                  color: '#000',
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  color: '#000000',
+                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
                 }}
               >
                 {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
@@ -2944,8 +2946,8 @@ const HomePage: React.FC = () => {
               <span 
                 className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
                 style={{
-                  color: '#000',
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  color: '#000000',
+                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
                 }}
               >
                 {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}

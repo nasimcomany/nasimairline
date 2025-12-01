@@ -43,7 +43,12 @@ const ScrollToTopButton: React.FC = () => {
     >
       <div className="flex flex-col items-center justify-center">
         <ArrowUpIcon className="h-6 w-6 mb-1 group-hover:animate-bounce" />
-        <span className={`text-xs font-medium ${fontClass} hidden sm:block`}>
+        <span 
+          className={`text-xs font-medium ${fontClass} hidden sm:block`}
+          style={{
+            fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+          }}
+        >
           {t('scrollToTop.title') || 'بازگشت به ابتدای صفحه'}
         </span>
       </div>

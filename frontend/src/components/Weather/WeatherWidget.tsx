@@ -126,12 +126,12 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
-            fontFamily: language === 'en' ? 'Arial, sans-serif' : language === 'fa' ? "'Vazirmatn', sans-serif" : "'Noto Sans Arabic', sans-serif",
+            fontFamily: 'DigiHamisheBold, Arial, sans-serif',
             fontWeight: language === 'fa' ? 300 : 400,
             letterSpacing: language === 'en' ? '1.5px' : '0.2px',
             marginBottom: '0',
-            color: language === 'fa' ? '#9ca3af' : '#9ca3af',
-            opacity: 0.85,
+            color: '#000000',
+            opacity: 1,
             textTransform: language === 'en' ? 'uppercase' : 'none',
             fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
             display: 'inline-flex',
