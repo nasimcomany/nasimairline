@@ -908,7 +908,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Elegant Quote Section */}
-      <section className="relative z-10 py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '3rem' }}>
+      <section className="relative z-10 py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '3rem', marginTop: '-35px' }}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center">
             <h2 
@@ -934,7 +934,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Services Section */}
-      <section className="relative z-10 py-16 bg-white">
+      <section className="relative z-10 py-16 bg-white" style={{ marginTop: '-50px' }}>
         <div className="max-w-7xl mx-auto px-6">
           {/* Section Title */}
           <div className="text-center mb-12">
@@ -1201,7 +1201,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Elegant Quote Section - Repeated with Airline Logo */}
-      <section className="relative z-10 py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '3rem' }}>
+      <section className="relative z-10 py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '3rem', marginTop: '-35px' }}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center">
             <p 
@@ -1238,7 +1238,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Skywards Banner Section - Minimal Emirates Style */}
-      <section className="relative z-10 py-4" style={{ overflow: 'visible' }}>
+      <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
             className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
@@ -1363,7 +1363,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Skywards+ Section - Emirates Style */}
-      <section className="relative z-10 py-16 bg-white overflow-hidden">
+      <section className="relative z-10 py-16 bg-white overflow-hidden" style={{ marginTop: '55px' }}>
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -1998,7 +1998,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Destinations Section - Emirates Style */}
-      <section className="relative z-10 py-12 bg-white">
+      <section className="relative z-10 py-12 bg-white" style={{ marginTop: '-30px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title - Smaller and minimal - Same style as country text but larger size */}
           <div className="text-center mb-8">
