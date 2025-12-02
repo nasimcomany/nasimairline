@@ -179,7 +179,7 @@ const TicketPage: React.FC = () => {
             <img 
               src="/images/nasim0.png" 
               alt="نسیم ایر" 
-              className="h-40 w-auto object-contain"
+              className="h-80 w-auto object-contain"
               style={{ 
                 filter: 'drop-shadow(2px 2px 8px rgba(0,0,0,0.5))'
               }}
@@ -298,12 +298,12 @@ const TicketPage: React.FC = () => {
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+                    className="w-full py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl', paddingRight: '2.5rem', paddingLeft: '1rem' }}
                     required
                   >
                     {ticketCategories.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
+                      <option key={cat.value} value={cat.value} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                         {cat.label} - {cat.description}
                       </option>
                     ))}
@@ -378,11 +378,11 @@ const TicketPage: React.FC = () => {
                     style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                     disabled={formData.category === 'SECURITY'}
                   >
-                    <option value="LOW">{language === 'en' ? 'Low' : language === 'ar' ? 'منخفض' : 'کم'}</option>
-                    <option value="NORMAL">{language === 'en' ? 'Normal' : language === 'ar' ? 'عادي' : 'عادی'}</option>
-                    <option value="HIGH">{language === 'en' ? 'High' : language === 'ar' ? 'عالي' : 'بالا'}</option>
-                    <option value="URGENT">{language === 'en' ? 'Urgent' : language === 'ar' ? 'عاجل' : 'فوری'}</option>
-                    <option value="CRITICAL">{language === 'en' ? 'Critical' : language === 'ar' ? 'حرج' : 'بحرانی'}</option>
+                    <option value="LOW" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'Low' : language === 'ar' ? 'منخفض' : 'کم'}</option>
+                    <option value="NORMAL" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'Normal' : language === 'ar' ? 'عادي' : 'عادی'}</option>
+                    <option value="HIGH" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'High' : language === 'ar' ? 'عالي' : 'بالا'}</option>
+                    <option value="URGENT" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'Urgent' : language === 'ar' ? 'عاجل' : 'فوری'}</option>
+                    <option value="CRITICAL" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'Critical' : language === 'ar' ? 'حرج' : 'بحرانی'}</option>
                   </select>
                 </div>
 

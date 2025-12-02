@@ -211,3 +211,10 @@ body[dir="rtl"] {
 .animate-airplane {
   animation: airplane 8s ease-in-out infinite;
 }
+
+/* Force DigiHamisheBold font for select options */
+select option {
+  font-family: 'DigiHamisheBold', Arial, sans-serif !important;
+  direction: rtl;
+  padding: 8px 12px;
+}

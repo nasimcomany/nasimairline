@@ -25,7 +25,8 @@ import {
   UserGroupIcon,
   TrophyIcon,
   CloudIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  HomeIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -100,6 +101,12 @@ const EmiratesHeader: React.FC = () => {
 
   const menuItems = [
     {
+      key: 'home',
+      label: 'خانه',
+      path: '/',
+      dropdown: []
+    },
+    {
       key: 'book',
       label: t('nav.book') || 'رزرو',
       path: '/flights/search',
@@ -163,13 +170,15 @@ const EmiratesHeader: React.FC = () => {
         { label: t('nav.faq') || 'سوالات متداول', path: '/#faq' },
         { label: t('nav.travelInfo') || 'اطلاعات سفر', path: '/support/travel-info' },
         { label: 'وضعیت آب و هوا', path: '/#weather' },
-        { label: 'ثبت شکایت', path: '/complaint' },
+        { label: 'ثبت شکایت', path: '/tickets' },
       ]
     }
   ];
 
-  const handleMouseEnter = (key: string) => {
-    setActiveDropdown(key);
+  const handleMouseEnter = (key: string, hasDropdown: boolean) => {
+    if (hasDropdown) {
+      setActiveDropdown(key);
+    }
   };
 
   const handleMouseLeave = () => {
@@ -198,7 +207,7 @@ const EmiratesHeader: React.FC = () => {
               <div
                 key={item.key}
                 className="relative h-full flex items-center"
-                onMouseEnter={() => handleMouseEnter(item.key)}
+                onMouseEnter={() => handleMouseEnter(item.key, item.dropdown && item.dropdown.length > 0)}
                 onMouseLeave={handleMouseLeave}
               >
                 <Link
@@ -220,6 +229,7 @@ const EmiratesHeader: React.FC = () => {
                     }
                   }}
                 >
+                  {item.key === 'home' && <HomeIcon className="w-5 h-5 text-black" />}
                   {item.key === 'book' && <TicketIcon className="w-5 h-5 text-black" />}
                   {item.key === 'manage' && <ClipboardDocumentIcon className="w-5 h-5 text-black" />}
                   {item.key === 'experience' && <SparklesIcon className="w-5 h-5 text-black" />}
@@ -231,7 +241,7 @@ const EmiratesHeader: React.FC = () => {
                 </Link>
                 
                 {/* Dropdown Menu with Image */}
-                {activeDropdown === item.key && item.dropdown && (
+                {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && (
                   <div 
                     className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-2 w-[900px] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden`}
                     onMouseLeave={() => {
