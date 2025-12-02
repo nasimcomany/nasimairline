@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import CustomSelect from '../components/CustomSelect/CustomSelect';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ticketService, CreateTicketData } from '../services/ticketService';
 import { AppDispatch, RootState } from '../store';
@@ -44,13 +45,13 @@ const TicketPage: React.FC = () => {
 
   // Ticket categories mapping
   const ticketCategories = [
-    { value: 'HR', label: 'همکاری با ما', description: 'برای درخواست همکاری با منابع انسانی' },
-    { value: 'FEEDBACK', label: 'انتقادات و پیشنهادات', description: 'برای ارسال انتقادات و پیشنهادات به روابط عمومی' },
-    { value: 'MISC', label: 'متفرقه', description: 'سوالات و درخواست‌های متفرقه' },
-    { value: 'SECURITY', label: 'ارتباط با حراست', description: 'برای ارتباط با حراست' },
-    { value: 'BOOKING', label: 'رزرو بلیط', description: 'مشکلات مربوط به رزرو بلیط' },
-    { value: 'FLIGHT', label: 'پرواز', description: 'سوالات و مشکلات مربوط به پرواز' },
-    { value: 'PAYMENT', label: 'پرداخت', description: 'مشکلات مربوط به پرداخت' },
+    { value: 'HR', label: 'همکاری با ما - برای درخواست همکاری با منابع انسانی' },
+    { value: 'FEEDBACK', label: 'انتقادات و پیشنهادات - برای ارسال انتقادات و پیشنهادات به روابط عمومی' },
+    { value: 'MISC', label: 'متفرقه - سوالات و درخواست‌های متفرقه' },
+    { value: 'SECURITY', label: 'ارتباط با حراست - برای ارتباط با حراست' },
+    { value: 'BOOKING', label: 'رزرو بلیط - مشکلات مربوط به رزرو بلیط' },
+    { value: 'FLIGHT', label: 'پرواز - سوالات و مشکلات مربوط به پرواز' },
+    { value: 'PAYMENT', label: 'پرداخت - مشکلات مربوط به پرداخت' },
   ];
 
   useEffect(() => {
@@ -295,19 +296,12 @@ const TicketPage: React.FC = () => {
                     <TicketIcon className="w-5 h-5 text-blue-900" />
                     {language === 'en' ? 'Category' : language === 'ar' ? 'الفئة' : 'دسته‌بندی'}
                   </label>
-                  <select
+                  <CustomSelect
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                    className="w-full py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl', paddingRight: '2.5rem', paddingLeft: '1rem' }}
+                    onChange={(value) => setFormData({ ...formData, category: value as any })}
+                    options={ticketCategories}
                     required
-                  >
-                    {ticketCategories.map((cat) => (
-                      <option key={cat.value} value={cat.value} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {cat.label} - {cat.description}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 {/* Security Notice */}
@@ -371,19 +365,18 @@ const TicketPage: React.FC = () => {
                     <ExclamationCircleIcon className="w-5 h-5 text-blue-900" />
                     {language === 'en' ? 'Priority' : language === 'ar' ? 'الأولوية' : 'اولویت'}
                   </label>
-                  <select
-                    value={formData.priority}
-                    onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+                  <CustomSelect
+                    value={formData.priority || 'NORMAL'}
+                    onChange={(value) => setFormData({ ...formData, priority: value as any })}
+                    options={[
+                      { value: 'LOW', label: language === 'en' ? 'Low' : language === 'ar' ? 'منخفض' : 'کم' },
+                      { value: 'NORMAL', label: language === 'en' ? 'Normal' : language === 'ar' ? 'عادي' : 'عادی' },
+                      { value: 'HIGH', label: language === 'en' ? 'High' : language === 'ar' ? 'عالي' : 'بالا' },
+                      { value: 'URGENT', label: language === 'en' ? 'Urgent' : language === 'ar' ? 'عاجل' : 'فوری' },
+                      { value: 'CRITICAL', label: language === 'en' ? 'Critical' : language === 'ar' ? 'حرج' : 'بحرانی' },
+                    ]}
                     disabled={formData.category === 'SECURITY'}
-                  >
-                    <option value="LOW" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'Low' : language === 'ar' ? 'منخفض' : 'کم'}</option>
-                    <option value="NORMAL" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'Normal' : language === 'ar' ? 'عادي' : 'عادی'}</option>
-                    <option value="HIGH" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'High' : language === 'ar' ? 'عالي' : 'بالا'}</option>
-                    <option value="URGENT" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'Urgent' : language === 'ar' ? 'عاجل' : 'فوری'}</option>
-                    <option value="CRITICAL" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{language === 'en' ? 'Critical' : language === 'ar' ? 'حرج' : 'بحرانی'}</option>
-                  </select>
+                  />
                 </div>
 
                 {/* Submit Button */}

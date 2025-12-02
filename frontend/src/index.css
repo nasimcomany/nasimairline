@@ -212,9 +212,29 @@ body[dir="rtl"] {
   animation: airplane 8s ease-in-out infinite;
 }
 
-/* Force DigiHamisheBold font for select options */
+/* Force DigiHamisheBold font for select and options */
+select.persian-select,
+select.persian-select * {
+  font-family: 'DigiHamisheBold', Arial, sans-serif !important;
+  font-weight: bold !important;
+}
+
+select.persian-select option,
 select option {
   font-family: 'DigiHamisheBold', Arial, sans-serif !important;
-  direction: rtl;
-  padding: 8px 12px;
+  font-weight: bold !important;
+  direction: rtl !important;
+  padding: 8px 12px !important;
+}
+
+/* Additional specificity for all option elements */
+option,
+select > option {
+  font-family: 'DigiHamisheBold', Arial, sans-serif !important;
+  font-weight: bold !important;
+}
+
+/* Ensure font is loaded and applied to dropdowns */
+select[style*="DigiHamisheBold"] option {
+  font-family: inherit !important;
 }
