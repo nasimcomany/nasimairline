@@ -8,7 +8,10 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import FlightSearchPage from './pages/FlightSearchPage';
+import FlightResultsPage from './pages/FlightResultsPage';
 import BookingPage from './pages/BookingPage';
+import BookingManagePage from './pages/BookingManagePage';
+import FlightStatusPage from './pages/FlightStatusPage';
 import DashboardPage from './pages/DashboardPage';
 import ServicesPage from './pages/ServicesPage';
 import GalleryPage from './pages/GalleryPage';
@@ -35,7 +38,11 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/flights/search" element={<FlightSearchPage />} />
+              <Route path="/flights/results" element={<FlightResultsPage />} />
               <Route path="/booking" element={<BookingPage />} />
+              <Route path="/booking/:flightId" element={<BookingPage />} />
+              <Route path="/booking/manage" element={<BookingManagePage />} />
+              <Route path="/flight/status" element={<FlightStatusPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/gallery" element={<GalleryPage />} />

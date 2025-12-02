@@ -8,19 +8,31 @@ import {
   CalendarIcon, 
   TagIcon,
   ClockIcon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowsRightLeftIcon,
+  TicketIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import CitySelect from './CitySelect';
+import PassengerSelect from './PassengerSelect';
+import CustomSelect from '../CustomSelect/CustomSelect';
 
 const EmiratesFlightSearchForm: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'search' | 'manage' | 'whatson' | 'status'>('search');
+  const [activeTab, setActiveTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
+  const [tripType, setTripType] = useState<'roundtrip' | 'oneway'>('roundtrip');
   const [formData, setFormData] = useState({
-    origin: 'Tehran (IKA)',
+    origin: 'THR',
     destination: '',
     departureDate: '',
     returnDate: '',
-    passengers: 1,
+    passengers: { adults: 1, children: 0, infants: 0 },
     class: 'economy' as 'economy' | 'business' | 'first'
+  });
+  
+  // Flight status form
+  const [flightStatusForm, setFlightStatusForm] = useState({
+    flightNumber: '',
+    date: ''
   });
   
   const dispatch = useDispatch();
@@ -38,187 +50,408 @@ const EmiratesFlightSearchForm: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.origin || !formData.destination || !formData.departureDate) {
+      alert('لطفاً تمام فیلدهای ضروری را پر کنید');
+      return;
+    }
+
+    if (tripType === 'roundtrip' && !formData.returnDate) {
+      alert('لطفاً تاریخ برگشت را انتخاب کنید');
+      return;
+    }
+    
     const searchParams = {
       origin: formData.origin,
       destination: formData.destination,
       departureDate: formData.departureDate,
-      returnDate: formData.returnDate || undefined,
+      returnDate: tripType === 'roundtrip' ? formData.returnDate : undefined,
       passengers: formData.passengers,
-      class: formData.class
+      class: formData.class,
+      tripType
     };
 
     dispatch(setSearchParams(searchParams));
-    navigate('/flights/search');
+    navigate('/flights/results');
   };
 
-  const clearOrigin = () => {
-    setFormData(prev => ({ ...prev, origin: '' }));
+  const swapCities = () => {
+    setFormData(prev => ({
+      ...prev,
+      origin: prev.destination,
+      destination: prev.origin
+    }));
   };
 
   return (
     <div className="bg-white/95 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden">
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 overflow-x-auto">
         <button
           onClick={() => setActiveTab('search')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'search'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
-          style={{ 
-            textTransform: 'none',
-            fontSize: '14px'
-          }}
+          style={{ fontSize: '13px' }}
         >
-          <PaperAirplaneIcon className="w-5 h-5" />
-          {t('nav.bookFlights') || 'Search flights'}
+          <PaperAirplaneIcon className="w-4 h-4" />
+          رزرو پرواز
         </button>
         <button
           onClick={() => setActiveTab('manage')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'manage'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
-          style={{ 
-            textTransform: 'none',
-            fontSize: '14px'
-          }}
+          style={{ fontSize: '13px' }}
         >
-          <TagIcon className="w-5 h-5" />
-          {t('nav.manageBooking') || 'Manage booking / Check in'}
+          <TagIcon className="w-4 h-4" />
+          مدیریت رزرو
+        </button>
+        <button
+          onClick={() => setActiveTab('services')}
+          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
+            activeTab === 'services'
+              ? 'text-blue-900 border-b-2 border-blue-900 bg-white'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          } ${fontClass}`}
+          style={{ fontSize: '13px' }}
+        >
+          <MapPinIcon className="w-4 h-4" />
+          خدمات ویژه
         </button>
         <button
           onClick={() => setActiveTab('whatson')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'whatson'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
-          style={{ 
-            textTransform: 'none',
-            fontSize: '14px'
-          }}
+          style={{ fontSize: '13px' }}
         >
-          <PaperAirplaneIcon className="w-5 h-5" />
-          {t('nav.whatsOnFlight') || 'What\'s on your flight'}
+          <PaperAirplaneIcon className="w-4 h-4" />
+          امکانات پرواز
         </button>
         <button
           onClick={() => setActiveTab('status')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'status'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-white'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           } ${fontClass}`}
-          style={{ 
-            textTransform: 'none',
-            fontSize: '14px'
-          }}
+          style={{ fontSize: '13px' }}
         >
-          <ClockIcon className="w-5 h-5" />
-          {t('nav.flightStatus') || 'Flight status'}
+          <ClockIcon className="w-4 h-4" />
+          وضعیت پرواز
         </button>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'search' && (
-        <form onSubmit={handleSearch} className="p-6">
-          <div className="flex gap-4 items-end">
-            {/* Origin */}
-            <div className="flex-1">
-              <label className={`block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wide ${fontClass}`}>
-                {t('home.flightSearch.from') || 'Departure airport'}
-              </label>
-              <div className="relative">
-                <MapPinIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-                <input
-                  type="text"
-                  name="origin"
-                  value={formData.origin}
-                  onChange={handleInputChange}
-                  placeholder={t('home.flightSearch.cityOrAirport') || 'City or airport'}
-                  className="w-full pr-10 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 text-sm bg-white"
-                  style={{ paddingRight: '2.5rem', paddingLeft: '2.5rem' }}
-                />
-                {formData.origin && (
-                  <button
-                    type="button"
-                    onClick={clearOrigin}
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
-                  >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Destination */}
-            <div className="flex-1">
-              <label className={`block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wide ${fontClass}`}>
-                {t('home.flightSearch.to') || 'Arrival airport'}
-              </label>
-              <div className="relative">
-                <MapPinIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-                <input
-                  type="text"
-                  name="destination"
-                  value={formData.destination}
-                  onChange={handleInputChange}
-                  placeholder={t('home.flightSearch.cityOrAirport') || 'City or airport'}
-                  className="w-full pr-10 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 text-sm bg-white"
-                  style={{ paddingRight: '2.5rem', paddingLeft: '2.5rem' }}
-                />
-              </div>
-            </div>
-
-            {/* Continue Button */}
+        <form onSubmit={handleSearch} className="p-4">
+          {/* Trip Type Selector - Compact */}
+          <div className="flex gap-2 mb-3">
             <button
-              type="submit"
-              className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
-              style={{ 
-                minWidth: '120px',
-                height: '48px'
-              }}
+              type="button"
+              onClick={() => setTripType('roundtrip')}
+              className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                tripType === 'roundtrip'
+                  ? 'bg-blue-900 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
             >
-              {t('common.continue') || 'Continue'}
+              رفت و برگشت
+            </button>
+            <button
+              type="button"
+              onClick={() => setTripType('oneway')}
+              className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                tripType === 'oneway'
+                  ? 'bg-blue-900 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+            >
+              یک طرفه
             </button>
           </div>
 
-          {/* Advanced Search Link */}
-          <div className="mt-4">
-            <a 
-              href="#" 
-              className={`text-blue-900 hover:text-blue-800 text-sm ${fontClass}`}
-              style={{ textDecoration: 'none' }}
+          {/* Main Row - All fields in one row */}
+          <div className="flex gap-2 items-end mb-3">
+            {/* Origin */}
+            <div className="flex-1 relative" style={{ minWidth: '140px' }}>
+              <CitySelect
+                value={formData.origin}
+                onChange={(value) => setFormData(prev => ({ ...prev, origin: value }))}
+                label="مبدأ"
+                placeholder="مبدأ"
+              />
+              
+              {/* Swap Button */}
+              <button
+                type="button"
+                onClick={swapCities}
+                className="absolute left-0 top-6 transform translate-x-1/2 z-10 w-6 h-6 bg-blue-900 hover:bg-blue-800 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+                title="تعویض"
+              >
+                <ArrowsRightLeftIcon className="w-3 h-3" />
+              </button>
+            </div>
+
+            {/* Destination */}
+            <div className="flex-1" style={{ minWidth: '140px' }}>
+              <CitySelect
+                value={formData.destination}
+                onChange={(value) => setFormData(prev => ({ ...prev, destination: value }))}
+                label="مقصد"
+                placeholder="مقصد"
+              />
+            </div>
+
+            {/* Departure Date */}
+            <div className="flex-1" style={{ minWidth: '130px' }}>
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                تاریخ رفت
+              </label>
+              <input
+                type="date"
+                value={formData.departureDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, departureDate: e.target.value }))}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                required
+              />
+            </div>
+
+            {/* Return Date */}
+            {tripType === 'roundtrip' && (
+              <div className="flex-1" style={{ minWidth: '130px' }}>
+                <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  تاریخ برگشت
+                </label>
+                <input
+                  type="date"
+                  value={formData.returnDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, returnDate: e.target.value }))}
+                  min={formData.departureDate || new Date().toISOString().split('T')[0]}
+                  className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  required
+                />
+              </div>
+            )}
+
+            {/* Passengers */}
+            <div className="flex-1" style={{ minWidth: '140px' }}>
+              <PassengerSelect
+                value={formData.passengers}
+                onChange={(value) => setFormData(prev => ({ ...prev, passengers: value }))}
+                label="مسافران"
+              />
+            </div>
+
+            {/* Class */}
+            <div className="flex-1" style={{ minWidth: '120px' }}>
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                کلاس
+              </label>
+              <div style={{ height: '42px' }}>
+                <CustomSelect
+                  value={formData.class}
+                  onChange={(value) => setFormData(prev => ({ ...prev, class: value as any }))}
+                  options={[
+                    { value: 'economy', label: 'اکونومی' },
+                    { value: 'business', label: 'بیزینس' },
+                    { value: 'first', label: 'فرست' }
+                  ]}
+                  placeholder="کلاس"
+                />
+              </div>
+            </div>
+
+            {/* Search Button */}
+            <button
+              type="submit"
+              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
             >
-              {t('home.flightSearch.advancedSearch') || 'Advanced search: multi-city, promo codes, flydubai and partner airlines >'}
-            </a>
+              <PaperAirplaneIcon className="w-4 h-4" />
+              جستجو
+            </button>
           </div>
         </form>
       )}
 
       {activeTab === 'manage' && (
-        <div className="p-6">
-          <p className={`text-gray-600 ${fontClass}`}>
-            {t('nav.manageBooking') || 'مدیریت رزرو و چک این'}
-          </p>
+        <div className="p-4">
+          <div className="flex gap-2 items-end">
+            {/* National ID / Passport */}
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                کد ملی / شماره پاسپورت
+              </label>
+              <input
+                type="text"
+                placeholder="کد ملی یا شماره پاسپورت"
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+                required
+              />
+            </div>
+
+            {/* PNR */}
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                کد رهگیری (PNR)
+              </label>
+              <input
+                type="text"
+                placeholder="کد رهگیری 6 رقمی"
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+                required
+              />
+            </div>
+
+            {/* Search Button */}
+            <button
+              type="button"
+              onClick={() => navigate('/booking/manage')}
+              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
+            >
+              <PaperAirplaneIcon className="w-4 h-4" />
+              پیگیری
+            </button>
+          </div>
         </div>
       )}
 
+      {/* Services Tab */}
+      {activeTab === 'services' && (
+        <div className="p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button
+              onClick={() => navigate('/services/seat-selection')}
+              className="p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
+            >
+              <TicketIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+              <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                انتخاب صندلی
+              </p>
+            </button>
+            <button
+              onClick={() => navigate('/services/extra-baggage')}
+              className="p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
+            >
+              <TagIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+              <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                خرید اضافه‌بار
+              </p>
+            </button>
+            <button
+              onClick={() => navigate('/services/pet-travel')}
+              className="p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
+            >
+              <MapPinIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+              <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                سفر با حیوان
+              </p>
+            </button>
+            <button
+              onClick={() => navigate('/services/wheelchair')}
+              className="p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
+            >
+              <ClockIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+              <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                درخواست ویلچر
+              </p>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* What's On Flight Tab */}
       {activeTab === 'whatson' && (
-        <div className="p-6">
-          <p className={`text-gray-600 ${fontClass}`}>
-            {t('nav.whatsOnFlight') || 'آنچه در پرواز شماست'}
-          </p>
+        <div className="p-4">
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                شماره پرواز
+              </label>
+              <input
+                type="text"
+                placeholder="مثال: NA101"
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                تاریخ پرواز
+              </label>
+              <input
+                type="date"
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/flight/amenities')}
+              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
+            >
+              <PaperAirplaneIcon className="w-4 h-4" />
+              مشاهده امکانات
+            </button>
+          </div>
         </div>
       )}
 
+      {/* Flight Status Tab */}
       {activeTab === 'status' && (
-        <div className="p-6">
-          <p className={`text-gray-600 ${fontClass}`}>
-            {t('nav.flightStatus') || 'وضعیت پرواز'}
-          </p>
+        <div className="p-4">
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                شماره پرواز
+              </label>
+              <input
+                type="text"
+                value={flightStatusForm.flightNumber}
+                onChange={(e) => setFlightStatusForm(prev => ({ ...prev, flightNumber: e.target.value }))}
+                placeholder="مثال: NA101"
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                تاریخ پرواز
+              </label>
+              <input
+                type="date"
+                value={flightStatusForm.date}
+                onChange={(e) => setFlightStatusForm(prev => ({ ...prev, date: e.target.value }))}
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/flight/status')}
+              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
+            >
+              <ClockIcon className="w-4 h-4" />
+              بررسی وضعیت
+            </button>
+          </div>
         </div>
       )}
     </div>

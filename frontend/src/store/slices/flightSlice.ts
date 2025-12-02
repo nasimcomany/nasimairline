@@ -23,13 +23,20 @@ interface Flight {
   services: string[];
 }
 
+interface PassengerCount {
+  adults: number;
+  children: number;
+  infants: number;
+}
+
 interface FlightSearchParams {
   origin: string;
   destination: string;
   departureDate: string;
   returnDate?: string;
-  passengers: number;
+  passengers: PassengerCount | number;
   class: 'economy' | 'business' | 'first';
+  tripType?: 'roundtrip' | 'oneway';
 }
 
 interface FlightState {
