@@ -28,7 +28,10 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   style = {}
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownContentRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find(opt => opt.value === value);
 
@@ -43,6 +46,32 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+      const dropdownHeight = Math.min(options.length * 48 + 16, 240); // 48px per option, max 240px
+
+      // If not enough space below but more space above, open upward
+      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+        setDropdownPosition('top');
+      } else {
+        setDropdownPosition('bottom');
+      }
+
+      // Scroll to selected option
+      setTimeout(() => {
+        if (dropdownContentRef.current) {
+          const selectedElement = dropdownContentRef.current.querySelector('[data-selected="true"]');
+          if (selectedElement) {
+            selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }
+      }, 50);
+    }
+  }, [isOpen, options.length]);
+
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
     setIsOpen(false);
@@ -51,46 +80,62 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   return (
     <div ref={dropdownRef} className={`relative ${className}`} style={style}>
       {/* Selected Value Display */}
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        className={`w-full py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right flex items-center justify-between ${
-          disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:border-gray-400'
-        }`}
-        style={{ 
-          fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-          direction: 'rtl',
-          paddingRight: '2.5rem',
-          paddingLeft: '1rem',
-          fontWeight: 'bold'
-        }}
-      >
-        <span className={selectedOption ? 'text-gray-900' : 'text-gray-400'}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <ChevronDownIcon 
-          className={`w-5 h-5 text-gray-500 transition-transform absolute left-3 ${isOpen ? 'transform rotate-180' : ''}`}
-        />
-      </button>
+      <div className="relative">
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+          disabled={disabled}
+          className={`w-full py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right ${
+            disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:border-gray-400'
+          }`}
+          style={{ 
+            fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+            direction: 'rtl',
+            paddingRight: '1rem',
+            paddingLeft: '3rem',
+            fontWeight: 'bold',
+            textAlign: 'right'
+          }}
+        >
+          <span className={selectedOption ? 'text-gray-900' : 'text-gray-400'}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+        </button>
+        
+        {/* Chevron Icon - Outside button to prevent layout issues */}
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+          <ChevronDownIcon 
+            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+          />
+        </div>
+      </div>
 
       {/* Dropdown Options */}
       {isOpen && !disabled && (
         <div 
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          ref={dropdownContentRef}
+          className={`absolute z-[9999] w-full bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto ${
+            dropdownPosition === 'top' ? 'mb-1' : 'mt-1'
+          }`}
           style={{
             fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-            direction: 'rtl'
+            direction: 'rtl',
+            ...(dropdownPosition === 'top' 
+              ? { bottom: '100%', left: 0, right: 0 }
+              : { top: '100%', left: 0, right: 0 }
+            )
           }}
         >
           {options.map((option) => (
             <div
               key={option.value}
+              data-selected={option.value === value}
               onClick={() => handleSelect(option.value)}
               className={`px-4 py-3 cursor-pointer transition-colors text-right ${
                 option.value === value
-                  ? 'bg-blue-50 text-blue-900 font-bold'
-                  : 'text-gray-900 hover:bg-gray-50'
+                  ? 'bg-blue-100 text-blue-900'
+                  : 'text-gray-900 hover:bg-gray-100'
               }`}
               style={{
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',

@@ -238,3 +238,16 @@ select > option {
 select[style*="DigiHamisheBold"] option {
   font-family: inherit !important;
 }
+
+/* Custom Select Dropdown Styling */
+.custom-select-dropdown {
+  position: absolute;
+  z-index: 9999 !important;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+/* Ensure dropdown appears above other elements */
+div[class*="z-[9999]"] {
+  z-index: 9999 !important;
+}
