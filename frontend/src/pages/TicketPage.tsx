@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import GlassmorphismHeader from '../components/Layout/GlassmorphismHeader';
+import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ticketService, CreateTicketData } from '../services/ticketService';
 import { AppDispatch, RootState } from '../store';
@@ -14,7 +14,9 @@ import {
   ExclamationCircleIcon,
   CheckCircleIcon,
   PhoneIcon,
-  XMarkIcon
+  XMarkIcon,
+  DocumentTextIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
 
 const TicketPage: React.FC = () => {
@@ -52,20 +54,14 @@ const TicketPage: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Check authentication
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
     // Load security contact info
     loadSecurityContact();
     
-    // Load user tickets
-    if (activeTab === 'my-tickets') {
+    // Load user tickets if authenticated
+    if (activeTab === 'my-tickets' && isAuthenticated) {
       loadMyTickets();
     }
-  }, [isAuthenticated, activeTab, navigate]);
+  }, [isAuthenticated, activeTab]);
 
   const loadSecurityContact = async () => {
     try {
@@ -162,29 +158,69 @@ const TicketPage: React.FC = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <GlassmorphismHeader />
+    <div className="min-h-screen bg-white">
+      <EmiratesHeader />
       
-      <div className="container mx-auto px-4 py-8 mt-20">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              {language === 'en' ? 'Support Tickets' : language === 'ar' ? 'تذاكر الدعم' : 'پشتیبانی و تیکتینگ'}
-            </h1>
-            <p className="text-gray-600">
-              {language === 'en' 
-                ? 'Create a support ticket or view your existing tickets' 
-                : language === 'ar' 
-                ? 'إنشاء تذكرة دعم أو عرض تذاكرك الموجودة'
-                : 'تیکت پشتیبانی ایجاد کنید یا تیکت‌های خود را مشاهده کنید'}
-            </p>
+      {/* Hero Section - Similar to ComplaintPage */}
+      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/images/nasim0.png" 
+              alt="نسیم ایر" 
+              className="h-40 w-auto object-contain"
+              style={{ 
+                filter: 'drop-shadow(2px 2px 8px rgba(0,0,0,0.5))'
+              }}
+            />
           </div>
+          
+          <h1 
+            className="text-white mb-6"
+            style={{ 
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              fontSize: 'clamp(2.5rem, 8vw, 4rem)',
+              fontWeight: 'bold',
+              lineHeight: '1.2',
+              textShadow: '2px 2px 8px rgba(0,0,0,0.5)',
+              direction: 'rtl'
+            }}
+          >
+            {language === 'en' ? 'Support Tickets' : language === 'ar' ? 'تذاكر الدعم' : 'پشتیبانی و تیکتینگ'}
+          </h1>
+          <p 
+            className="text-white/90 mb-8"
+            style={{ 
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
+              fontWeight: 'normal',
+              lineHeight: '1.6',
+              textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
+              direction: 'rtl'
+            }}
+          >
+            {language === 'en' 
+              ? 'Create a support ticket or view your existing tickets' 
+              : language === 'ar' 
+              ? 'إنشاء تذكرة دعم أو عرض تذاكرك الموجودة'
+              : 'تیکت پشتیبانی ایجاد کنید یا تیکت‌های خود را مشاهده کنید'}
+          </p>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
 
           {/* Tabs */}
           <div className="flex space-x-4 mb-6 border-b border-gray-200">
@@ -192,22 +228,26 @@ const TicketPage: React.FC = () => {
               onClick={() => setActiveTab('create')}
               className={`px-6 py-3 font-medium transition-colors ${
                 activeTab === 'create'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  ? 'text-blue-900 border-b-2 border-blue-900'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
             >
               {language === 'en' ? 'Create Ticket' : language === 'ar' ? 'إنشاء تذكرة' : 'ایجاد تیکت'}
             </button>
             <button
               onClick={() => {
                 setActiveTab('my-tickets');
-                loadMyTickets();
+                if (isAuthenticated) {
+                  loadMyTickets();
+                }
               }}
               className={`px-6 py-3 font-medium transition-colors ${
                 activeTab === 'my-tickets'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  ? 'text-blue-900 border-b-2 border-blue-900'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
             >
               {language === 'en' ? 'My Tickets' : language === 'ar' ? 'تذاكري' : 'تیکت‌های من'}
             </button>
@@ -236,17 +276,30 @@ const TicketPage: React.FC = () => {
 
           {/* Create Ticket Form */}
           {activeTab === 'create' && (
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-900 to-blue-800 px-6 py-4">
+                <h2 
+                  className="text-white text-2xl font-bold"
+                  style={{ 
+                    fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                    direction: 'rtl'
+                  }}
+                >
+                  فرم ایجاد تیکت
+                </h2>
+              </div>
+              <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 {/* Category */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <TicketIcon className="w-5 h-5 text-blue-900" />
                     {language === 'en' ? 'Category' : language === 'ar' ? 'الفئة' : 'دسته‌بندی'}
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                     required
                   >
                     {ticketCategories.map((cat) => (
@@ -278,14 +331,16 @@ const TicketPage: React.FC = () => {
 
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {language === 'en' ? 'Title' : language === 'ar' ? 'العنوان' : 'عنوان'}
+                  <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <DocumentTextIcon className="w-5 h-5 text-blue-900" />
+                    {language === 'en' ? 'Title' : language === 'ar' ? 'العنوان' : 'عنوان'} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                     placeholder={language === 'en' ? 'Enter ticket title' : language === 'ar' ? 'أدخل عنوان التذكرة' : 'عنوان تیکت را وارد کنید'}
                     required={formData.category !== 'SECURITY'}
                     disabled={formData.category === 'SECURITY'}
@@ -294,14 +349,16 @@ const TicketPage: React.FC = () => {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {language === 'en' ? 'Description' : language === 'ar' ? 'الوصف' : 'توضیحات'}
+                  <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <DocumentTextIcon className="w-5 h-5 text-blue-900" />
+                    {language === 'en' ? 'Description' : language === 'ar' ? 'الوصف' : 'توضیحات'} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={6}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={8}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all resize-none"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                     placeholder={language === 'en' ? 'Describe your issue or request' : language === 'ar' ? 'اوصف مشكلتك أو طلبك' : 'مشکل یا درخواست خود را توضیح دهید'}
                     required={formData.category !== 'SECURITY'}
                     disabled={formData.category === 'SECURITY'}
@@ -310,13 +367,15 @@ const TicketPage: React.FC = () => {
 
                 {/* Priority */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <ExclamationCircleIcon className="w-5 h-5 text-blue-900" />
                     {language === 'en' ? 'Priority' : language === 'ar' ? 'الأولوية' : 'اولویت'}
                   </label>
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                     disabled={formData.category === 'SECURITY'}
                   >
                     <option value="LOW">{language === 'en' ? 'Low' : language === 'ar' ? 'منخفض' : 'کم'}</option>
@@ -328,17 +387,29 @@ const TicketPage: React.FC = () => {
                 </div>
 
                 {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading || formData.category === 'SECURITY'}
-                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  {loading ? (
-                    <span>{language === 'en' ? 'Creating...' : language === 'ar' ? 'جارٍ الإنشاء...' : 'در حال ایجاد...'}</span>
-                  ) : (
-                    <span>{language === 'en' ? 'Create Ticket' : language === 'ar' ? 'إنشاء تذكرة' : 'ایجاد تیکت'}</span>
-                  )}
-                </button>
+                <div className="flex justify-center pt-4">
+                  <button
+                    type="submit"
+                    disabled={loading || formData.category === 'SECURITY'}
+                    className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-12 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+                    style={{ 
+                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      direction: 'rtl'
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        {language === 'en' ? 'Creating...' : language === 'ar' ? 'جارٍ الإنشاء...' : 'در حال ایجاد...'}
+                      </>
+                    ) : (
+                      <>
+                        <PaperAirplaneIcon className="w-5 h-5" />
+                        {language === 'en' ? 'Create Ticket' : language === 'ar' ? 'إنشاء تذكرة' : 'ایجاد تیکت'}
+                      </>
+                    )}
+                  </button>
+                </div>
               </form>
             </div>
           )}
