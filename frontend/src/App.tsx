@@ -18,6 +18,7 @@ import OffersPage from './pages/OffersPage';
 import MembershipPage from './pages/MembershipPage';
 import SupportPage from './pages/SupportPage';
 import TicketPage from './pages/TicketPage';
+import ComplaintPage from './pages/ComplaintPage';
 import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
 
@@ -44,6 +45,7 @@ function App() {
               <Route path="/membership" element={<MembershipPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/tickets" element={<TicketPage />} />
+              <Route path="/complaint" element={<ComplaintPage />} />
             </Routes>
             {/* Chat Widget - Available on all pages */}
             <ChatWidget />

@@ -23,7 +23,9 @@ import {
   StarIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
-  TrophyIcon
+  TrophyIcon,
+  CloudIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -158,8 +160,10 @@ const EmiratesHeader: React.FC = () => {
       dropdown: [
         { label: t('nav.helpCenter') || 'مرکز کمک', path: '/support' },
         { label: t('nav.contactUs') || 'تماس با ما', path: '/support' },
-        { label: t('nav.faq') || 'سوالات متداول', path: '/support/faq' },
+        { label: t('nav.faq') || 'سوالات متداول', path: '/#faq' },
         { label: t('nav.travelInfo') || 'اطلاعات سفر', path: '/support/travel-info' },
+        { label: 'وضعیت آب و هوا', path: '/#weather' },
+        { label: 'ثبت شکایت', path: '/complaint' },
       ]
     }
   ];
@@ -272,6 +276,8 @@ const EmiratesHeader: React.FC = () => {
                                 return <BuildingOfficeIcon className="w-7 h-7 text-gray-700" />;
                               }
                               if (key === 'help') {
+                                if (label.includes('آب و هوا') || label.includes('Weather')) return <CloudIcon className="w-7 h-7 text-blue-500" />;
+                                if (label.includes('شکایت') || label.includes('Complaint')) return <ExclamationTriangleIcon className="w-7 h-7 text-red-500" />;
                                 return <QuestionMarkCircleIcon className="w-7 h-7 text-blue-500" />;
                               }
                               return null;
@@ -282,7 +288,28 @@ const EmiratesHeader: React.FC = () => {
                                 key={index}
                                 to={subItem.path}
                                 className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-50 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
-                                onClick={() => setActiveDropdown(null)}
+                                onClick={(e) => {
+                                  setActiveDropdown(null);
+                                  // Handle scroll to sections on homepage
+                                  if (subItem.path.startsWith('/#')) {
+                                    e.preventDefault();
+                                    const sectionId = subItem.path.substring(2); // Remove '/#'
+                                    const section = document.getElementById(sectionId);
+                                    if (section) {
+                                      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                      // If not on homepage, navigate first
+                                      if (window.location.pathname !== '/') {
+                                        navigate('/');
+                                        setTimeout(() => {
+                                          const targetSection = document.getElementById(sectionId);
+                                          if (targetSection) {
+                                            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                          }
+                                        }, 100);
+                                      }
+                                    }
+                                  }
+                                }}
                                 onMouseEnter={() => setHoveredSubItem({key: item.key, index})}
                                 onMouseLeave={() => setHoveredSubItem(null)}
                               >
