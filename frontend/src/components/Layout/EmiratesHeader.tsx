@@ -29,12 +29,15 @@ import {
   HomeIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import AuthModal from '../Auth/AuthModal';
 
 const EmiratesHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [hoveredSubItem, setHoveredSubItem] = useState<{key: string, index: number} | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
@@ -494,8 +497,11 @@ const EmiratesHeader: React.FC = () => {
               </button>
             ) : (
               <>
-                <Link
-                  to="/login"
+                <button
+                  onClick={() => {
+                    setAuthModalMode('login');
+                    setIsAuthModalOpen(true);
+                  }}
                   className={`text-black text-sm font-medium hover:text-black transition-all ${fontClass}`}
                   style={{ 
                     textTransform: 'uppercase',
@@ -510,9 +516,12 @@ const EmiratesHeader: React.FC = () => {
                   }}
                 >
                   {t('nav.login') || 'ورود'}
-                </Link>
-                <Link
-                  to="/register"
+                </button>
+                <button
+                  onClick={() => {
+                    setAuthModalMode('register');
+                    setIsAuthModalOpen(true);
+                  }}
                   className={`text-black text-sm font-medium hover:text-black transition-all ${fontClass}`}
                   style={{ 
                     textTransform: 'uppercase',
@@ -527,7 +536,7 @@ const EmiratesHeader: React.FC = () => {
                   }}
                 >
                   ثبت‌نام
-                </Link>
+                </button>
               </>
             )}
           </div>
@@ -590,20 +599,26 @@ const EmiratesHeader: React.FC = () => {
                     </button>
                   ) : (
                     <>
-                      <Link
-                        to="/login"
-                        className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                        onClick={() => setIsMenuOpen(false)}
+                      <button
+                        onClick={() => {
+                          setAuthModalMode('login');
+                          setIsAuthModalOpen(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
                         {t('nav.login') || 'ورود'}
-                      </Link>
-                      <Link
-                        to="/register"
-                        className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                        onClick={() => setIsMenuOpen(false)}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAuthModalMode('register');
+                          setIsAuthModalOpen(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
                         ثبت‌نام
-                      </Link>
+                      </button>
                     </>
                   )}
                 </div>
