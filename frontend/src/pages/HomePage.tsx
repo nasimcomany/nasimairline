@@ -1360,9 +1360,9 @@ const HomePage: React.FC = () => {
             {/* Left Side - Button - Smaller */}
             <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-sm" style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: 'rtl'
+              direction: language === 'en' ? 'ltr' : 'rtl'
             }}>
-              همین حالا عضو شوید
+              {t('home.loyalty.joinNow')}
             </button>
           </div>
         </div>
@@ -1434,7 +1434,7 @@ const HomePage: React.FC = () => {
                 fontVariant: 'normal',
                 textDecoration: 'none'
               }}>
-                پرواز با هواپیمایی نسیم ایر
+                {t('home.experience.flyWithNasim')}
               </p>
               
               {/* Second line - Large */}
@@ -1462,7 +1462,7 @@ const HomePage: React.FC = () => {
                     objectFit: 'contain'
                   }} 
                 />
-                نسیم ایر را تجربه کنید
+                {t('home.experience.exploreNasim')}
                 <img 
                   src="/images/nasim1.png" 
                   alt="نسیم ایر" 
@@ -1486,7 +1486,7 @@ const HomePage: React.FC = () => {
                 opacity: 1,
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif'
               }}>
-                سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید.
+                {t('home.experience.planUnforgettable')}
               </p>
             </div>
           </div>

@@ -51,12 +51,12 @@ const EmiratesFlightSearchForm: React.FC = () => {
     e.preventDefault();
     
     if (!formData.origin || !formData.destination || !formData.departureDate) {
-      alert('لطفاً تمام فیلدهای ضروری را پر کنید');
+      alert(t('home.flightSearch.pleaseFillFields'));
       return;
     }
 
     if (tripType === 'roundtrip' && !formData.returnDate) {
-      alert('لطفاً تاریخ برگشت را انتخاب کنید');
+      alert(t('home.flightSearch.pleaseReturnDate'));
       return;
     }
     
@@ -96,7 +96,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           style={{ fontSize: '13px' }}
         >
           <PaperAirplaneIcon className="w-4 h-4" />
-          رزرو پرواز
+          {t('home.flightSearch.bookFlight')}
         </button>
         <button
           onClick={() => setActiveTab('manage')}
@@ -108,7 +108,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           style={{ fontSize: '13px' }}
         >
           <TagIcon className="w-4 h-4" />
-          مدیریت رزرو
+          {t('home.flightSearch.manageBooking')}
         </button>
         <button
           onClick={() => setActiveTab('services')}
@@ -120,7 +120,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           style={{ fontSize: '13px' }}
         >
           <MapPinIcon className="w-4 h-4" />
-          خدمات ویژه
+          {t('home.flightSearch.specialServices')}
         </button>
         <button
           onClick={() => setActiveTab('whatson')}
@@ -132,7 +132,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           style={{ fontSize: '13px' }}
         >
           <PaperAirplaneIcon className="w-4 h-4" />
-          امکانات پرواز
+          {t('home.flightSearch.flightFacilities')}
         </button>
         <button
           onClick={() => setActiveTab('status')}
@@ -144,7 +144,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
           style={{ fontSize: '13px' }}
         >
           <ClockIcon className="w-4 h-4" />
-          وضعیت پرواز
+          {t('home.flightSearch.flightStatus')}
         </button>
       </div>
 
@@ -163,7 +163,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
               }`}
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
             >
-              رفت و برگشت
+              {t('home.flightSearch.roundTrip')}
             </button>
             <button
               type="button"
@@ -175,7 +175,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
               }`}
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
             >
-              یک طرفه
+              {t('home.flightSearch.oneWay')}
             </button>
           </div>
 
@@ -186,8 +186,8 @@ const EmiratesFlightSearchForm: React.FC = () => {
               <CitySelect
                 value={formData.origin}
                 onChange={(value) => setFormData(prev => ({ ...prev, origin: value }))}
-                label="مبدأ"
-                placeholder="مبدأ"
+                label={t('home.flightSearch.origin')}
+                placeholder={t('home.flightSearch.origin')}
               />
               
               {/* Swap Button */}
@@ -195,7 +195,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
                 type="button"
                 onClick={swapCities}
                 className="absolute left-0 top-6 transform translate-x-1/2 z-10 w-6 h-6 bg-blue-900 hover:bg-blue-800 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
-                title="تعویض"
+                title={t('home.flightSearch.swap')}
               >
                 <ArrowsRightLeftIcon className="w-3 h-3" />
               </button>
@@ -206,15 +206,15 @@ const EmiratesFlightSearchForm: React.FC = () => {
               <CitySelect
                 value={formData.destination}
                 onChange={(value) => setFormData(prev => ({ ...prev, destination: value }))}
-                label="مقصد"
-                placeholder="مقصد"
+                label={t('home.flightSearch.destination')}
+                placeholder={t('home.flightSearch.destination')}
               />
             </div>
 
             {/* Departure Date */}
             <div className="flex-1" style={{ minWidth: '130px' }}>
               <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                تاریخ رفت
+                {t('home.flightSearch.departDate')}
               </label>
               <input
                 type="date"
@@ -231,7 +231,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
             {tripType === 'roundtrip' && (
               <div className="flex-1" style={{ minWidth: '130px' }}>
                 <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  تاریخ برگشت
+                  {t('home.flightSearch.returnDate')}
                 </label>
                 <input
                   type="date"
@@ -250,14 +250,14 @@ const EmiratesFlightSearchForm: React.FC = () => {
               <PassengerSelect
                 value={formData.passengers}
                 onChange={(value) => setFormData(prev => ({ ...prev, passengers: value }))}
-                label="مسافران"
+                label={t('home.flightSearch.passengers')}
               />
             </div>
 
             {/* Class */}
             <div className="flex-1" style={{ minWidth: '120px' }}>
               <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                کلاس
+                {t('home.flightSearch.class')}
               </label>
               <div style={{ height: '42px' }}>
                 <CustomSelect
@@ -280,7 +280,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
             >
               <PaperAirplaneIcon className="w-4 h-4" />
-              جستجو
+              {t('home.flightSearch.search')}
             </button>
           </div>
         </form>
@@ -292,11 +292,11 @@ const EmiratesFlightSearchForm: React.FC = () => {
             {/* National ID / Passport */}
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                کد ملی / شماره پاسپورت
+                {t('home.flightSearch.nationalIdPassport')}
               </label>
               <input
                 type="text"
-                placeholder="کد ملی یا شماره پاسپورت"
+                placeholder={t('home.flightSearch.nationalIdPlaceholder')}
                 className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                 required
@@ -306,11 +306,11 @@ const EmiratesFlightSearchForm: React.FC = () => {
             {/* PNR */}
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                کد رهگیری (PNR)
+                {t('home.flightSearch.pnrCode')}
               </label>
               <input
                 type="text"
-                placeholder="کد رهگیری 6 رقمی"
+                placeholder={t('home.flightSearch.pnrPlaceholder')}
                 className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                 required
@@ -341,7 +341,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
             >
               <TicketIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                انتخاب صندلی
+                {t('home.flightSearch.seatSelection')}
               </p>
             </button>
             <button
@@ -350,7 +350,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
             >
               <TagIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                خرید اضافه‌بار
+                {t('home.flightSearch.extraBaggage')}
               </p>
             </button>
             <button
@@ -359,7 +359,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
             >
               <MapPinIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                سفر با حیوان
+                {t('home.flightSearch.petTravel')}
               </p>
             </button>
             <button
@@ -368,7 +368,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
             >
               <ClockIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                درخواست ویلچر
+                {t('home.flightSearch.wheelchair')}
               </p>
             </button>
           </div>
