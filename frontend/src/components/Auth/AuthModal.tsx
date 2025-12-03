@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { login } from '../../store/slices/authSlice';
+import { loginUser, registerUser } from '../../store/slices/authSlice';
 import { AppDispatch } from '../../store';
 
 interface AuthModalProps {
@@ -92,9 +92,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     }
 
     try {
-      // TODO: Replace with actual API call
-      await dispatch(login({
-        username: loginForm.nationalId,
+      await dispatch(loginUser({
+        email: loginForm.nationalId,
         password: loginForm.password
       })).unwrap();
       
@@ -149,20 +148,23 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     }
 
     try {
-      // TODO: Replace with actual API call
-      console.log('Register data:', {
-        nationality: registerForm.nationality,
-        username: registerForm.nationalId,
-        birthDate: registerForm.birthDate,
-        password: registerForm.password
-      });
+      await dispatch(registerUser({
+        email: `${registerForm.nationalId}@nasimair.com`,
+        password: registerForm.password,
+        password_confirm: registerForm.confirmPassword,
+        first_name: registerForm.nationalId,
+        last_name: registerForm.nationality,
+        phone_number: '',
+        date_of_birth: registerForm.birthDate,
+        nationality: registerForm.nationality
+      })).unwrap();
 
       setSuccess('ثبت‌نام با موفقیت انجام شد. در حال ورود...');
       
       // Auto login after registration
       setTimeout(async () => {
-        await dispatch(login({
-          username: registerForm.nationalId,
+        await dispatch(loginUser({
+          email: registerForm.nationalId,
           password: registerForm.password
         })).unwrap();
         onClose();
