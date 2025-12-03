@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { loginUser, registerUser } from '../../store/slices/authSlice';
 import { AppDispatch } from '../../store';
+import CustomSelect from '../CustomSelect/CustomSelect';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -272,8 +273,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 </label>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      {captcha.num1} {captcha.operator} {captcha.num2} = ?
+                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr' }}>
+                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
                     </span>
                   </div>
                   <button
@@ -290,7 +291,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   value={loginForm.captcha}
                   onChange={(e) => setLoginForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
+                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                   placeholder="جواب را وارد کنید"
                   required
                 />
@@ -315,18 +316,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                   ملیت
                 </label>
-                <select
+                <CustomSelect
                   value={registerForm.nationality}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, nationality: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                  required
-                >
-                  <option value="iranian">ایرانی</option>
-                  <option value="afghan">افغانستانی</option>
-                  <option value="iraqi">عراقی</option>
-                  <option value="other">سایر</option>
-                </select>
+                  onChange={(value) => setRegisterForm(prev => ({ ...prev, nationality: value }))}
+                  options={[
+                    { value: 'iranian', label: 'ایرانی' },
+                    { value: 'afghan', label: 'افغانستانی' },
+                    { value: 'iraqi', label: 'عراقی' },
+                    { value: 'other', label: 'سایر' }
+                  ]}
+                  placeholder="انتخاب ملیت"
+                />
               </div>
 
               {/* National ID */}
@@ -420,8 +420,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 </label>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      {captcha.num1} {captcha.operator} {captcha.num2} = ?
+                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr' }}>
+                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
                     </span>
                   </div>
                   <button
@@ -438,7 +438,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   value={registerForm.captcha}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
+                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                   placeholder="جواب را وارد کنید"
                   required
                 />
