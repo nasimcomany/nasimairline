@@ -61,14 +61,14 @@ const BookingDetailsPage: React.FC = () => {
   const flight = {
     id: flightId,
     flightNumber: 'NA101',
-    airline: 'نسیم ایر',
-    origin: 'تهران',
-    destination: 'دبی',
+    airline: 'Nasim Air',
+    origin: 'Tehran',
+    destination: 'Dubai',
     departureTime: '08:00',
     arrivalTime: '10:30',
     date: '1404/09/15',
     duration: '2h 30m',
-    class: 'اکونومی',
+    class: 'Economy',
     basePrice: {
       adult: 3500000,
       child: 2625000,

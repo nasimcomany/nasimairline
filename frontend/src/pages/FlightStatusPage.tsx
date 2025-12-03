@@ -33,10 +33,10 @@ const FlightStatusPage: React.FC = () => {
   // Mock data
   const mockFlight: FlightStatus = {
     flightNumber: 'NA101',
-    airline: 'نسیم ایر',
+    airline: 'Nasim Air',
     status: 'on-time',
-    origin: 'تهران (THR)',
-    destination: 'دبی (DXB)',
+    origin: 'Tehran (THR)',
+    destination: 'Dubai (DXB)',
     scheduledDeparture: '08:00',
     actualDeparture: '08:00',
     scheduledArrival: '10:30',
