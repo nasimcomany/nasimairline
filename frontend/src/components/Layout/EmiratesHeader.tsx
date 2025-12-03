@@ -35,10 +35,12 @@ const EmiratesHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+  const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [hoveredSubItem, setHoveredSubItem] = useState<{key: string, index: number} | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const loginDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -193,6 +195,9 @@ const EmiratesHeader: React.FC = () => {
     return () => {
       if (languageDropdownTimeoutRef.current) {
         clearTimeout(languageDropdownTimeoutRef.current);
+      }
+      if (loginDropdownTimeoutRef.current) {
+        clearTimeout(loginDropdownTimeoutRef.current);
       }
     };
   }, []);
@@ -497,26 +502,90 @@ const EmiratesHeader: React.FC = () => {
               </button>
             ) : (
               <>
-                <button
-                  onClick={() => {
-                    setAuthModalMode('login');
-                    setIsAuthModalOpen(true);
+                {/* Login Dropdown */}
+                <div 
+                  className="relative"
+                  onMouseEnter={() => {
+                    if (loginDropdownTimeoutRef.current) {
+                      clearTimeout(loginDropdownTimeoutRef.current);
+                    }
+                    setIsLoginDropdownOpen(true);
                   }}
-                  className={`text-black text-sm font-medium hover:text-black transition-all ${fontClass}`}
-                  style={{ 
-                    textTransform: 'uppercase',
-                    borderBottom: '2px solid transparent',
-                    paddingBottom: '2px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  onMouseLeave={() => {
+                    loginDropdownTimeoutRef.current = setTimeout(() => {
+                      setIsLoginDropdownOpen(false);
+                    }, 200);
                   }}
                 >
-                  {t('nav.login') || 'ورود'}
-                </button>
+                  <button
+                    className={`text-black text-sm font-medium hover:text-black transition-all ${fontClass} flex items-center gap-1`}
+                    style={{ 
+                      textTransform: 'uppercase',
+                      borderBottom: '2px solid transparent',
+                      paddingBottom: '2px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderBottomColor = '#000';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isLoginDropdownOpen) {
+                        e.currentTarget.style.borderBottomColor = 'transparent';
+                      } else {
+                        e.currentTarget.style.borderBottomColor = '#000';
+                      }
+                    }}
+                  >
+                    {t('nav.login') || 'ورود'}
+                    <ChevronDownIcon className="w-4 h-4" />
+                  </button>
+                  
+                  {/* Simple Login Dropdown Menu */}
+                  {isLoginDropdownOpen && (
+                    <div 
+                      className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50`}
+                      onMouseEnter={() => {
+                        if (loginDropdownTimeoutRef.current) {
+                          clearTimeout(loginDropdownTimeoutRef.current);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        loginDropdownTimeoutRef.current = setTimeout(() => {
+                          setIsLoginDropdownOpen(false);
+                        }, 200);
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          setAuthModalMode('login');
+                          setIsAuthModalOpen(true);
+                          setIsLoginDropdownOpen(false);
+                        }}
+                        className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                      >
+                        ورود کاربران
+                      </button>
+                      <button
+                        onClick={() => {
+                          // No action for now - will be linked later
+                          setIsLoginDropdownOpen(false);
+                        }}
+                        className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                      >
+                        ورود همکار
+                      </button>
+                      <button
+                        onClick={() => {
+                          window.location.href = '/limited-admin/';
+                          setIsLoginDropdownOpen(false);
+                        }}
+                        className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                      >
+                        ورود پرسنل
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
                 <button
                   onClick={() => {
                     setAuthModalMode('register');
@@ -607,7 +676,25 @@ const EmiratesHeader: React.FC = () => {
                         }}
                         className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
-                        {t('nav.login') || 'ورود'}
+                        ورود کاربران
+                      </button>
+                      <button
+                        onClick={() => {
+                          // No action for now - will be linked later
+                          setIsMenuOpen(false);
+                        }}
+                        className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      >
+                        ورود همکار
+                      </button>
+                      <button
+                        onClick={() => {
+                          window.location.href = '/limited-admin/';
+                          setIsMenuOpen(false);
+                        }}
+                        className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      >
+                        ورود پرسنل
                       </button>
                       <button
                         onClick={() => {

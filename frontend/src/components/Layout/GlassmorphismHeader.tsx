@@ -231,7 +231,7 @@ const GlassmorphismHeader: React.FC = () => {
                   </button>
                   <button
                     onClick={() => {
-                      navigate('/admin/login?type=staff');
+                      window.location.href = '/limited-admin/';
                       setIsLoginMenuOpen(false);
                     }}
                     className={`w-full px-4 py-2.5 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-blue-50 transition-colors duration-200 ${fontClass} text-gray-700 text-sm border-b border-gray-100`}
@@ -343,7 +343,7 @@ const GlassmorphismHeader: React.FC = () => {
                 <button onClick={() => {navigate('/login'); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
                   {t('nav.loginUsers')}
                 </button>
-                <button onClick={() => {navigate('/admin/login?type=staff'); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
+                <button onClick={() => {window.location.href = '/limited-admin/'; setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
                   {t('nav.loginStaff')}
                 </button>
                 <button onClick={() => {navigate('/admin/login?type=admin'); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
