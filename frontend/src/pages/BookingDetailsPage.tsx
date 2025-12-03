@@ -242,9 +242,10 @@ const BookingDetailsPage: React.FC = () => {
       return;
     }
 
-    // If not authenticated, try to register or login
+    // If not authenticated, try to register automatically
     if (!isAuthenticated) {
       const firstPassenger = passengers[0];
+      
       try {
         // Try to register with first passenger's info
         await dispatch(registerUser({
@@ -258,22 +259,31 @@ const BookingDetailsPage: React.FC = () => {
           nationality: 'iranian'
         })).unwrap();
 
-        // Auto login after registration
+        // Auto login after successful registration
         await dispatch(loginUser({
           email: contactInfo.email,
           password: firstPassenger.nationalId
         })).unwrap();
-      } catch (error: any) {
-        // If registration fails (user exists), try to login
-        try {
-          await dispatch(loginUser({
-            email: contactInfo.email,
-            password: firstPassenger.nationalId
-          })).unwrap();
-        } catch (loginError) {
-          newErrors.push('لطفاً ابتدا وارد حساب کاربری خود شوید یا ثبت‌نام کنید');
-          setErrors(newErrors);
-          return;
+        
+        console.log('User registered and logged in successfully');
+      } catch (registerError: any) {
+        // If registration fails, user might already exist - try to login
+        if (registerError.message?.includes('exist') || registerError.message?.includes('موجود')) {
+          try {
+            await dispatch(loginUser({
+              email: contactInfo.email,
+              password: firstPassenger.nationalId
+            })).unwrap();
+            
+            console.log('Existing user logged in successfully');
+          } catch (loginError: any) {
+            // User exists but password is different - continue without login
+            console.log('Could not auto-login, proceeding as guest');
+            // Don't block payment, just continue
+          }
+        } else {
+          // Some other registration error - continue as guest
+          console.log('Registration error, proceeding as guest:', registerError);
         }
       }
     }

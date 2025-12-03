@@ -13,6 +13,8 @@ import BookingPage from './pages/BookingPage';
 import BookingManagePage from './pages/BookingManagePage';
 import FlightStatusPage from './pages/FlightStatusPage';
 import BookingDetailsPage from './pages/BookingDetailsPage';
+import PaymentPage from './pages/PaymentPage';
+import PaymentVerifyPage from './pages/PaymentVerifyPage';
 import DashboardPage from './pages/DashboardPage';
 import ServicesPage from './pages/ServicesPage';
 import GalleryPage from './pages/GalleryPage';
@@ -45,6 +47,8 @@ function App() {
               <Route path="/booking/:flightId" element={<BookingPage />} />
               <Route path="/booking/manage" element={<BookingManagePage />} />
               <Route path="/flight/status" element={<FlightStatusPage />} />
+              <Route path="/payment" element={<PaymentPage />} />
+              <Route path="/payment/verify" element={<PaymentVerifyPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/gallery" element={<GalleryPage />} />
