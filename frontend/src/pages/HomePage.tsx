@@ -867,10 +867,10 @@ const HomePage: React.FC = () => {
                   fontWeight: 'bold',
                   lineHeight: '1.2',
                   textShadow: '2px 2px 8px rgba(0,0,0,0.5)',
-                  direction: 'rtl'
+                  direction: language === 'en' ? 'ltr' : 'rtl'
                 }}
               >
-                پرواز با نسیم ایر
+                {t('home.hero.flyWithNasim')}
               </h1>
               <p 
                 className="text-white mb-8"
@@ -880,10 +880,10 @@ const HomePage: React.FC = () => {
                   fontWeight: 'bold',
                   lineHeight: '1.5',
                   textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
-                  direction: 'rtl'
+                  direction: language === 'en' ? 'ltr' : 'rtl'
                 }}
               >
-                سفری امن، راحت و به‌یادماندنی به مقاصد داخلی و بین‌المللی
+                {t('home.hero.safeTripDescription')}
               </p>
             </div>
           </div>
@@ -921,8 +921,14 @@ const HomePage: React.FC = () => {
                 letterSpacing: '0.3px'
               }}
             >
-              <span style={{ direction: 'rtl' }}>
-                سفری امن، <span className="text-gray-900" style={{ fontWeight: 900 }}>راحت</span> و به یادماندنی
+              <span style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                {language === 'fa' ? (
+                  <>سفری امن، <span className="text-gray-900" style={{ fontWeight: 900 }}>راحت</span> و به یادماندنی</>
+                ) : language === 'ar' ? (
+                  <>رحلة آمنة، <span className="text-gray-900" style={{ fontWeight: 900 }}>مريحة</span> لا تُنسى</>
+                ) : (
+                  <>A safe, <span className="text-gray-900" style={{ fontWeight: 900 }}>comfortable</span> and memorable journey</>
+                )}
               </span>
               <span className="text-gray-400 mx-2" style={{ fontSize: 'clamp(1rem, 2.5vw, 1.8rem)' }}>|</span>
               <span style={{ direction: 'ltr' }}>
@@ -946,10 +952,10 @@ const HomePage: React.FC = () => {
                 fontWeight: 'bold',
                 lineHeight: '1.4',
                 letterSpacing: '0.5px',
-                direction: 'rtl'
+                direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              خدمات ویژه نسیم ایر
+              {t('home.services.specialTitle')}
             </h2>
           </div>
 
@@ -1339,15 +1345,15 @@ const HomePage: React.FC = () => {
             <div className="flex-1 text-center md:text-left" style={{ paddingRight: '120px' }}>
               <h3 className={`text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                direction: 'rtl'
+                direction: language === 'en' ? 'ltr' : 'rtl'
               }}>
-                عضویت در برنامه وفاداری نسیم ایر
+                {t('home.loyalty.joinTitle')}
               </h3>
               <p className={`text-gray-400 text-xs md:text-sm ${fontClass}`} style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                direction: 'rtl'
+                direction: language === 'en' ? 'ltr' : 'rtl'
               }}>
-                عضو برنامه وفاداری نسیم ایر شوید و از پاداش‌های پرواز، امتیازات ویژه و مزایای بیشتر لذت ببرید
+                {t('home.loyalty.joinDescription')}
               </p>
             </div>
 
@@ -1376,24 +1382,24 @@ const HomePage: React.FC = () => {
           <div className="max-w-2xl">
             <p className={`text-white text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: 'rtl',
+              direction: language === 'en' ? 'ltr' : 'rtl',
               textTransform: 'none'
             }}>
-              برنامه وفاداری نسیم ایر
+              {t('home.loyalty.programTitle')}
             </p>
             <h2 className={`text-4xl md:text-5xl font-bold text-white mb-4 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: 'rtl',
+              direction: language === 'en' ? 'ltr' : 'rtl',
               fontWeight: 700
             }}>
-              مزایای خود را با برنامه وفاداری نسیم ایر افزایش دهید
+              {t('home.loyalty.enhanceTitle')}
             </h2>
             <p className={`text-white text-lg mb-6 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: 'rtl',
+              direction: language === 'en' ? 'ltr' : 'rtl',
               lineHeight: '1.8'
             }}>
-              هواپیمایی نسیم ایر با افتخار ارائه‌دهنده خدمات پروازی با کیفیت و ایمن در مسیرهای داخلی و بین‌المللی است. با عضویت در برنامه وفاداری ما، از امتیازات ویژه، پاداش‌های پروازی، دسترسی به لانژ فرودگاه، بار اضافی و نرخ‌های انحصاری بهره‌مند شوید. ما با تکیه بر سال‌ها تجربه و تعهد به رضایت مسافران، سفری راحت، امن و به‌یادماندنی را برای شما فراهم می‌کنیم.
+              {t('home.loyalty.fullDescription')}
             </p>
             <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-8 py-3 rounded-lg transition-colors" style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
