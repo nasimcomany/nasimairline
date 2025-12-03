@@ -212,16 +212,18 @@ const FlightResultsPage: React.FC = () => {
                   <label className="block text-sm font-bold text-gray-700 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}>
                     مرتب‌سازی بر اساس
                   </label>
-                  <CustomSelect
-                    value={sortBy}
-                    onChange={(value) => setSortBy(value as any)}
-                    options={[
-                      { value: 'price', label: 'ارزان‌ترین' },
-                      { value: 'duration', label: 'سریع‌ترین' },
-                      { value: 'departure', label: 'زودترین پرواز' }
-                    ]}
-                    placeholder="انتخاب کنید"
-                  />
+                  <div style={{ height: '42px' }}>
+                    <CustomSelect
+                      value={sortBy}
+                      onChange={(value) => setSortBy(value as any)}
+                      options={[
+                        { value: 'price', label: 'ارزان‌ترین' },
+                        { value: 'duration', label: 'سریع‌ترین' },
+                        { value: 'departure', label: 'زودترین پرواز' }
+                      ]}
+                      placeholder="انتخاب کنید"
+                    />
+                  </div>
                 </div>
 
                 {/* Filter Stops */}

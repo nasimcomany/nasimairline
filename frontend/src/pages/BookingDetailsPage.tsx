@@ -61,21 +61,24 @@ const BookingDetailsPage: React.FC = () => {
   const locationState = window.history.state?.usr;
   const flightFromState = locationState?.flight;
   
-  const flight = flightFromState || {
-    id: flightId,
-    flightNumber: 'NA101',
-    airline: 'Nasim Air',
-    origin: 'Tehran',
-    destination: 'Dubai',
-    departureTime: '08:00',
-    arrivalTime: '10:30',
-    date: searchParams?.departureDate || '1404/09/15',
-    duration: '2h 30m',
-    class: searchParams?.class || 'Economy',
-    basePrice: {
-      adult: 3500000,
-      child: 2625000,
-      infant: 350000
+  // Ensure basePrice exists
+  const flight = {
+    ...(flightFromState || {
+      id: flightId,
+      flightNumber: 'NA101',
+      airline: 'Nasim Air',
+      origin: 'Tehran',
+      destination: 'Dubai',
+      departureTime: '08:00',
+      arrivalTime: '10:30',
+      date: searchParams?.departureDate || '1404/09/15',
+      duration: '2h 30m',
+      class: searchParams?.class || 'Economy'
+    }),
+    basePrice: flightFromState?.basePrice || {
+      adult: flightFromState?.price || 3500000,
+      child: (flightFromState?.price || 3500000) * 0.75,
+      infant: (flightFromState?.price || 3500000) * 0.1
     }
   };
 
@@ -123,32 +126,9 @@ const BookingDetailsPage: React.FC = () => {
       
       setPassengers(passengerList);
 
-      // Fill contact info if user is logged in
-      if (isAuthenticated && user) {
-        setContactInfo({
-          phone: user.phone_number || '',
-          email: user.email || ''
-        });
-      }
+      // Don't auto-fill - let user enter manually
     }
-  }, [searchParams, isAuthenticated, user]);
-
-  // Fill first passenger info if user is logged in
-  useEffect(() => {
-    if (isAuthenticated && user && passengers.length > 0) {
-      setPassengers(prev => {
-        const updated = [...prev];
-        updated[0] = {
-          ...updated[0],
-          firstName: user.first_name,
-          lastName: user.last_name,
-          nationalId: user.first_name, // کد ملی به عنوان نام ذخیره شده
-          birthDate: ''
-        };
-        return updated;
-      });
-    }
-  }, [isAuthenticated, user, passengers.length]);
+  }, [searchParams]);
 
   // Timer countdown
   useEffect(() => {
@@ -184,9 +164,9 @@ const BookingDetailsPage: React.FC = () => {
   const calculateTotalPrice = () => {
     let total = 0;
     passengers.forEach(p => {
-      if (p.type === 'adult') total += flight.basePrice.adult;
-      if (p.type === 'child') total += flight.basePrice.child;
-      if (p.type === 'infant') total += flight.basePrice.infant;
+      if (p.type === 'adult') total += flight.basePrice?.adult || 3500000;
+      if (p.type === 'child') total += flight.basePrice?.child || 2625000;
+      if (p.type === 'infant') total += flight.basePrice?.infant || 350000;
     });
     return total;
   };
@@ -418,10 +398,7 @@ const BookingDetailsPage: React.FC = () => {
                             type="text"
                             value={passenger.firstName}
                             onChange={(e) => updatePassenger(index, 'firstName', e.target.value)}
-                            disabled={isAuthenticated && index === 0}
-                            className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
-                              isAuthenticated && index === 0 ? 'bg-gray-100 cursor-not-allowed' : ''
-                            }`}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                             style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'left' }}
                             placeholder="First Name"
                             required
@@ -436,10 +413,7 @@ const BookingDetailsPage: React.FC = () => {
                             type="text"
                             value={passenger.lastName}
                             onChange={(e) => updatePassenger(index, 'lastName', e.target.value)}
-                            disabled={isAuthenticated && index === 0}
-                            className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
-                              isAuthenticated && index === 0 ? 'bg-gray-100 cursor-not-allowed' : ''
-                            }`}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                             style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'left' }}
                             placeholder="Last Name"
                             required
@@ -455,10 +429,7 @@ const BookingDetailsPage: React.FC = () => {
                               type="text"
                               value={passenger.nationalId}
                               onChange={(e) => updatePassenger(index, 'nationalId', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                              disabled={isAuthenticated && index === 0}
-                              className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
-                                isAuthenticated && index === 0 ? 'bg-gray-100 cursor-not-allowed' : ''
-                              }`}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
                               placeholder="کد ملی 10 رقمی"
                               maxLength={10}
@@ -561,10 +532,7 @@ const BookingDetailsPage: React.FC = () => {
                         type="tel"
                         value={contactInfo.phone}
                         onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-                        disabled={isAuthenticated}
-                        className={`flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
-                          isAuthenticated ? 'bg-gray-100 cursor-not-allowed' : ''
-                        }`}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                         style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
                         placeholder="9123456789"
                         maxLength={10}
@@ -583,10 +551,7 @@ const BookingDetailsPage: React.FC = () => {
                         type="email"
                         value={contactInfo.email}
                         onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
-                        disabled={isAuthenticated}
-                        className={`w-full pr-10 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
-                          isAuthenticated ? 'bg-gray-100 cursor-not-allowed' : ''
-                        }`}
+                        className="w-full pr-10 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                         style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'left' }}
                         placeholder="email@example.com"
                         required
@@ -661,7 +626,7 @@ const BookingDetailsPage: React.FC = () => {
                         بزرگسال ({passengers.filter(p => p.type === 'adult').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {(flight.basePrice.adult * passengers.filter(p => p.type === 'adult').length).toLocaleString('fa-IR')} تومان
+                        {((flight.basePrice?.adult || 3500000) * passengers.filter(p => p.type === 'adult').length).toLocaleString('fa-IR')} تومان
                       </span>
                     </div>
                   )}
@@ -671,7 +636,7 @@ const BookingDetailsPage: React.FC = () => {
                         کودک ({passengers.filter(p => p.type === 'child').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {(flight.basePrice.child * passengers.filter(p => p.type === 'child').length).toLocaleString('fa-IR')} تومان
+                        {((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('fa-IR')} تومان
                       </span>
                     </div>
                   )}
@@ -681,7 +646,7 @@ const BookingDetailsPage: React.FC = () => {
                         نوزاد ({passengers.filter(p => p.type === 'infant').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {(flight.basePrice.infant * passengers.filter(p => p.type === 'infant').length).toLocaleString('fa-IR')} تومان
+                        {((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('fa-IR')} تومان
                       </span>
                     </div>
                   )}
