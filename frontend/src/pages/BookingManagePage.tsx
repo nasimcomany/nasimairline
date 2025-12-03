@@ -62,9 +62,9 @@ const BookingManagePage: React.FC = () => {
     },
     flight: {
       flightNumber: 'NA101',
-      airline: 'نسیم ایر',
-      origin: 'تهران',
-      destination: 'دبی',
+      airline: 'Nasim Air',
+      origin: 'Tehran',
+      destination: 'Dubai',
       departureDate: '1403/09/15',
       departureTime: '08:00',
       arrivalTime: '10:30',

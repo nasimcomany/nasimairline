@@ -45,7 +45,7 @@ const FlightResultsPage: React.FC = () => {
       const mockFlights: Flight[] = [
         {
           id: '1',
-          airline: 'نسیم ایر',
+          airline: 'Nasim Air',
           flightNumber: 'NA101',
           origin: searchParams?.origin || 'THR',
           destination: searchParams?.destination || 'DXB',
@@ -59,7 +59,7 @@ const FlightResultsPage: React.FC = () => {
         },
         {
           id: '2',
-          airline: 'نسیم ایر',
+          airline: 'Nasim Air',
           flightNumber: 'NA103',
           origin: searchParams?.origin || 'THR',
           destination: searchParams?.destination || 'DXB',
@@ -73,7 +73,7 @@ const FlightResultsPage: React.FC = () => {
         },
         {
           id: '3',
-          airline: 'نسیم ایر',
+          airline: 'Nasim Air',
           flightNumber: 'NA105',
           origin: searchParams?.origin || 'THR',
           destination: searchParams?.destination || 'DXB',
