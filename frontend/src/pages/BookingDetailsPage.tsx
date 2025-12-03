@@ -57,8 +57,11 @@ const BookingDetailsPage: React.FC = () => {
   // Errors
   const [errors, setErrors] = useState<string[]>([]);
 
-  // Mock flight data
-  const flight = {
+  // Get flight data - try from state first, fallback to mock
+  const locationState = window.history.state?.usr;
+  const flightFromState = locationState?.flight;
+  
+  const flight = flightFromState || {
     id: flightId,
     flightNumber: 'NA101',
     airline: 'Nasim Air',
@@ -66,9 +69,9 @@ const BookingDetailsPage: React.FC = () => {
     destination: 'Dubai',
     departureTime: '08:00',
     arrivalTime: '10:30',
-    date: '1404/09/15',
+    date: searchParams?.departureDate || '1404/09/15',
     duration: '2h 30m',
-    class: 'Economy',
+    class: searchParams?.class || 'Economy',
     basePrice: {
       adult: 3500000,
       child: 2625000,
@@ -242,53 +245,57 @@ const BookingDetailsPage: React.FC = () => {
       return;
     }
 
-    // If not authenticated, try to register automatically
+    // Try to register/login if not authenticated (but don't block if it fails)
     if (!isAuthenticated) {
       const firstPassenger = passengers[0];
       
-      try {
-        // Try to register with first passenger's info
-        await dispatch(registerUser({
-          email: contactInfo.email,
-          password: firstPassenger.nationalId, // Using national ID as default password
-          password_confirm: firstPassenger.nationalId,
-          first_name: firstPassenger.firstName,
-          last_name: firstPassenger.lastName,
-          phone_number: contactInfo.phone,
-          date_of_birth: firstPassenger.birthDate,
-          nationality: 'iranian'
-        })).unwrap();
-
-        // Auto login after successful registration
-        await dispatch(loginUser({
+      // Background registration attempt - don't await or block on errors
+      dispatch(registerUser({
+        email: contactInfo.email,
+        password: firstPassenger.nationalId,
+        password_confirm: firstPassenger.nationalId,
+        first_name: firstPassenger.firstName,
+        last_name: firstPassenger.lastName,
+        phone_number: contactInfo.phone,
+        date_of_birth: firstPassenger.birthDate,
+        nationality: 'iranian'
+      }))
+      .unwrap()
+      .then(() => {
+        // Try to login after registration
+        return dispatch(loginUser({
           email: contactInfo.email,
           password: firstPassenger.nationalId
         })).unwrap();
-        
+      })
+      .then(() => {
         console.log('User registered and logged in successfully');
-      } catch (registerError: any) {
-        // If registration fails, user might already exist - try to login
-        if (registerError.message?.includes('exist') || registerError.message?.includes('موجود')) {
-          try {
-            await dispatch(loginUser({
-              email: contactInfo.email,
-              password: firstPassenger.nationalId
-            })).unwrap();
-            
-            console.log('Existing user logged in successfully');
-          } catch (loginError: any) {
-            // User exists but password is different - continue without login
-            console.log('Could not auto-login, proceeding as guest');
-            // Don't block payment, just continue
-          }
-        } else {
-          // Some other registration error - continue as guest
-          console.log('Registration error, proceeding as guest:', registerError);
-        }
-      }
+      })
+      .catch((error) => {
+        // Try login if registration failed (user might exist)
+        dispatch(loginUser({
+          email: contactInfo.email,
+          password: firstPassenger.nationalId
+        }))
+        .unwrap()
+        .then(() => {
+          console.log('Existing user logged in successfully');
+        })
+        .catch(() => {
+          console.log('Proceeding as guest checkout');
+        });
+      });
     }
 
-    // Proceed to payment
+    // Proceed to payment - always allow
+    console.log('Proceeding to payment with data:', {
+      flight,
+      passengers: passengers.length,
+      contactInfo,
+      totalPrice: calculateTotalPrice(),
+      isAuthenticated
+    });
+    
     navigate('/payment', {
       state: {
         flight,

@@ -78,7 +78,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
 
   return (
-    <div ref={dropdownRef} className={`relative ${className}`} style={style}>
+    <div ref={dropdownRef} className={`relative ${className}`} style={{ ...style }}>
       {/* Selected Value Display */}
       <div className="relative">
         <button
@@ -86,17 +86,18 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           type="button"
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
-          className={`w-full h-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right ${
+          className={`w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right ${
             disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:border-gray-400'
-          }`}
+          } ${className?.includes('py-') ? '' : 'py-2'}`}
           style={{ 
             fontFamily: 'DigiHamisheBold, Arial, sans-serif',
             direction: 'rtl',
-            paddingRight: '0.5rem',
-            paddingLeft: '2rem',
+            paddingRight: '1rem',
+            paddingLeft: '2.5rem',
             fontWeight: 'bold',
             textAlign: 'right',
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
+            ...style
           }}
         >
           <span className={selectedOption ? 'text-gray-900' : 'text-gray-400'}>

@@ -14,6 +14,7 @@ import {
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
 import { cities } from '../data/cities';
+import CustomSelect from '../components/CustomSelect/CustomSelect';
 
 interface Flight {
   id: string;
@@ -87,7 +88,7 @@ const FlightResultsPage: React.FC = () => {
         },
         {
           id: '4',
-          airline: 'نسیم ایر',
+          airline: 'Nasim Air',
           flightNumber: 'NA201',
           origin: searchParams?.origin || 'THR',
           destination: searchParams?.destination || 'DXB',
@@ -211,16 +212,16 @@ const FlightResultsPage: React.FC = () => {
                   <label className="block text-sm font-bold text-gray-700 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}>
                     مرتب‌سازی بر اساس
                   </label>
-                  <select
+                  <CustomSelect
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                  >
-                    <option value="price">ارزان‌ترین</option>
-                    <option value="duration">سریع‌ترین</option>
-                    <option value="departure">زودترین پرواز</option>
-                  </select>
+                    onChange={(value) => setSortBy(value as any)}
+                    options={[
+                      { value: 'price', label: 'ارزان‌ترین' },
+                      { value: 'duration', label: 'سریع‌ترین' },
+                      { value: 'departure', label: 'زودترین پرواز' }
+                    ]}
+                    placeholder="انتخاب کنید"
+                  />
                 </div>
 
                 {/* Filter Stops */}
@@ -357,7 +358,15 @@ const FlightResultsPage: React.FC = () => {
                             </div>
                           </div>
                           <button
-                            onClick={() => navigate(`/booking/details/${flight.id}`)}
+                            onClick={() => navigate(`/booking/details/${flight.id}`, { 
+                              state: { 
+                                flight: {
+                                  ...flight,
+                                  origin: originCity?.name || flight.origin,
+                                  destination: destCity?.name || flight.destination
+                                }
+                              } 
+                            })}
                             className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
                             style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                             انتخاب پرواز
