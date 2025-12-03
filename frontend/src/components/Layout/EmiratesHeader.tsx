@@ -498,7 +498,7 @@ const EmiratesHeader: React.FC = () => {
                   e.currentTarget.style.borderBottomColor = 'transparent';
                 }}
               >
-                خروج
+                {t('nav.logout')}
               </button>
             ) : (
               <>
@@ -560,27 +560,27 @@ const EmiratesHeader: React.FC = () => {
                           setIsAuthModalOpen(true);
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
                       >
-                        ورود کاربران
+                        {t('nav.loginUsers')}
                       </button>
                       <button
                         onClick={() => {
                           // No action for now - will be linked later
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
                       >
-                        ورود همکار
+                        {t('nav.loginPartner')}
                       </button>
                       <button
                         onClick={() => {
                           window.location.href = '/limited-admin/';
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
                       >
-                        ورود پرسنل
+                        {t('nav.loginStaff')}
                       </button>
                     </div>
                   )}
@@ -662,9 +662,9 @@ const EmiratesHeader: React.FC = () => {
                         handleLogout();
                         setIsMenuOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                     >
-                      خروج
+                      {t('nav.logout')}
                     </button>
                   ) : (
                     <>
@@ -674,27 +674,27 @@ const EmiratesHeader: React.FC = () => {
                           setIsAuthModalOpen(true);
                           setIsMenuOpen(false);
                         }}
-                        className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
-                        ورود کاربران
+                        {t('nav.loginUsers')}
                       </button>
                       <button
                         onClick={() => {
                           // No action for now - will be linked later
                           setIsMenuOpen(false);
                         }}
-                        className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
-                        ورود همکار
+                        {t('nav.loginPartner')}
                       </button>
                       <button
                         onClick={() => {
                           window.location.href = '/limited-admin/';
                           setIsMenuOpen(false);
                         }}
-                        className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
-                        ورود پرسنل
+                        {t('nav.loginStaff')}
                       </button>
                       <button
                         onClick={() => {
@@ -702,9 +702,9 @@ const EmiratesHeader: React.FC = () => {
                           setIsAuthModalOpen(true);
                           setIsMenuOpen(false);
                         }}
-                        className={`block w-full text-right px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
-                        ثبت‌نام
+                        {t('nav.register')}
                       </button>
                     </>
                   )}
