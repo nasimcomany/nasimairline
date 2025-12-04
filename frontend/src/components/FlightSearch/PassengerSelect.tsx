@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserGroupIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface PassengerCount {
   adults: number;
@@ -20,6 +21,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,10 +55,10 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
 
   const getPassengerText = () => {
     const parts = [];
-    if (value.adults > 0) parts.push(`${value.adults} بزرگسال`);
-    if (value.children > 0) parts.push(`${value.children} کودک`);
-    if (value.infants > 0) parts.push(`${value.infants} نوزاد`);
-    return parts.join('، ') || 'انتخاب مسافران';
+    if (value.adults > 0) parts.push(`${value.adults} ${t('passengers.adult')}`);
+    if (value.children > 0) parts.push(`${value.children} ${t('passengers.child')}`);
+    if (value.infants > 0) parts.push(`${value.infants} ${t('passengers.infant')}`);
+    return parts.join('، ') || t('passengers.selectPassengers');
   };
 
   return (
@@ -86,8 +88,8 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
         <div className="absolute z-[9999] w-full bottom-full mb-1 bg-white border border-gray-300 rounded-lg shadow-xl p-1.5">
           {/* Adults */}
           <div className="flex items-center justify-between py-1 px-1 border-b border-gray-200">
-            <div className="text-right flex-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              <div className="text-xs font-bold text-gray-900">بزرگسال</div>
+            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="text-xs font-bold text-gray-900">{t('passengers.adult')}</div>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -114,8 +116,8 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
 
           {/* Children */}
           <div className="flex items-center justify-between py-1 px-1 border-b border-gray-200">
-            <div className="text-right flex-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              <div className="text-xs font-bold text-gray-900">کودک</div>
+            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="text-xs font-bold text-gray-900">{t('passengers.child')}</div>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -142,8 +144,8 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
 
           {/* Infants */}
           <div className="flex items-center justify-between py-1 px-1">
-            <div className="text-right flex-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              <div className="text-xs font-bold text-gray-900">نوزاد</div>
+            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="text-xs font-bold text-gray-900">{t('passengers.infant')}</div>
             </div>
             <div className="flex items-center gap-1">
               <button

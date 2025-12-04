@@ -1,0 +1,27 @@
+// Add these translations to LanguageContext.tsx in Persian section (around line 227):
+    'passengers.adult': 'بزرگسال',
+    'passengers.child': 'کودک',
+    'passengers.infant': 'نوزاد',
+    'passengers.selectPassengers': 'انتخاب مسافران',
+    'class.economy': 'اکونومی',
+    'class.business': 'بیزینس',
+    'class.first': 'فرست کلاس',
+
+// Add these translations to Arabic section (around line 752):
+    'passengers.adult': 'بالغ',
+    'passengers.child': 'طفل',
+    'passengers.infant': 'رضيع',
+    'passengers.selectPassengers': 'اختيار الركاب',
+    'class.economy': 'اقتصادية',
+    'class.business': 'رجال أعمال',
+    'class.first': 'درجة أولى',
+
+// Add these translations to English section (around line 1280):
+    'passengers.adult': 'Adult',
+    'passengers.child': 'Child',
+    'passengers.infant': 'Infant',
+    'passengers.selectPassengers': 'Select Passengers',
+    'class.economy': 'Economy',
+    'class.business': 'Business',
+    'class.first': 'First Class',
+
