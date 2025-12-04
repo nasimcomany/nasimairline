@@ -15,6 +15,7 @@ interface CustomSelectProps {
   required?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  dropdownPosition?: 'top' | 'bottom' | 'auto';
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -25,7 +26,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   disabled = false,
   required = false,
   className = '',
-  style = {}
+  style = {},
+  dropdownPosition: forcedPosition = 'auto'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom');

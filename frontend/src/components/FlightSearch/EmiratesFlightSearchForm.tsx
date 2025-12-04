@@ -264,11 +264,11 @@ const EmiratesFlightSearchForm: React.FC = () => {
                   value={formData.class}
                   onChange={(value) => setFormData(prev => ({ ...prev, class: value as any }))}
                   options={[
-                    { value: 'economy', label: 'اکونومی' },
-                    { value: 'business', label: 'بیزینس' },
-                    { value: 'first', label: 'فرست' }
+                    { value: 'economy', label: t('class.economy') },
+                    { value: 'business', label: t('class.business') },
+                    { value: 'first', label: t('class.first') }
                   ]}
-                  placeholder="کلاس"
+                  placeholder={t('class.economy')}
                 />
               </div>
             </div>
