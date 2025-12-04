@@ -290,10 +290,10 @@ const TicketPage: React.FC = () => {
                   className="text-white text-2xl font-bold"
                   style={{ 
                     fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                    direction: 'rtl'
+                    direction: language === 'en' ? 'ltr' : 'rtl'
                   }}
                 >
-                  فرم ایجاد تیکت
+                  {t('ticket.formTitle')}
                 </h2>
               </div>
               <form onSubmit={handleSubmit} className="p-6 space-y-6">

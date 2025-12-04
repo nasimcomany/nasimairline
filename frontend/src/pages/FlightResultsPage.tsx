@@ -373,7 +373,7 @@ const FlightResultsPage: React.FC = () => {
                             })}
                             className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
                             style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                            انتخاب پرواز
+                            {t('flights.selectFlight')}
                             <ArrowRightIcon className="w-5 h-5" />
                           </button>
                         </div>

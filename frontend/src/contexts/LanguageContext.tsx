@@ -262,6 +262,7 @@ const translations = {
     'ticket.createTicket': 'ایجاد تیکت',
     'ticket.myTickets': 'تیکت‌های من',
     'ticket.newTicket': 'ثبت تیکت جدید',
+    'ticket.formTitle': 'فرم ایجاد تیکت',
     'ticket.title': 'عنوان',
     'ticket.titlePlaceholder': 'عنوان تیکت را وارد کنید',
     'ticket.description': 'توضیحات',
@@ -303,6 +304,23 @@ const translations = {
     'flights.stop': 'توقف',
     'flights.loading': 'در حال جستجو...',
     'flights.noResults': 'پروازی یافت نشد',
+    
+    // Booking Details Page
+    'booking.bookingDetails': 'جزئیات رزرو',
+    'booking.flightInfo': 'اطلاعات پرواز',
+    'booking.passengerInfo': 'اطلاعات مسافر',
+    'booking.contactInfo': 'اطلاعات تماس',
+    'booking.payment': 'پرداخت',
+    'booking.total': 'مجموع',
+    'booking.proceedToPayment': 'ادامه به پرداخت',
+    
+    // Payment Page
+    'payment.title': 'پرداخت',
+    'payment.processing': 'در حال پردازش...',
+    'payment.redirecting': 'در حال انتقال به درگاه پرداخت...',
+    'payment.success': 'پرداخت موفق',
+    'payment.failed': 'پرداخت ناموفق',
+    'payment.verifying': 'در حال تایید پرداخت...',
     
     // Support FAQ Categories
     'support.faqCategories.general': 'عمومی',
@@ -352,7 +370,6 @@ const translations = {
     'booking.to': 'مقصد:',
     'booking.date': 'تاریخ:',
     'booking.passengers': 'مسافران:',
-    'booking.passengerInfo': 'اطلاعات مسافر',
     'booking.nationalId': 'کد ملی',
     'booking.address': 'آدرس',
     'booking.nationalIdPlaceholder': 'کد ملی خود را وارد کنید',
@@ -867,6 +884,7 @@ const translations = {
     'ticket.createTicket': 'إنشاء تذكرة',
     'ticket.myTickets': 'تذاكري',
     'ticket.newTicket': 'تذكرة جديدة',
+    'ticket.formTitle': 'نموذج إنشاء التذكرة',
     'ticket.title': 'العنوان',
     'ticket.titlePlaceholder': 'أدخل عنوان التذكرة',
     'ticket.description': 'الوصف',
@@ -909,6 +927,23 @@ const translations = {
     'flights.loading': 'جارٍ البحث...',
     'flights.noResults': 'لم يتم العثور على رحلات',
     
+    // Booking Details Page
+    'booking.bookingDetails': 'تفاصيل الحجز',
+    'booking.flightInfo': 'معلومات الرحلة',
+    'booking.passengerInfo': 'معلومات الراكب',
+    'booking.contactInfo': 'معلومات الاتصال',
+    'booking.payment': 'الدفع',
+    'booking.total': 'المجموع',
+    'booking.proceedToPayment': 'متابعة الدفع',
+    
+    // Payment Page
+    'payment.title': 'الدفع',
+    'payment.processing': 'جارٍ المعالجة...',
+    'payment.redirecting': 'جارٍ التحويل إلى بوابة الدفع...',
+    'payment.success': 'الدفع ناجح',
+    'payment.failed': 'فشل الدفع',
+    'payment.verifying': 'جارٍ التحقق من الدفع...',
+    
     // Stats
     'home.stats.destinations': 'الوجهات',
     'home.stats.happyPassengers': 'ركاب راضون',
@@ -923,7 +958,6 @@ const translations = {
     'booking.to': 'إلى:',
     'booking.date': 'التاريخ:',
     'booking.passengers': 'الركاب:',
-    'booking.passengerInfo': 'معلومات الراكب',
     'booking.nationalId': 'الهوية الوطنية',
     'booking.address': 'العنوان',
     'booking.nationalIdPlaceholder': 'أدخل رقم الهوية الوطنية',
@@ -1382,6 +1416,7 @@ const translations = {
     'ticket.createTicket': 'Create Ticket',
     'ticket.myTickets': 'My Tickets',
     'ticket.newTicket': 'New Ticket',
+    'ticket.formTitle': 'Create Ticket Form',
     'ticket.title': 'Title',
     'ticket.titlePlaceholder': 'Enter ticket title',
     'ticket.description': 'Description',
@@ -1423,6 +1458,23 @@ const translations = {
     'flights.stop': 'Stop',
     'flights.loading': 'Searching...',
     'flights.noResults': 'No flights found',
+    
+    // Booking Details Page
+    'booking.bookingDetails': 'Booking Details',
+    'booking.flightInfo': 'Flight Information',
+    'booking.passengerInfo': 'Passenger Information',
+    'booking.contactInfo': 'Contact Information',
+    'booking.payment': 'Payment',
+    'booking.total': 'Total',
+    'booking.proceedToPayment': 'Proceed to Payment',
+    
+    // Payment Page
+    'payment.title': 'Payment',
+    'payment.processing': 'Processing...',
+    'payment.redirecting': 'Redirecting to payment gateway...',
+    'payment.success': 'Payment Successful',
+    'payment.failed': 'Payment Failed',
+    'payment.verifying': 'Verifying payment...',
     
     // Homepage
     'home.hero.flyWithNasim': 'Fly with Nasim Air',
@@ -1523,7 +1575,6 @@ const translations = {
     'booking.to': 'To:',
     'booking.date': 'Date:',
     'booking.passengers': 'Passengers:',
-    'booking.passengerInfo': 'Passenger Information',
     'booking.nationalId': 'National ID',
     'booking.address': 'Address',
     'booking.nationalIdPlaceholder': 'Enter your national ID',
