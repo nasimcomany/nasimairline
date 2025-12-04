@@ -269,6 +269,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
                     { value: 'first', label: t('class.first') }
                   ]}
                   placeholder={t('class.economy')}
+                  dropdownPosition="top"
                 />
               </div>
             </div>

@@ -50,16 +50,22 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - buttonRect.bottom;
-      const spaceAbove = buttonRect.top;
-      const dropdownHeight = Math.min(options.length * 48 + 16, 240); // 48px per option, max 240px
-
-      // If not enough space below but more space above, open upward
-      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+      if (forcedPosition === 'top') {
         setDropdownPosition('top');
-      } else {
+      } else if (forcedPosition === 'bottom') {
         setDropdownPosition('bottom');
+      } else {
+        const buttonRect = buttonRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        const dropdownHeight = Math.min(options.length * 36 + 12, 180); // Smaller: 36px per option, max 180px
+
+        // If not enough space below but more space above, open upward
+        if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+          setDropdownPosition('top');
+        } else {
+          setDropdownPosition('bottom');
+        }
       }
 
       // Scroll to selected option
@@ -72,7 +78,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         }
       }, 50);
     }
-  }, [isOpen, options.length]);
+  }, [isOpen, options.length, forcedPosition]);
 
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
@@ -122,12 +128,13 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       {isOpen && !disabled && (
         <div 
           ref={dropdownContentRef}
-          className={`absolute z-[9999] w-full bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto ${
+          className={`absolute z-[9999] w-full bg-white border border-gray-300 rounded-lg shadow-xl max-h-44 overflow-y-auto ${
             dropdownPosition === 'top' ? 'mb-1' : 'mt-1'
           }`}
           style={{
             fontFamily: 'DigiHamisheBold, Arial, sans-serif',
             direction: 'rtl',
+            fontSize: '13px',
             ...(dropdownPosition === 'top' 
               ? { bottom: '100%', left: 0, right: 0 }
               : { top: '100%', left: 0, right: 0 }

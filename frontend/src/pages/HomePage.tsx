@@ -1011,10 +1011,10 @@ const HomePage: React.FC = () => {
                       fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                       fontSize: '1.4rem',
                       fontWeight: 'bold',
-                      direction: 'rtl'
+                      direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
-                    انتخاب صندلی
+                    {t('home.flightSearch.seatSelection')}
                   </p>
                 </div>
               </div>
@@ -1072,10 +1072,10 @@ const HomePage: React.FC = () => {
                       fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                       fontSize: '1.4rem',
                       fontWeight: 'bold',
-                      direction: 'rtl'
+                      direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
-                    خرید اضافه بار
+                    {t('home.flightSearch.extraBaggage')}
                   </p>
                 </div>
               </div>
@@ -1133,10 +1133,10 @@ const HomePage: React.FC = () => {
                       fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                       fontSize: '1.4rem',
                       fontWeight: 'bold',
-                      direction: 'rtl'
+                      direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
-                    سفر با حیوان خانگی
+                    {t('home.services.petTravelFull')}
                   </p>
                 </div>
               </div>
