@@ -44,14 +44,21 @@ const TicketPage: React.FC = () => {
   });
 
   // Ticket categories mapping
-  const ticketCategories = [
-    { value: 'HR', label: 'همکاری با ما - برای درخواست همکاری با منابع انسانی' },
-    { value: 'FEEDBACK', label: 'انتقادات و پیشنهادات - برای ارسال انتقادات و پیشنهادات به روابط عمومی' },
-    { value: 'MISC', label: 'متفرقه - سوالات و درخواست‌های متفرقه' },
-    { value: 'SECURITY', label: 'ارتباط با حراست - برای ارتباط با حراست' },
-    { value: 'BOOKING', label: 'رزرو بلیط - مشکلات مربوط به رزرو بلیط' },
-    { value: 'FLIGHT', label: 'پرواز - سوالات و مشکلات مربوط به پرواز' },
-    { value: 'PAYMENT', label: 'پرداخت - مشکلات مربوط به پرداخت' },
+  const getTicketCategories = () => [
+    { value: 'HR', label: t('ticket.category.hr') },
+    { value: 'FEEDBACK', label: t('ticket.category.feedback') },
+    { value: 'MISC', label: t('ticket.category.misc') },
+    { value: 'SECURITY', label: t('ticket.category.security') },
+    { value: 'BOOKING', label: t('ticket.category.booking') },
+    { value: 'FLIGHT', label: t('ticket.category.flight') },
+    { value: 'PAYMENT', label: t('ticket.category.payment') },
+  ];
+  
+  const getPriorityOptions = () => [
+    { value: 'LOW', label: t('ticket.priority.low') },
+    { value: 'NORMAL', label: t('ticket.priority.normal') },
+    { value: 'HIGH', label: t('ticket.priority.high') },
+    { value: 'URGENT', label: t('ticket.priority.urgent') },
   ];
 
   useEffect(() => {
@@ -79,7 +86,7 @@ const TicketPage: React.FC = () => {
       const tickets = await ticketService.getMyTickets();
       setMyTickets(tickets);
     } catch (error: any) {
-      setError('خطا در بارگذاری تیکت‌ها');
+      setError(t('ticket.errorLoading'));
       console.error('Error loading tickets:', error);
     } finally {
       setLoading(false);
@@ -94,20 +101,20 @@ const TicketPage: React.FC = () => {
     // Special handling for security category
     if (formData.category === 'SECURITY') {
       if (securityPhone) {
-        alert(`برای ارتباط با حراست با شماره زیر تماس بگیرید:\n${securityPhone}`);
+        alert(`${t('ticket.securityContact')}:\n${securityPhone}`);
       }
       return;
     }
 
     if (!formData.title || !formData.description) {
-      setError('لطفاً عنوان و توضیحات را وارد کنید');
+      setError(t('ticket.pleaseFillFields'));
       return;
     }
 
     try {
       setLoading(true);
       const ticket = await ticketService.createTicket(formData);
-      setSuccess(`تیکت شما با شماره ${ticket.reference} با موفقیت ایجاد شد`);
+      setSuccess(t('ticket.submitSuccess'));
       setFormData({
         title: '',
         description: '',
@@ -120,7 +127,7 @@ const TicketPage: React.FC = () => {
         await loadMyTickets();
       }
     } catch (error: any) {
-      setError(error.response?.data?.detail || 'خطا در ایجاد تیکت');
+      setError(error.response?.data?.detail || t('ticket.submitError'));
       console.error('Error creating ticket:', error);
     } finally {
       setLoading(false);
@@ -234,7 +241,7 @@ const TicketPage: React.FC = () => {
               }`}
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
             >
-              {language === 'en' ? 'Create Ticket' : language === 'ar' ? 'إنشاء تذكرة' : 'ایجاد تیکت'}
+              {t('ticket.createTicket')}
             </button>
             <button
               onClick={() => {
@@ -250,7 +257,7 @@ const TicketPage: React.FC = () => {
               }`}
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
             >
-              {language === 'en' ? 'My Tickets' : language === 'ar' ? 'تذاكري' : 'تیکت‌های من'}
+              {t('ticket.myTickets')}
             </button>
           </div>
 
@@ -294,12 +301,12 @@ const TicketPage: React.FC = () => {
                 <div>
                   <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                     <TicketIcon className="w-5 h-5 text-blue-900" />
-                    {language === 'en' ? 'Category' : language === 'ar' ? 'الفئة' : 'دسته‌بندی'}
+                    {t('ticket.category')}
                   </label>
                   <CustomSelect
                     value={formData.category}
                     onChange={(value) => setFormData({ ...formData, category: value as any })}
-                    options={ticketCategories}
+                    options={getTicketCategories()}
                     required
                   />
                 </div>
@@ -327,15 +334,15 @@ const TicketPage: React.FC = () => {
                 <div>
                   <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                     <DocumentTextIcon className="w-5 h-5 text-blue-900" />
-                    {language === 'en' ? 'Title' : language === 'ar' ? 'العنوان' : 'عنوان'} <span className="text-red-500">*</span>
+                    {t('ticket.title')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                    placeholder={language === 'en' ? 'Enter ticket title' : language === 'ar' ? 'أدخل عنوان التذكرة' : 'عنوان تیکت را وارد کنید'}
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    placeholder={t('ticket.titlePlaceholder')}
                     required={formData.category !== 'SECURITY'}
                     disabled={formData.category === 'SECURITY'}
                   />
@@ -345,15 +352,15 @@ const TicketPage: React.FC = () => {
                 <div>
                   <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                     <DocumentTextIcon className="w-5 h-5 text-blue-900" />
-                    {language === 'en' ? 'Description' : language === 'ar' ? 'الوصف' : 'توضیحات'} <span className="text-red-500">*</span>
+                    {t('ticket.description')} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={8}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all resize-none"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                    placeholder={language === 'en' ? 'Describe your issue or request' : language === 'ar' ? 'اوصف مشكلتك أو طلبك' : 'مشکل یا درخواست خود را توضیح دهید'}
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    placeholder={t('ticket.descriptionPlaceholder')}
                     required={formData.category !== 'SECURITY'}
                     disabled={formData.category === 'SECURITY'}
                   />
@@ -363,18 +370,12 @@ const TicketPage: React.FC = () => {
                 <div>
                   <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                     <ExclamationCircleIcon className="w-5 h-5 text-blue-900" />
-                    {language === 'en' ? 'Priority' : language === 'ar' ? 'الأولوية' : 'اولویت'}
+                    {t('ticket.priority')}
                   </label>
                   <CustomSelect
                     value={formData.priority || 'NORMAL'}
                     onChange={(value) => setFormData({ ...formData, priority: value as any })}
-                    options={[
-                      { value: 'LOW', label: language === 'en' ? 'Low' : language === 'ar' ? 'منخفض' : 'کم' },
-                      { value: 'NORMAL', label: language === 'en' ? 'Normal' : language === 'ar' ? 'عادي' : 'عادی' },
-                      { value: 'HIGH', label: language === 'en' ? 'High' : language === 'ar' ? 'عالي' : 'بالا' },
-                      { value: 'URGENT', label: language === 'en' ? 'Urgent' : language === 'ar' ? 'عاجل' : 'فوری' },
-                      { value: 'CRITICAL', label: language === 'en' ? 'Critical' : language === 'ar' ? 'حرج' : 'بحرانی' },
-                    ]}
+                    options={getPriorityOptions()}
                     disabled={formData.category === 'SECURITY'}
                   />
                 </div>
@@ -393,12 +394,12 @@ const TicketPage: React.FC = () => {
                     {loading ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        {language === 'en' ? 'Creating...' : language === 'ar' ? 'جارٍ الإنشاء...' : 'در حال ایجاد...'}
+                        {t('ticket.loading')}
                       </>
                     ) : (
                       <>
                         <PaperAirplaneIcon className="w-5 h-5" />
-                        {language === 'en' ? 'Create Ticket' : language === 'ar' ? 'إنشاء تذكرة' : 'ایجاد تیکت'}
+                        {t('ticket.submit')}
                       </>
                     )}
                   </button>

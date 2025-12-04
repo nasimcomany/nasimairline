@@ -326,7 +326,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
             >
               <PaperAirplaneIcon className="w-4 h-4" />
-              پیگیری
+              {t('home.flightSearch.track')}
             </button>
           </div>
         </div>
