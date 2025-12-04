@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPinIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { cities, City } from '../../data/cities';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface CitySelectProps {
   value: string;
@@ -19,8 +20,17 @@ const CitySelect: React.FC<CitySelectProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { language } = useLanguage();
 
   const selectedCity = cities.find(city => city.code === value);
+  
+  const getCityName = (city: City) => {
+    return language === 'en' ? city.name : city.nameFa;
+  };
+  
+  const getCountryName = (city: City) => {
+    return language === 'en' ? city.country : city.countryFa;
+  };
 
   const filteredCities = cities.filter(city =>
     city.nameFa.includes(searchTerm) ||
@@ -72,8 +82,8 @@ const CitySelect: React.FC<CitySelectProps> = ({
         <div className="flex items-center gap-1">
           <MapPinIcon className="w-4 h-4 text-gray-400" />
           {selectedCity ? (
-            <div className="text-right">
-              <div className="text-sm text-gray-900 font-bold">{selectedCity.nameFa}</div>
+            <div className={language === 'en' ? 'text-left' : 'text-right'}>
+              <div className="text-sm text-gray-900 font-bold">{getCityName(selectedCity)}</div>
               <div className="text-xs text-gray-500">{selectedCity.code}</div>
             </div>
           ) : (
@@ -112,7 +122,7 @@ const CitySelect: React.FC<CitySelectProps> = ({
                   key={city.code}
                   type="button"
                   onClick={() => handleSelect(city.code)}
-                  className={`w-full px-4 py-3 text-right hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0 ${
+                  className={`w-full px-4 py-3 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0 ${
                     city.code === value ? 'bg-blue-50' : ''
                   }`}
                   style={{
@@ -120,9 +130,11 @@ const CitySelect: React.FC<CitySelectProps> = ({
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="text-right">
-                      <div className="font-bold text-gray-900">{city.nameFa}</div>
-                      <div className="text-sm text-gray-600">{city.name} - {city.countryFa}</div>
+                    <div className={language === 'en' ? 'text-left' : 'text-right'}>
+                      <div className="font-bold text-gray-900">{getCityName(city)}</div>
+                      <div className="text-sm text-gray-600">
+                        {language === 'en' ? `${city.nameFa} - ${getCountryName(city)}` : `${city.name} - ${getCountryName(city)}`}
+                      </div>
                     </div>
                     <div className="text-sm font-bold text-blue-900">{city.code}</div>
                   </div>

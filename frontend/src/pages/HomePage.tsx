@@ -1194,10 +1194,10 @@ const HomePage: React.FC = () => {
                       fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                       fontSize: '1.4rem',
                       fontWeight: 'bold',
-                      direction: 'rtl'
+                      direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
-                    درخواست ویلچر
+                    {t('home.flightSearch.wheelchair')}
                   </p>
                 </div>
               </div>
