@@ -224,6 +224,13 @@ const translations = {
     'home.experience.flyWithNasim': 'پرواز با هواپیمایی نسیم ایر',
     'home.experience.exploreNasim': 'نسیم ایر را تجربه کنید',
     'home.experience.planUnforgettable': 'سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید',
+    'passengers.adult': 'بزرگسال',
+    'passengers.child': 'کودک',
+    'passengers.infant': 'نوزاد',
+    'passengers.selectPassengers': 'انتخاب مسافران',
+    'class.economy': 'اکونومی',
+    'class.business': 'بیزینس',
+    'class.first': 'فرست کلاس',
     
     // Support FAQ Categories
     'support.faqCategories.general': 'عمومی',

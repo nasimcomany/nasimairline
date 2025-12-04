@@ -735,8 +735,8 @@ const HomePage: React.FC = () => {
               }}
             />
             <div className="absolute inset-0 bg-black/10"></div>
-          </div>
-          
+      </div>
+
           {/* Image 2: tstnasim2.jpg */}
           <div
             className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
@@ -758,8 +758,8 @@ const HomePage: React.FC = () => {
               }}
             />
             <div className="absolute inset-0 bg-black/10"></div>
-          </div>
-          
+      </div>
+
           {/* Image 3: tstnasim3.jpg */}
           <div
             className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
@@ -827,9 +827,9 @@ const HomePage: React.FC = () => {
               }}
             />
             <div className="absolute inset-0 bg-black/10"></div>
-          </div>
-        </div>
-
+              </div>
+            </div>
+            
         {/* Navigation Arrows - Minimal and Elegant */}
         <button
           onClick={() => setCurrentHeroImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
@@ -1474,7 +1474,7 @@ const HomePage: React.FC = () => {
                     objectFit: 'contain'
                   }} 
                 />
-              </h2>
+            </h2>
               
               {/* Third line - Small */}
               <p style={{ 
@@ -1490,7 +1490,7 @@ const HomePage: React.FC = () => {
               </p>
             </div>
           </div>
-          
+
           {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 justify-center items-center" style={{ perspective: '1000px' }}>
             {/* 4 Small Images - Left Side (2/3 width, 2x2 grid) - First in order */}
@@ -1498,7 +1498,7 @@ const HomePage: React.FC = () => {
               {/* Image 1 - two.png - Left page of book */}
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                style={{ 
+                style={{
                   borderRadius: '6px',
                   border: '0.5px solid #d1d5db',
                   boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
@@ -1587,8 +1587,8 @@ const HomePage: React.FC = () => {
                       imageRendering: '-webkit-optimize-contrast'
                     }}
                   />
-                </div>
-              </div>
+                    </div>
+                  </div>
 
               {/* Image 3 - four.png - Left page of book */}
               <div 
@@ -1754,7 +1754,7 @@ const HomePage: React.FC = () => {
               <h3 className={`text-white font-semibold mb-3 text-sm ${fontClass} flex items-center gap-2`}>
                 <MapPinIcon className="w-4 h-4" />
                 {t('booking.flightSummary')}
-              </h3>
+                  </h3>
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>
                   <span className={`text-blue-200 ${fontClass}`}>{t('booking.from')}</span>
@@ -2889,7 +2889,7 @@ const HomePage: React.FC = () => {
               >
                 {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
               </span>
-            </div>
+                    </div>
 
             {/* Card 2: خدمات مسافران */}
             <div 
@@ -2902,7 +2902,7 @@ const HomePage: React.FC = () => {
                   alt={language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
                   className="w-full h-full object-cover"
                 />
-              </div>
+                  </div>
               <span 
                 className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
                 style={{
@@ -2912,7 +2912,7 @@ const HomePage: React.FC = () => {
               >
                 {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
               </span>
-            </div>
+                  </div>
 
             {/* Card 3: اطلاعات پرواز */}
             <div 
@@ -2925,7 +2925,7 @@ const HomePage: React.FC = () => {
                   alt={language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
                   className="w-full h-full object-cover"
                 />
-              </div>
+                </div>
               <span 
                 className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
                 style={{
@@ -2935,7 +2935,7 @@ const HomePage: React.FC = () => {
               >
                 {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
               </span>
-            </div>
+              </div>
 
             {/* Card 4: پشتیبانی و تماس */}
             <div 
@@ -3008,9 +3008,9 @@ const HomePage: React.FC = () => {
                           : language === 'ar'
                           ? 'يمكنك بسهولة حجز رحلتك من خلال موقع نسيم إير الإلكتروني أو تطبيق الهاتف المحمول أو الاتصال بمركز الحجز لدينا. نحن مرخصون رسمياً من منظمة الطيران المدني ونتحلى بشارة الثقة الإلكترونية، وجميع معاملاتك تتم بأمان.'
                           : 'You can easily book your flight through Nasim Air website, mobile app, or by contacting our reservation center. We are officially licensed by the Civil Aviation Organization and have an electronic trust badge, and all your transactions are secure.'}
-                      </p>
-                    </div>
-                    <div>
+              </p>
+            </div>
+            <div>
                       <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
                         fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                       }}>
@@ -3375,7 +3375,7 @@ const HomePage: React.FC = () => {
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>{language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}</a></li>
               </ul>
-            </div>
+              </div>
 
             {/* مجوزها و اعتبارات Column */}
             <div>
