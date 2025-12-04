@@ -155,15 +155,15 @@ const FlightResultsPage: React.FC = () => {
           <div className="max-w-6xl mx-auto">
             <h1 
               className="text-white text-4xl font-bold mb-4 text-center"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
-              نتایج جستجوی پرواز
+              {t('flights.searchResults')}
             </h1>
             <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 flex items-center justify-center gap-8 flex-wrap">
               <div className="flex items-center gap-2 text-white">
                 <PaperAirplaneIcon className="w-5 h-5" />
                 <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  {originCity?.nameFa} → {destCity?.nameFa}
+                  {language === 'en' ? `${originCity?.name} → ${destCity?.name}` : `${originCity?.nameFa} → ${destCity?.nameFa}`}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-white">
@@ -203,35 +203,35 @@ const FlightResultsPage: React.FC = () => {
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
                 <h3 
                   className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                 >
                   <AdjustmentsHorizontalIcon className="w-6 h-6" />
-                  فیلترها
+                  {t('flights.filters')}
                 </h3>
 
                 {/* Sort By */}
                 <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-700 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}>
-                    مرتب‌سازی بر اساس
+                  <label className="block text-sm font-bold text-gray-700 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('flights.sortBy')}
                   </label>
                   <div style={{ height: '42px' }}>
                     <CustomSelect
                       value={sortBy}
                       onChange={(value) => setSortBy(value as any)}
                       options={[
-                        { value: 'price', label: 'ارزان‌ترین' },
-                        { value: 'duration', label: 'سریع‌ترین' },
-                        { value: 'departure', label: 'زودترین پرواز' }
+                        { value: 'price', label: t('flights.price') },
+                        { value: 'duration', label: t('flights.duration') },
+                        { value: 'departure', label: t('flights.departure') }
                       ]}
-                      placeholder="انتخاب کنید"
+                      placeholder={t('flights.price')}
                     />
                   </div>
                 </div>
 
                 {/* Filter Stops */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}>
-                    تعداد توقف
+                  <label className="block text-sm font-bold text-gray-700 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('flights.stops')}
                   </label>
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -242,7 +242,7 @@ const FlightResultsPage: React.FC = () => {
                         onChange={() => setFilterStops('all')}
                         className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                       />
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>همه پروازها</span>
+                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{t('flights.allFlights')}</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -252,7 +252,7 @@ const FlightResultsPage: React.FC = () => {
                         onChange={() => setFilterStops('direct')}
                         className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                       />
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>بدون توقف</span>
+                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{t('flights.directOnly')}</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -262,7 +262,7 @@ const FlightResultsPage: React.FC = () => {
                         onChange={() => setFilterStops('one')}
                         className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                       />
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>یک توقف</span>
+                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{t('flights.oneStop')}</span>
                     </label>
                   </div>
                 </div>
