@@ -284,6 +284,26 @@ const translations = {
     'ticket.priority.high': 'زیاد',
     'ticket.priority.urgent': 'فوری',
     
+    // Flight Results Page
+    'flights.searchResults': 'نتایج جستجوی پرواز',
+    'flights.pleaseSearch': 'لطفاً ابتدا جستجوی پرواز را انجام دهید',
+    'flights.backToHome': 'بازگشت به صفحه اصلی',
+    'flights.filters': 'فیلترها',
+    'flights.sortBy': 'مرتب‌سازی بر اساس',
+    'flights.price': 'قیمت',
+    'flights.duration': 'مدت زمان',
+    'flights.departure': 'ساعت پرواز',
+    'flights.stops': 'توقف‌ها',
+    'flights.allFlights': 'همه پروازها',
+    'flights.directOnly': 'مستقیم',
+    'flights.oneStop': 'یک توقف',
+    'flights.selectFlight': 'انتخاب پرواز',
+    'flights.availableSeats': 'صندلی موجود',
+    'flights.direct': 'مستقیم',
+    'flights.stop': 'توقف',
+    'flights.loading': 'در حال جستجو...',
+    'flights.noResults': 'پروازی یافت نشد',
+    
     // Support FAQ Categories
     'support.faqCategories.general': 'عمومی',
     'support.faqCategories.booking': 'رزرو',
@@ -868,6 +888,26 @@ const translations = {
     'ticket.priority.normal': 'عادي',
     'ticket.priority.high': 'عالي',
     'ticket.priority.urgent': 'عاجل',
+    
+    // Flight Results Page
+    'flights.searchResults': 'نتائج البحث عن الرحلات',
+    'flights.pleaseSearch': 'يرجى البحث عن رحلة أولاً',
+    'flights.backToHome': 'العودة إلى الصفحة الرئيسية',
+    'flights.filters': 'الفلاتر',
+    'flights.sortBy': 'الترتيب حسب',
+    'flights.price': 'السعر',
+    'flights.duration': 'المدة',
+    'flights.departure': 'وقت المغادرة',
+    'flights.stops': 'التوقفات',
+    'flights.allFlights': 'جميع الرحلات',
+    'flights.directOnly': 'مباشر',
+    'flights.oneStop': 'توقف واحد',
+    'flights.selectFlight': 'اختيار الرحلة',
+    'flights.availableSeats': 'مقاعد متاحة',
+    'flights.direct': 'مباشر',
+    'flights.stop': 'توقف',
+    'flights.loading': 'جارٍ البحث...',
+    'flights.noResults': 'لم يتم العثور على رحلات',
     
     // Stats
     'home.stats.destinations': 'الوجهات',
