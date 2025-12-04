@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { cities } from '../data/cities';
 import CustomSelect from '../components/CustomSelect/CustomSelect';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Flight {
   id: string;
@@ -34,6 +35,7 @@ interface Flight {
 const FlightResultsPage: React.FC = () => {
   const navigate = useNavigate();
   const searchParams = useSelector((state: RootState) => state.flight.searchParams);
+  const { t, language } = useLanguage();
   
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,15 +114,15 @@ const FlightResultsPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         <EmiratesHeader />
         <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-xl text-gray-600 mb-6" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-            لطفاً ابتدا جستجوی پرواز را انجام دهید
+          <p className="text-xl text-gray-600 mb-6" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+            {t('flights.pleaseSearch')}
           </p>
           <button
             onClick={() => navigate('/')}
             className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg transition-colors"
             style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
           >
-            بازگشت به صفحه اصلی
+            {t('flights.backToHome')}
           </button>
         </div>
       </div>

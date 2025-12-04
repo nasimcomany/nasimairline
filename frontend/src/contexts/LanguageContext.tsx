@@ -1404,6 +1404,26 @@ const translations = {
     'ticket.priority.high': 'High',
     'ticket.priority.urgent': 'Urgent',
     
+    // Flight Results Page
+    'flights.searchResults': 'Flight Search Results',
+    'flights.pleaseSearch': 'Please search for flights first',
+    'flights.backToHome': 'Back to Home',
+    'flights.filters': 'Filters',
+    'flights.sortBy': 'Sort By',
+    'flights.price': 'Price',
+    'flights.duration': 'Duration',
+    'flights.departure': 'Departure Time',
+    'flights.stops': 'Stops',
+    'flights.allFlights': 'All Flights',
+    'flights.directOnly': 'Direct',
+    'flights.oneStop': 'One Stop',
+    'flights.selectFlight': 'Select Flight',
+    'flights.availableSeats': 'Available Seats',
+    'flights.direct': 'Direct',
+    'flights.stop': 'Stop',
+    'flights.loading': 'Searching...',
+    'flights.noResults': 'No flights found',
+    
     // Homepage
     'home.hero.flyWithNasim': 'Fly with Nasim Air',
     'home.hero.safeTripDescription': 'A safe, comfortable and memorable journey to domestic and international destinations',
