@@ -5,6 +5,7 @@ import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { loginUser, registerUser } from '../../store/slices/authSlice';
 import { AppDispatch } from '../../store';
 import CustomSelect from '../CustomSelect/CustomSelect';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
 
   // Login form
   const [loginForm, setLoginForm] = useState({
@@ -80,7 +82,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
     // Validate captcha
     if (parseInt(loginForm.captcha) !== captcha.answer) {
-      setError('کد امنیتی اشتباه است');
+      setError(t('auth.captchaError'));
       generateCaptcha();
       setLoginForm(prev => ({ ...prev, captcha: '' }));
       return;
@@ -88,7 +90,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
     // Validate national ID
     if (!validateNationalId(loginForm.nationalId)) {
-      setError('کد ملی نامعتبر است');
+      setError(t('auth.invalidNationalId'));
       return;
     }
 
@@ -98,13 +100,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         password: loginForm.password
       })).unwrap();
       
-      setSuccess('ورود موفقیت‌آمیز بود');
+      setSuccess(t('auth.loginSuccess'));
       setTimeout(() => {
         onClose();
         navigate('/dashboard');
       }, 1000);
     } catch (err: any) {
-      setError(err.message || 'نام کاربری یا رمز عبور اشتباه است');
+      setError(err.message || t('auth.loginError'));
       generateCaptcha();
     }
   };
@@ -115,7 +117,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
     // Validate captcha
     if (parseInt(registerForm.captcha) !== captcha.answer) {
-      setError('کد امنیتی اشتباه است');
+      setError(t('auth.captchaError'));
       generateCaptcha();
       setRegisterForm(prev => ({ ...prev, captcha: '' }));
       return;
@@ -123,19 +125,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
     // Validate national ID
     if (!validateNationalId(registerForm.nationalId)) {
-      setError('کد ملی نامعتبر است');
+      setError(t('auth.invalidNationalId'));
       return;
     }
 
     // Validate passwords match
     if (registerForm.password !== registerForm.confirmPassword) {
-      setError('رمز عبور و تکرار آن یکسان نیست');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
     // Validate password strength
     if (registerForm.password.length < 8) {
-      setError('رمز عبور باید حداقل 8 کاراکتر باشد');
+      setError(t('auth.passwordMinLength'));
       return;
     }
 
@@ -144,7 +146,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     const birthDate = new Date(registerForm.birthDate);
     const age = today.getFullYear() - birthDate.getFullYear();
     if (age < 18) {
-      setError('برای ثبت‌نام باید حداقل 18 سال سن داشته باشید');
+      setError(t('auth.ageRestriction'));
       return;
     }
 
@@ -160,7 +162,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         nationality: registerForm.nationality
       })).unwrap();
 
-      setSuccess('ثبت‌نام با موفقیت انجام شد. در حال ورود...');
+      setSuccess(t('auth.registerSuccess'));
       
       // Auto login after registration
       setTimeout(async () => {
@@ -172,7 +174,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         navigate('/dashboard');
       }, 1500);
     } catch (err: any) {
-      setError(err.message || 'خطا در ثبت‌نام. لطفاً دوباره تلاش کنید');
+      setError(err.message || t('auth.registerError'));
       generateCaptcha();
     }
   };
@@ -201,9 +203,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-6 rounded-t-2xl">
           <h2 
             className="text-2xl font-bold text-white text-center"
-            style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+            style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
           >
-            {mode === 'login' ? 'ورود به حساب کاربری' : 'ثبت‌نام'}
+            {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
           </h2>
         </div>
 
@@ -226,8 +228,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
             <form onSubmit={handleLogin} className="space-y-4">
               {/* National ID */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  نام کاربری (کد ملی)
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.nationalId')}
                 </label>
                 <input
                   type="text"
@@ -235,7 +237,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   onChange={(e) => setLoginForm(prev => ({ ...prev, nationalId: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                   style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
-                  placeholder="کد ملی 10 رقمی"
+                  placeholder={t('auth.nationalIdPlaceholder')}
                   maxLength={10}
                   required
                 />
@@ -243,8 +245,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  رمز عبور
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.password')}
                 </label>
                 <div className="relative">
                   <input
@@ -252,8 +254,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     value={loginForm.password}
                     onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                    placeholder="رمز عبور"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    placeholder={t('auth.passwordPlaceholder')}
                     required
                   />
                   <button
@@ -268,8 +270,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Captcha */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  کد امنیتی
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.captcha')}
                 </label>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
@@ -283,7 +285,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
                     style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                   >
-                    تغییر
+                    {t('auth.captchaChange')}
                   </button>
                 </div>
                 <input
@@ -291,8 +293,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   value={loginForm.captcha}
                   onChange={(e) => setLoginForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                  placeholder="جواب را وارد کنید"
+                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  placeholder={t('auth.captchaPlaceholder')}
                   required
                 />
               </div>
@@ -303,7 +305,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition-colors"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
               >
-                ورود
+                {t('auth.loginButton')}
               </button>
             </form>
           )}
@@ -313,26 +315,26 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
             <form onSubmit={handleRegister} className="space-y-4">
               {/* Nationality */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  ملیت
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.nationality')}
                 </label>
                 <CustomSelect
                   value={registerForm.nationality}
                   onChange={(value) => setRegisterForm(prev => ({ ...prev, nationality: value }))}
                   options={[
-                    { value: 'iranian', label: 'ایرانی' },
-                    { value: 'afghan', label: 'افغانستانی' },
-                    { value: 'iraqi', label: 'عراقی' },
-                    { value: 'other', label: 'سایر' }
+                    { value: 'iranian', label: t('nationality.iranian') },
+                    { value: 'afghan', label: t('nationality.afghan') },
+                    { value: 'iraqi', label: t('nationality.iraqi') },
+                    { value: 'other', label: t('nationality.other') }
                   ]}
-                  placeholder="انتخاب ملیت"
+                  placeholder={t('auth.selectNationality')}
                 />
               </div>
 
               {/* National ID */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  کد ملی (نام کاربری)
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.nationalIdRegister')}
                 </label>
                 <input
                   type="text"
@@ -340,7 +342,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, nationalId: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                   style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
-                  placeholder="کد ملی 10 رقمی"
+                  placeholder={t('auth.nationalIdPlaceholder')}
                   maxLength={10}
                   required
                 />
@@ -348,8 +350,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Birth Date */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  تاریخ تولد
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.birthDate')}
                 </label>
                 <input
                   type="date"
@@ -364,8 +366,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  رمز عبور
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.password')}
                 </label>
                 <div className="relative">
                   <input
@@ -373,8 +375,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     value={registerForm.password}
                     onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                    placeholder="حداقل 8 کاراکتر"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    placeholder={t('auth.passwordPlaceholder')}
                     minLength={8}
                     required
                   />
@@ -390,8 +392,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  تکرار رمز عبور
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.confirmPassword')}
                 </label>
                 <div className="relative">
                   <input
@@ -399,8 +401,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     value={registerForm.confirmPassword}
                     onChange={(e) => setRegisterForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                    placeholder="تکرار رمز عبور"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    placeholder={t('auth.confirmPasswordPlaceholder')}
                     required
                   />
                   <button
@@ -415,8 +417,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Captcha */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  کد امنیتی
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.captcha')}
                 </label>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
@@ -430,7 +432,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
                     style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                   >
-                    تغییر
+                    {t('auth.captchaChange')}
                   </button>
                 </div>
                 <input
@@ -438,8 +440,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   value={registerForm.captcha}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                  placeholder="جواب را وارد کنید"
+                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  placeholder={t('auth.captchaPlaceholder')}
                   required
                 />
               </div>
@@ -450,7 +452,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition-colors"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
               >
-                ثبت‌نام
+                {t('auth.registerButton')}
               </button>
             </form>
           )}
@@ -464,9 +466,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 setSuccess('');
               }}
               className="text-blue-900 hover:text-blue-800 font-bold text-sm"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
-              {mode === 'login' ? 'حساب کاربری ندارید? ثبت‌نام کنید' : 'حساب کاربری دارید؟ وارد شوید'}
+              {mode === 'login' ? t('auth.noAccount') : t('auth.haveAccount')}
             </button>
           </div>
         </div>

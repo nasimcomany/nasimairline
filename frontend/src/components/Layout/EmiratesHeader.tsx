@@ -107,7 +107,7 @@ const EmiratesHeader: React.FC = () => {
   const menuItems = [
     {
       key: 'home',
-      label: 'خانه',
+      label: t('nav.home'),
       path: '/',
       dropdown: []
     },
