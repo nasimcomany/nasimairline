@@ -604,7 +604,7 @@ const EmiratesHeader: React.FC = () => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}
                 >
-                  ثبت‌نام
+                  {t('nav.register')}
                 </button>
               </>
             )}
