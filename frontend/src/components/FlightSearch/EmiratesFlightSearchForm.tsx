@@ -382,18 +382,18 @@ const EmiratesFlightSearchForm: React.FC = () => {
           <div className="flex gap-2 items-end">
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                شماره پرواز
+                {t('home.flightSearch.flightNumber')}
               </label>
               <input
                 type="text"
-                placeholder="مثال: NA101"
+                placeholder={t('home.flightSearch.flightNumberPlaceholder')}
                 className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
               />
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                تاریخ پرواز
+                {t('home.flightSearch.flightDate')}
               </label>
               <input
                 type="date"
@@ -408,7 +408,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
             >
               <PaperAirplaneIcon className="w-4 h-4" />
-              مشاهده امکانات
+              {t('home.flightSearch.viewAmenities')}
             </button>
           </div>
         </div>
@@ -420,20 +420,20 @@ const EmiratesFlightSearchForm: React.FC = () => {
           <div className="flex gap-2 items-end">
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                شماره پرواز
+                {t('home.flightSearch.flightNumber')}
               </label>
               <input
                 type="text"
                 value={flightStatusForm.flightNumber}
                 onChange={(e) => setFlightStatusForm(prev => ({ ...prev, flightNumber: e.target.value }))}
-                placeholder="مثال: NA101"
+                placeholder={t('home.flightSearch.flightNumberPlaceholder')}
                 className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
               />
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                تاریخ پرواز
+                {t('home.flightSearch.flightDate')}
               </label>
               <input
                 type="date"
@@ -450,7 +450,7 @@ const EmiratesFlightSearchForm: React.FC = () => {
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
             >
               <ClockIcon className="w-4 h-4" />
-              بررسی وضعیت
+              {t('home.flightSearch.checkStatus')}
             </button>
           </div>
         </div>
