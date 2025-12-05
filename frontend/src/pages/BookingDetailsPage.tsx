@@ -631,8 +631,8 @@ const BookingDetailsPage: React.FC = () => {
                   {/* Price Breakdown */}
                   {passengers.filter(p => p.type === 'adult').length > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        بزرگسال ({passengers.filter(p => p.type === 'adult').length}):
+                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        {t('passengers.adult')} ({passengers.filter(p => p.type === 'adult').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                         {language === 'en' 
@@ -645,8 +645,8 @@ const BookingDetailsPage: React.FC = () => {
                   )}
                   {passengers.filter(p => p.type === 'child').length > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        کودک ({passengers.filter(p => p.type === 'child').length}):
+                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        {t('passengers.child')} ({passengers.filter(p => p.type === 'child').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                         {language === 'en' 
@@ -659,8 +659,8 @@ const BookingDetailsPage: React.FC = () => {
                   )}
                   {passengers.filter(p => p.type === 'infant').length > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        نوزاد ({passengers.filter(p => p.type === 'infant').length}):
+                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        {t('passengers.infant')} ({passengers.filter(p => p.type === 'infant').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                         {language === 'en' 
@@ -733,12 +733,12 @@ const BookingDetailsPage: React.FC = () => {
                   <InformationCircleIcon className="w-6 h-6 text-blue-600 flex-shrink-0" />
                   <div>
                     <h4 className="text-sm font-bold text-blue-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      نکات مهم
+                      {t('booking.importantNotes')}
                     </h4>
-                    <ul className="text-xs text-blue-800 space-y-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      <li>• نام و نام خانوادگی باید به انگلیسی و مطابق با گذرنامه باشد</li>
-                      <li>• کد ملی باید معتبر باشد</li>
-                      <li>• اطلاعات تماس برای ارسال بلیط الکترونیکی استفاده می‌شود</li>
+                    <ul className="text-xs text-blue-800 space-y-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <li>• {t('booking.note1')}</li>
+                      <li>• {t('booking.note2')}</li>
+                      <li>• {t('booking.note3')}</li>
                     </ul>
                   </div>
                 </div>

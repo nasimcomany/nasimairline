@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { paymentService } from '../services/paymentService';
+import { useLanguage } from '../contexts/LanguageContext';
+import { cities } from '../data/cities';
 import {
   CreditCardIcon,
   ShieldCheckIcon,
@@ -14,6 +16,13 @@ const PaymentPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { flight, passengers, contactInfo, totalPrice } = location.state || {};
+  const { t, language } = useLanguage();
+  
+  const getCityName = (cityCode: string) => {
+    const city = cities.find(c => c.code === cityCode);
+    if (!city) return cityCode;
+    return language === 'en' ? city.name : city.nameFa;
+  };
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,7 +42,7 @@ const PaymentPage: React.FC = () => {
       
       const paymentData = {
         amount: totalPrice,
-        description: `خرید بلیط پرواز ${flight.flightNumber} - ${flight.origin} به ${flight.destination}`,
+        description: `${t('payment.buyFlightTicket')} ${flight.flightNumber} - ${getCityName(flight.origin)} ${language === 'en' ? 'to' : language === 'ar' ? 'إلى' : 'به'} ${getCityName(flight.destination)}`,
         email: contactInfo.email,
         mobile: contactInfo.phone,
         callbackUrl
@@ -71,9 +80,9 @@ const PaymentPage: React.FC = () => {
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-6">
-              <h1 className="text-2xl font-bold text-white text-center flex items-center justify-center gap-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h1 className="text-2xl font-bold text-white text-center flex items-center justify-center gap-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                 <CreditCardIcon className="w-8 h-8" />
-                پرداخت امن
+                {t('payment.securePayment')}
               </h1>
             </div>
 
@@ -84,8 +93,8 @@ const PaymentPage: React.FC = () => {
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
                   <ExclamationCircleIcon className="w-6 h-6 text-red-600 flex-shrink-0" />
                   <div>
-                    <p className="text-red-800 font-bold mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      خطا در پرداخت
+                    <p className="text-red-800 font-bold mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {t('payment.paymentError')}
                     </p>
                     <p className="text-sm text-red-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                       {error}
@@ -96,34 +105,38 @@ const PaymentPage: React.FC = () => {
 
               {/* Flight Summary */}
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                <h3 className="font-bold text-gray-900 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  خلاصه رزرو
+                <h3 className="font-bold text-gray-900 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('payment.bookingSummary')}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>شماره پرواز:</span>
-                    <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.flightNumber')}</span>
+                    <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {flight.flightNumber}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>مسیر:</span>
-                    <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      {flight.origin} → {flight.destination}
+                    <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.route')}</span>
+                    <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {getCityName(flight.origin)} → {getCityName(flight.destination)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>تعداد مسافران:</span>
-                    <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      {passengers.length} نفر
+                    <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.passengerCount')}</span>
+                    <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {passengers.length} {t('payment.person')}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-blue-300">
-                    <span className="text-lg font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      مبلغ قابل پرداخت:
+                    <span className="text-lg font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {t('booking.payableAmount')}
                     </span>
-                    <span className="text-xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      {totalPrice.toLocaleString('fa-IR')} تومان
+                    <span className="text-xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {language === 'en' 
+                        ? totalPrice.toLocaleString('en-US')
+                        : language === 'ar'
+                        ? totalPrice.toLocaleString('ar-SA')
+                        : totalPrice.toLocaleString('fa-IR')} {t('flights.currency')}
                     </span>
                   </div>
                 </div>
@@ -134,11 +147,11 @@ const PaymentPage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <ShieldCheckIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
                   <div>
-                    <h4 className="font-bold text-green-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      پرداخت امن
+                    <h4 className="font-bold text-green-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {t('payment.securePayment')}
                     </h4>
-                    <p className="text-sm text-green-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      پرداخت شما از طریق درگاه امن زرین‌پال انجام می‌شود. اطلاعات کارت شما کاملاً محفوظ است.
+                    <p className="text-sm text-green-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {t('payment.securePaymentNotice')}
                     </p>
                   </div>
                 </div>
@@ -154,12 +167,12 @@ const PaymentPage: React.FC = () => {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                    در حال انتقال به درگاه پرداخت...
+                    {t('payment.redirecting')}
                   </>
                 ) : (
                   <>
                     <CreditCardIcon className="w-6 h-6" />
-                    پرداخت از طریق زرین‌پال
+                    {t('payment.payViaZarinpal')}
                   </>
                 )}
               </button>
@@ -171,7 +184,7 @@ const PaymentPage: React.FC = () => {
                 className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg transition-colors"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
               >
-                بازگشت
+                {t('payment.back')}
               </button>
             </div>
           </div>
