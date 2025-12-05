@@ -523,14 +523,14 @@ const BookingDetailsPage: React.FC = () => {
                 <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-4">
                   <h2 className="text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                     <PhoneIcon className="w-6 h-6" />
-                    اطلاعات تماس
+                    {t('booking.contactInfo')}
                   </h2>
                 </div>
 
                 <div className="p-6 space-y-4">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      شماره تلفن همراه مسافر *
+                      {t('booking.passengerPhone')} *
                     </label>
                     <div className="flex gap-2">
                       <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg">
@@ -552,7 +552,7 @@ const BookingDetailsPage: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      آدرس ایمیل *
+                      {t('booking.emailAddress')} *
                     </label>
                     <div className="relative">
                       <EnvelopeIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -577,7 +577,7 @@ const BookingDetailsPage: React.FC = () => {
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-4">
                   <h3 className="font-bold text-white" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    اطلاعات پرواز
+                    {t('booking.flightInfo')}
                   </h3>
                 </div>
                 <div className="p-4">
@@ -586,8 +586,8 @@ const BookingDetailsPage: React.FC = () => {
                       <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                         {flight.departureTime}
                       </div>
-                      <div className="text-sm text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {flight.origin}
+                      <div className="text-sm text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        {getCityName(flight.origin)}
                       </div>
                     </div>
                     <div className="px-4">
@@ -597,8 +597,8 @@ const BookingDetailsPage: React.FC = () => {
                       <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                         {flight.arrivalTime}
                       </div>
-                      <div className="text-sm text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {flight.destination}
+                      <div className="text-sm text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        {getCityName(flight.destination)}
                       </div>
                     </div>
                   </div>
@@ -615,7 +615,7 @@ const BookingDetailsPage: React.FC = () => {
                     className="w-full mt-3 text-red-600 hover:text-red-700 text-sm font-bold"
                     style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                   >
-                    تغییر پرواز
+                    {t('booking.changeFlight')}
                   </button>
                 </div>
               </div>
@@ -624,7 +624,7 @@ const BookingDetailsPage: React.FC = () => {
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-4">
                   <h3 className="font-bold text-white" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    پیش فاکتور
+                    {t('booking.invoice')}
                   </h3>
                 </div>
                 <div className="p-4 space-y-3">
@@ -635,7 +635,11 @@ const BookingDetailsPage: React.FC = () => {
                         بزرگسال ({passengers.filter(p => p.type === 'adult').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {((flight.basePrice?.adult || 3500000) * passengers.filter(p => p.type === 'adult').length).toLocaleString('fa-IR')} تومان
+                        {language === 'en' 
+                          ? ((flight.basePrice?.adult || 3500000) * passengers.filter(p => p.type === 'adult').length).toLocaleString('en-US')
+                          : language === 'ar'
+                          ? ((flight.basePrice?.adult || 3500000) * passengers.filter(p => p.type === 'adult').length).toLocaleString('ar-SA')
+                          : ((flight.basePrice?.adult || 3500000) * passengers.filter(p => p.type === 'adult').length).toLocaleString('fa-IR')} {t('flights.currency')}
                       </span>
                     </div>
                   )}
@@ -645,7 +649,11 @@ const BookingDetailsPage: React.FC = () => {
                         کودک ({passengers.filter(p => p.type === 'child').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('fa-IR')} تومان
+                        {language === 'en' 
+                          ? ((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('en-US')
+                          : language === 'ar'
+                          ? ((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('ar-SA')
+                          : ((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('fa-IR')} {t('flights.currency')}
                       </span>
                     </div>
                   )}
@@ -655,22 +663,26 @@ const BookingDetailsPage: React.FC = () => {
                         نوزاد ({passengers.filter(p => p.type === 'infant').length}):
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('fa-IR')} تومان
+                        {language === 'en' 
+                          ? ((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('en-US')
+                          : language === 'ar'
+                          ? ((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('ar-SA')
+                          : ((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('fa-IR')} {t('flights.currency')}
                       </span>
                     </div>
                   )}
 
                   <div className="border-t pt-3 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>مبلغ تخفیف:</span>
-                      <span className="font-bold text-green-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        0 تومان
+                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.discountAmount')}</span>
+                      <span className="font-bold text-green-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        0 {t('flights.currency')}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>هزینه اضافی:</span>
-                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        0 تومان
+                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.extraCost')}</span>
+                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        0 {t('flights.currency')}
                       </span>
                     </div>
                   </div>
@@ -678,10 +690,14 @@ const BookingDetailsPage: React.FC = () => {
                   <div className="border-t pt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        مبلغ قابل پرداخت:
+                        {t('booking.payableAmount')}
                       </span>
-                      <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {totalPrice.toLocaleString('fa-IR')} تومان
+                      <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        {language === 'en' 
+                          ? totalPrice.toLocaleString('en-US')
+                          : language === 'ar'
+                          ? totalPrice.toLocaleString('ar-SA')
+                          : totalPrice.toLocaleString('fa-IR')} {t('flights.currency')}
                       </span>
                     </div>
                   </div>
@@ -695,7 +711,7 @@ const BookingDetailsPage: React.FC = () => {
                       className="w-4 h-4 text-blue-900 focus:ring-blue-900 rounded mt-1"
                     />
                     <span className="text-xs text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      قوانین رزرو و استرداد پرواز را خوانده‌ام و می‌پذیرم
+                      {t('booking.acceptTerms')}
                     </span>
                   </label>
 
@@ -706,7 +722,7 @@ const BookingDetailsPage: React.FC = () => {
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                   >
-                    پرداخت
+                    {t('booking.payment')}
                   </button>
                 </div>
               </div>
