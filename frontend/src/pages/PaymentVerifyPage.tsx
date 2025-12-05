@@ -107,17 +107,17 @@ const PaymentVerifyPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <EmiratesHeader />
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-12">
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
             {/* Verifying State */}
             {status === 'verifying' && (
-              <div className="p-12 text-center">
-                <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-900 mb-6"></div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+              <div className="p-6 sm:p-12 text-center">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-900 mb-4 sm:mb-6"></div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('payment.verifying')}
                 </h2>
-                <p className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <p className="text-sm sm:text-base text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('payment.pleaseWait')}
                 </p>
               </div>
@@ -126,23 +126,23 @@ const PaymentVerifyPage: React.FC = () => {
             {/* Success State */}
             {status === 'success' && (
               <div>
-                <div className="bg-gradient-to-r from-green-600 to-green-700 p-8 text-center">
-                  <CheckCircleIcon className="w-20 h-20 text-white mx-auto mb-4" />
-                  <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    پرداخت موفق!
+                <div className="bg-gradient-to-r from-green-600 to-green-700 p-6 sm:p-8 text-center">
+                  <CheckCircleIcon className="w-16 h-16 sm:w-20 sm:h-20 text-white mx-auto mb-3 sm:mb-4" />
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('payment.paymentSuccessful')}
                   </h2>
-                  <p className="text-white/90" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    رزرو شما با موفقیت انجام شد
+                  <p className="text-sm sm:text-base text-white/90" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('payment.bookingSuccessful')}
                   </p>
                 </div>
 
-                <div className="p-8 space-y-6">
+                <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
                   {/* Reference ID */}
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <div className="text-sm text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      شماره پیگیری تراکنش:
+                  <div className="bg-blue-50 rounded-lg p-3 sm:p-4 border border-blue-200">
+                    <div className="text-xs sm:text-sm text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {t('payment.transactionId')}
                     </div>
-                    <div className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr' }}>
+                    <div className="text-lg sm:text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr' }}>
                       {refId}
                     </div>
                   </div>
@@ -151,62 +151,66 @@ const PaymentVerifyPage: React.FC = () => {
                   {bookingData && (
                     <div className="space-y-3">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>شماره پرواز:</span>
-                        <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                        <span className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.flightNumber')}</span>
+                        <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                           {bookingData.flight.flightNumber}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>مسیر:</span>
-                        <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                          {bookingData.flight.origin} → {bookingData.flight.destination}
+                        <span className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.route')}</span>
+                        <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          {getCityName(bookingData.flight.origin)} → {getCityName(bookingData.flight.destination)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>مبلغ پرداختی:</span>
-                        <span className="font-bold text-green-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                          {bookingData.totalPrice.toLocaleString('fa-IR')} تومان
+                        <span className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.paidAmount')}</span>
+                        <span className="font-bold text-green-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          {language === 'en' 
+                            ? bookingData.totalPrice.toLocaleString('en-US')
+                            : language === 'ar'
+                            ? bookingData.totalPrice.toLocaleString('ar-SA')
+                            : bookingData.totalPrice.toLocaleString('fa-IR')} {t('flights.currency')}
                         </span>
                       </div>
                     </div>
                   )}
 
                   {/* Action Buttons */}
-                  <div className="space-y-3 pt-4">
+                  <div className="space-y-2 sm:space-y-3 pt-2 sm:pt-4">
                     <button
                       onClick={handleDownloadPDF}
-                      className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 sm:py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
+                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     >
-                      <ArrowDownTrayIcon className="w-5 h-5" />
-                      دانلود بلیط (PDF)
+                      <ArrowDownTrayIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      {t('payment.downloadTicket')}
                     </button>
 
                     <button
                       onClick={handleDownloadPDF}
-                      className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 sm:py-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     >
-                      <PrinterIcon className="w-5 h-5" />
-                      چاپ بلیط
+                      <PrinterIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      {t('payment.printTicket')}
                     </button>
 
                     <button
                       onClick={() => navigate('/')}
-                      className="w-full bg-white hover:bg-gray-50 border-2 border-gray-300 text-gray-700 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      className="w-full bg-white hover:bg-gray-50 border-2 border-gray-300 text-gray-700 font-bold py-2.5 sm:py-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     >
-                      <HomeIcon className="w-5 h-5" />
-                      بازگشت به صفحه اصلی
+                      <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      {t('payment.returnToHome')}
                     </button>
                   </div>
 
                   {/* Notice */}
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <ClockIcon className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                      <p className="text-xs text-yellow-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        بلیط الکترونیکی به ایمیل شما ارسال شده است. لطفاً قبل از پرواز، بلیط را چاپ کنید یا روی موبایل ذخیره کنید.
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-yellow-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                        {t('payment.ticketEmailSent')}
                       </p>
                     </div>
                   </div>
@@ -217,36 +221,36 @@ const PaymentVerifyPage: React.FC = () => {
             {/* Failed State */}
             {status === 'failed' && (
               <div>
-                <div className="bg-gradient-to-r from-red-600 to-red-700 p-8 text-center">
-                  <XCircleIcon className="w-20 h-20 text-white mx-auto mb-4" />
-                  <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    پرداخت ناموفق
+                <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 sm:p-8 text-center">
+                  <XCircleIcon className="w-16 h-16 sm:w-20 sm:h-20 text-white mx-auto mb-3 sm:mb-4" />
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('payment.paymentFailed')}
                   </h2>
-                  <p className="text-white/90" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    متأسفانه پرداخت شما انجام نشد
+                  <p className="text-sm sm:text-base text-white/90" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('payment.paymentNotCompleted')}
                   </p>
                 </div>
 
-                <div className="p-8 space-y-4">
-                  <p className="text-center text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    پرداخت توسط شما لغو شد یا با خطا مواجه شد
+                <div className="p-4 sm:p-8 space-y-3 sm:space-y-4">
+                  <p className="text-center text-sm sm:text-base text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('payment.paymentCancelled')}
                   </p>
 
                   <button
                     onClick={() => navigate('/flights/results')}
-                    className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition-colors"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                    className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                   >
-                    جستجوی مجدد پرواز
+                    {t('payment.searchAgain')}
                   </button>
 
                   <button
                     onClick={() => navigate('/')}
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 sm:py-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                   >
-                    <HomeIcon className="w-5 h-5" />
-                    بازگشت به صفحه اصلی
+                    <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    {t('payment.returnToHome')}
                   </button>
                 </div>
               </div>

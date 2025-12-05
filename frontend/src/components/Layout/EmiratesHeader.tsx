@@ -171,11 +171,11 @@ const EmiratesHeader: React.FC = () => {
       path: '/support',
       dropdown: [
         { label: t('nav.helpCenter') || 'مرکز کمک', path: '/support' },
-        { label: t('nav.contactUs') || 'تماس با ما', path: '/support' },
+        { label: t('nav.contactUs') || 'تماس با ما', path: '/#faq' },
         { label: t('nav.faq') || 'سوالات متداول', path: '/#faq' },
         { label: t('nav.travelInfo') || 'اطلاعات سفر', path: '/support/travel-info' },
-        { label: 'وضعیت آب و هوا', path: '/#weather' },
-        { label: 'ثبت شکایت', path: '/tickets' },
+        { label: t('nav.weather') || 'وضعیت آب و هوا', path: '/#weather' },
+        { label: t('nav.complaint') || 'ثبت شکایت', path: '/tickets' },
       ]
     }
   ];
@@ -268,6 +268,7 @@ const EmiratesHeader: React.FC = () => {
                                 if (itemIndex === 0) return <TicketIcon className="w-7 h-7 text-blue-600" />;
                                 if (itemIndex === 1) return <CalendarDaysIcon className="w-7 h-7 text-green-600" />;
                                 if (itemIndex === 2) return <GiftIcon className="w-7 h-7 text-purple-600" />;
+                                if (itemIndex === 3) return <SparklesIcon className="w-7 h-7 text-pink-600" />;
                               }
                               if (key === 'manage') {
                                 if (itemIndex === 0) return <ClipboardDocumentIcon className="w-7 h-7 text-indigo-600" />;

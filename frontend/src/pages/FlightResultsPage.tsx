@@ -155,16 +155,16 @@ const FlightResultsPage: React.FC = () => {
       <EmiratesHeader />
       
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 py-12">
+      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 py-6 sm:py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <h1 
-              className="text-white text-4xl font-bold mb-4 text-center"
+              className="text-white text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-center"
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
               {t('flights.searchResults')}
             </h1>
-            <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 flex items-center justify-center gap-8 flex-wrap">
+            <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 sm:p-6 flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
               <div className="flex items-center gap-2 text-white">
                 <PaperAirplaneIcon className="w-5 h-5" />
                 <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
@@ -200,23 +200,23 @@ const FlightResultsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Filters Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 sticky top-4">
                 <h3 
-                  className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"
+                  className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2"
                   style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                 >
-                  <AdjustmentsHorizontalIcon className="w-6 h-6" />
+                  <AdjustmentsHorizontalIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                   {t('flights.filters')}
                 </h3>
 
                 {/* Sort By */}
-                <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-700 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-2 sm:mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('flights.sortBy')}
                   </label>
                   <div style={{ height: '42px' }}>
@@ -235,7 +235,7 @@ const FlightResultsPage: React.FC = () => {
 
                 {/* Filter Stops */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-2 sm:mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('flights.stops')}
                   </label>
                   <div className="space-y-2">
@@ -297,7 +297,7 @@ const FlightResultsPage: React.FC = () => {
                       key={flight.id}
                       className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-blue-300"
                     >
-                      <div className="p-6">
+                      <div className="p-4 sm:p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-4">
                             <div className="w-16 h-16 bg-gradient-to-br from-blue-900 to-blue-700 rounded-lg flex items-center justify-center">
@@ -326,22 +326,22 @@ const FlightResultsPage: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {flight.departureTime}
                             </div>
-                            <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <div className="text-xs sm:text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {getCityName(originCity)}
                             </div>
                           </div>
 
                           <div className="flex flex-col items-center justify-center">
-                            <div className="text-sm text-gray-500 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            <div className="text-xs sm:text-sm text-gray-500 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {flight.duration}
                             </div>
                             <div className="w-full h-0.5 bg-gray-300 relative">
-                              <PaperAirplaneIcon className="w-5 h-5 text-blue-900 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-90" />
+                              <PaperAirplaneIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-90" />
                             </div>
                             <div className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {flight.stops === 0 ? t('flights.noStops') : `${flight.stops} ${t('flights.stopsCount')}`}
@@ -349,24 +349,24 @@ const FlightResultsPage: React.FC = () => {
                           </div>
 
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {flight.arrivalTime}
                             </div>
-                            <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <div className="text-xs sm:text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {getCityName(destCity)}
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-3 sm:pt-4 border-t border-gray-200 gap-3 sm:gap-0">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                              <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                               <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                                 {flight.availableSeats} {t('flights.availableSeatsRemaining')}
                               </span>
                             </div>
-                            <div className="px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-sm font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <div className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-xs sm:text-sm font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {flight.class === 'economy' ? t('class.economy') : flight.class === 'business' ? t('class.business') : t('class.first')}
                             </div>
                           </div>
@@ -380,10 +380,10 @@ const FlightResultsPage: React.FC = () => {
                                 }
                               } 
                             })}
-                            className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
+                            className="w-full sm:w-auto bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 sm:px-8 py-2 sm:py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
                             style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                             {t('flights.selectFlight')}
-                            <ArrowRightIcon className="w-5 h-5" />
+                            <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                           </button>
                         </div>
                       </div>
