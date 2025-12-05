@@ -312,9 +312,13 @@ const FlightResultsPage: React.FC = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="text-left">
+                          <div className="text-left" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             <div className="text-3xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              {flight.price.toLocaleString('fa-IR')}
+                              {language === 'en' 
+                                ? flight.price.toLocaleString('en-US')
+                                : language === 'ar'
+                                ? flight.price.toLocaleString('ar-SA')
+                                : flight.price.toLocaleString('fa-IR')}
                             </div>
                             <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {t('flights.currency')}
@@ -327,8 +331,8 @@ const FlightResultsPage: React.FC = () => {
                             <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {flight.departureTime}
                             </div>
-                            <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              {originCity?.nameFa}
+                            <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                              {getCityName(originCity)}
                             </div>
                           </div>
 
@@ -339,8 +343,8 @@ const FlightResultsPage: React.FC = () => {
                             <div className="w-full h-0.5 bg-gray-300 relative">
                               <PaperAirplaneIcon className="w-5 h-5 text-blue-900 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-90" />
                             </div>
-                            <div className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              {flight.stops === 0 ? 'بدون توقف' : `${flight.stops} توقف`}
+                            <div className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                              {flight.stops === 0 ? t('flights.noStops') : `${flight.stops} ${t('flights.stopsCount')}`}
                             </div>
                           </div>
 
@@ -348,8 +352,8 @@ const FlightResultsPage: React.FC = () => {
                             <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {flight.arrivalTime}
                             </div>
-                            <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              {destCity?.nameFa}
+                            <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                              {getCityName(destCity)}
                             </div>
                           </div>
                         </div>
@@ -358,12 +362,12 @@ const FlightResultsPage: React.FC = () => {
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                               <CheckCircleIcon className="w-5 h-5 text-green-600" />
-                              <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                                {flight.availableSeats} صندلی باقی‌مانده
+                              <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                                {flight.availableSeats} {t('flights.availableSeatsRemaining')}
                               </span>
                             </div>
-                            <div className="px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-sm font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              {flight.class === 'economy' ? 'اکونومی' : flight.class === 'business' ? 'بیزینس' : 'فرست کلاس'}
+                            <div className="px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-sm font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                              {flight.class === 'economy' ? t('class.economy') : flight.class === 'business' ? t('class.business') : t('class.first')}
                             </div>
                           </div>
                           <button

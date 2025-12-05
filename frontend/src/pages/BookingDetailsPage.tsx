@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { loginUser, registerUser } from '../store/slices/authSlice';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import { useLanguage } from '../contexts/LanguageContext';
+import { cities } from '../data/cities';
 import {
   PaperAirplaneIcon,
   ClockIcon,
