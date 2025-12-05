@@ -286,8 +286,8 @@ const FlightResultsPage: React.FC = () => {
               ) : sortedFlights.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                   <XMarkIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-xl text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    پروازی یافت نشد
+                  <p className="text-xl text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('flights.noResults')}
                   </p>
                 </div>
               ) : (
@@ -316,8 +316,8 @@ const FlightResultsPage: React.FC = () => {
                             <div className="text-3xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {flight.price.toLocaleString('fa-IR')}
                             </div>
-                            <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              تومان
+                            <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                              {t('flights.currency')}
                             </div>
                           </div>
                         </div>
