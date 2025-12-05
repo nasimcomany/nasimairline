@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { paymentService } from '../services/paymentService';
 import { generateTicketPDF } from '../utils/pdfGenerator';
+import { useLanguage } from '../contexts/LanguageContext';
+import { cities } from '../data/cities';
 import {
   CheckCircleIcon,
   XCircleIcon,
@@ -15,6 +17,13 @@ import {
 const PaymentVerifyPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  
+  const getCityName = (cityCode: string) => {
+    const city = cities.find(c => c.code === cityCode);
+    if (!city) return cityCode;
+    return language === 'en' ? city.name : city.nameFa;
+  };
   
   const [status, setStatus] = useState<'verifying' | 'success' | 'failed'>('verifying');
   const [refId, setRefId] = useState('');
@@ -105,11 +114,11 @@ const PaymentVerifyPage: React.FC = () => {
             {status === 'verifying' && (
               <div className="p-12 text-center">
                 <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-900 mb-6"></div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  در حال تایید پرداخت...
+                <h2 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('payment.verifying')}
                 </h2>
-                <p className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  لطفاً صبر کنید
+                <p className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('payment.pleaseWait')}
                 </p>
               </div>
             )}
