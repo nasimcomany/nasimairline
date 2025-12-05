@@ -512,7 +512,7 @@ const BookingDetailsPage: React.FC = () => {
                       className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-colors"
                       style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                     >
-                      اعمال
+                      {t('booking.apply')}
                     </button>
                   </div>
                 </div>
