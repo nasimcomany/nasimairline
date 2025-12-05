@@ -36,6 +36,7 @@ const BookingDetailsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const searchParams = useSelector((state: RootState) => state.flight.searchParams);
+  const { t, language } = useLanguage();
 
   // Timer state (5 minutes)
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
@@ -138,7 +139,7 @@ const BookingDetailsPage: React.FC = () => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          alert('زمان رزرو به پایان رسید. لطفاً دوباره جستجو کنید.');
+          alert(t('booking.reservationExpired'));
           navigate('/');
           return 0;
         }
@@ -175,11 +176,17 @@ const BookingDetailsPage: React.FC = () => {
 
   const getPassengerTypeLabel = (type: string) => {
     switch (type) {
-      case 'adult': return 'بزرگسال';
-      case 'child': return 'کودک';
-      case 'infant': return 'نوزاد';
+      case 'adult': return t('passengers.adult');
+      case 'child': return t('passengers.child');
+      case 'infant': return t('passengers.infant');
       default: return type;
     }
+  };
+  
+  const getCityName = (cityCode: string) => {
+    const city = cities.find(c => c.code === cityCode);
+    if (!city) return cityCode;
+    return language === 'en' ? city.name : city.nameFa;
   };
 
   const validateNationalId = (nationalId: string): boolean => {
@@ -199,26 +206,26 @@ const BookingDetailsPage: React.FC = () => {
 
     // Validate terms
     if (!acceptedTerms) {
-      newErrors.push('لطفاً قوانین و مقررات را بپذیرید');
+      newErrors.push(t('booking.acceptTermsError'));
     }
 
     // Validate contact info
     if (!contactInfo.phone || contactInfo.phone.length < 10) {
-      newErrors.push('شماره تلفن همراه معتبر وارد کنید');
+      newErrors.push(t('booking.validPhoneError'));
     }
     if (!contactInfo.email || !contactInfo.email.includes('@')) {
-      newErrors.push('آدرس ایمیل معتبر وارد کنید');
+      newErrors.push(t('booking.validEmailError'));
     }
 
     // Validate passengers
     passengers.forEach((p, idx) => {
-      if (!p.firstName) newErrors.push(`نام مسافر ${idx + 1} الزامی است`);
-      if (!p.lastName) newErrors.push(`نام خانوادگی مسافر ${idx + 1} الزامی است`);
-      if (!p.isForeign && !p.nationalId) newErrors.push(`کد ملی مسافر ${idx + 1} الزامی است`);
+      if (!p.firstName) newErrors.push(`${t('booking.passengerFirstNameRequired')} ${idx + 1} ${t('booking.isRequired')}`);
+      if (!p.lastName) newErrors.push(`${t('booking.passengerLastNameRequired')} ${idx + 1} ${t('booking.isRequired')}`);
+      if (!p.isForeign && !p.nationalId) newErrors.push(`${t('booking.passengerNationalIdRequired')} ${idx + 1} ${t('booking.isRequired')}`);
       if (!p.isForeign && p.nationalId && !validateNationalId(p.nationalId)) {
-        newErrors.push(`کد ملی مسافر ${idx + 1} نامعتبر است`);
+        newErrors.push(`${t('booking.passengerNationalIdInvalid')} ${idx + 1} ${t('booking.isInvalid')}`);
       }
-      if (!p.birthDate) newErrors.push(`تاریخ تولد مسافر ${idx + 1} الزامی است`);
+      if (!p.birthDate) newErrors.push(`${t('booking.passengerBirthDateRequired')} ${idx + 1} ${t('booking.isRequired')}`);
     });
 
     if (newErrors.length > 0) {
@@ -302,8 +309,8 @@ const BookingDetailsPage: React.FC = () => {
               <div className="flex items-start gap-2">
                 <ExclamationCircleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-red-800 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    خطاهای فرم:
+                  <h4 className="font-bold text-red-800 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('booking.formErrors')}
                   </h4>
                   <ul className="text-sm text-red-700 space-y-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                     {errors.map((err, idx) => (
@@ -323,8 +330,8 @@ const BookingDetailsPage: React.FC = () => {
                 <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <UserIcon className="w-6 h-6 text-white" />
-                    <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                      اطلاعات مسافران
+                    <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {t('booking.passengerInfo')}
                     </h2>
                   </div>
                   <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-lg">
@@ -350,8 +357,8 @@ const BookingDetailsPage: React.FC = () => {
                             <h3 className="font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {getPassengerTypeLabel(passenger.type)}
                             </h3>
-                            <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              مسافر شماره {index + 1}
+                            <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                              {t('booking.passengerNumber')} {index + 1}
                             </p>
                           </div>
                         </div>
@@ -367,7 +374,7 @@ const BookingDetailsPage: React.FC = () => {
                             onChange={() => updatePassenger(index, 'gender', 'male')}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                           />
-                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>آقا</span>
+                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.male')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -377,7 +384,7 @@ const BookingDetailsPage: React.FC = () => {
                             onChange={() => updatePassenger(index, 'gender', 'female')}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                           />
-                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>خانم</span>
+                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.female')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer mr-auto">
                           <input
@@ -386,15 +393,15 @@ const BookingDetailsPage: React.FC = () => {
                             onChange={(e) => updatePassenger(index, 'isForeign', e.target.checked)}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900 rounded"
                           />
-                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>اتباع خارجی</span>
+                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.foreignNational')}</span>
                         </label>
                       </div>
 
                       {/* Personal Info */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                            نام (انگلیسی) *
+                          <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            {t('booking.firstNameEnglish')} *
                           </label>
                           <input
                             type="text"
@@ -408,8 +415,8 @@ const BookingDetailsPage: React.FC = () => {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                            نام خانوادگی (انگلیسی) *
+                          <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            {t('booking.lastNameEnglish')} *
                           </label>
                           <input
                             type="text"
@@ -424,8 +431,8 @@ const BookingDetailsPage: React.FC = () => {
 
                         {!passenger.isForeign && (
                           <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              کد ملی *
+                            <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                              {t('booking.nationalId')} *
                             </label>
                             <input
                               type="text"
@@ -433,7 +440,7 @@ const BookingDetailsPage: React.FC = () => {
                               onChange={(e) => updatePassenger(index, 'nationalId', e.target.value.replace(/\D/g, '').slice(0, 10))}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
-                              placeholder="کد ملی 10 رقمی"
+                              placeholder={t('booking.nationalId10Digits')}
                               maxLength={10}
                               required
                             />
@@ -442,8 +449,8 @@ const BookingDetailsPage: React.FC = () => {
 
                         {passenger.isForeign && (
                           <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                              شماره پاسپورت *
+                            <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                              {t('booking.passportNumber')} *
                             </label>
                             <input
                               type="text"
@@ -458,8 +465,8 @@ const BookingDetailsPage: React.FC = () => {
                         )}
 
                         <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                            تاریخ تولد *
+                          <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            {t('booking.birthDate')} *
                           </label>
                           <div className="relative">
                             <CalendarDaysIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -487,7 +494,7 @@ const BookingDetailsPage: React.FC = () => {
                   className="text-blue-900 hover:text-blue-800 text-sm font-bold"
                   style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                 >
-                  کد تخفیف دارید? وارد کردن کد تخفیف
+                  {t('booking.haveDiscountCode')} {t('booking.enterDiscountCode')}
                 </button>
               ) : (
                 <div className="bg-white rounded-xl shadow-lg p-4">
