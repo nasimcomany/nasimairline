@@ -182,15 +182,15 @@ const FlightResultsPage: React.FC = () => {
                 <UserGroupIcon className="w-5 h-5" />
                 <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                   {typeof searchParams.passengers === 'number' 
-                    ? `${searchParams.passengers} مسافر`
+                    ? `${searchParams.passengers} ${t('flights.passenger')}`
                     : (() => {
                         const p = searchParams.passengers;
                         const total = (p?.adults || 0) + (p?.children || 0) + (p?.infants || 0);
                         const parts = [];
-                        if (p?.adults) parts.push(`${p.adults} بزرگسال`);
-                        if (p?.children) parts.push(`${p.children} کودک`);
-                        if (p?.infants) parts.push(`${p.infants} نوزاد`);
-                        return parts.join('، ') || '1 مسافر';
+                        if (p?.adults) parts.push(`${p.adults} ${t('passengers.adult')}`);
+                        if (p?.children) parts.push(`${p.children} ${t('passengers.child')}`);
+                        if (p?.infants) parts.push(`${p.infants} ${t('passengers.infant')}`);
+                        return parts.join(language === 'en' ? ', ' : '، ') || `1 ${t('flights.passenger')}`;
                       })()
                   }
                 </span>
@@ -279,8 +279,8 @@ const FlightResultsPage: React.FC = () => {
               {loading ? (
                 <div className="text-center py-20">
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
-                  <p className="mt-4 text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    در حال جستجوی پروازها...
+                  <p className="mt-4 text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('flights.loadingFlights')}
                   </p>
                 </div>
               ) : sortedFlights.length === 0 ? (
