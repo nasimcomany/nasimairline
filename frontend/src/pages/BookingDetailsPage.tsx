@@ -644,11 +644,11 @@ const BookingDetailsPage: React.FC = () => {
                     </div>
                   )}
                   {passengers.filter(p => p.type === 'child').length > 0 && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {t('passengers.child')} ({passengers.filter(p => p.type === 'child').length}):
                       </span>
-                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
                           ? ((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('en-US')
                           : language === 'ar'
@@ -658,11 +658,11 @@ const BookingDetailsPage: React.FC = () => {
                     </div>
                   )}
                   {passengers.filter(p => p.type === 'infant').length > 0 && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {t('passengers.infant')} ({passengers.filter(p => p.type === 'infant').length}):
                       </span>
-                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
                           ? ((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('en-US')
                           : language === 'ar'
@@ -672,14 +672,14 @@ const BookingDetailsPage: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="border-t pt-3 space-y-2">
-                    <div className="flex justify-between text-sm">
+                  <div className="border-t pt-2 sm:pt-3 space-y-2">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.discountAmount')}</span>
                       <span className="font-bold text-green-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         0 {t('flights.currency')}
                       </span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.extraCost')}</span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         0 {t('flights.currency')}
@@ -687,12 +687,12 @@ const BookingDetailsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="border-t pt-3">
+                  <div className="border-t pt-2 sm:pt-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      <span className="text-base sm:text-lg font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {t('booking.payableAmount')}
                       </span>
-                      <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span className="text-xl sm:text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
                           ? totalPrice.toLocaleString('en-US')
                           : language === 'ar'
@@ -728,11 +728,11 @@ const BookingDetailsPage: React.FC = () => {
               </div>
 
               {/* Info Notice */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <div className="flex gap-3">
-                  <InformationCircleIcon className="w-6 h-6 text-blue-600 flex-shrink-0" />
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+                <div className="flex gap-2 sm:gap-3">
+                  <InformationCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-bold text-blue-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <h4 className="text-xs sm:text-sm font-bold text-blue-900 mb-1 sm:mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.importantNotes')}
                     </h4>
                     <ul className="text-xs text-blue-800 space-y-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
