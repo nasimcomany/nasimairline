@@ -26,6 +26,7 @@ const PaymentPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedGateway, setSelectedGateway] = useState<string>('zarinpal');
 
   useEffect(() => {
     if (!flight || !passengers || !contactInfo) {
@@ -33,7 +34,7 @@ const PaymentPage: React.FC = () => {
     }
   }, [flight, passengers, contactInfo, navigate]);
 
-  const handlePayment = async () => {
+  const handlePayment = async (gateway: string = selectedGateway) => {
     setLoading(true);
     setError('');
 
@@ -45,7 +46,8 @@ const PaymentPage: React.FC = () => {
         description: `${t('payment.buyFlightTicket')} ${flight.flightNumber} - ${getCityName(flight.origin)} ${language === 'en' ? 'to' : language === 'ar' ? 'إلى' : 'به'} ${getCityName(flight.destination)}`,
         email: contactInfo.email,
         mobile: contactInfo.phone,
-        callbackUrl
+        callbackUrl,
+        gateway
       };
 
       // Save booking data to sessionStorage for after payment
@@ -53,18 +55,28 @@ const PaymentPage: React.FC = () => {
         flight,
         passengers,
         contactInfo,
-        totalPrice
+        totalPrice,
+        gateway
       }));
 
       const response = await paymentService.requestPayment(paymentData);
       
-      // Redirect to ZarinPal
-      paymentService.redirectToGateway(response.authority);
+      // Redirect to selected gateway
+      paymentService.redirectToGateway(response.authority, gateway);
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
     }
   };
+
+  const paymentGateways = [
+    { id: 'zarinpal', name: t('payment.payViaZarinpal'), icon: '💳', color: 'from-green-600 to-green-700' },
+    { id: 'tejarat', name: t('payment.payViaTejarat'), icon: '🏦', color: 'from-blue-600 to-blue-700' },
+    { id: 'mellat', name: t('payment.payViaMellat'), icon: '🏛️', color: 'from-purple-600 to-purple-700' },
+    { id: 'pasargad', name: t('payment.payViaPasargad'), icon: '🏢', color: 'from-orange-600 to-orange-700' },
+    { id: 'melli', name: t('payment.payViaMelli'), icon: '🏪', color: 'from-red-600 to-red-700' },
+    { id: 'saderat', name: t('payment.payViaSaderat'), icon: '🏬', color: 'from-indigo-600 to-indigo-700' },
+  ];
 
   if (!flight) {
     return null;
@@ -157,25 +169,35 @@ const PaymentPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Payment Button */}
-              <button
-                onClick={handlePayment}
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                    {t('payment.redirecting')}
-                  </>
-                ) : (
-                  <>
-                    <CreditCardIcon className="w-6 h-6" />
-                    {t('payment.payViaZarinpal')}
-                  </>
-                )}
-              </button>
+              {/* Payment Gateways */}
+              <div className="space-y-3">
+                <h3 className="font-bold text-gray-900 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('payment.selectGateway')}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {paymentGateways.map((gateway) => (
+                    <button
+                      key={gateway.id}
+                      onClick={() => handlePayment(gateway.id)}
+                      disabled={loading}
+                      className={`w-full bg-gradient-to-r ${gateway.color} hover:opacity-90 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 text-sm sm:text-base`}
+                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    >
+                      {loading && selectedGateway === gateway.id ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          <span className="text-xs sm:text-sm">{t('payment.redirecting')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xl">{gateway.icon}</span>
+                          <span className="text-xs sm:text-sm truncate">{gateway.name}</span>
+                        </>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Cancel Button */}
               <button

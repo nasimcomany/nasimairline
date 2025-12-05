@@ -262,40 +262,40 @@ const EmiratesHeader: React.FC = () => {
                       <div className="flex-1 py-6 px-6">
                         <div className="space-y-2">
                           {item.dropdown.map((subItem, index) => {
-                            // Get icon for each submenu item based on label with colors
-                            const getSubItemIcon = (label: string, key: string) => {
+                            // Get icon for each submenu item based on index and key (language-independent)
+                            const getSubItemIcon = (label: string, key: string, itemIndex: number) => {
                               if (key === 'book') {
-                                if (label.includes('پرواز') || label.includes('Flight')) return <TicketIcon className="w-7 h-7 text-blue-600" />;
-                                if (label.includes('برنامه') || label.includes('Schedule')) return <CalendarDaysIcon className="w-7 h-7 text-green-600" />;
-                                if (label.includes('پیشنهاد') || label.includes('Offer')) return <GiftIcon className="w-7 h-7 text-purple-600" />;
+                                if (itemIndex === 0) return <TicketIcon className="w-7 h-7 text-blue-600" />;
+                                if (itemIndex === 1) return <CalendarDaysIcon className="w-7 h-7 text-green-600" />;
+                                if (itemIndex === 2) return <GiftIcon className="w-7 h-7 text-purple-600" />;
                               }
                               if (key === 'manage') {
-                                if (label.includes('مدیریت') || label.includes('Manage')) return <ClipboardDocumentIcon className="w-7 h-7 text-indigo-600" />;
-                                if (label.includes('بازیابی') || label.includes('Retrieve')) return <ArrowPathIcon className="w-7 h-7 text-cyan-600" />;
-                                if (label.includes('چک') || label.includes('Check')) return <CheckCircleIcon className="w-7 h-7 text-emerald-600" />;
-                                if (label.includes('وضعیت') || label.includes('Status')) return <PaperAirplaneIcon className="w-7 h-7 text-blue-500" />;
+                                if (itemIndex === 0) return <ClipboardDocumentIcon className="w-7 h-7 text-indigo-600" />;
+                                if (itemIndex === 1) return <ArrowPathIcon className="w-7 h-7 text-cyan-600" />;
+                                if (itemIndex === 2) return <CheckCircleIcon className="w-7 h-7 text-emerald-600" />;
+                                if (itemIndex === 3) return <PaperAirplaneIcon className="w-7 h-7 text-blue-500" />;
                               }
                               if (key === 'experience') {
-                                if (label.includes('کابین') || label.includes('Cabin')) return <BuildingOfficeIcon className="w-7 h-7 text-amber-600" />;
-                                if (label.includes('سرگرمی') || label.includes('Entertainment')) return <SparklesIcon className="w-7 h-7 text-pink-600" />;
-                                if (label.includes('غذا') || label.includes('Dining')) return <HeartIcon className="w-7 h-7 text-red-500" />;
-                                if (label.includes('ناوگان') || label.includes('Fleet')) return <PaperAirplaneIcon className="w-7 h-7 text-sky-600" />;
+                                if (itemIndex === 0) return <BuildingOfficeIcon className="w-7 h-7 text-amber-600" />;
+                                if (itemIndex === 1) return <SparklesIcon className="w-7 h-7 text-pink-600" />;
+                                if (itemIndex === 2) return <HeartIcon className="w-7 h-7 text-red-500" />;
+                                if (itemIndex === 3) return <PaperAirplaneIcon className="w-7 h-7 text-sky-600" />;
                               }
                               if (key === 'wherewefly') {
                                 return <MapPinIcon className="w-7 h-7 text-orange-600" />;
                               }
                               if (key === 'loyalty') {
-                                if (label.includes('عضویت') || label.includes('Join')) return <StarIcon className="w-7 h-7 text-yellow-500" />;
-                                if (label.includes('کسب') || label.includes('Earn')) return <CurrencyDollarIcon className="w-7 h-7 text-green-600" />;
-                                if (label.includes('استفاده') || label.includes('Spend')) return <TrophyIcon className="w-7 h-7 text-amber-600" />;
-                                if (label.includes('شریک') || label.includes('شرکا') || label.includes('Partner')) return <UserGroupIcon className="w-7 h-7 text-blue-600" />;
+                                if (itemIndex === 0) return <StarIcon className="w-7 h-7 text-yellow-500" />;
+                                if (itemIndex === 1) return <CurrencyDollarIcon className="w-7 h-7 text-green-600" />;
+                                if (itemIndex === 2) return <TrophyIcon className="w-7 h-7 text-amber-600" />;
+                                if (itemIndex === 3) return <UserGroupIcon className="w-7 h-7 text-blue-600" />;
                               }
                               if (key === 'about') {
                                 return <BuildingOfficeIcon className="w-7 h-7 text-gray-700" />;
                               }
                               if (key === 'help') {
-                                if (label.includes('آب و هوا') || label.includes('Weather')) return <CloudIcon className="w-7 h-7 text-blue-500" />;
-                                if (label.includes('شکایت') || label.includes('Complaint')) return <ExclamationTriangleIcon className="w-7 h-7 text-red-500" />;
+                                if (itemIndex === 0) return <CloudIcon className="w-7 h-7 text-blue-500" />;
+                                if (itemIndex === 1) return <ExclamationTriangleIcon className="w-7 h-7 text-red-500" />;
                                 return <QuestionMarkCircleIcon className="w-7 h-7 text-blue-500" />;
                               }
                               return null;
