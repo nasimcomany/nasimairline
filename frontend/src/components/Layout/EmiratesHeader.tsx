@@ -331,7 +331,7 @@ const EmiratesHeader: React.FC = () => {
                                 onMouseEnter={() => setHoveredSubItem({key: item.key, index})}
                                 onMouseLeave={() => setHoveredSubItem(null)}
                               >
-                                {getSubItemIcon(subItem.label, item.key)}
+                                {getSubItemIcon(subItem.label, item.key, index)}
                                 <span className="font-medium">{subItem.label}</span>
                               </Link>
                             );

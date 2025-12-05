@@ -8,6 +8,7 @@ export interface PaymentRequest {
   email: string;
   mobile: string;
   callbackUrl: string;
+  gateway?: string;
 }
 
 export interface PaymentResponse {
@@ -80,20 +81,29 @@ class PaymentService {
     });
   }
 
-  // Redirect to ZarinPal gateway
-  redirectToGateway(authority: string) {
-    // For testing, redirect to our verify page directly instead of ZarinPal
-    // In production, this should redirect to actual ZarinPal
+  // Redirect to payment gateway
+  redirectToGateway(authority: string, gateway: string = 'zarinpal') {
+    // For testing, redirect to our verify page directly instead of actual gateway
+    // In production, this should redirect to actual gateway
     const isDevelopment = process.env.NODE_ENV === 'development';
     
     if (isDevelopment) {
-      // Mock ZarinPal redirect - simulate payment success
+      // Mock gateway redirect - simulate payment success
       setTimeout(() => {
-        window.location.href = `${window.location.origin}/payment/verify?Authority=${authority}&Status=OK`;
+        window.location.href = `${window.location.origin}/payment/verify?Authority=${authority}&Status=OK&Gateway=${gateway}`;
       }, 2000);
     } else {
-      // Real ZarinPal sandbox
-      const gatewayUrl = `https://sandbox.zarinpal.com/pg/StartPay/${authority}`;
+      // Real gateway URLs (in production, these would be actual gateway URLs)
+      const gatewayUrls: Record<string, string> = {
+        zarinpal: `https://sandbox.zarinpal.com/pg/StartPay/${authority}`,
+        tejarat: `https://epay.tejaratbank.ir/payment/start/${authority}`,
+        mellat: `https://bpm.shaparak.ir/pgwchannel/startpay.mellat?RefId=${authority}`,
+        pasargad: `https://pep.shaparak.ir/payment.aspx?n=${authority}`,
+        melli: `https://pg.sb24.com/payment/start/${authority}`,
+        saderat: `https://sadad.shaparak.ir/VPG/Purchase?Token=${authority}`,
+      };
+      
+      const gatewayUrl = gatewayUrls[gateway] || gatewayUrls.zarinpal;
       window.location.href = gatewayUrl;
     }
   }

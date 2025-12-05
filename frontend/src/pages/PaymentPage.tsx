@@ -86,20 +86,20 @@ const PaymentPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <EmiratesHeader />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="max-w-2xl mx-auto">
           {/* Payment Card */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-6">
-              <h1 className="text-2xl font-bold text-white text-center flex items-center justify-center gap-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                <CreditCardIcon className="w-8 h-8" />
+            <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-4 sm:p-6">
+              <h1 className="text-xl sm:text-2xl font-bold text-white text-center flex items-center justify-center gap-2 sm:gap-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <CreditCardIcon className="w-6 h-6 sm:w-8 sm:h-8" />
                 {t('payment.securePayment')}
               </h1>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Error Message */}
               {error && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
@@ -116,11 +116,11 @@ const PaymentPage: React.FC = () => {
               )}
 
               {/* Flight Summary */}
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                <h3 className="font-bold text-gray-900 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+              <div className="bg-blue-50 rounded-lg p-3 sm:p-4 border border-blue-200">
+                <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('payment.bookingSummary')}
                 </h3>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs sm:text-sm">
                   <div className="flex justify-between">
                     <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.flightNumber')}</span>
                     <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
@@ -140,10 +140,10 @@ const PaymentPage: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-blue-300">
-                    <span className="text-lg font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <span className="text-base sm:text-lg font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.payableAmount')}
                     </span>
-                    <span className="text-xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <span className="text-lg sm:text-xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {language === 'en' 
                         ? totalPrice.toLocaleString('en-US')
                         : language === 'ar'
@@ -155,14 +155,14 @@ const PaymentPage: React.FC = () => {
               </div>
 
               {/* Security Notice */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <ShieldCheckIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <ShieldCheckIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-green-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <h4 className="font-bold text-green-900 mb-1 sm:mb-2 text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('payment.securePayment')}
                     </h4>
-                    <p className="text-sm text-green-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <p className="text-xs sm:text-sm text-green-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('payment.securePaymentNotice')}
                     </p>
                   </div>
@@ -170,27 +170,27 @@ const PaymentPage: React.FC = () => {
               </div>
 
               {/* Payment Gateways */}
-              <div className="space-y-3">
-                <h3 className="font-bold text-gray-900 mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+              <div className="space-y-2 sm:space-y-3">
+                <h3 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('payment.selectGateway')}
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   {paymentGateways.map((gateway) => (
                     <button
                       key={gateway.id}
                       onClick={() => handlePayment(gateway.id)}
                       disabled={loading}
-                      className={`w-full bg-gradient-to-r ${gateway.color} hover:opacity-90 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 text-sm sm:text-base`}
+                      className={`w-full bg-gradient-to-r ${gateway.color} hover:opacity-90 text-white font-bold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 text-xs sm:text-sm`}
                       style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     >
                       {loading && selectedGateway === gateway.id ? (
                         <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                          <span className="text-xs sm:text-sm">{t('payment.redirecting')}</span>
+                          <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
+                          <span className="text-xs">{t('payment.redirecting')}</span>
                         </>
                       ) : (
                         <>
-                          <span className="text-xl">{gateway.icon}</span>
+                          <span className="text-lg sm:text-xl">{gateway.icon}</span>
                           <span className="text-xs sm:text-sm truncate">{gateway.name}</span>
                         </>
                       )}
@@ -203,8 +203,8 @@ const PaymentPage: React.FC = () => {
               <button
                 onClick={() => navigate(-1)}
                 disabled={loading}
-                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg transition-colors"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
                 {t('payment.back')}
               </button>
