@@ -1468,10 +1468,17 @@ const translations = {
     'flights.oneStop': 'One Stop',
     'flights.selectFlight': 'Select Flight',
     'flights.availableSeats': 'Available Seats',
+    'flights.availableSeatsRemaining': 'Seats Remaining',
+    'flights.currency': 'Toman',
+    'flights.noStops': 'No Stops',
+    'flights.stopsCount': 'Stop',
     'flights.direct': 'Direct',
     'flights.stop': 'Stop',
     'flights.loading': 'Searching...',
+    'flights.loadingFlights': 'Searching for flights...',
     'flights.noResults': 'No flights found',
+    'flights.passenger': 'Passenger',
+    'flights.passengers': 'Passengers',
     
     // Booking Details Page
     'booking.bookingDetails': 'Booking Details',

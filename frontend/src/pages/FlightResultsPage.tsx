@@ -131,6 +131,11 @@ const FlightResultsPage: React.FC = () => {
 
   const originCity = cities.find(c => c.code === searchParams.origin);
   const destCity = cities.find(c => c.code === searchParams.destination);
+  
+  const getCityName = (city: typeof originCity) => {
+    if (!city) return '';
+    return language === 'en' ? city.name : city.nameFa;
+  };
 
   const filteredFlights = flights.filter(flight => {
     if (filterStops === 'direct') return flight.stops === 0;
@@ -163,7 +168,7 @@ const FlightResultsPage: React.FC = () => {
               <div className="flex items-center gap-2 text-white">
                 <PaperAirplaneIcon className="w-5 h-5" />
                 <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  {language === 'en' ? `${originCity?.name} → ${destCity?.name}` : `${originCity?.nameFa} → ${destCity?.nameFa}`}
+                  {getCityName(originCity)} → {getCityName(destCity)}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-white">
