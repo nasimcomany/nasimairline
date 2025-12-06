@@ -1342,8 +1342,8 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Center - Text - Smaller */}
-            <div className="flex-1 text-center md:text-left" style={{ paddingRight: language === 'en' ? '0' : window.innerWidth < 768 ? '0' : '120px' }}>
-              <h3 className={`text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
+            <div className="flex-1 text-center md:text-left" style={{ paddingRight: language === 'en' ? '0' : '0' }}>
+              <h3 className={`text-base sm:text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}>
@@ -1358,7 +1358,7 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Left Side - Button - Smaller */}
-            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-sm" style={{ 
+            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-xs sm:text-sm" style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl'
             }}>
@@ -1736,7 +1736,7 @@ const HomePage: React.FC = () => {
 
       {/* Old Booking Section - Remove this */}
       <section className="hidden">
-        <div className="max-w-3xl mx-auto px-6">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
           
           {/* Header */}
           <div className="text-center mb-8">
@@ -2339,7 +2339,7 @@ const HomePage: React.FC = () => {
 
       {/* Destinations Section - Additional (if needed) */}
       <section id="destinations" className="relative z-10 py-16 bg-white hidden">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8">
             <h2 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`}>
               {t('destinations.title')}
@@ -3151,9 +3151,9 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Footer - Emirates Style */}
-      <footer className="relative z-10 bg-gray-800 text-white py-16">
+      <footer className="relative z-10 bg-gray-800 text-white py-8 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* درباره نسیم ایر Column */}
             <div>
               <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
