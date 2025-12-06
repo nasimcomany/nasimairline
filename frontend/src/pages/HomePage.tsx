@@ -704,7 +704,7 @@ const HomePage: React.FC = () => {
       <EmiratesHeader />
 
       {/* Hero Section with Flight Search - Emirates Style */}
-      <section className="relative z-10 min-h-[90vh] flex flex-col">
+      <section className="relative z-10 min-h-[70vh] sm:min-h-[90vh] flex flex-col">
         {/* Hero Image Background - Slider Container */}
         <div 
           className="absolute inset-x-0 top-0 overflow-hidden"
@@ -858,7 +858,7 @@ const HomePage: React.FC = () => {
         <div className="relative z-10 flex-1 flex flex-col">
           {/* Promotional Text - Centered */}
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center max-w-4xl px-6">
+            <div className="text-center max-w-4xl px-4 sm:px-6">
               <h1 
                 className="text-white mb-6"
                 style={{ 
@@ -889,10 +889,10 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Flight Search Form at Bottom */}
-          <div className="max-w-6xl mx-auto w-full px-6 pb-8">
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8">
             <div className="flex justify-center mb-0">
               <button 
-                className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-10 py-4 rounded-lg transition-colors text-lg"
+                className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-6 sm:px-10 py-3 sm:py-4 rounded-lg transition-colors text-sm sm:text-lg"
                 style={{ 
                   letterSpacing: '0.5px',
                   boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
@@ -908,11 +908,11 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Elegant Quote Section */}
-      <section className="relative z-10 py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '3rem', marginTop: '-35px' }}>
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="relative z-10 py-8 sm:py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '1.5rem', marginTop: '-35px' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 
-              className="text-gray-500 flex items-center justify-center gap-3 whitespace-nowrap"
+              className="text-gray-500 flex items-center justify-center gap-2 sm:gap-3 flex-wrap"
               style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 fontSize: 'clamp(1rem, 2.5vw, 1.8rem)',
@@ -940,10 +940,10 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Services Section */}
-      <section className="relative z-10 py-16 bg-white" style={{ marginTop: '-50px' }}>
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="relative z-10 py-8 sm:py-16 bg-white" style={{ marginTop: '-50px' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Section Title */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-6 sm:mb-12">
             <h2 
               className="text-gray-900"
               style={{ 
@@ -960,7 +960,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Services Grid - Memory Book Style - 3D Connected Pages */}
-          <div className="flex items-center justify-center gap-2 flex-wrap" style={{ perspective: '1200px' }}>
+          <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap" style={{ perspective: '1200px' }}>
             {/* Service 1: Seat Selection */}
             <div 
               className="relative group cursor-pointer"
@@ -1207,11 +1207,11 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Elegant Quote Section - Repeated with Airline Logo */}
-      <section className="relative z-10 py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '3rem', marginTop: '-35px' }}>
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="relative z-10 py-8 sm:py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '1.5rem', marginTop: '-35px' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <p 
-              className="text-gray-700 flex items-center justify-center gap-3 whitespace-nowrap flex-wrap"
+              className="text-gray-700 flex items-center justify-center gap-2 sm:gap-3 flex-wrap"
               style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 fontSize: 'clamp(1rem, 2.5vw, 1.8rem)',
@@ -1342,7 +1342,7 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Center - Text - Smaller */}
-            <div className="flex-1 text-center md:text-left" style={{ paddingRight: '120px' }}>
+            <div className="flex-1 text-center md:text-left" style={{ paddingRight: language === 'en' ? '0' : window.innerWidth < 768 ? '0' : '120px' }}>
               <h3 className={`text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl'
