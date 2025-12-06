@@ -171,7 +171,7 @@ const TicketPage: React.FC = () => {
       <EmiratesHeader />
       
       {/* Hero Section - Similar to ComplaintPage */}
-      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
+      <section className="relative min-h-[40vh] sm:min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
