@@ -1,5 +1,6 @@
 import React from 'react';
 import GlassmorphismHeader from '../components/Layout/GlassmorphismHeader';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   MapPinIcon, 
   GlobeAltIcon, 
@@ -7,6 +8,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 const DestinationsPage: React.FC = () => {
+  const { t, language } = useLanguage();
+  
   const destinations = [
     {
       id: 1,
@@ -98,64 +101,64 @@ const DestinationsPage: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 pt-32 pb-16">
-        <div className="max-w-6xl mx-auto px-6">
+      <div className="relative z-10 pt-20 sm:pt-32 pb-8 sm:pb-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           
           {/* Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-white mb-1 persian-font-vazir">
-              مقاصد پروازی
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+              {t('destinations.title')}
             </h1>
-            <p className="text-blue-200 text-xs persian-font-vazir">
-              مقاصد مختلف داخلی و خارجی نسیم ایر
+            <p className="text-blue-200 text-xs sm:text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+              {t('destinations.subtitle')}
             </p>
           </div>
 
           {/* Destinations Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {destinations.map((destination) => (
               <div key={destination.id} className="group bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden border border-white/20 shadow-xl hover:bg-white/20 transition-all duration-300 hover:scale-105">
                 {/* Image */}
-                <div className="relative h-32 overflow-hidden">
+                <div className="relative h-24 sm:h-32 overflow-hidden">
                   <img 
                     src={destination.image} 
                     alt={destination.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className={`absolute inset-0 bg-gradient-to-t ${destination.gradient} opacity-60`}></div>
-                  <div className="absolute top-2 right-2">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-full p-1.5">
-                      <MapPinIcon className="h-4 w-4 text-white" />
+                  <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-full p-1 sm:p-1.5">
+                      <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                     </div>
                   </div>
-                  <div className="absolute bottom-2 right-2">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1">
-                      <span className="text-white text-xs font-medium persian-font-vazir">{destination.country}</span>
+                  <div className="absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1">
+                      <span className="text-white text-xs font-medium" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{destination.country}</span>
                     </div>
                   </div>
                 </div>
                 
                 {/* Content */}
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-white persian-font-vazir">
+                <div className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                    <h3 className="text-base sm:text-lg font-semibold text-white" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {destination.name}
                     </h3>
-                    <div className="text-white/60 text-xs persian-font-vazir">
+                    <div className="text-white/60 text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {destination.flights}
                     </div>
                   </div>
                   
-                  <p className="text-white/70 text-sm mb-3 persian-font-vazir">
+                  <p className="text-white/70 text-xs sm:text-sm mb-2 sm:mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {destination.description}
                   </p>
                   
-                  <div className="flex items-center justify-between">
-                    <div className="text-white font-semibold text-sm persian-font-vazir">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-white font-semibold text-xs sm:text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {destination.price}
                     </div>
-                    <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-1.5 px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl persian-font-vazir text-xs">
-                      مشاهده
+                    <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-1 sm:py-1.5 px-2 sm:px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      {language === 'en' ? 'View' : language === 'ar' ? 'عرض' : 'مشاهده'}
                     </button>
                   </div>
                 </div>

@@ -181,13 +181,13 @@ const TicketPage: React.FC = () => {
         </div>
         
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
           {/* Logo */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4 sm:mb-6">
             <img 
               src="/images/nasim0.png" 
               alt="نسیم ایر" 
-              className="h-80 w-auto object-contain"
+              className="h-40 sm:h-60 md:h-80 w-auto object-contain"
               style={{ 
                 filter: 'drop-shadow(2px 2px 8px rgba(0,0,0,0.5))'
               }}
@@ -227,19 +227,19 @@ const TicketPage: React.FC = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="max-w-6xl mx-auto">
 
           {/* Tabs */}
-          <div className="flex space-x-4 mb-6 border-b border-gray-200">
+          <div className="flex space-x-2 sm:space-x-4 mb-4 sm:mb-6 border-b border-gray-200 overflow-x-auto">
             <button
               onClick={() => setActiveTab('create')}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'create'
                   ? 'text-blue-900 border-b-2 border-blue-900'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
               {t('ticket.createTicket')}
             </button>
@@ -250,12 +250,12 @@ const TicketPage: React.FC = () => {
                   loadMyTickets();
                 }
               }}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'my-tickets'
                   ? 'text-blue-900 border-b-2 border-blue-900'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
               {t('ticket.myTickets')}
             </button>
@@ -285,9 +285,9 @@ const TicketPage: React.FC = () => {
           {/* Create Ticket Form */}
           {activeTab === 'create' && (
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-900 to-blue-800 px-6 py-4">
+              <div className="bg-gradient-to-r from-blue-900 to-blue-800 px-4 sm:px-6 py-3 sm:py-4">
                 <h2 
-                  className="text-white text-2xl font-bold"
+                  className="text-white text-lg sm:text-2xl font-bold"
                   style={{ 
                     fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                     direction: language === 'en' ? 'ltr' : 'rtl'
@@ -296,11 +296,11 @@ const TicketPage: React.FC = () => {
                   {t('ticket.formTitle')}
                 </h2>
               </div>
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                 {/* Category */}
                 <div>
-                  <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    <TicketIcon className="w-5 h-5 text-blue-900" />
+                  <label className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <TicketIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900" />
                     {t('ticket.category')}
                   </label>
                   <CustomSelect
@@ -313,13 +313,13 @@ const TicketPage: React.FC = () => {
 
                 {/* Security Notice */}
                 {formData.category === 'SECURITY' && securityPhone && (
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start">
-                    <PhoneIcon className="h-5 w-5 text-yellow-600 mr-2 mt-0.5" />
+                  <div className="p-3 sm:p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2 sm:gap-3">
+                    <PhoneIcon className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium text-yellow-800">
+                      <p className="font-medium text-xs sm:text-sm text-yellow-800" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' ? 'Contact Security' : language === 'ar' ? 'اتصل بالأمن' : 'ارتباط با حراست'}
                       </p>
-                      <p className="text-yellow-700 mt-1">
+                      <p className="text-xs sm:text-sm text-yellow-700 mt-1" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
                           ? `Please contact security at: ${securityPhone}`
                           : language === 'ar'
@@ -332,15 +332,15 @@ const TicketPage: React.FC = () => {
 
                 {/* Title */}
                 <div>
-                  <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    <DocumentTextIcon className="w-5 h-5 text-blue-900" />
+                  <label className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900" />
                     {t('ticket.title')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
                     style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     placeholder={t('ticket.titlePlaceholder')}
                     required={formData.category !== 'SECURITY'}
@@ -350,15 +350,15 @@ const TicketPage: React.FC = () => {
 
                 {/* Description */}
                 <div>
-                  <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    <DocumentTextIcon className="w-5 h-5 text-blue-900" />
+                  <label className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900" />
                     {t('ticket.description')} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={8}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all resize-none"
+                    rows={6}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all resize-none"
                     style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     placeholder={t('ticket.descriptionPlaceholder')}
                     required={formData.category !== 'SECURITY'}
@@ -368,8 +368,8 @@ const TicketPage: React.FC = () => {
 
                 {/* Priority */}
                 <div>
-                  <label className="flex items-center gap-2 mb-2 text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    <ExclamationCircleIcon className="w-5 h-5 text-blue-900" />
+                  <label className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <ExclamationCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900" />
                     {t('ticket.priority')}
                   </label>
                   <CustomSelect
@@ -381,24 +381,24 @@ const TicketPage: React.FC = () => {
                 </div>
 
                 {/* Submit Button */}
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center pt-2 sm:pt-4">
                   <button
                     type="submit"
                     disabled={loading || formData.category === 'SECURITY'}
-                    className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-12 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-800 text-white font-semibold px-6 sm:px-12 py-3 sm:py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base"
                     style={{ 
                       fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      direction: 'rtl'
+                      direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
                     {loading ? (
                       <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
                         {t('ticket.loading')}
                       </>
                     ) : (
                       <>
-                        <PaperAirplaneIcon className="w-5 h-5" />
+                        <PaperAirplaneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         {t('ticket.submit')}
                       </>
                     )}
@@ -410,7 +410,7 @@ const TicketPage: React.FC = () => {
 
           {/* My Tickets List */}
           {activeTab === 'my-tickets' && (
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
               {loading ? (
                 <div className="text-center py-8">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -426,19 +426,19 @@ const TicketPage: React.FC = () => {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {myTickets.map((ticket) => (
                     <div
                       key={ticket.uuid}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                      className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">{ticket.title}</h3>
-                            <span className="text-sm text-gray-500">#{ticket.reference}</span>
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0">
+                        <div className="flex-1 w-full sm:w-auto">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mb-2">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900">{ticket.title}</h3>
+                            <span className="text-xs sm:text-sm text-gray-500">#{ticket.reference}</span>
                           </div>
-                          <p className="text-gray-600 mb-3 line-clamp-2">{ticket.description}</p>
+                          <p className="text-sm sm:text-base text-gray-600 mb-2 sm:mb-3 line-clamp-2">{ticket.description}</p>
                           <div className="flex flex-wrap gap-2">
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
                               {ticket.status}
