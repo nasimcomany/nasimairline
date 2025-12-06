@@ -1369,7 +1369,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Skywards+ Section - Emirates Style */}
-      <section className="relative z-10 py-16 bg-white overflow-hidden" style={{ marginTop: '55px' }}>
+      <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '55px' }}>
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -1378,32 +1378,32 @@ const HomePage: React.FC = () => {
         >
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl">
-            <p className={`text-white text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
+            <p className={`text-white text-xs sm:text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
               textTransform: 'none'
             }}>
               {t('home.loyalty.programTitle')}
             </p>
-            <h2 className={`text-4xl md:text-5xl font-bold text-white mb-4 ${fontClass}`} style={{ 
+            <h2 className={`text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
               fontWeight: 700
             }}>
               {t('home.loyalty.enhanceTitle')}
             </h2>
-            <p className={`text-white text-lg mb-6 ${fontClass}`} style={{ 
+            <p className={`text-white text-sm sm:text-lg mb-4 sm:mb-6 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
               lineHeight: '1.8'
             }}>
               {t('home.loyalty.fullDescription')}
             </p>
-            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-8 py-3 rounded-lg transition-colors" style={{ 
+            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-8 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base" style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: 'rtl'
+              direction: language === 'en' ? 'ltr' : 'rtl'
             }}>
               {t('common.learnMore') || 'بیشتر بدانید'}
             </button>
@@ -1412,10 +1412,10 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Destinations Section - Images Only (No Text) */}
-      <section className="relative z-10 py-12 bg-white">
+      <section className="relative z-10 py-6 sm:py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title Section - Same style as Section 2 */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-4 sm:mb-8">
             <div style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               color: '#000000',
@@ -1423,10 +1423,10 @@ const HomePage: React.FC = () => {
             }}>
               {/* First line - Small and Bold */}
               <p style={{ 
-                fontSize: '16.5px',
+                fontSize: 'clamp(14px, 3vw, 16.5px)',
                 fontWeight: 700,
                 letterSpacing: '0.2px',
-                marginBottom: '8px',
+                marginBottom: '6px',
                 color: '#000000',
                 opacity: 1,
                 fontFamily: "'IranNastaliq', 'Nastaliq', 'Al Qalam Taj Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif",
@@ -1439,24 +1439,26 @@ const HomePage: React.FC = () => {
               
               {/* Second line - Large */}
               <h2 style={{ 
-                fontSize: '42px',
+                fontSize: 'clamp(24px, 6vw, 42px)',
                 fontWeight: language === 'fa' ? 300 : 400,
                 letterSpacing: '0.2px',
-                marginBottom: '12px',
+                marginBottom: '8px',
                 color: '#000000',
                 opacity: 1,
                 fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '12px',
+                gap: '8px',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif'
               }}>
                 <img 
                   src="/images/nasim1.png" 
                   alt="نسیم ایر" 
                   style={{ 
-                    width: '2em', 
-                    height: '2em', 
+                    width: 'clamp(1.5em, 4vw, 2em)', 
+                    height: 'clamp(1.5em, 4vw, 2em)', 
                     display: 'inline-block',
                     verticalAlign: 'middle',
                     objectFit: 'contain'
@@ -1467,14 +1469,14 @@ const HomePage: React.FC = () => {
                   src="/images/nasim1.png" 
                   alt="نسیم ایر" 
                   style={{ 
-                    width: '2em', 
-                    height: '2em', 
+                    width: 'clamp(1.5em, 4vw, 2em)', 
+                    height: 'clamp(1.5em, 4vw, 2em)', 
                     display: 'inline-block',
                     verticalAlign: 'middle',
                     objectFit: 'contain'
                   }} 
                 />
-            </h2>
+              </h2>
               
               {/* Third line - Small */}
               <p style={{ 
@@ -1492,9 +1494,9 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 justify-center items-center" style={{ perspective: '1000px' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-6 justify-center items-center" style={{ perspective: '1000px' }}>
             {/* 4 Small Images - Left Side (2/3 width, 2x2 grid) - First in order */}
-            <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-2 gap-1 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible' }}>
+            <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-2 gap-1 sm:gap-2 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible' }}>
               {/* Image 1 - two.png - Left page of book */}
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
@@ -2833,8 +2835,8 @@ const HomePage: React.FC = () => {
       <section id="faq" className="relative z-10 py-12 bg-white" style={{ marginTop: '-85px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title Section - Same style as other sections */}
-          <div className="text-center mb-8">
-            <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
+          <div className="text-center mb-4 sm:mb-8">
+            <h2 className={`text-xl sm:text-2xl md:text-3xl ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               fontWeight: language === 'fa' ? 300 : 400,
               letterSpacing: language === 'en' ? '1.5px' : '0.2px',
@@ -2845,18 +2847,21 @@ const HomePage: React.FC = () => {
               fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '4px',
+              flexWrap: 'wrap',
+              justifyContent: 'center'
             }}>
               {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
             </h2>
             <p style={{ 
-              fontSize: '16.5px',
+              fontSize: 'clamp(14px, 3vw, 16.5px)',
               fontWeight: language === 'fa' ? 300 : 400,
               letterSpacing: '0.2px',
               marginBottom: '0',
               color: '#000000',
               opacity: 1,
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              direction: language === 'en' ? 'ltr' : 'rtl'
             }}>
               {language === 'fa' 
                 ? 'پاسخ به سوالات متداول شما درباره نسیم ایر' 
@@ -2867,13 +2872,13 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Circular Cards Grid - Minimal and Compact */}
-          <div className="flex flex-wrap justify-center items-center gap-1 md:gap-2 max-w-4xl mx-auto">
+          <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-4 max-w-4xl mx-auto">
             {/* Card 1: رزرو پرواز */}
             <div 
               className="flex flex-col items-center group cursor-pointer flex-shrink-0"
               onClick={() => setSelectedFAQ('booking')}
             >
-              <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
+              <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-2 sm:mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
                 <img 
                   src="/images/airplane-clouds-night_864588-19786.jpg" 
                   alt={language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
