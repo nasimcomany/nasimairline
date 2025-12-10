@@ -155,12 +155,30 @@ const EmiratesHeader: React.FC = () => {
         <div className="flex-1 bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center justify-between">
         <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
 
+          {/* Logo on the left */}
+          <div className="hidden lg:flex items-center absolute left-4">
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/images/nasim0.png" 
+                alt="نسیم ایر" 
+                className="object-contain"
+                style={{ 
+                  width: '180px',
+                  height: 'auto',
+                  maxWidth: '180px'
+                }}
+              />
+            </Link>
+          </div>
+
           {/* Logo with Blue Flag - Horizontal on the right */}
           <div className="hidden lg:flex items-center absolute right-0">
             <div 
-              className="bg-blue-900 flex items-center justify-center px-3 py-2"
+              className="bg-blue-900 flex items-center justify-center py-2"
               style={{ 
                 height: '81px',
+                paddingLeft: '40px',
+                paddingRight: '20px',
                 boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
                 zIndex: 60,
                 borderTopLeftRadius: '20px',
@@ -173,9 +191,39 @@ const EmiratesHeader: React.FC = () => {
                   alt="نسیم ایر" 
                   className="object-contain"
                   style={{ 
-                    width: '120px',
+                    width: '200px',
                     height: 'auto',
-                    maxWidth: '120px'
+                    maxWidth: '200px',
+                    transform: 'translate(-20px, -5px)'
+                  }}
+                />
+              </Link>
+            </div>
+          </div>
+
+          {/* Logo with Blue Flag - Smaller copy in center */}
+          <div className="hidden lg:flex items-center absolute right-[330px]">
+            <div 
+              className="bg-blue-900 flex items-center justify-center"
+              style={{ 
+                height: '81px',
+                paddingLeft: '20px',
+                paddingRight: '10px',
+                boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
+                zIndex: 60,
+                borderRadius: '20px'
+              }}
+            >
+              <Link to="/" className="flex items-center">
+                <img 
+                  src="/images/nasim0.png" 
+                  alt="نسیم ایر" 
+                  className="object-contain"
+                  style={{ 
+                    width: '130px',
+                    height: 'auto',
+                    maxWidth: '130px',
+                    transform: 'translate(-10px, 0)'
                   }}
                 />
               </Link>
@@ -220,7 +268,7 @@ const EmiratesHeader: React.FC = () => {
                 {/* Dropdown Menu with Image */}
                 {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && (
                   <div 
-                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-gray-400/10 rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
+                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
                     onMouseLeave={() => {
                       handleMouseLeave();
                       setHoveredSubItem(null);
@@ -257,7 +305,7 @@ const EmiratesHeader: React.FC = () => {
                               <Link
                                 key={index}
                                 to={subItem.path}
-                                className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-500/20 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
+                                className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
                                 onClick={(e) => {
                                   setActiveDropdown(null);
                                   // Handle scroll to sections on homepage
@@ -344,7 +392,7 @@ const EmiratesHeader: React.FC = () => {
                 {/* Language Dropdown Menu */}
                 {isLanguageDropdownOpen && (
                   <div 
-                    className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-gray-400/30 backdrop-blur-xl rounded-lg shadow-lg border border-gray-300/30 py-2 z-50`}
+                    className={`absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-40 bg-gray-200 rounded-lg shadow-lg border border-gray-300/30 py-2 z-50`}
                     onMouseEnter={() => {
                       if (languageDropdownTimeoutRef.current) {
                         clearTimeout(languageDropdownTimeoutRef.current);
@@ -361,8 +409,8 @@ const EmiratesHeader: React.FC = () => {
                         setLanguage('fa');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass} ${
-                        language === 'fa' ? 'bg-gray-500/20 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass} ${
+                        language === 'fa' ? 'bg-gray-300 font-semibold' : ''
                       }`}
                     >
                       فارسی
@@ -372,8 +420,8 @@ const EmiratesHeader: React.FC = () => {
                         setLanguage('ar');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass} ${
-                        language === 'ar' ? 'bg-gray-500/20 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass} ${
+                        language === 'ar' ? 'bg-gray-300 font-semibold' : ''
                       }`}
                     >
                       العربية
@@ -383,8 +431,8 @@ const EmiratesHeader: React.FC = () => {
                         setLanguage('en');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass} ${
-                        language === 'en' ? 'bg-gray-500/20 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass} ${
+                        language === 'en' ? 'bg-gray-300 font-semibold' : ''
                       }`}
                     >
                       English
@@ -432,19 +480,8 @@ const EmiratesHeader: React.FC = () => {
                   <button
                     className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
                     style={{ 
-                      borderBottom: '2px solid transparent',
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderBottomColor = '#000';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isLoginDropdownOpen) {
-                        e.currentTarget.style.borderBottomColor = 'transparent';
-                      } else {
-                        e.currentTarget.style.borderBottomColor = '#000';
-                      }
                     }}
                   >
                     <UserIcon className="w-5 h-5 text-black" />
@@ -455,7 +492,7 @@ const EmiratesHeader: React.FC = () => {
                   {/* Simple Login Dropdown Menu */}
                   {isLoginDropdownOpen && (
                     <div 
-                      className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-48 bg-gray-400/30 backdrop-blur-xl rounded-lg shadow-lg border border-gray-300/30 py-2 z-50`}
+                      className={`absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-48 bg-gray-200 rounded-lg shadow-lg border border-gray-300/30 py-2 z-50`}
                       onMouseEnter={() => {
                         if (loginDropdownTimeoutRef.current) {
                           clearTimeout(loginDropdownTimeoutRef.current);
@@ -473,7 +510,7 @@ const EmiratesHeader: React.FC = () => {
                           setIsAuthModalOpen(true);
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginUsers')}
                       </button>
@@ -482,7 +519,7 @@ const EmiratesHeader: React.FC = () => {
                           // No action for now - will be linked later
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginPartner')}
                       </button>
@@ -491,7 +528,7 @@ const EmiratesHeader: React.FC = () => {
                           window.location.href = '/limited-admin/';
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginStaff')}
                       </button>
