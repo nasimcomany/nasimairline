@@ -173,19 +173,20 @@ const EmiratesHeader: React.FC = () => {
 
           {/* Logo with Blue Flag - Horizontal on the right */}
           <div className="hidden lg:flex items-center absolute right-0">
-            <div 
-              className="bg-blue-900 flex items-center justify-center py-2"
-              style={{ 
-                height: '81px',
-                paddingLeft: '40px',
-                paddingRight: '20px',
-                boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
-                zIndex: 60,
-                borderTopLeftRadius: '20px',
-                borderBottomLeftRadius: '20px'
-              }}
-            >
-              <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center">
+              <div 
+                className="bg-blue-900 flex items-center justify-center py-2"
+                style={{ 
+                  height: '81px',
+                  paddingLeft: '40px',
+                  paddingRight: '20px',
+                  boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
+                  zIndex: 60,
+                  borderTopLeftRadius: '20px',
+                  borderBottomLeftRadius: '20px',
+                  cursor: 'pointer'
+                }}
+              >
                 <img 
                   src="/images/nasim0.png" 
                   alt="نسیم ایر" 
@@ -197,24 +198,25 @@ const EmiratesHeader: React.FC = () => {
                     transform: 'translate(-20px, -5px)'
                   }}
                 />
-              </Link>
-            </div>
+              </div>
+            </Link>
           </div>
 
           {/* Logo with Blue Flag - Smaller copy in center */}
           <div className="hidden lg:flex items-center absolute right-[330px]">
-            <div 
-              className="bg-blue-900 flex items-center justify-center"
-              style={{ 
-                height: '81px',
-                paddingLeft: '20px',
-                paddingRight: '10px',
-                boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
-                zIndex: 60,
-                borderRadius: '20px'
-              }}
-            >
-              <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center">
+              <div 
+                className="bg-blue-900 flex items-center justify-center"
+                style={{ 
+                  height: '81px',
+                  paddingLeft: '20px',
+                  paddingRight: '10px',
+                  boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
+                  zIndex: 60,
+                  borderRadius: '20px',
+                  cursor: 'pointer'
+                }}
+              >
                 <img 
                   src="/images/nasim0.png" 
                   alt="نسیم ایر" 
@@ -223,11 +225,11 @@ const EmiratesHeader: React.FC = () => {
                     width: '130px',
                     height: 'auto',
                     maxWidth: '130px',
-                    transform: 'translate(-10px, 0)'
+                    transform: 'translate(-10px, 0) scale(1.27)'
                   }}
                 />
-              </Link>
-            </div>
+              </div>
+            </Link>
           </div>
 
           {/* Desktop Navigation - All items together and centered */}
