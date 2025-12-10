@@ -1453,29 +1453,7 @@ const HomePage: React.FC = () => {
                 justifyContent: 'center',
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif'
               }}>
-                <img 
-                  src="/images/nasim1.png" 
-                  alt="نسیم ایر" 
-                  style={{ 
-                    width: 'clamp(1.5em, 4vw, 2em)', 
-                    height: 'clamp(1.5em, 4vw, 2em)', 
-                    display: 'inline-block',
-                    verticalAlign: 'middle',
-                    objectFit: 'contain'
-                  }} 
-                />
                 {t('home.experience.exploreNasim')}
-                <img 
-                  src="/images/nasim1.png" 
-                  alt="نسیم ایر" 
-                  style={{ 
-                    width: 'clamp(1.5em, 4vw, 2em)', 
-                    height: 'clamp(1.5em, 4vw, 2em)', 
-                    display: 'inline-block',
-                    verticalAlign: 'middle',
-                    objectFit: 'contain'
-                  }} 
-                />
               </h2>
               
               {/* Third line - Small */}
@@ -3151,19 +3129,19 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Footer - Emirates Style */}
-      <footer className="relative z-10 bg-gray-800 text-white py-8 sm:py-16">
+      <footer className="relative z-10 bg-gray-200 text-gray-900 py-8 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* درباره نسیم ایر Column */}
             <div>
-              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
+              <h4 className={`text-sm font-medium mb-6 text-gray-900 ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'درباره نسیم ایر' : language === 'ar' ? 'حول نسيم إير' : 'About Nasim Air'}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3171,17 +3149,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <DocumentTextIcon className="w-4 h-4 text-white" />
+                    <DocumentTextIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'تاریخچه نسیم ایر' : language === 'ar' ? 'تاريخ نسيم إير' : 'Nasim Air History'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3189,17 +3167,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <ShieldCheckIcon className="w-4 h-4 text-white" />
+                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'مجوز سازمان هواپیمایی' : language === 'ar' ? 'ترخيص منظمة الطيران' : 'Aviation License'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3207,17 +3185,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <UserGroupIcon className="w-4 h-4 text-white" />
+                    <UserGroupIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'فرصت‌های شغلی' : language === 'ar' ? 'فرص العمل' : 'Careers'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3225,17 +3203,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <PhoneIcon className="w-4 h-4 text-white" />
+                    <PhoneIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'تماس با ما' : language === 'ar' ? 'اتصل بنا' : 'Contact Us'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3243,12 +3221,12 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <NewspaperIcon className="w-4 h-4 text-white" />
+                    <NewspaperIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'مرکز رسانه' : language === 'ar' ? 'مركز الإعلام' : 'Media Center'}
                   </a>
                 </li>
@@ -3257,14 +3235,14 @@ const HomePage: React.FC = () => {
 
             {/* خدمات Column */}
             <div>
-              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
+              <h4 className={`text-sm font-medium mb-6 text-gray-900 ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'خدمات' : language === 'ar' ? 'الخدمات' : 'Services'}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3272,17 +3250,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <PaperAirplaneIcon className="w-4 h-4 text-white" />
+                    <PaperAirplaneIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'رزرو پرواز داخلی' : language === 'ar' ? 'حجز رحلة داخلية' : 'Domestic Flights'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3290,17 +3268,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <GlobeAltIcon className="w-4 h-4 text-white" />
+                    <GlobeAltIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'رزرو پرواز بین‌المللی' : language === 'ar' ? 'حجز رحلة دولية' : 'International Flights'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3308,17 +3286,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <UserIcon className="w-4 h-4 text-white" />
+                    <UserIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3326,17 +3304,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <TruckIcon className="w-4 h-4 text-white" />
+                    <TruckIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'بار اضافی' : language === 'ar' ? 'أمتعة إضافية' : 'Extra Baggage'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3344,12 +3322,12 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#fff';
+                    e.currentTarget.style.borderBottomColor = '#000';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <SparklesIcon className="w-4 h-4 text-white" />
+                    <SparklesIcon className="w-4 h-4 text-gray-900" />
                     {language === 'fa' ? 'خدمات ویژه' : language === 'ar' ? 'خدمات خاصة' : 'Special Services'}
                   </a>
                 </li>
@@ -3358,61 +3336,111 @@ const HomePage: React.FC = () => {
 
             {/* اطلاعات پرواز Column */}
             <div>
-              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
+              <h4 className={`text-sm font-medium mb-6 text-gray-900 ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}</h4>
               <ul className="space-y-3">
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'وضعیت پرواز' : language === 'ar' ? 'حالة الرحلة' : 'Flight Status'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'مقصدهای پروازی' : language === 'ar' ? 'الوجهات' : 'Destinations'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'چک این آنلاین' : language === 'ar' ? 'تسجيل الوصول عبر الإنترنت' : 'Online Check-in'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'مدیریت رزرو' : language === 'ar' ? 'إدارة الحجز' : 'Manage Booking'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}</a></li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <ClockIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'وضعیت پرواز' : language === 'ar' ? 'حالة الرحلة' : 'Flight Status'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <MapPinIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'مقصدهای پروازی' : language === 'ar' ? 'الوجهات' : 'Destinations'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <CheckCircleIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'چک این آنلاین' : language === 'ar' ? 'تسجيل الوصول عبر الإنترنت' : 'Online Check-in'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <ClipboardDocumentIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'مدیریت رزرو' : language === 'ar' ? 'إدارة الحجز' : 'Manage Booking'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <QuestionMarkCircleIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}
+                  </a>
+                </li>
               </ul>
               </div>
 
             {/* مجوزها و اعتبارات Column */}
             <div>
-              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
+              <h4 className={`text-sm font-medium mb-6 text-gray-900 ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'مجوزها و اعتبارات' : language === 'ar' ? 'التراخيص والاعتمادات' : 'Licenses & Credentials'}</h4>
               <ul className="space-y-3">
-                <li><a href="https://www.enamad.ir" target="_blank" rel="noopener noreferrer" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'نماد اعتماد الکترونیکی (اینماد)' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge (Enamad)'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO License'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'استانداردهای ایمنی' : language === 'ar' ? 'معايير السلامة' : 'Safety Standards'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'گواهینامه‌های بین‌المللی' : language === 'ar' ? 'الشهادات الدولية' : 'International Certificates'}</a></li>
-                <li><a href="#" className={`text-sm font-medium text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>{language === 'fa' ? 'حریم خصوصی و امنیت' : language === 'ar' ? 'الخصوصية والأمان' : 'Privacy & Security'}</a></li>
+                <li>
+                  <a href="https://www.enamad.ir" target="_blank" rel="noopener noreferrer" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'نماد اعتماد الکترونیکی (اینماد)' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge (Enamad)'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO License'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'استانداردهای ایمنی' : language === 'ar' ? 'معايير السلامة' : 'Safety Standards'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'گواهینامه‌های بین‌المللی' : language === 'ar' ? 'الشهادات الدولية' : 'International Certificates'}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'حریم خصوصی و امنیت' : language === 'ar' ? 'الخصوصية والأمان' : 'Privacy & Security'}
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
-          <div className={`border-t border-gray-700 mt-12 pt-8 ${fontClass}`} style={{
+          <div className={`border-t border-gray-400 mt-12 pt-8 ${fontClass}`} style={{
             fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
           }}>
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm font-medium text-white text-center md:text-right">
+              <p className="text-sm font-medium text-gray-900 text-center md:text-right">
                 &copy; 2024 {t('common.nasimAir')} {t('footer.copyright') || 'تمام حقوق محفوظ است'}.
               </p>
               <div className="flex items-center justify-center gap-4">
@@ -3420,13 +3448,13 @@ const HomePage: React.FC = () => {
                   href="https://www.enamad.ir" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
+                  className="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors"
                 >
-                  <ShieldCheckIcon className="w-5 h-5" />
+                  <ShieldCheckIcon className="w-5 h-5 text-gray-900" />
                   <span>{language === 'fa' ? 'نماد اعتماد الکترونیکی' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge'}</span>
                 </a>
-                <span className="text-gray-500">|</span>
-                <span className="text-sm text-gray-400">
+                <span className="text-gray-600">|</span>
+                <span className="text-sm text-gray-700">
                   {language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO Licensed'}
                 </span>
               </div>
