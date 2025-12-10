@@ -152,7 +152,7 @@ const EmiratesHeader: React.FC = () => {
     <header className="sticky top-0 z-50 relative">
       <div className="flex h-20 relative">
         {/* Dark Navigation Section - Glassmorphism */}
-        <div className="flex-1 bg-white/5 backdrop-blur-xl border-b border-white/20 shadow-2xl flex items-center justify-between">
+        <div className="flex-1 bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center justify-between">
         <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
 
           {/* Logo with Blue Flag - Horizontal on the right */}
@@ -160,7 +160,7 @@ const EmiratesHeader: React.FC = () => {
             <div 
               className="bg-blue-900 flex items-center justify-center px-3 py-2"
               style={{ 
-                height: '80px',
+                height: '81px',
                 boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
                 zIndex: 60,
                 borderTopLeftRadius: '20px',
@@ -220,7 +220,7 @@ const EmiratesHeader: React.FC = () => {
                 {/* Dropdown Menu with Image */}
                 {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && (
                   <div 
-                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden`}
+                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-gray-400/30 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
                     onMouseLeave={() => {
                       handleMouseLeave();
                       setHoveredSubItem(null);
@@ -257,7 +257,7 @@ const EmiratesHeader: React.FC = () => {
                               <Link
                                 key={index}
                                 to={subItem.path}
-                                className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-50 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
+                                className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-500/20 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
                                 onClick={(e) => {
                                   setActiveDropdown(null);
                                   // Handle scroll to sections on homepage
