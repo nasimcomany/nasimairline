@@ -220,7 +220,7 @@ const EmiratesHeader: React.FC = () => {
                 {/* Dropdown Menu with Image */}
                 {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && (
                   <div 
-                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-gray-400/30 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
+                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-gray-400/10 rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
                     onMouseLeave={() => {
                       handleMouseLeave();
                       setHoveredSubItem(null);
@@ -292,14 +292,14 @@ const EmiratesHeader: React.FC = () => {
                       </div>
                       
                       {/* Image Section */}
-                      <div className="w-80 h-[400px] bg-gray-100 flex-shrink-0 relative overflow-hidden">
+                      <div className="w-80 h-[400px] bg-gray-100 flex-shrink-0 relative overflow-hidden m-4 rounded-2xl">
                         <img 
                           src={hoveredSubItem && hoveredSubItem.key === item.key 
                             ? getDefaultImage(item.key, hoveredSubItem.index)
                             : getDefaultImage(item.key, 0)
                           }
                           alt={item.label}
-                          className="w-full h-full object-cover transition-opacity duration-300"
+                          className="w-full h-full object-cover transition-opacity duration-300 rounded-2xl"
                         />
                       </div>
                     </div>
