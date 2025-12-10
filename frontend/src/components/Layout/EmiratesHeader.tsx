@@ -344,7 +344,7 @@ const EmiratesHeader: React.FC = () => {
                 {/* Language Dropdown Menu */}
                 {isLanguageDropdownOpen && (
                   <div 
-                    className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50`}
+                    className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-40 bg-gray-400/30 backdrop-blur-xl rounded-lg shadow-lg border border-gray-300/30 py-2 z-50`}
                     onMouseEnter={() => {
                       if (languageDropdownTimeoutRef.current) {
                         clearTimeout(languageDropdownTimeoutRef.current);
@@ -361,8 +361,8 @@ const EmiratesHeader: React.FC = () => {
                         setLanguage('fa');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass} ${
-                        language === 'fa' ? 'bg-gray-100 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass} ${
+                        language === 'fa' ? 'bg-gray-500/20 font-semibold' : ''
                       }`}
                     >
                       فارسی
@@ -372,8 +372,8 @@ const EmiratesHeader: React.FC = () => {
                         setLanguage('ar');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass} ${
-                        language === 'ar' ? 'bg-gray-100 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass} ${
+                        language === 'ar' ? 'bg-gray-500/20 font-semibold' : ''
                       }`}
                     >
                       العربية
@@ -383,8 +383,8 @@ const EmiratesHeader: React.FC = () => {
                         setLanguage('en');
                         setIsLanguageDropdownOpen(false);
                       }}
-                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass} ${
-                        language === 'en' ? 'bg-gray-100 font-semibold' : ''
+                      className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass} ${
+                        language === 'en' ? 'bg-gray-500/20 font-semibold' : ''
                       }`}
                     >
                       English
@@ -455,7 +455,7 @@ const EmiratesHeader: React.FC = () => {
                   {/* Simple Login Dropdown Menu */}
                   {isLoginDropdownOpen && (
                     <div 
-                      className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50`}
+                      className={`absolute ${language === 'en' ? 'left-0' : 'right-0'} top-full mt-2 w-48 bg-gray-400/30 backdrop-blur-xl rounded-lg shadow-lg border border-gray-300/30 py-2 z-50`}
                       onMouseEnter={() => {
                         if (loginDropdownTimeoutRef.current) {
                           clearTimeout(loginDropdownTimeoutRef.current);
@@ -473,7 +473,7 @@ const EmiratesHeader: React.FC = () => {
                           setIsAuthModalOpen(true);
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginUsers')}
                       </button>
@@ -482,7 +482,7 @@ const EmiratesHeader: React.FC = () => {
                           // No action for now - will be linked later
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginPartner')}
                       </button>
@@ -491,7 +491,7 @@ const EmiratesHeader: React.FC = () => {
                           window.location.href = '/limited-admin/';
                           setIsLoginDropdownOpen(false);
                         }}
-                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-100 transition-colors ${fontClass}`}
+                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-500/20 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginStaff')}
                       </button>
