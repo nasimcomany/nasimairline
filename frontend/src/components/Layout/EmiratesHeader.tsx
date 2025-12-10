@@ -26,7 +26,10 @@ import {
   TrophyIcon,
   CloudIcon,
   ExclamationTriangleIcon,
-  HomeIcon
+  HomeIcon,
+  GlobeAltIcon,
+  UserIcon,
+  UserPlusIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import AuthModal from '../Auth/AuthModal';
@@ -60,29 +63,11 @@ const EmiratesHeader: React.FC = () => {
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
         '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
       ],
-      'manage': [
-        '/images/airport-crew.jpg',
-        '/images/airplane-clouds-night_864588-19786.jpg',
-        '/images/airport-plane-photo_991869-62.jpg',
-        '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
-      ],
-      'experience': [
-        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg',
-        '/images/airport-crew.jpg',
-        '/images/airplane-clouds-night_864588-19786.jpg',
-        '/images/airport-plane-photo_991869-62.jpg'
-      ],
       'wherewefly': [
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-crew.jpg',
         '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
-      ],
-      'loyalty': [
-        '/images/airport-plane-photo_991869-62.jpg',
-        '/images/airport-crew.jpg',
-        '/images/airplane-clouds-night_864588-19786.jpg',
-        '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
       ],
       'about': [
         '/images/airport-crew.jpg',
@@ -106,12 +91,6 @@ const EmiratesHeader: React.FC = () => {
 
   const menuItems = [
     {
-      key: 'home',
-      label: t('nav.home'),
-      path: '/',
-      dropdown: []
-    },
-    {
       key: 'book',
       label: t('nav.book') || 'رزرو',
       path: '/flights/search',
@@ -123,28 +102,6 @@ const EmiratesHeader: React.FC = () => {
       ]
     },
     {
-      key: 'manage',
-      label: t('nav.manage') || 'مدیریت',
-      path: '/dashboard',
-      dropdown: [
-        { label: t('nav.manageBooking') || 'مدیریت رزرو', path: '/dashboard' },
-        { label: t('nav.retrieveBooking') || 'بازیابی رزرو', path: '/booking/retrieve' },
-        { label: t('nav.checkIn') || 'چک این', path: '/checkin' },
-        { label: t('nav.flightStatus') || 'وضعیت پرواز', path: '/flights/status' },
-      ]
-    },
-    {
-      key: 'experience',
-      label: t('nav.experience') || 'تجربه',
-      path: '/experience',
-      dropdown: [
-        { label: t('nav.cabinFeatures') || 'ویژگی‌های کابین', path: '/experience/cabins' },
-        { label: t('nav.inflightEntertainment') || 'سرگرمی در پرواز', path: '/experience/entertainment' },
-        { label: t('nav.dining') || 'غذا و نوشیدنی', path: '/experience/dining' },
-        { label: t('nav.ourFleet') || 'ناوگان ما', path: '/experience/fleet' },
-      ]
-    },
-    {
       key: 'wherewefly',
       label: t('nav.whereWeFly') || 'مقاصد',
       path: '/destinations',
@@ -152,17 +109,6 @@ const EmiratesHeader: React.FC = () => {
         { label: t('nav.destinations') || 'مقاصد', path: '/destinations' },
         { label: t('nav.routeMap') || 'نقشه مسیرها', path: '/destinations/map' },
         { label: t('nav.popularDestinations') || 'مقاصد محبوب', path: '/destinations' },
-      ]
-    },
-    {
-      key: 'loyalty',
-      label: t('nav.loyalty') || 'برنامه وفاداری',
-      path: '/membership',
-      dropdown: [
-        { label: t('nav.joinLoyalty') || 'عضویت در برنامه', path: '/membership' },
-        { label: t('nav.earnMiles') || 'کسب امتیاز', path: '/membership' },
-        { label: t('nav.spendMiles') || 'استفاده از امتیاز', path: '/membership' },
-        { label: t('nav.loyaltyPartners') || 'شرکای برنامه', path: '/membership/partners' },
       ]
     },
     {
@@ -207,10 +153,37 @@ const EmiratesHeader: React.FC = () => {
       <div className="flex h-20 relative">
         {/* Dark Navigation Section - Glassmorphism */}
         <div className="flex-1 bg-white/5 backdrop-blur-xl border-b border-white/20 shadow-2xl flex items-center justify-between">
-          <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
 
-          {/* Desktop Navigation - White text */}
-          <nav className="hidden lg:flex items-center space-x-1 space-x-reverse h-full">
+          {/* Logo with Blue Flag - Horizontal on the right */}
+          <div className="hidden lg:flex items-center absolute right-0">
+            <div 
+              className="bg-blue-900 flex items-center justify-center px-3 py-2"
+              style={{ 
+                height: '80px',
+                boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
+                zIndex: 60,
+                borderTopLeftRadius: '20px',
+                borderBottomLeftRadius: '20px'
+              }}
+            >
+              <Link to="/" className="flex items-center">
+                <img 
+                  src="/images/nasim0.png" 
+                  alt="نسیم ایر" 
+                  className="object-contain"
+                  style={{ 
+                    width: '120px',
+                    height: 'auto',
+                    maxWidth: '120px'
+                  }}
+                />
+              </Link>
+            </div>
+          </div>
+
+          {/* Desktop Navigation - All items together and centered */}
+          <nav className="hidden lg:flex items-center justify-center space-x-3 space-x-reverse h-full">
             {menuItems.map((item) => (
               <div
                 key={item.key}
@@ -237,12 +210,8 @@ const EmiratesHeader: React.FC = () => {
                     }
                   }}
                 >
-                  {item.key === 'home' && <HomeIcon className="w-5 h-5 text-black" />}
                   {item.key === 'book' && <TicketIcon className="w-5 h-5 text-black" />}
-                  {item.key === 'manage' && <ClipboardDocumentIcon className="w-5 h-5 text-black" />}
-                  {item.key === 'experience' && <SparklesIcon className="w-5 h-5 text-black" />}
                   {item.key === 'wherewefly' && <MapPinIcon className="w-5 h-5 text-black" />}
-                  {item.key === 'loyalty' && <StarIcon className="w-5 h-5 text-black" />}
                   {item.key === 'about' && <BuildingOfficeIcon className="w-5 h-5 text-black" />}
                   {item.key === 'help' && <QuestionMarkCircleIcon className="w-5 h-5 text-black" />}
                   {item.label}
@@ -251,7 +220,7 @@ const EmiratesHeader: React.FC = () => {
                 {/* Dropdown Menu with Image */}
                 {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && (
                   <div 
-                    className={`absolute top-full ${language === 'en' ? 'left-0' : 'right-0'} mt-2 w-[900px] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden`}
+                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden`}
                     onMouseLeave={() => {
                       handleMouseLeave();
                       setHoveredSubItem(null);
@@ -270,26 +239,8 @@ const EmiratesHeader: React.FC = () => {
                                 if (itemIndex === 2) return <GiftIcon className="w-7 h-7 text-purple-600" />;
                                 if (itemIndex === 3) return <SparklesIcon className="w-7 h-7 text-pink-600" />;
                               }
-                              if (key === 'manage') {
-                                if (itemIndex === 0) return <ClipboardDocumentIcon className="w-7 h-7 text-indigo-600" />;
-                                if (itemIndex === 1) return <ArrowPathIcon className="w-7 h-7 text-cyan-600" />;
-                                if (itemIndex === 2) return <CheckCircleIcon className="w-7 h-7 text-emerald-600" />;
-                                if (itemIndex === 3) return <PaperAirplaneIcon className="w-7 h-7 text-blue-500" />;
-                              }
-                              if (key === 'experience') {
-                                if (itemIndex === 0) return <BuildingOfficeIcon className="w-7 h-7 text-amber-600" />;
-                                if (itemIndex === 1) return <SparklesIcon className="w-7 h-7 text-pink-600" />;
-                                if (itemIndex === 2) return <HeartIcon className="w-7 h-7 text-red-500" />;
-                                if (itemIndex === 3) return <PaperAirplaneIcon className="w-7 h-7 text-sky-600" />;
-                              }
                               if (key === 'wherewefly') {
                                 return <MapPinIcon className="w-7 h-7 text-orange-600" />;
-                              }
-                              if (key === 'loyalty') {
-                                if (itemIndex === 0) return <StarIcon className="w-7 h-7 text-yellow-500" />;
-                                if (itemIndex === 1) return <CurrencyDollarIcon className="w-7 h-7 text-green-600" />;
-                                if (itemIndex === 2) return <TrophyIcon className="w-7 h-7 text-amber-600" />;
-                                if (itemIndex === 3) return <UserGroupIcon className="w-7 h-7 text-blue-600" />;
                               }
                               if (key === 'about') {
                                 return <BuildingOfficeIcon className="w-7 h-7 text-gray-700" />;
@@ -356,41 +307,8 @@ const EmiratesHeader: React.FC = () => {
                 )}
               </div>
             ))}
-          </nav>
 
-            {/* Right Side Actions - White text */}
-            <div className="hidden lg:flex items-center space-x-2 space-x-reverse relative">
-              {/* Blue Flag Section - Next to "فارسی" */}
-              <div 
-                className={`bg-blue-900 flex flex-col items-center justify-end absolute`}
-                style={{ 
-                  width: '125px', // Wider
-                  height: '160px', // Longer from bottom
-                  top: '-30px', // 4cm higher (40px)
-                  ...(language === 'en' ? { right: 'calc(100% - 1px)' } : { left: 'calc(100% - 1px)' }), // 50cm (500px) closer to center
-                  padding: '8px',
-                  paddingBottom: '-150px', // More padding at bottom
-                  boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
-                  zIndex: 60
-                }}
-              >
-                <Link to="/" className="flex items-center justify-center w-full">
-                  {/* Only Logo Image - No text */}
-                  <img 
-                    src="/images/nasim0.png" 
-                    alt="نسیم ایر" 
-                    className="object-contain"
-                    style={{ 
-                      width: '165px',
-                      height: 'auto',
-                      maxWidth: '165px',
-                      transform: 'translateY(15px)' // Move down
-                    }}
-                  />
-                </Link>
-              </div>
-
-              {/* Global/Language Dropdown */}
+            {/* Language Dropdown */}
               <div 
                 className="relative"
                 onMouseEnter={() => {
@@ -406,11 +324,11 @@ const EmiratesHeader: React.FC = () => {
                 }}
               >
                 <button 
-                  className={`text-black text-sm font-medium hover:text-black transition-all ${fontClass}`} 
+                  className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`} 
                   style={{ 
-                    textTransform: 'uppercase',
                     borderBottom: '2px solid transparent',
-                    paddingBottom: '2px'
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderBottomColor = '#000';
@@ -419,6 +337,7 @@ const EmiratesHeader: React.FC = () => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}
                 >
+                  <GlobeAltIcon className="w-5 h-5 text-black" />
                   فارسی
                 </button>
                 
@@ -474,14 +393,6 @@ const EmiratesHeader: React.FC = () => {
                 )}
               </div>
 
-            {/* Search */}
-            <button className="text-black hover:text-black transition-colors flex items-center gap-2">
-              <MagnifyingGlassIcon className="w-5 h-5" />
-              <span className={`text-black text-sm font-medium ${fontClass}`} style={{ textTransform: 'uppercase' }}>
-                {t('nav.search') || 'SEARCH'}
-              </span>
-            </button>
-
             {/* Login/Register/Logout */}
             {isAuthenticated ? (
               <button
@@ -519,11 +430,11 @@ const EmiratesHeader: React.FC = () => {
                   }}
                 >
                   <button
-                    className={`text-black text-sm font-medium hover:text-black transition-all ${fontClass} flex items-center gap-1`}
+                    className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
                     style={{ 
-                      textTransform: 'uppercase',
                       borderBottom: '2px solid transparent',
-                      paddingBottom: '2px'
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.borderBottomColor = '#000';
@@ -536,6 +447,7 @@ const EmiratesHeader: React.FC = () => {
                       }
                     }}
                   >
+                    <UserIcon className="w-5 h-5 text-black" />
                     {t('nav.login') || 'ورود'}
                     <ChevronDownIcon className="w-4 h-4" />
                   </button>
@@ -592,11 +504,11 @@ const EmiratesHeader: React.FC = () => {
                     setAuthModalMode('register');
                     setIsAuthModalOpen(true);
                   }}
-                  className={`text-black text-sm font-medium hover:text-black transition-all ${fontClass}`}
+                  className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
                   style={{ 
-                    textTransform: 'uppercase',
                     borderBottom: '2px solid transparent',
-                    paddingBottom: '2px'
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderBottomColor = '#000';
@@ -605,11 +517,12 @@ const EmiratesHeader: React.FC = () => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}
                 >
+                  <UserPlusIcon className="w-5 h-5 text-black" />
                   {t('nav.register')}
                 </button>
               </>
             )}
-          </div>
+          </nav>
 
             {/* Mobile Menu Button */}
             <button
