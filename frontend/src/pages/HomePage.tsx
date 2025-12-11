@@ -2809,140 +2809,91 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* FAQ Section - Circular Cards */}
-      <section id="faq" className="relative z-10 py-12 bg-white" style={{ marginTop: '-85px' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Title Section - Same style as other sections */}
-          <div className="text-center mb-4 sm:mb-8">
-            <h2 className={`text-xl sm:text-2xl md:text-3xl ${fontClass}`} style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              fontWeight: language === 'fa' ? 300 : 400,
-              letterSpacing: language === 'en' ? '1.5px' : '0.2px',
-              marginBottom: '0',
-              color: '#000000',
-              opacity: 1,
-              textTransform: language === 'en' ? 'uppercase' : 'none',
-              fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              flexWrap: 'wrap',
-              justifyContent: 'center'
-            }}>
-              {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
-            </h2>
-            <p style={{ 
-              fontSize: 'clamp(14px, 3vw, 16.5px)',
-              fontWeight: language === 'fa' ? 300 : 400,
-              letterSpacing: '0.2px',
-              marginBottom: '0',
-              color: '#000000',
-              opacity: 1,
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: language === 'en' ? 'ltr' : 'rtl'
-            }}>
-              {language === 'fa' 
-                ? 'پاسخ به سوالات متداول شما درباره نسیم ایر' 
-                : language === 'ar' 
-                ? 'إجابات على الأسئلة الشائعة حول نسيم إير' 
-                : 'Answers to frequently asked questions about Nasim Air'}
-            </p>
-          </div>
-
-          {/* Circular Cards Grid - Minimal and Compact */}
-          <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-4 max-w-4xl mx-auto">
-            {/* Card 1: رزرو پرواز */}
-            <div 
-              className="flex flex-col items-center group cursor-pointer flex-shrink-0"
-              onClick={() => setSelectedFAQ('booking')}
-            >
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-2 sm:mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
-                <img 
-                  src="/images/airplane-clouds-night_864588-19786.jpg" 
-                  alt={language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span 
-                className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
-                style={{
-                  color: '#000000',
-                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
-                }}
-              >
-                {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
-              </span>
-                    </div>
-
-            {/* Card 2: خدمات مسافران */}
-            <div 
-              className="flex flex-col items-center group cursor-pointer flex-shrink-0"
-              onClick={() => setSelectedFAQ('services')}
-            >
-              <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
-                <img 
-                  src="/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg" 
-                  alt={language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
-                  className="w-full h-full object-cover"
-                />
-                  </div>
-              <span 
-                className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
-                style={{
-                  color: '#000000',
-                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
-                }}
-              >
-                {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
-              </span>
-                  </div>
-
-            {/* Card 3: اطلاعات پرواز */}
-            <div 
-              className="flex flex-col items-center group cursor-pointer flex-shrink-0"
-              onClick={() => setSelectedFAQ('flight-info')}
-            >
-              <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
-                <img 
-                  src="/images/airport-crew.jpg" 
-                  alt={language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
-                  className="w-full h-full object-cover"
-                />
-                </div>
-              <span 
-                className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
-                style={{
-                  color: '#000000',
-                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
-                }}
-              >
-                {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
-              </span>
+      {/* FAQ Section - Attached to Footer with Clean Trapezoid Design */}
+      <section id="faq" className="relative z-10 bg-white" style={{ marginTop: '0', marginBottom: '0' }}>
+        {/* Clean Trapezoid Shape Container */}
+        <div className="relative" style={{ height: '300px', marginBottom: '0', overflow: 'hidden' }}>
+          {/* Simple Clean Trapezoid Shape SVG - top edge wider than bottom */}
+          <svg 
+            className="absolute bottom-0 left-0 w-full h-full" 
+            viewBox="0 0 1200 300" 
+            preserveAspectRatio="none"
+          >
+            {/* Trapezoid: top edge wider (starts from negative x to extend beyond), bottom edge narrower */}
+            <path 
+              d="M -50 300 L 0 50 L 1200 50 L 1250 300 Z" 
+              fill="#9ca3af" 
+              stroke="none"
+            />
+          </svg>
+          
+          {/* Content inside the trapezoid shape */}
+          <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '60px', paddingBottom: '40px' }}>
+            <div className="max-w-7xl mx-auto w-full">
+              {/* Minimal Title inside shape */}
+              <div className="text-center mb-6">
+                <h2 
+                  className={`text-xl sm:text-2xl font-medium text-white ${fontClass}`} 
+                  style={{ 
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}
+                >
+                  {language === 'fa' ? 'سؤالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+                </h2>
               </div>
 
-            {/* Card 4: پشتیبانی و تماس */}
-            <div 
-              className="flex flex-col items-center group cursor-pointer flex-shrink-0"
-              onClick={() => setSelectedFAQ('support')}
-            >
-              <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden mb-3 border-2 border-gray-300 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:border-gray-500 group-hover:shadow-lg">
-                <img 
-                  src="/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg" 
-                  alt={language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span 
-                className={`text-sm md:text-base font-medium underline hover:no-underline transition-all ${fontClass}`}
-                style={{
-                  color: '#000000',
-                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
-                }}
+              {/* Simple FAQ Categories - Minimal Design */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {/* Category 1: رزرو پرواز */}
+              <button
+                onClick={() => setSelectedFAQ('booking')}
+                className="group bg-white/90 hover:bg-white rounded-lg p-4 transition-all duration-200 border border-white/50 hover:border-white text-center"
+                style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
-              </span>
+                <h3 className={`text-base font-medium text-gray-900 ${fontClass}`}>
+                  {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
+                </h3>
+              </button>
+
+              {/* Category 2: خدمات مسافران */}
+              <button
+                onClick={() => setSelectedFAQ('services')}
+                className="group bg-white/90 hover:bg-white rounded-lg p-4 transition-all duration-200 border border-white/50 hover:border-white text-center"
+                style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+              >
+                <h3 className={`text-base font-medium text-gray-900 ${fontClass}`}>
+                  {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
+                </h3>
+              </button>
+
+              {/* Category 3: اطلاعات پرواز */}
+              <button
+                onClick={() => setSelectedFAQ('flight-info')}
+                className="group bg-white/90 hover:bg-white rounded-lg p-4 transition-all duration-200 border border-white/50 hover:border-white text-center"
+                style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+              >
+                <h3 className={`text-base font-medium text-gray-900 ${fontClass}`}>
+                  {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
+                </h3>
+              </button>
+
+              {/* Category 4: پشتیبانی و تماس */}
+              <button
+                onClick={() => setSelectedFAQ('support')}
+                className="group bg-white/90 hover:bg-white rounded-lg p-4 transition-all duration-200 border border-white/50 hover:border-white text-center"
+                style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+              >
+                <h3 className={`text-base font-medium text-gray-900 ${fontClass}`}>
+                  {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
+                </h3>
+              </button>
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* Thick Horizontal Line Separator */}
+        <div className="relative" style={{ height: '4px', backgroundColor: '#9ca3af', marginTop: '0' }}>
         </div>
       </section>
 
@@ -3493,9 +3444,9 @@ const HomePage: React.FC = () => {
         >
           <div 
             className="bg-gray-200 rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-scroll border border-gray-300"
-            style={{ maxWidth: '1400px' }}
             onClick={(e) => e.stopPropagation()}
             style={{
+              maxWidth: '1400px',
               transform: 'translateZ(0)',
               WebkitOverflowScrolling: 'touch',
               contain: 'layout style paint',
