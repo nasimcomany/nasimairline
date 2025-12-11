@@ -1248,17 +1248,16 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Skywards Banner Section - Minimal Emirates Style */}
-      <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
+      {/* COMMENTED OUT: عضویت در برنامه وفاداری نسیم ایر banner section */}
+      {/* <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
             className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
             style={{
-              borderRadius: '12px', // Curve from all sides
-              overflow: 'visible' // Allow badges to extend outside
+              borderRadius: '12px',
+              overflow: 'visible'
             }}
           >
-            {/* Right Side - Badges - 3D effect extending out from top and bottom */}
             <div 
               className="flex items-center" 
               style={{ 
@@ -1267,20 +1266,19 @@ const HomePage: React.FC = () => {
                 top: '50%',
                 transform: 'translateY(-50%)',
                 zIndex: 10,
-                height: '0' // Don't affect parent height
+                height: '0'
               }}
             >
-              {/* Silver Badge - 3D, extending out from top and bottom */}
               <div 
                 className="rounded-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '100px', // Size to protrude from top and bottom
-                  height: '100px', // Size to protrude from top and bottom
+                  width: '100px',
+                  height: '100px',
                   background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  marginRight: '-12px', // Overlap to create connected effect
-                  transform: 'rotate(2deg) translateZ(0)' // Rotate only
+                  marginRight: '-12px',
+                  transform: 'rotate(2deg) translateZ(0)'
                 }}
               >
                 <div 
@@ -1295,17 +1293,16 @@ const HomePage: React.FC = () => {
                   SILVER
                 </div>
               </div>
-              {/* Gold Badge - 3D, extending out from top and bottom */}
               <div 
                 className="rounded-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '100px', // Size to protrude from top and bottom
-                  height: '100px', // Size to protrude from top and bottom
+                  width: '100px',
+                  height: '100px',
                   background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  marginRight: '-12px', // Overlap to create connected effect
-                  transform: 'rotate(-3deg) translateZ(0)' // Rotate only
+                  marginRight: '-12px',
+                  transform: 'rotate(-3deg) translateZ(0)'
                 }}
               >
                 <div 
@@ -1320,16 +1317,15 @@ const HomePage: React.FC = () => {
                   GOLD
                 </div>
               </div>
-              {/* Platinum Badge - 3D, extending out from top and bottom */}
               <div 
                 className="rounded-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '100px', // Size to protrude from top and bottom
-                  height: '100px', // Size to protrude from top and bottom
+                  width: '100px',
+                  height: '100px',
                   background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  transform: 'rotate(4deg) translateZ(0)' // Rotate only
+                  transform: 'rotate(4deg) translateZ(0)'
                 }}
               >
                 <div 
@@ -1346,7 +1342,6 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Center - Text - Smaller */}
             <div className="flex-1 text-center md:text-left" style={{ paddingRight: language === 'en' ? '0' : '0' }}>
               <h3 className={`text-base sm:text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
@@ -1362,7 +1357,6 @@ const HomePage: React.FC = () => {
               </p>
             </div>
 
-            {/* Left Side - Button - Smaller */}
             <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-xs sm:text-sm" style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl'
@@ -1371,7 +1365,7 @@ const HomePage: React.FC = () => {
             </button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Skywards+ Section - Emirates Style */}
       <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '55px' }}>
@@ -1988,17 +1982,16 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Destinations Section - Emirates Style */}
-      <section className="relative z-10 py-12 bg-white" style={{ marginTop: '-30px' }}>
+      {/* COMMENTED OUT: مقصدهای ویژه در ایران زیبا section */}
+      {/* <section className="relative z-10 py-12 bg-white" style={{ marginTop: '-30px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Title - Smaller and minimal - Same style as country text but larger size */}
           <div className="text-center mb-8">
             <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               fontWeight: language === 'fa' ? 300 : 400,
               letterSpacing: language === 'en' ? '1.5px' : '0.2px',
               marginBottom: '0',
-              color: '#000000', // Black color
+              color: '#000000',
               opacity: 1,
               textTransform: language === 'en' ? 'uppercase' : 'none',
               fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal',
@@ -2030,7 +2023,6 @@ const HomePage: React.FC = () => {
             </h2>
           </div>
           
-          {/* Six Compact Destination Cards - Minimal Emirates Style */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {destinations.filter(d => [1, 2, 7, 8, 9, 10].includes(d.id)).map((destination) => (
               <div 
@@ -2057,9 +2049,8 @@ const HomePage: React.FC = () => {
                   e.currentTarget.style.transform = 'translateY(0) scale(1)';
                 }}
               >
-                {/* Image - Much smaller, minimal space */}
                 <div className="relative w-full overflow-hidden" style={{ 
-                  height: '180px', // Much smaller image
+                  height: '180px',
                   borderRadius: '6px 6px 0 0'
                 }}>
                   <img 
@@ -2073,9 +2064,7 @@ const HomePage: React.FC = () => {
                   />
                 </div>
                 
-                {/* Content - Compact and minimal */}
                 <div className="bg-white px-5 py-4">
-                  {/* Country - Very small, soft light gray, centered */}
                   <p 
                     className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
@@ -2085,14 +2074,13 @@ const HomePage: React.FC = () => {
                       fontWeight: language === 'fa' ? 300 : 400,
                       lineHeight: '1.4',
                       fontSize: '9px',
-                      color: language === 'fa' ? '#9ca3af' : '#9ca3af', // Soft gray
+                      color: language === 'fa' ? '#9ca3af' : '#9ca3af',
                       opacity: 0.85
                     }}
                   >
                     {destination.country}
                   </p>
                   
-                  {/* City Name - Refined size, attractive Persian font, centered */}
                   <h3 
                     className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
@@ -2102,14 +2090,13 @@ const HomePage: React.FC = () => {
                       letterSpacing: language === 'en' ? '-0.3px' : 'normal',
                       marginBottom: '10px',
                       fontSize: language === 'fa' ? '20px' : '24px',
-                      color: language === 'fa' ? '#374151' : '#111827', // Soft dark gray for Persian
+                      color: language === 'fa' ? '#374151' : '#111827',
                       fontFeatureSettings: language === 'fa' ? "'kern' 1" : 'normal'
                     }}
                   >
                     {destination.name}
                   </h3>
                   
-                  {/* Short beautiful description about the city - Small, minimal, soft gray, centered */}
                   <p 
                     className={`text-center ${fontClass}`} 
                     style={{ 
@@ -2117,7 +2104,7 @@ const HomePage: React.FC = () => {
                       fontWeight: language === 'fa' ? 300 : 400,
                       lineHeight: '1.5',
                       fontSize: language === 'fa' ? '11px' : '13px',
-                      color: language === 'fa' ? '#6b7280' : '#4b5563', // Soft medium gray
+                      color: language === 'fa' ? '#6b7280' : '#4b5563',
                       opacity: language === 'fa' ? 0.9 : 1
                     }}
                   >
@@ -2141,7 +2128,7 @@ const HomePage: React.FC = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Old Flight Search Section - Remove */}
       <section className="hidden">
@@ -2826,12 +2813,21 @@ const HomePage: React.FC = () => {
               fill="#e5e7eb" 
               stroke="none"
             />
-            {/* Thin black line on top, left, and right edges only (not bottom) */}
+            {/* Thin black line on top edge - slightly thicker to match visual appearance */}
             <path 
-              d="M 12 30 L 88 30 M 3 100 L 12 30 M 97 100 L 88 30" 
+              d="M 12 30 L 88 30" 
               fill="none"
               stroke="#000000"
-              strokeWidth="0.3"
+              strokeWidth="0.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {/* Thin black line on left and right edges only (not bottom) */}
+            <path 
+              d="M 3 100 L 12 30 M 97 100 L 88 30" 
+              fill="none"
+              stroke="#000000"
+              strokeWidth="0.12"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -2916,7 +2912,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* Thin Elegant Black Line Separator */}
-        <div className="relative" style={{ height: '1px', backgroundColor: '#000000', marginTop: '0' }}>
+        <div className="relative" style={{ height: '1px', backgroundColor: '#000000', marginTop: '-5px' }}>
         </div>
       </section>
 
