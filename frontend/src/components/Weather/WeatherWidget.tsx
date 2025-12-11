@@ -123,7 +123,8 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
     };
 
     fetchWeather();
-  }, [cities, language]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cities]);
 
   const getWeatherIcon = (iconCode: string) => {
     if (!iconCode) return <SunIcon className="h-8 w-8 text-yellow-400" />;
@@ -139,14 +140,16 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
   return (
     <div className="w-full py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex justify-center gap-4 sm:gap-6 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
           {weatherData.map((weather, index) => (
             <div
               key={index}
-              className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 shadow-lg border border-blue-200 dark:border-gray-700"
+              className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 shadow-lg border border-blue-200 dark:border-gray-700 flex-shrink-0"
               style={{
                 contain: 'layout style paint',
                 willChange: 'auto',
+                minWidth: '180px',
+                flex: '1 1 0%',
               }}
             >
               {weather.loading ? (

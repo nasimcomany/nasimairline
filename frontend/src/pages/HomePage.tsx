@@ -100,6 +100,9 @@ const HomePage: React.FC = () => {
   const [showWeatherModal, setShowWeatherModal] = useState(false);
 
   const reservedSeats = ['A1', 'B2', 'C3', 'D4', 'A5', 'B6'];
+  
+  // Memoized cities array to prevent re-renders
+  const weatherCities = useMemo(() => ['Tehran', 'Mashhad', 'Kish', 'Abadan', 'Isfahan'], []);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -3498,7 +3501,7 @@ const HomePage: React.FC = () => {
             }}
           >
             <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-between mb-6">
+              <div className="relative flex items-center justify-center mb-6">
                 <h3 className={`text-xl sm:text-2xl font-bold text-gray-900 ${fontClass} flex items-center gap-2`} style={{
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
@@ -3507,14 +3510,14 @@ const HomePage: React.FC = () => {
                 </h3>
                 <button
                   onClick={() => setShowWeatherModal(false)}
-                  className="text-gray-700 hover:text-gray-900 p-1 rounded-full hover:bg-gray-300"
+                  className="absolute right-0 text-gray-700 hover:text-gray-900 p-1 rounded-full hover:bg-gray-300"
                   aria-label="Close"
                 >
                   <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <div style={{ contain: 'layout style paint' }}>
-                <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
+                <WeatherWidget cities={weatherCities} />
               </div>
             </div>
           </div>

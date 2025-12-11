@@ -285,8 +285,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                       <div className="flex-1 py-6 px-6">
                         <div className="space-y-2">
                           {item.dropdown.map((subItem, index) => {
-                            // Get icon for each submenu item based on index and key (language-independent)
-                            const getSubItemIcon = (label: string, key: string, itemIndex: number) => {
+                            // Get icon for each submenu item based on path and key (language-independent)
+                            const getSubItemIcon = (label: string, key: string, itemIndex: number, path: string) => {
                               if (key === 'book') {
                                 if (itemIndex === 0) return <TicketIcon className="w-7 h-7 text-blue-600" />;
                                 if (itemIndex === 1) return <CalendarDaysIcon className="w-7 h-7 text-green-600" />;
@@ -300,8 +300,12 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 return <BuildingOfficeIcon className="w-7 h-7 text-gray-700" />;
                               }
                               if (key === 'help') {
-                                if (itemIndex === 0) return <CloudIcon className="w-7 h-7 text-blue-500" />;
-                                if (itemIndex === 1) return <ExclamationTriangleIcon className="w-7 h-7 text-red-500" />;
+                                // Use path to determine icon instead of index
+                                if (path === '/support') return <QuestionMarkCircleIcon className="w-7 h-7 text-blue-500" />; // مرکز کمک
+                                if (path === '/#faq') return <ExclamationTriangleIcon className="w-7 h-7 text-red-500" />; // تماس با ما / سوالات متداول
+                                if (path === '/support/travel-info') return <MapPinIcon className="w-7 h-7 text-green-500" />; // اطلاعات سفر
+                                if (path === '/#weather') return <CloudIcon className="w-7 h-7 text-blue-500" />; // وضعیت آب و هوا
+                                if (path === '/tickets') return <TicketIcon className="w-7 h-7 text-purple-500" />; // ثبت شکایت
                                 return <QuestionMarkCircleIcon className="w-7 h-7 text-blue-500" />;
                               }
                               return null;
@@ -343,7 +347,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 onMouseEnter={() => setHoveredSubItem({key: item.key, index})}
                                 onMouseLeave={() => setHoveredSubItem(null)}
                               >
-                                {getSubItemIcon(subItem.label, item.key, index)}
+                                {getSubItemIcon(subItem.label, item.key, index, subItem.path)}
                                 <span className="font-medium">{subItem.label}</span>
                               </Link>
                             );
