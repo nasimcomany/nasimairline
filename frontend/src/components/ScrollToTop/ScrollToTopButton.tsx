@@ -37,24 +37,26 @@ const ScrollToTopButton: React.FC = () => {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed ${language === 'en' ? 'right-6' : 'left-6'} bottom-24 z-40 bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 hover:scale-110 hover:shadow-blue-900/50 group`}
+      className="fixed right-6 bottom-24 z-40 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg p-3 shadow-lg transition-all duration-300 hover:shadow-xl group border border-gray-300/50"
+      style={{
+        backdropFilter: 'blur(10px)',
+        minWidth: '56px',
+        minHeight: '56px'
+      }}
       aria-label={t('scrollToTop.title') || 'بازگشت به ابتدای صفحه'}
       title={t('scrollToTop.title') || 'بازگشت به ابتدای صفحه'}
     >
       <div className="flex flex-col items-center justify-center">
-        <ArrowUpIcon className="h-6 w-6 mb-1 group-hover:animate-bounce" />
+        <ArrowUpIcon className="h-5 w-5 group-hover:translate-y-[-2px] transition-transform duration-300" />
         <span 
-          className={`text-xs font-medium ${fontClass} hidden sm:block`}
+          className={`text-[10px] font-medium ${fontClass} hidden sm:block mt-1`}
           style={{
-            fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
           }}
         >
           {t('scrollToTop.title') || 'بازگشت به ابتدای صفحه'}
         </span>
       </div>
-      
-      {/* Animated background effect */}
-      <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
     </button>
   );
 };
