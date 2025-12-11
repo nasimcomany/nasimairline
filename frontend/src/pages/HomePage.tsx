@@ -3485,27 +3485,22 @@ const HomePage: React.FC = () => {
       {showWeatherModal && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
           onClick={() => setShowWeatherModal(false)}
         >
           <div 
-            className="bg-gray-200/99 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-300/30"
+            className="bg-gray-200 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-scroll border border-gray-300"
             onClick={(e) => e.stopPropagation()}
             style={{
-              backdropFilter: 'blur(1px)',
+              transform: 'translateZ(0)',
+              WebkitOverflowScrolling: 'touch',
             }}
           >
             <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className={`text-xl sm:text-2xl font-bold text-gray-900 ${fontClass} flex items-center gap-2`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  <CloudIcon className="w-6 h-6 sm:w-7 sm:h-7 text-gray-900" />
-                  {language === 'fa' ? 'وضعیت آب و هوا' : language === 'ar' ? 'حالة الطقس' : 'Weather'}
-                </h3>
+              <div className="flex items-center justify-end mb-4">
                 <button
                   onClick={() => setShowWeatherModal(false)}
-                  className="text-gray-700 hover:text-gray-900 transition-colors p-1 rounded-full hover:bg-gray-300"
+                  className="text-gray-700 hover:text-gray-900 p-1 rounded-full hover:bg-gray-300"
                   aria-label="Close"
                 >
                   <XMarkIcon className="w-6 h-6" />
