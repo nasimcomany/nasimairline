@@ -148,8 +148,8 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
               style={{
                 contain: 'layout style paint',
                 willChange: 'auto',
-                minWidth: '180px',
-                flex: '1 1 0%',
+                minWidth: '200px',
+                width: '200px',
               }}
             >
               {weather.loading ? (
