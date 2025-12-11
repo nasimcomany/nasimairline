@@ -2809,49 +2809,52 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* FAQ Section - Attached to Footer with Clean Trapezoid Design */}
+      {/* FAQ Section - Attached to Footer with Premium Trapezoid Design */}
       <section id="faq" className="relative z-10 bg-white" style={{ marginTop: '0', marginBottom: '0' }}>
-        {/* Clean Trapezoid Shape Container */}
-        <div className="relative" style={{ height: '300px', marginBottom: '0', overflow: 'hidden' }}>
-          {/* Simple Clean Trapezoid Shape SVG - top edge wider than bottom */}
+        {/* Premium Trapezoid Shape Container */}
+        <div className="relative" style={{ height: '280px', marginBottom: '0', overflow: 'hidden' }}>
+          {/* Premium Trapezoid Shape SVG - bottom edge wider than top (inverted trapezoid) */}
           <svg 
             className="absolute bottom-0 left-0 w-full h-full" 
-            viewBox="-5 0 110 100" 
+            viewBox="-2 0 104 100" 
             preserveAspectRatio="none"
             style={{ overflow: 'visible' }}
           >
-            {/* Trapezoid: top edge wider (from -5 to 105), bottom edge narrower (from 0 to 100) */}
+            {/* Inverted Trapezoid: bottom edge wider, top edge narrower, very minimal angle, shorter from top */}
             <path 
-              d="M 0 100 L -5 16.67 L 105 16.67 L 100 100 Z" 
-              fill="#9ca3af" 
+              d="M -2 100 L 12 20 L 88 20 L 102 100 Z" 
+              fill="#e5e7eb" 
               stroke="none"
             />
           </svg>
           
-          {/* Content inside the trapezoid shape */}
-          <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '60px', paddingBottom: '40px' }}>
+          {/* Premium Content inside the trapezoid shape */}
+          <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '35px', paddingBottom: '50px' }}>
             <div className="max-w-7xl mx-auto w-full">
-              {/* Minimal Title inside shape */}
-              <div className="text-center mb-6">
+              {/* Premium Minimal Title inside shape - closer to top */}
+              <div className="text-center mb-8">
                 <h2 
-                  className={`text-xl sm:text-2xl font-medium text-white ${fontClass}`} 
+                  className={`text-lg sm:text-xl font-semibold text-gray-900 ${fontClass}`} 
                   style={{ 
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    letterSpacing: '0.5px'
                   }}
                 >
                   {language === 'fa' ? 'سؤالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
                 </h2>
               </div>
 
-              {/* Simple FAQ Categories - Minimal Design */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {/* Premium Luxury FAQ Categories - Modern Minimal Design */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
               {/* Category 1: رزرو پرواز */}
               <button
                 onClick={() => setSelectedFAQ('booking')}
-                className="group bg-white/90 hover:bg-white rounded-lg p-4 transition-all duration-200 border border-white/50 hover:border-white text-center"
+                className="group bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
                 style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                <h3 className={`text-base font-medium text-gray-900 ${fontClass}`}>
+                <h3 className={`text-sm sm:text-base font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
+                  letterSpacing: '0.3px'
+                }}>
                   {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
                 </h3>
               </button>
@@ -2859,10 +2862,12 @@ const HomePage: React.FC = () => {
               {/* Category 2: خدمات مسافران */}
               <button
                 onClick={() => setSelectedFAQ('services')}
-                className="group bg-white/90 hover:bg-white rounded-lg p-4 transition-all duration-200 border border-white/50 hover:border-white text-center"
+                className="group bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
                 style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                <h3 className={`text-base font-medium text-gray-900 ${fontClass}`}>
+                <h3 className={`text-sm sm:text-base font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
+                  letterSpacing: '0.3px'
+                }}>
                   {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
                 </h3>
               </button>
@@ -2870,10 +2875,12 @@ const HomePage: React.FC = () => {
               {/* Category 3: اطلاعات پرواز */}
               <button
                 onClick={() => setSelectedFAQ('flight-info')}
-                className="group bg-white/90 hover:bg-white rounded-lg p-4 transition-all duration-200 border border-white/50 hover:border-white text-center"
+                className="group bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
                 style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                <h3 className={`text-base font-medium text-gray-900 ${fontClass}`}>
+                <h3 className={`text-sm sm:text-base font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
+                  letterSpacing: '0.3px'
+                }}>
                   {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
                 </h3>
               </button>
@@ -2881,10 +2888,12 @@ const HomePage: React.FC = () => {
               {/* Category 4: پشتیبانی و تماس */}
               <button
                 onClick={() => setSelectedFAQ('support')}
-                className="group bg-white/90 hover:bg-white rounded-lg p-4 transition-all duration-200 border border-white/50 hover:border-white text-center"
+                className="group bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
                 style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                <h3 className={`text-base font-medium text-gray-900 ${fontClass}`}>
+                <h3 className={`text-sm sm:text-base font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
+                  letterSpacing: '0.3px'
+                }}>
                   {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
                 </h3>
               </button>
@@ -2894,7 +2903,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* Thick Horizontal Line Separator */}
-        <div className="relative" style={{ height: '4px', backgroundColor: '#9ca3af', marginTop: '0' }}>
+        <div className="relative" style={{ height: '4px', backgroundColor: '#e5e7eb', marginTop: '0' }}>
         </div>
       </section>
 
