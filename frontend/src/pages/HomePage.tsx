@@ -2816,12 +2816,13 @@ const HomePage: React.FC = () => {
           {/* Simple Clean Trapezoid Shape SVG - top edge wider than bottom */}
           <svg 
             className="absolute bottom-0 left-0 w-full h-full" 
-            viewBox="0 0 1200 300" 
+            viewBox="-5 0 110 100" 
             preserveAspectRatio="none"
+            style={{ overflow: 'visible' }}
           >
-            {/* Trapezoid: top edge wider (starts from negative x to extend beyond), bottom edge narrower */}
+            {/* Trapezoid: top edge wider (from -5 to 105), bottom edge narrower (from 0 to 100) */}
             <path 
-              d="M -50 300 L 0 50 L 1200 50 L 1250 300 Z" 
+              d="M 0 100 L -5 16.67 L 105 16.67 L 100 100 Z" 
               fill="#9ca3af" 
               stroke="none"
             />
