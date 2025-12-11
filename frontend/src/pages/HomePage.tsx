@@ -3492,7 +3492,8 @@ const HomePage: React.FC = () => {
           onClick={() => setShowWeatherModal(false)}
         >
           <div 
-            className="bg-gray-200 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-scroll border border-gray-300"
+            className="bg-gray-200 rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-scroll border border-gray-300"
+            style={{ maxWidth: '1400px' }}
             onClick={(e) => e.stopPropagation()}
             style={{
               transform: 'translateZ(0)',

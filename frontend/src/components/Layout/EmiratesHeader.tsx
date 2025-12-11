@@ -303,7 +303,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 // Use path and index to determine icon
                                 if (path === '/support' && itemIndex === 0) return <QuestionMarkCircleIcon className="w-7 h-7 text-blue-500" />; // مرکز کمک
                                 if (path === '/#faq' && itemIndex === 1) return <ExclamationTriangleIcon className="w-7 h-7 text-red-500" />; // تماس با ما
-                                if (path === '/#faq' && itemIndex === 2) return <QuestionMarkCircleIcon className="w-7 h-7 text-blue-500" />; // سوالات متداول
+                                if (path === '/#faq' && itemIndex === 2) return <ClipboardDocumentIcon className="w-7 h-7 text-orange-500" />; // سوالات متداول
                                 if (path === '/support/travel-info') return <MapPinIcon className="w-7 h-7 text-green-500" />; // اطلاعات سفر
                                 if (path === '/#weather') return <CloudIcon className="w-7 h-7 text-blue-500" />; // وضعیت آب و هوا
                                 if (path === '/tickets') return <TicketIcon className="w-7 h-7 text-purple-500" />; // ثبت شکایت

@@ -139,7 +139,7 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
 
   return (
     <div className="w-full py-4">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{ maxWidth: '1400px' }}>
         <div className="flex justify-center gap-4 sm:gap-6 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
           {weatherData.map((weather, index) => (
             <div
