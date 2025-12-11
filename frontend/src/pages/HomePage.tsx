@@ -3494,10 +3494,17 @@ const HomePage: React.FC = () => {
             style={{
               transform: 'translateZ(0)',
               WebkitOverflowScrolling: 'touch',
+              contain: 'layout style paint',
             }}
           >
             <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-end mb-4">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-xl sm:text-2xl font-bold text-gray-900 ${fontClass} flex items-center gap-2`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  <CloudIcon className="w-6 h-6 sm:w-7 sm:h-7 text-gray-900" />
+                  {language === 'fa' ? 'وضعیت آب و هوا' : language === 'ar' ? 'حالة الطقس' : 'Weather'}
+                </h3>
                 <button
                   onClick={() => setShowWeatherModal(false)}
                   className="text-gray-700 hover:text-gray-900 p-1 rounded-full hover:bg-gray-300"
@@ -3506,7 +3513,9 @@ const HomePage: React.FC = () => {
                   <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
-              <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
+              <div style={{ contain: 'layout style paint' }}>
+                <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
+              </div>
             </div>
           </div>
         </div>
