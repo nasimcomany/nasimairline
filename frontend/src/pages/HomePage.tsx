@@ -2812,27 +2812,36 @@ const HomePage: React.FC = () => {
       {/* FAQ Section - Attached to Footer with Premium Trapezoid Design */}
       <section id="faq" className="relative z-10 bg-white" style={{ marginTop: '0', marginBottom: '0' }}>
         {/* Premium Trapezoid Shape Container */}
-        <div className="relative" style={{ height: '280px', marginBottom: '0', overflow: 'hidden' }}>
+        <div className="relative" style={{ height: '240px', marginBottom: '0', overflow: 'hidden' }}>
           {/* Premium Trapezoid Shape SVG - bottom edge wider than top (inverted trapezoid) */}
           <svg 
             className="absolute bottom-0 left-0 w-full h-full" 
-            viewBox="-2 0 104 100" 
+            viewBox="0 0 100 100" 
             preserveAspectRatio="none"
             style={{ overflow: 'visible' }}
           >
-            {/* Inverted Trapezoid: bottom edge wider, top edge narrower, very minimal angle, shorter from top */}
+            {/* Inverted Trapezoid: bottom edge wider, top edge narrower, very minimal angle, shorter from top, bottom edge closer to center */}
             <path 
-              d="M -2 100 L 12 20 L 88 20 L 102 100 Z" 
+              d="M 3 100 L 12 30 L 88 30 L 97 100 Z" 
               fill="#e5e7eb" 
               stroke="none"
+            />
+            {/* Thin black line on top, left, and right edges only (not bottom) */}
+            <path 
+              d="M 12 30 L 88 30 M 3 100 L 12 30 M 97 100 L 88 30" 
+              fill="none"
+              stroke="#000000"
+              strokeWidth="0.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
           
           {/* Premium Content inside the trapezoid shape */}
-          <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '35px', paddingBottom: '50px' }}>
+          <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '90px', paddingBottom: '30px' }}>
             <div className="max-w-7xl mx-auto w-full">
-              {/* Premium Minimal Title inside shape - closer to top */}
-              <div className="text-center mb-8">
+              {/* Premium Minimal Title inside shape - moved down more */}
+              <div className="text-center mb-5">
                 <h2 
                   className={`text-lg sm:text-xl font-semibold text-gray-900 ${fontClass}`} 
                   style={{ 
@@ -2845,7 +2854,7 @@ const HomePage: React.FC = () => {
               </div>
 
               {/* Premium Luxury FAQ Categories - Modern Minimal Design */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5" style={{ marginTop: '35px' }}>
               {/* Category 1: رزرو پرواز */}
               <button
                 onClick={() => setSelectedFAQ('booking')}
@@ -2904,6 +2913,10 @@ const HomePage: React.FC = () => {
 
         {/* Thick Horizontal Line Separator */}
         <div className="relative" style={{ height: '4px', backgroundColor: '#e5e7eb', marginTop: '0' }}>
+        </div>
+
+        {/* Thin Elegant Black Line Separator */}
+        <div className="relative" style={{ height: '1px', backgroundColor: '#000000', marginTop: '0' }}>
         </div>
       </section>
 
