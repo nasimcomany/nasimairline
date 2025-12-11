@@ -37,7 +37,8 @@ import {
   ArrowPathIcon,
   CreditCardIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  CloudIcon
 } from '@heroicons/react/24/outline';
 
 const HomePage: React.FC = () => {
@@ -96,6 +97,7 @@ const HomePage: React.FC = () => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [showSeatModal, setShowSeatModal] = useState(false);
   const [show3DViewer, setShow3DViewer] = useState(false);
+  const [showWeatherModal, setShowWeatherModal] = useState(false);
 
   const reservedSeats = ['A1', 'B2', 'C3', 'D4', 'A5', 'B6'];
 
@@ -701,7 +703,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <EmiratesHeader />
+      <EmiratesHeader onWeatherClick={() => setShowWeatherModal(true)} />
 
       {/* Hero Section with Flight Search - Emirates Style */}
       <section className="relative z-10 min-h-[70vh] sm:min-h-[90vh] flex flex-col">
@@ -2804,11 +2806,6 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Weather Section - Your Custom Feature */}
-      <section id="weather" className="relative z-10 pt-4 pb-12 bg-white" style={{ marginTop: '-55px' }}>
-        <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
-      </section>
-
       {/* FAQ Section - Circular Cards */}
       <section id="faq" className="relative z-10 py-12 bg-white" style={{ marginTop: '-85px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -3382,6 +3379,27 @@ const HomePage: React.FC = () => {
                     {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}
                   </a>
                 </li>
+                <li>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowWeatherModal(true);
+                    }}
+                    className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} 
+                    style={{
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                      width: '100%',
+                      textAlign: language === 'fa' || language === 'ar' ? 'right' : 'left'
+                    }}
+                  >
+                    <CloudIcon className="w-4 h-4 text-gray-900" />
+                    {language === 'fa' ? 'وضعیت آب و هوا' : language === 'ar' ? 'حالة الطقس' : 'Weather'}
+                  </button>
+                </li>
               </ul>
               </div>
 
@@ -3462,6 +3480,42 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Weather Modal */}
+      {showWeatherModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setShowWeatherModal(false)}
+        >
+          <div 
+            className="bg-gray-200/99 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-300/30"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backdropFilter: 'blur(1px)',
+            }}
+          >
+            <div className="p-6 sm:p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-xl sm:text-2xl font-bold text-gray-900 ${fontClass} flex items-center gap-2`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  <CloudIcon className="w-6 h-6 sm:w-7 sm:h-7 text-gray-900" />
+                  {language === 'fa' ? 'وضعیت آب و هوا' : language === 'ar' ? 'حالة الطقس' : 'Weather'}
+                </h3>
+                <button
+                  onClick={() => setShowWeatherModal(false)}
+                  className="text-gray-700 hover:text-gray-900 transition-colors p-1 rounded-full hover:bg-gray-300"
+                  aria-label="Close"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+              <WeatherWidget cities={['Tehran', 'Mashhad', 'Kish', 'Abadan']} />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

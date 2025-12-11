@@ -34,7 +34,11 @@ import {
 import { useLanguage } from '../../contexts/LanguageContext';
 import AuthModal from '../Auth/AuthModal';
 
-const EmiratesHeader: React.FC = () => {
+interface EmiratesHeaderProps {
+  onWeatherClick?: () => void;
+}
+
+const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
@@ -310,6 +314,12 @@ const EmiratesHeader: React.FC = () => {
                                 className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
                                 onClick={(e) => {
                                   setActiveDropdown(null);
+                                  // Handle weather modal
+                                  if (subItem.path === '/#weather' && onWeatherClick) {
+                                    e.preventDefault();
+                                    onWeatherClick();
+                                    return;
+                                  }
                                   // Handle scroll to sections on homepage
                                   if (subItem.path.startsWith('/#')) {
                                     e.preventDefault();
