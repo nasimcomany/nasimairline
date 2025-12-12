@@ -44,6 +44,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [hoveredSubItem, setHoveredSubItem] = useState<{key: string, index: number} | null>(null);
+  const [selectedDestinationIndex, setSelectedDestinationIndex] = useState<number | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -171,6 +172,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
 
   const handleMouseLeave = () => {
     setActiveDropdown(null);
+    setSelectedDestinationIndex(null); // Reset selected destination when dropdown closes
   };
 
   // Cleanup timeout on unmount
@@ -349,8 +351,16 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                               <Link
                                 key={index}
                                 to={subItem.path}
-                                className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
+                                className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${item.key === 'wherewefly' && selectedDestinationIndex === index ? 'bg-gray-300' : ''}`}
                                 onClick={(e) => {
+                                  // For wherewefly dropdown, keep it open and set selected index
+                                  if (item.key === 'wherewefly') {
+                                    e.preventDefault();
+                                    setSelectedDestinationIndex(index);
+                                    setActiveDropdown(item.key); // Keep dropdown open
+                                    return;
+                                  }
+                                  
                                   setActiveDropdown(null);
                                   // Handle weather modal
                                   if (subItem.path === '/#weather' && onWeatherClick) {
@@ -395,9 +405,11 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                         <div className="flex-1 h-[600px] bg-gray-100 flex-shrink-0 relative overflow-hidden m-4 rounded-2xl p-4">
                           <div className="grid grid-cols-3 gap-4 h-full">
                             {getDestinationImages(
-                              hoveredSubItem && hoveredSubItem.key === item.key 
-                                ? hoveredSubItem.index 
-                                : 0
+                              selectedDestinationIndex !== null 
+                                ? selectedDestinationIndex 
+                                : (hoveredSubItem && hoveredSubItem.key === item.key 
+                                    ? hoveredSubItem.index 
+                                    : 0)
                             ).map((destination, imgIndex) => (
                               <div 
                                 key={imgIndex}
@@ -425,13 +437,19 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     labelDiv.style.alignItems = 'center';
                                     labelDiv.style.justifyContent = 'center';
                                     labelDiv.style.backgroundColor = 'rgba(75, 85, 99, 0.85)';
+                                    // Ensure text is centered
                                     // Ensure it starts from bottom-left corner
                                     labelDiv.style.bottom = '0';
                                     labelDiv.style.left = '0';
                                     
-                                    // Apply inverse scale to text to keep it same size
+                                    // Apply inverse scale to text to keep it same size, but ensure it's visible
                                     if (textSpan) {
-                                      textSpan.style.transform = `scale(${1/scaleX}, ${1/scaleY})`;
+                                      const inverseScaleX = 1 / scaleX;
+                                      const inverseScaleY = 1 / scaleY;
+                                      textSpan.style.transform = `scale(${inverseScaleX}, ${inverseScaleY})`;
+                                      textSpan.style.display = 'block';
+                                      textSpan.style.width = 'auto';
+                                      textSpan.style.height = 'auto';
                                     }
                                   }
                                 }}
@@ -447,9 +465,12 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     labelDiv.style.backgroundColor = 'rgba(55, 65, 81, 0.9)';
                                     labelDiv.style.bottom = '0.5rem';
                                     labelDiv.style.left = '0.5rem';
+                                    labelDiv.style.width = 'auto';
+                                    labelDiv.style.height = 'auto';
                                     
                                     if (textSpan) {
                                       textSpan.style.transform = 'scale(1)';
+                                      textSpan.style.display = 'block';
                                     }
                                   }
                                 }}
