@@ -93,6 +93,39 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return images[key]?.[0] || '/images/airplane-clouds-night_864588-19786.jpg';
   };
 
+  // Get multiple destination images with names for wherewefly dropdown
+  const getDestinationImages = (subItemIndex?: number): Array<{image: string, name: string}> => {
+    const destinationData: Record<number, Array<{image: string, name: string}>> = {
+      0: [ // مقاصد داخلی
+        { image: '/images/tehran.jpg', name: language === 'fa' ? 'تهران' : language === 'ar' ? 'طهران' : 'Tehran' },
+        { image: '/images/mashhad.jpeg', name: language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad' },
+        { image: '/images/kish.jpg', name: language === 'fa' ? 'کیش' : language === 'ar' ? 'كيش' : 'Kish' },
+        { image: '/images/abadan1.jpg', name: language === 'fa' ? 'آبادان' : language === 'ar' ? 'عبادان' : 'Abadan' },
+        { image: '/images/tabriz.jpg', name: language === 'fa' ? 'تبریز' : language === 'ar' ? 'تبريز' : 'Tabriz' },
+        { image: '/images/isfahan.jpg', name: language === 'fa' ? 'اصفهان' : language === 'ar' ? 'أصفهان' : 'Isfahan' }
+      ],
+      1: [ // مقاصد خارجی
+        { image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
+        { image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&h=300&fit=crop', name: language === 'fa' ? 'استانبول' : language === 'ar' ? 'إسطنبول' : 'Istanbul' },
+        { image: 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop', name: language === 'fa' ? 'پاریس' : language === 'ar' ? 'باريس' : 'Paris' },
+        { image: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d2?w=400&h=300&fit=crop', name: language === 'fa' ? 'لندن' : language === 'ar' ? 'لندن' : 'London' },
+        { image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=300&fit=crop', name: language === 'fa' ? 'نیویورک' : language === 'ar' ? 'نيويورك' : 'New York' },
+        { image: 'https://images.unsplash.com/photo-1555993536-4c58d47e3e5e?w=400&h=300&fit=crop', name: language === 'fa' ? 'توکیو' : language === 'ar' ? 'طوكيو' : 'Tokyo' }
+      ],
+      2: [ // همه مقاصد
+        { image: '/images/tehran.jpg', name: language === 'fa' ? 'تهران' : language === 'ar' ? 'طهران' : 'Tehran' },
+        { image: '/images/mashhad.jpeg', name: language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad' },
+        { image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
+        { image: '/images/kish.jpg', name: language === 'fa' ? 'کیش' : language === 'ar' ? 'كيش' : 'Kish' },
+        { image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&h=300&fit=crop', name: language === 'fa' ? 'استانبول' : language === 'ar' ? 'إسطنبول' : 'Istanbul' },
+        { image: '/images/isfahan.jpg', name: language === 'fa' ? 'اصفهان' : language === 'ar' ? 'أصفهان' : 'Isfahan' }
+      ]
+    };
+    
+    const index = subItemIndex !== undefined ? subItemIndex : 0;
+    return destinationData[index] || destinationData[0];
+  };
+
   const menuItems = [
     {
       key: 'book',
@@ -110,9 +143,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.whereWeFly') || 'مقاصد',
       path: '/destinations',
       dropdown: [
-        { label: t('nav.destinations') || 'مقاصد', path: '/destinations' },
-        { label: t('nav.routeMap') || 'نقشه مسیرها', path: '/destinations/map' },
-        { label: t('nav.popularDestinations') || 'مقاصد محبوب', path: '/destinations' },
+        { label: t('nav.domesticDestinations') || 'مقاصد داخلی', path: '/destinations?type=domestic' },
+        { label: t('nav.internationalDestinations') || 'مقاصد خارجی', path: '/destinations?type=international' },
+        { label: t('nav.allDestinations') || 'همه مقاصد', path: '/destinations' },
       ]
     },
     {
@@ -274,7 +307,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 {/* Dropdown Menu with Image */}
                 {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && (
                   <div 
-                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
+                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 ${item.key === 'wherewefly' ? 'w-[1400px]' : 'w-[900px]'} bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
                     onMouseLeave={() => {
                       handleMouseLeave();
                       setHoveredSubItem(null);
@@ -282,7 +315,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   >
                     <div className="flex">
                       {/* Menu Items Section */}
-                      <div className="flex-1 py-6 px-6">
+                      <div className={`${item.key === 'wherewefly' ? 'w-80' : 'flex-1'} py-6 px-6`}>
                         <div className="space-y-2">
                           {item.dropdown.map((subItem, index) => {
                             // Get icon for each submenu item based on path and key (language-independent)
@@ -357,16 +390,54 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                       </div>
                       
                       {/* Image Section */}
-                      <div className="w-80 h-[400px] bg-gray-100 flex-shrink-0 relative overflow-hidden m-4 rounded-2xl">
-                        <img 
-                          src={hoveredSubItem && hoveredSubItem.key === item.key 
-                            ? getDefaultImage(item.key, hoveredSubItem.index)
-                            : getDefaultImage(item.key, 0)
-                          }
-                          alt={item.label}
-                          className="w-full h-full object-cover transition-opacity duration-300 rounded-2xl"
-                        />
-                      </div>
+                      {item.key === 'wherewefly' ? (
+                        // Multiple images grid for destinations - Larger size
+                        <div className="flex-1 h-[600px] bg-gray-100 flex-shrink-0 relative overflow-hidden m-4 rounded-2xl p-4">
+                          <div className="grid grid-cols-3 gap-4 h-full">
+                            {getDestinationImages(
+                              hoveredSubItem && hoveredSubItem.key === item.key 
+                                ? hoveredSubItem.index 
+                                : 0
+                            ).map((destination, imgIndex) => (
+                              <div 
+                                key={imgIndex}
+                                className="relative overflow-hidden rounded-lg group cursor-pointer"
+                                style={{ minHeight: '180px' }}
+                              >
+                                <img 
+                                  src={destination.image}
+                                  alt={destination.name}
+                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+                                {/* City name label - bottom left with gray box */}
+                                <div className="absolute bottom-2 left-2 bg-gray-700/90 text-white px-3 py-1.5 rounded-md">
+                                  <span 
+                                    className={`text-xs font-medium ${fontClass}`}
+                                    style={{
+                                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                                    }}
+                                  >
+                                    {destination.name}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        // Single image for other menus
+                        <div className="w-80 h-[400px] bg-gray-100 flex-shrink-0 relative overflow-hidden m-4 rounded-2xl">
+                          <img 
+                            src={hoveredSubItem && hoveredSubItem.key === item.key 
+                              ? getDefaultImage(item.key, hoveredSubItem.index)
+                              : getDefaultImage(item.key, 0)
+                            }
+                            alt={item.label}
+                            className="w-full h-full object-cover transition-opacity duration-300 rounded-2xl"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
