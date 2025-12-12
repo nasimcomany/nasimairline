@@ -98,6 +98,7 @@ const HomePage: React.FC = () => {
   const [showSeatModal, setShowSeatModal] = useState(false);
   const [show3DViewer, setShow3DViewer] = useState(false);
   const [showWeatherModal, setShowWeatherModal] = useState(false);
+  const [hoveredService, setHoveredService] = useState<number | null>(null);
 
   const reservedSeats = ['A1', 'B2', 'C3', 'D4', 'A5', 'B6'];
   
@@ -965,14 +966,18 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Services Grid - Simple Horizontal Cards with Text Overlay */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6" style={{ justifyContent: 'center' }}>
             {/* Service 1: Seat Selection - Wider by default */}
             <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
-                transform: 'scaleX(1.3) scaleY(1)',
-                transformOrigin: 'left center'
+                flexBasis: hoveredService === null || hoveredService === 1 ? '32.5%' : '25%',
+                flexGrow: 0,
+                flexShrink: 0,
+                transition: 'flex-basis 0.3s ease-out'
               }}
+              onMouseEnter={() => setHoveredService(1)}
+              onMouseLeave={() => setHoveredService(null)}
             >
               <div className="relative w-full" style={{ height: '500px' }}>
                 <img 
@@ -1001,17 +1006,15 @@ const HomePage: React.FC = () => {
 
             {/* Service 2: Extra Baggage */}
             <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
-                transform: 'scaleX(1) scaleY(1)',
-                transformOrigin: 'left center'
+                flexBasis: hoveredService === 2 ? '32.5%' : '25%',
+                flexGrow: 0,
+                flexShrink: 0,
+                transition: 'flex-basis 0.3s ease-out'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scaleX(1.3) scaleY(1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scaleX(1) scaleY(1)';
-              }}
+              onMouseEnter={() => setHoveredService(2)}
+              onMouseLeave={() => setHoveredService(null)}
             >
               <div className="relative w-full" style={{ height: '500px' }}>
                 <img 
@@ -1040,17 +1043,15 @@ const HomePage: React.FC = () => {
 
             {/* Service 3: Pet Travel */}
             <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
-                transform: 'scaleX(1) scaleY(1)',
-                transformOrigin: 'left center'
+                flexBasis: hoveredService === 3 ? '32.5%' : '25%',
+                flexGrow: 0,
+                flexShrink: 0,
+                transition: 'flex-basis 0.3s ease-out'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scaleX(1.3) scaleY(1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scaleX(1) scaleY(1)';
-              }}
+              onMouseEnter={() => setHoveredService(3)}
+              onMouseLeave={() => setHoveredService(null)}
             >
               <div className="relative w-full" style={{ height: '500px' }}>
                 <img 
@@ -1079,17 +1080,15 @@ const HomePage: React.FC = () => {
 
             {/* Service 4: Wheelchair Request */}
             <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
-                transform: 'scaleX(1) scaleY(1)',
-                transformOrigin: 'left center'
+                flexBasis: hoveredService === 4 ? '32.5%' : '25%',
+                flexGrow: 0,
+                flexShrink: 0,
+                transition: 'flex-basis 0.3s ease-out'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scaleX(1.3) scaleY(1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scaleX(1) scaleY(1)';
-              }}
+              onMouseEnter={() => setHoveredService(4)}
+              onMouseLeave={() => setHoveredService(null)}
             >
               <div className="relative w-full" style={{ height: '500px' }}>
                 <img 
