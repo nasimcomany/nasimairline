@@ -414,9 +414,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     const labelWidth = labelRect.width;
                                     const labelHeight = labelRect.height;
                                     
-                                    // Calculate scale to cover entire parent (add small margin to ensure full coverage)
-                                    const scaleX = (parentWidth + 4) / labelWidth;
-                                    const scaleY = (parentHeight + 4) / labelHeight;
+                                    // Calculate scale to cover entire parent (add larger margin to ensure full coverage)
+                                    // Account for the offset (bottom-2 left-2 = 8px) and add extra margin, especially for height
+                                    const scaleX = (parentWidth + 30) / labelWidth;
+                                    const scaleY = (parentHeight + 40) / labelHeight;
                                     
                                     labelDiv.style.transform = `scale(${scaleX}, ${scaleY})`;
                                     labelDiv.style.borderRadius = '0';
@@ -424,6 +425,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     labelDiv.style.alignItems = 'center';
                                     labelDiv.style.justifyContent = 'center';
                                     labelDiv.style.backgroundColor = 'rgba(75, 85, 99, 0.85)';
+                                    // Ensure it starts from bottom-left corner
+                                    labelDiv.style.bottom = '0';
+                                    labelDiv.style.left = '0';
                                     
                                     // Apply inverse scale to text to keep it same size
                                     if (textSpan) {
@@ -441,6 +445,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     labelDiv.style.alignItems = 'auto';
                                     labelDiv.style.justifyContent = 'auto';
                                     labelDiv.style.backgroundColor = 'rgba(55, 65, 81, 0.9)';
+                                    labelDiv.style.bottom = '0.5rem';
+                                    labelDiv.style.left = '0.5rem';
                                     
                                     if (textSpan) {
                                       textSpan.style.transform = 'scale(1)';
