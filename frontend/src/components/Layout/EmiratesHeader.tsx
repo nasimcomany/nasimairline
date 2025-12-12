@@ -106,19 +106,19 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         { image: '/images/isfahan.jpg', name: language === 'fa' ? 'اصفهان' : language === 'ar' ? 'أصفهان' : 'Isfahan' }
       ],
       1: [ // مقاصد خارجی
-        { image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
-        { image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&h=300&fit=crop', name: language === 'fa' ? 'استانبول' : language === 'ar' ? 'إسطنبول' : 'Istanbul' },
-        { image: 'https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop', name: language === 'fa' ? 'پاریس' : language === 'ar' ? 'باريس' : 'Paris' },
-        { image: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d2?w=400&h=300&fit=crop', name: language === 'fa' ? 'لندن' : language === 'ar' ? 'لندن' : 'London' },
-        { image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=300&fit=crop', name: language === 'fa' ? 'نیویورک' : language === 'ar' ? 'نيويورك' : 'New York' },
-        { image: 'https://images.unsplash.com/photo-1555993536-4c58d47e3e5e?w=400&h=300&fit=crop', name: language === 'fa' ? 'توکیو' : language === 'ar' ? 'طوكيو' : 'Tokyo' }
+        { image: '/images/airplane-clouds-night_864588-19786.jpg', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
+        { image: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg', name: language === 'fa' ? 'استانبول' : language === 'ar' ? 'إسطنبول' : 'Istanbul' },
+        { image: '/images/airport-crew.jpg', name: language === 'fa' ? 'پاریس' : language === 'ar' ? 'باريس' : 'Paris' },
+        { image: '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg', name: language === 'fa' ? 'لندن' : language === 'ar' ? 'لندن' : 'London' },
+        { image: '/images/airport-plane-photo_991869-62.jpg', name: language === 'fa' ? 'نیویورک' : language === 'ar' ? 'نيويورك' : 'New York' },
+        { image: '/images/airplane-clouds-night_864588-19786.jpg', name: language === 'fa' ? 'توکیو' : language === 'ar' ? 'طوكيو' : 'Tokyo' }
       ],
       2: [ // همه مقاصد
         { image: '/images/tehran.jpg', name: language === 'fa' ? 'تهران' : language === 'ar' ? 'طهران' : 'Tehran' },
         { image: '/images/mashhad.jpeg', name: language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad' },
-        { image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
+        { image: '/images/airplane-clouds-night_864588-19786.jpg', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
         { image: '/images/kish.jpg', name: language === 'fa' ? 'کیش' : language === 'ar' ? 'كيش' : 'Kish' },
-        { image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400&h=300&fit=crop', name: language === 'fa' ? 'استانبول' : language === 'ar' ? 'إسطنبول' : 'Istanbul' },
+        { image: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg', name: language === 'fa' ? 'استانبول' : language === 'ar' ? 'إسطنبول' : 'Istanbul' },
         { image: '/images/isfahan.jpg', name: language === 'fa' ? 'اصفهان' : language === 'ar' ? 'أصفهان' : 'Isfahan' }
       ]
     };
@@ -417,7 +417,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 style={{ minHeight: '180px' }}
                                 onMouseEnter={(e) => {
                                   const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
-                                  const textSpan = e.currentTarget.querySelector('.city-text') as HTMLElement;
+                                  const textWrapper = e.currentTarget.querySelector('.city-text-wrapper') as HTMLElement;
                                   if (labelDiv) {
                                     const parent = e.currentTarget;
                                     const parentWidth = parent.clientWidth;
@@ -437,25 +437,21 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     labelDiv.style.alignItems = 'center';
                                     labelDiv.style.justifyContent = 'center';
                                     labelDiv.style.backgroundColor = 'rgba(75, 85, 99, 0.85)';
-                                    // Ensure text is centered
                                     // Ensure it starts from bottom-left corner
                                     labelDiv.style.bottom = '0';
                                     labelDiv.style.left = '0';
                                     
-                                    // Apply inverse scale to text to keep it same size, but ensure it's visible
-                                    if (textSpan) {
+                                    // Apply inverse scale to text wrapper to keep text same size
+                                    if (textWrapper) {
                                       const inverseScaleX = 1 / scaleX;
                                       const inverseScaleY = 1 / scaleY;
-                                      textSpan.style.transform = `scale(${inverseScaleX}, ${inverseScaleY})`;
-                                      textSpan.style.display = 'block';
-                                      textSpan.style.width = 'auto';
-                                      textSpan.style.height = 'auto';
+                                      textWrapper.style.transform = `scale(${inverseScaleX}, ${inverseScaleY})`;
                                     }
                                   }
                                 }}
                                 onMouseLeave={(e) => {
                                   const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
-                                  const textSpan = e.currentTarget.querySelector('.city-text') as HTMLElement;
+                                  const textWrapper = e.currentTarget.querySelector('.city-text-wrapper') as HTMLElement;
                                   if (labelDiv) {
                                     labelDiv.style.transform = 'scale(1)';
                                     labelDiv.style.borderRadius = '0.375rem';
@@ -468,9 +464,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     labelDiv.style.width = 'auto';
                                     labelDiv.style.height = 'auto';
                                     
-                                    if (textSpan) {
-                                      textSpan.style.transform = 'scale(1)';
-                                      textSpan.style.display = 'block';
+                                    if (textWrapper) {
+                                      textWrapper.style.transform = 'scale(1)';
                                     }
                                   }
                                 }}
@@ -479,6 +474,12 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                   src={destination.image}
                                   alt={destination.name}
                                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                  onError={(e) => {
+                                    // Fallback to a default image if the image fails to load
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                                  }}
+                                  loading="eager"
                                 />
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
                                 {/* City name label - expands to cover full image on hover, starting from bottom-left */}
@@ -488,14 +489,23 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     transformOrigin: 'bottom left'
                                   }}
                                 >
-                                  <span 
-                                    className={`city-text text-sm font-medium ${fontClass}`}
+                                  <div 
+                                    className="city-text-wrapper flex items-center justify-center w-full h-full"
                                     style={{
-                                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                                      minWidth: '100%',
+                                      minHeight: '100%'
                                     }}
                                   >
-                                    {destination.name}
-                                  </span>
+                                    <span 
+                                      className={`city-text text-sm font-medium ${fontClass}`}
+                                      style={{
+                                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                                        whiteSpace: 'nowrap'
+                                      }}
+                                    >
+                                      {destination.name}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                             ))}

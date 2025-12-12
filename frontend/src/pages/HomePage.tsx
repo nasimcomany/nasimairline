@@ -964,58 +964,32 @@ const HomePage: React.FC = () => {
             </h2>
           </div>
 
-          {/* Services Grid - Memory Book Style - 3D Connected Pages */}
-          <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap" style={{ perspective: '1200px' }}>
-            {/* Service 1: Seat Selection */}
+          {/* Services Grid - Simple Horizontal Cards with Text Overlay */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* Service 1: Seat Selection - Wider by default */}
             <div 
-              className="relative group cursor-pointer"
-              style={{
-                transformStyle: 'preserve-3d'
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              style={{ 
+                transform: 'scaleX(1.3) scaleY(1)',
+                transformOrigin: 'left center'
               }}
             >
-              <div
-                className="bg-white overflow-hidden transition-all duration-500"
-                style={{
-                  width: '280px',
-                  minHeight: '420px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)',
-                  transform: 'rotateY(-8deg) translateX(-15px)',
-                  transformOrigin: 'left center',
-                  marginRight: '-10px',
-                  zIndex: 1
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'rotateY(-12deg) translateX(15px) translateY(-12px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.12)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'rotateY(-8deg) translateX(15px) translateY(0px) scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)';
-                }}
-              >
-                {/* Image Section */}
-                <div className="relative h-56 overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100">
-                  <img 
-                    src="/images/chair.jpeg" 
-                    alt="انتخاب صندلی"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-                {/* Text Section */}
-                <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+              <div className="relative w-full" style={{ height: '500px' }}>
+                <img 
+                  src="/images/chair.jpeg" 
+                  alt="انتخاب صندلی"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                  }}
+                />
+                {/* Text Overlay - Bottom of image */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                   <p 
-                    className="text-gray-800 text-center"
+                    className="text-white text-center font-semibold"
                     style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      fontSize: '1.4rem',
-                      fontWeight: 'bold',
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                      fontSize: '1.1rem',
                       direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
@@ -1027,56 +1001,34 @@ const HomePage: React.FC = () => {
 
             {/* Service 2: Extra Baggage */}
             <div 
-              className="relative group cursor-pointer"
-              style={{
-                transformStyle: 'preserve-3d'
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              style={{ 
+                transform: 'scaleX(1) scaleY(1)',
+                transformOrigin: 'left center'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scaleX(1.3) scaleY(1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scaleX(1) scaleY(1)';
               }}
             >
-              <div
-                className="bg-white overflow-hidden transition-all duration-500"
-                style={{
-                  width: '280px',
-                  minHeight: '420px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)',
-                  transform: 'rotateY(-4deg)',
-                  transformOrigin: 'center center',
-                  marginLeft: '-10px',
-                  zIndex: 2
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'rotateY(-6deg) translateY(-12px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.12)';
-                  e.currentTarget.style.zIndex = '10';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'rotateY(-4deg) translateY(0px) scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.zIndex = '2';
-                }}
-              >
-                {/* Image Section */}
-                <div className="relative h-56 overflow-hidden bg-gradient-to-br from-green-50 to-green-100">
-                  <img 
-                    src="/images/overload.jpeg" 
-                    alt="خرید اضافه بار"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-                {/* Text Section */}
-                <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+              <div className="relative w-full" style={{ height: '500px' }}>
+                <img 
+                  src="/images/overload.jpeg" 
+                  alt="خرید اضافه بار"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                  }}
+                />
+                {/* Text Overlay - Bottom of image */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                   <p 
-                    className="text-gray-800 text-center"
+                    className="text-white text-center font-semibold"
                     style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      fontSize: '1.4rem',
-                      fontWeight: 'bold',
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                      fontSize: '1.1rem',
                       direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
@@ -1088,56 +1040,34 @@ const HomePage: React.FC = () => {
 
             {/* Service 3: Pet Travel */}
             <div 
-              className="relative group cursor-pointer"
-              style={{
-                transformStyle: 'preserve-3d'
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              style={{ 
+                transform: 'scaleX(1) scaleY(1)',
+                transformOrigin: 'left center'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scaleX(1.3) scaleY(1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scaleX(1) scaleY(1)';
               }}
             >
-              <div
-                className="bg-white overflow-hidden transition-all duration-500"
-                style={{
-                  width: '280px',
-                  minHeight: '420px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)',
-                  transform: 'rotateY(4deg)',
-                  transformOrigin: 'center center',
-                  marginLeft: '-10px',
-                  zIndex: 2
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'rotateY(6deg) translateY(-12px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.12)';
-                  e.currentTarget.style.zIndex = '10';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'rotateY(4deg) translateY(0px) scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.zIndex = '2';
-                }}
-              >
-                {/* Image Section */}
-                <div className="relative h-56 overflow-hidden bg-gradient-to-br from-amber-50 to-amber-100">
-                  <img 
-                    src="/images/TravelingWithPets.jpg" 
-                    alt="سفر با حیوان خانگی"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-                {/* Text Section */}
-                <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+              <div className="relative w-full" style={{ height: '500px' }}>
+                <img 
+                  src="/images/TravelingWithPets.jpg" 
+                  alt="سفر با حیوان خانگی"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                  }}
+                />
+                {/* Text Overlay - Bottom of image */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                   <p 
-                    className="text-gray-800 text-center"
+                    className="text-white text-center font-semibold"
                     style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      fontSize: '1.4rem',
-                      fontWeight: 'bold',
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                      fontSize: '1.1rem',
                       direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
@@ -1149,56 +1079,34 @@ const HomePage: React.FC = () => {
 
             {/* Service 4: Wheelchair Request */}
             <div 
-              className="relative group cursor-pointer"
-              style={{
-                transformStyle: 'preserve-3d'
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+              style={{ 
+                transform: 'scaleX(1) scaleY(1)',
+                transformOrigin: 'left center'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scaleX(1.3) scaleY(1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scaleX(1) scaleY(1)';
               }}
             >
-              <div
-                className="bg-white overflow-hidden transition-all duration-500"
-                style={{
-                  width: '280px',
-                  minHeight: '420px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)',
-                  transform: 'rotateY(8deg)',
-                  transformOrigin: 'right center',
-                  marginLeft: '-10px',
-                  zIndex: 1
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'rotateY(12deg) translateY(-12px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15), 0 20px 40px rgba(0, 0, 0, 0.12)';
-                  e.currentTarget.style.zIndex = '10';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'rotateY(8deg) translateY(0px) scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.zIndex = '1';
-                }}
-              >
-                {/* Image Section */}
-                <div className="relative h-56 overflow-hidden bg-gradient-to-br from-purple-50 to-purple-100">
-                  <img 
-                    src="/images/travelwheelchair.jpeg" 
-                    alt="درخواست ویلچر"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-                {/* Text Section */}
-                <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
+              <div className="relative w-full" style={{ height: '500px' }}>
+                <img 
+                  src="/images/travelwheelchair.jpeg" 
+                  alt="درخواست ویلچر"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                  }}
+                />
+                {/* Text Overlay - Bottom of image */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                   <p 
-                    className="text-gray-800 text-center"
+                    className="text-white text-center font-semibold"
                     style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      fontSize: '1.4rem',
-                      fontWeight: 'bold',
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                      fontSize: '1.1rem',
                       direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
