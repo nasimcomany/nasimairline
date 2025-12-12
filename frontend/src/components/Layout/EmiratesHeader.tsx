@@ -403,17 +403,49 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 key={imgIndex}
                                 className="relative overflow-hidden rounded-lg group cursor-pointer"
                                 style={{ minHeight: '180px' }}
+                                onMouseEnter={(e) => {
+                                  const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
+                                  if (labelDiv) {
+                                    const parentRect = e.currentTarget.getBoundingClientRect();
+                                    const labelRect = labelDiv.getBoundingClientRect();
+                                    const scaleX = parentRect.width / labelRect.width;
+                                    const scaleY = parentRect.height / labelRect.height;
+                                    labelDiv.style.transform = `scale(${scaleX}, ${scaleY})`;
+                                    labelDiv.style.borderRadius = '0.5rem';
+                                    labelDiv.style.display = 'flex';
+                                    labelDiv.style.alignItems = 'center';
+                                    labelDiv.style.justifyContent = 'center';
+                                    labelDiv.style.backgroundColor = 'rgba(75, 85, 99, 0.85)';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
+                                  if (labelDiv) {
+                                    labelDiv.style.transform = 'scale(1)';
+                                    labelDiv.style.borderRadius = '0.375rem';
+                                    labelDiv.style.display = 'block';
+                                    labelDiv.style.alignItems = 'auto';
+                                    labelDiv.style.justifyContent = 'auto';
+                                    labelDiv.style.backgroundColor = 'rgba(55, 65, 81, 0.9)';
+                                  }
+                                }}
                               >
                                 <img 
                                   src={destination.image}
                                   alt={destination.name}
                                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                                 />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-                                {/* City name label - bottom left with gray box */}
-                                <div className="absolute bottom-2 left-2 bg-gray-700/90 text-white px-3 py-1.5 rounded-md">
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
+                                {/* City name label - expands to cover full image on hover, starting from bottom-left */}
+                                <div 
+                                  className="city-label absolute bottom-2 left-2 bg-gray-700/90 text-white px-4 py-2 rounded-md transition-all duration-300 ease-out"
+                                  style={{
+                                    transform: 'scale(1)',
+                                    transformOrigin: 'bottom left'
+                                  }}
+                                >
                                   <span 
-                                    className={`text-xs font-medium ${fontClass}`}
+                                    className={`text-sm font-medium transition-all duration-300 group-hover:text-2xl group-hover:font-bold ${fontClass}`}
                                     style={{
                                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                                     }}
