@@ -405,21 +405,35 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 style={{ minHeight: '180px' }}
                                 onMouseEnter={(e) => {
                                   const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
+                                  const textSpan = e.currentTarget.querySelector('.city-text') as HTMLElement;
                                   if (labelDiv) {
-                                    const parentRect = e.currentTarget.getBoundingClientRect();
+                                    const parent = e.currentTarget;
+                                    const parentWidth = parent.clientWidth;
+                                    const parentHeight = parent.clientHeight;
                                     const labelRect = labelDiv.getBoundingClientRect();
-                                    const scaleX = parentRect.width / labelRect.width;
-                                    const scaleY = parentRect.height / labelRect.height;
+                                    const labelWidth = labelRect.width;
+                                    const labelHeight = labelRect.height;
+                                    
+                                    // Calculate scale to cover entire parent (add small margin to ensure full coverage)
+                                    const scaleX = (parentWidth + 4) / labelWidth;
+                                    const scaleY = (parentHeight + 4) / labelHeight;
+                                    
                                     labelDiv.style.transform = `scale(${scaleX}, ${scaleY})`;
-                                    labelDiv.style.borderRadius = '0.5rem';
+                                    labelDiv.style.borderRadius = '0';
                                     labelDiv.style.display = 'flex';
                                     labelDiv.style.alignItems = 'center';
                                     labelDiv.style.justifyContent = 'center';
                                     labelDiv.style.backgroundColor = 'rgba(75, 85, 99, 0.85)';
+                                    
+                                    // Apply inverse scale to text to keep it same size
+                                    if (textSpan) {
+                                      textSpan.style.transform = `scale(${1/scaleX}, ${1/scaleY})`;
+                                    }
                                   }
                                 }}
                                 onMouseLeave={(e) => {
                                   const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
+                                  const textSpan = e.currentTarget.querySelector('.city-text') as HTMLElement;
                                   if (labelDiv) {
                                     labelDiv.style.transform = 'scale(1)';
                                     labelDiv.style.borderRadius = '0.375rem';
@@ -427,6 +441,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     labelDiv.style.alignItems = 'auto';
                                     labelDiv.style.justifyContent = 'auto';
                                     labelDiv.style.backgroundColor = 'rgba(55, 65, 81, 0.9)';
+                                    
+                                    if (textSpan) {
+                                      textSpan.style.transform = 'scale(1)';
+                                    }
                                   }
                                 }}
                               >
@@ -440,12 +458,11 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 <div 
                                   className="city-label absolute bottom-2 left-2 bg-gray-700/90 text-white px-4 py-2 rounded-md transition-all duration-300 ease-out"
                                   style={{
-                                    transform: 'scale(1)',
                                     transformOrigin: 'bottom left'
                                   }}
                                 >
                                   <span 
-                                    className={`text-sm font-medium transition-all duration-300 group-hover:text-2xl group-hover:font-bold ${fontClass}`}
+                                    className={`city-text text-sm font-medium ${fontClass}`}
                                     style={{
                                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                                     }}
