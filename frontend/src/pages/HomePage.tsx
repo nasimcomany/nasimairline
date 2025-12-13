@@ -988,10 +988,10 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-                {/* Text and Line - Left side of element */}
-                <div className="absolute left-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                {/* Text and Line - Right side of element */}
+                <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-white text-left font-semibold mb-2"
+                    className="text-gray-400 text-right font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       fontSize: '1.1rem'
@@ -1030,10 +1030,10 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-                {/* Text and Line - Left side of element */}
-                <div className="absolute left-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                {/* Text and Line - Right side of element */}
+                <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-white text-left font-semibold mb-2"
+                    className="text-gray-400 text-right font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       fontSize: '1.1rem'
@@ -1072,10 +1072,10 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-                {/* Text and Line - Left side of element */}
-                <div className="absolute left-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                {/* Text and Line - Right side of element */}
+                <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-white text-left font-semibold mb-2"
+                    className="text-gray-400 text-right font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       fontSize: '1.1rem'
@@ -1114,10 +1114,10 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-                {/* Text and Line - Left side of element */}
-                <div className="absolute left-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                {/* Text and Line - Right side of element */}
+                <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-white text-left font-semibold mb-2"
+                    className="text-gray-400 text-right font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       fontSize: '1.1rem'
