@@ -1175,6 +1175,183 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* Special Offers Section */}
+      <section className="relative z-10 py-12 sm:py-16 bg-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Title */}
+          <div className="text-center mb-8 sm:mb-12">
+            <h2
+              className={`text-gray-900 ${fontClass}`}
+              style={{
+                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+                fontWeight: 'bold',
+                lineHeight: '1.4',
+                letterSpacing: '0.5px',
+                direction: language === 'en' ? 'ltr' : 'rtl'
+              }}
+            >
+              {language === 'fa' ? 'پیشنهادات ویژه' : language === 'ar' ? 'عروض خاصة' : 'Special Offers'}
+            </h2>
+          </div>
+
+          {/* Offers Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Offer 1: Muscat - Tehran */}
+            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src="/images/azadi-tower.jpg"
+                  alt="مسقط - تهران"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/airport-plane-photo_991869-62.jpg';
+                  }}
+                />
+              </div>
+              <div className="p-4">
+                <div className="text-sm text-gray-600 mb-3" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {language === 'fa' ? '۱۴۰۴/۰۹/۲۲' : language === 'ar' ? '۱۴۰۴/۰۹/۲۲' : '2025/12/13'}
+                </div>
+                <div className="flex items-center gap-2 mb-3" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    {language === 'fa' ? 'مسقط' : language === 'ar' ? 'مسقط' : 'Muscat'}
+                  </span>
+                  <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                  <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    {language === 'fa' ? 'تهران' : language === 'ar' ? 'طهران' : 'Tehran'}
+                  </span>
+                </div>
+                <div className={`text-lg font-bold text-blue-900 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  direction: language === 'en' ? 'ltr' : 'rtl'
+                }}>
+                  {language === 'fa' ? '۱۲,۰۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۲,۰۰۰,۰۰۰ ريال' : '12,000,000 Toman'}
+                </div>
+              </div>
+            </div>
+
+            {/* Offer 2: Mashhad - Dubai */}
+            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src="/images/burj-khalifa.jpg"
+                  alt="مشهد - دبی"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                  }}
+                />
+              </div>
+              <div className="p-4">
+                <div className="text-sm text-gray-600 mb-3" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {language === 'fa' ? '۱۴۰۴/۰۹/۲۳' : language === 'ar' ? '۱۴۰۴/۰۹/۲۳' : '2025/12/14'}
+                </div>
+                <div className="flex items-center gap-2 mb-3" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
+                  </span>
+                  <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                  <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    {language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai'}
+                  </span>
+                </div>
+                <div className={`text-lg font-bold text-blue-900 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  direction: language === 'en' ? 'ltr' : 'rtl'
+                }}>
+                  {language === 'fa' ? '۱۳,۷۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۳,۷۰۰,۰۰۰ ريال' : '13,700,000 Toman'}
+                </div>
+              </div>
+            </div>
+
+            {/* Offer 3: Mashhad - Muscat */}
+            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src="/images/sultan-qaboos-mosque.jpg"
+                  alt="مشهد - مسقط"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg';
+                  }}
+                />
+              </div>
+              <div className="p-4">
+                <div className="text-sm text-gray-600 mb-3" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {language === 'fa' ? '۱۴۰۴/۰۹/۲۳' : language === 'ar' ? '۱۴۰۴/۰۹/۲۳' : '2025/12/14'}
+                </div>
+                <div className="flex items-center gap-2 mb-3" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
+                  </span>
+                  <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                  <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    {language === 'fa' ? 'مسقط' : language === 'ar' ? 'مسقط' : 'Muscat'}
+                  </span>
+                </div>
+                <div className={`text-lg font-bold text-blue-900 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  direction: language === 'en' ? 'ltr' : 'rtl'
+                }}>
+                  {language === 'fa' ? '۱۶,۵۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۶,۵۰۰,۰۰۰ ريال' : '16,500,000 Toman'}
+                </div>
+              </div>
+            </div>
+
+            {/* Offer 4: Mashhad - Najaf */}
+            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src="/images/imam-ali-shrine.jpg"
+                  alt="مشهد - نجف"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg';
+                  }}
+                />
+              </div>
+              <div className="p-4">
+                <div className="text-sm text-gray-600 mb-3" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {language === 'fa' ? '۱۴۰۴/۰۹/۲۲' : language === 'ar' ? '۱۴۰۴/۰۹/۲۲' : '2025/12/13'}
+                </div>
+                <div className="flex items-center gap-2 mb-3" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
+                  </span>
+                  <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                  <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  }}>
+                    {language === 'fa' ? 'نجف' : language === 'ar' ? 'النجف' : 'Najaf'}
+                  </span>
+                </div>
+                <div className={`text-lg font-bold text-blue-900 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  direction: language === 'en' ? 'ltr' : 'rtl'
+                }}>
+                  {language === 'fa' ? '۱۷,۸۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۷,۸۰۰,۰۰۰ ريال' : '17,800,000 Toman'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* COMMENTED OUT: عضویت در برنامه وفاداری نسیم ایر banner section */}
       {/* <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
