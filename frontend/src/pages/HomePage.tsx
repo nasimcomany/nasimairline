@@ -969,7 +969,7 @@ const HomePage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6" style={{ justifyContent: 'center' }}>
             {/* Service 1: Seat Selection - Wider by default */}
             <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1 flex flex-col"
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
                 flexBasis: hoveredService === null || hoveredService === 1 ? '32.5%' : '25%',
                 flexGrow: 0,
@@ -1011,7 +1011,7 @@ const HomePage: React.FC = () => {
 
             {/* Service 2: Extra Baggage */}
             <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1 flex flex-col"
+              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
                 flexBasis: hoveredService === 2 ? '32.5%' : '25%',
                 flexGrow: 0,
@@ -1030,26 +1030,24 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-              </div>
-              {/* Text and Line - Left side of element */}
-              <div className="mt-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                <p 
-                  className="text-left font-semibold mb-2"
-                  style={{ 
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                    fontSize: '1.1rem',
-                    color: '#1f2937'
-                  }}
-                >
-                  {t('home.flightSearch.extraBaggage')}
-                </p>
-                <div 
-                  className="h-0.5 transition-colors duration-300"
-                  style={{
-                    backgroundColor: hoveredService === 2 ? '#1e3a8a' : '#9ca3af',
-                    width: '100%'
-                  }}
-                ></div>
+                {/* Text and Line - Left side of element */}
+                <div className="absolute left-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <p 
+                    className="text-white text-left font-semibold mb-2"
+                    style={{ 
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                      fontSize: '1.1rem'
+                    }}
+                  >
+                    {t('home.flightSearch.extraBaggage')}
+                  </p>
+                  <div 
+                    className="h-0.5 transition-colors duration-300"
+                    style={{
+                      backgroundColor: hoveredService === 2 ? '#1e3a8a' : '#9ca3af'
+                    }}
+                  ></div>
+                </div>
               </div>
             </div>
 
@@ -1074,18 +1072,23 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-                {/* Text Overlay - Bottom of image */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                {/* Text and Line - Left side of element */}
+                <div className="absolute left-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-white text-center font-semibold"
+                    className="text-white text-left font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      fontSize: '1.1rem',
-                      direction: language === 'en' ? 'ltr' : 'rtl'
+                      fontSize: '1.1rem'
                     }}
                   >
                     {t('home.services.petTravelFull')}
                   </p>
+                  <div 
+                    className="h-0.5 transition-colors duration-300"
+                    style={{
+                      backgroundColor: hoveredService === 3 ? '#1e3a8a' : '#9ca3af'
+                    }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -1111,18 +1114,23 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-                {/* Text Overlay - Bottom of image */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                {/* Text and Line - Left side of element */}
+                <div className="absolute left-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-white text-center font-semibold"
+                    className="text-white text-left font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      fontSize: '1.1rem',
-                      direction: language === 'en' ? 'ltr' : 'rtl'
+                      fontSize: '1.1rem'
                     }}
                   >
                     {t('home.flightSearch.wheelchair')}
                   </p>
+                  <div 
+                    className="h-0.5 transition-colors duration-300"
+                    style={{
+                      backgroundColor: hoveredService === 4 ? '#1e3a8a' : '#9ca3af'
+                    }}
+                  ></div>
                 </div>
               </div>
             </div>
