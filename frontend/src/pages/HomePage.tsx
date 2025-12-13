@@ -988,26 +988,24 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-              </div>
-              {/* Text and Line - Left side of element */}
-              <div className="mt-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                <p 
-                  className="text-left font-semibold mb-2"
-                  style={{ 
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                    fontSize: '1.1rem',
-                    color: '#1f2937'
-                  }}
-                >
-                  {t('home.flightSearch.seatSelection')}
-                </p>
-                <div 
-                  className="h-0.5 transition-colors duration-300"
-                  style={{
-                    backgroundColor: hoveredService === 1 ? '#1e3a8a' : '#9ca3af',
-                    width: '100%'
-                  }}
-                ></div>
+                {/* Text and Line - Left side of element */}
+                <div className="absolute left-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <p 
+                    className="text-white text-left font-semibold mb-2"
+                    style={{ 
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                      fontSize: '1.1rem'
+                    }}
+                  >
+                    {t('home.flightSearch.seatSelection')}
+                  </p>
+                  <div 
+                    className="h-0.5 transition-colors duration-300"
+                    style={{
+                      backgroundColor: hoveredService === 1 ? '#1e3a8a' : '#9ca3af'
+                    }}
+                  ></div>
+                </div>
               </div>
             </div>
 
