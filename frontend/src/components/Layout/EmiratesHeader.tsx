@@ -29,7 +29,9 @@ import {
   HomeIcon,
   GlobeAltIcon,
   UserIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  NewspaperIcon,
+  PhotoIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import AuthModal from '../Auth/AuthModal';
@@ -160,6 +162,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         { label: t('nav.travelInfo') || 'اطلاعات سفر', path: '/support/travel-info' },
         { label: t('nav.weather') || 'وضعیت آب و هوا', path: '/#weather' },
         { label: t('nav.complaint') || 'ثبت شکایت', path: '/tickets' },
+        { label: t('nav.magazine') || 'مجله', path: '/magazine' },
+        { label: t('nav.photoGallery') || 'گالری عکس', path: '/gallery' },
       ]
     }
   ];
@@ -342,6 +346,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 if (path === '/support/travel-info') return <MapPinIcon className="w-7 h-7 text-green-500" />; // اطلاعات سفر
                                 if (path === '/#weather') return <CloudIcon className="w-7 h-7 text-blue-500" />; // وضعیت آب و هوا
                                 if (path === '/tickets') return <TicketIcon className="w-7 h-7 text-purple-500" />; // ثبت شکایت
+                                if (path === '/magazine') return <NewspaperIcon className="w-7 h-7 text-indigo-500" />; // مجله
+                                if (path === '/gallery') return <PhotoIcon className="w-7 h-7 text-cyan-500" />; // گالری عکس
                                 return <QuestionMarkCircleIcon className="w-7 h-7 text-blue-500" />;
                               }
                               return null;
