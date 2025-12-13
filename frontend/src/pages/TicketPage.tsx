@@ -1,5 +1,5 @@
 /**
- * Ticket Page - Create and view support tickets
+ * Support Request Page - Create and view support requests
  */
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -43,7 +43,7 @@ const TicketPage: React.FC = () => {
     source: 'WEB',
   });
 
-  // Ticket categories mapping
+  // Support request categories mapping
   const getTicketCategories = () => [
     { value: 'HR', label: t('ticket.category.hr') },
     { value: 'FEEDBACK', label: t('ticket.category.feedback') },
@@ -65,7 +65,7 @@ const TicketPage: React.FC = () => {
     // Load security contact info
     loadSecurityContact();
     
-    // Load user tickets if authenticated
+    // Load user requests if authenticated
     if (activeTab === 'my-tickets' && isAuthenticated) {
       loadMyTickets();
     }
@@ -122,7 +122,7 @@ const TicketPage: React.FC = () => {
         priority: 'NORMAL',
         source: 'WEB',
       });
-      // Reload tickets
+      // Reload requests
       if (activeTab === 'my-tickets') {
         await loadMyTickets();
       }
@@ -205,7 +205,7 @@ const TicketPage: React.FC = () => {
               direction: 'rtl'
             }}
           >
-            {language === 'en' ? 'Support Tickets' : language === 'ar' ? 'تذاكر الدعم' : 'پشتیبانی و تیکتینگ'}
+            {language === 'en' ? 'Support Requests' : language === 'ar' ? 'طلبات الدعم' : 'پشتیبانی و درخواست‌ها'}
           </h1>
           <p 
             className="text-white/90 mb-8"
@@ -219,10 +219,10 @@ const TicketPage: React.FC = () => {
             }}
           >
             {language === 'en' 
-              ? 'Create a support ticket or view your existing tickets' 
+              ? 'Create a support request or view your existing requests' 
               : language === 'ar' 
-              ? 'إنشاء تذكرة دعم أو عرض تذاكرك الموجودة'
-              : 'تیکت پشتیبانی ایجاد کنید یا تیکت‌های خود را مشاهده کنید'}
+              ? 'إنشاء طلب دعم أو عرض طلباتك الموجودة'
+              : 'درخواست پشتیبانی ایجاد کنید یا درخواست‌های خود را مشاهده کنید'}
           </p>
         </div>
       </section>
@@ -282,7 +282,7 @@ const TicketPage: React.FC = () => {
             </div>
           )}
 
-          {/* Create Ticket Form */}
+          {/* Create Support Request Form */}
           {activeTab === 'create' && (
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-blue-900 to-blue-800 px-4 sm:px-6 py-3 sm:py-4">
@@ -408,21 +408,21 @@ const TicketPage: React.FC = () => {
             </div>
           )}
 
-          {/* My Tickets List */}
+          {/* My Requests List */}
           {activeTab === 'my-tickets' && (
             <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
               {loading ? (
                 <div className="text-center py-8">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   <p className="mt-4 text-gray-600">
-                    {language === 'en' ? 'Loading tickets...' : language === 'ar' ? 'جارٍ تحميل التذاكر...' : 'در حال بارگذاری تیکت‌ها...'}
+                    {language === 'en' ? 'Loading requests...' : language === 'ar' ? 'جارٍ تحميل الطلبات...' : 'در حال بارگذاری درخواست‌ها...'}
                   </p>
                 </div>
               ) : myTickets.length === 0 ? (
                 <div className="text-center py-8">
                   <TicketIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">
-                    {language === 'en' ? 'No tickets found' : language === 'ar' ? 'لم يتم العثور على تذاكر' : 'تیکتی یافت نشد'}
+                    {language === 'en' ? 'No requests found' : language === 'ar' ? 'لم يتم العثور على طلبات' : 'درخواستی یافت نشد'}
                   </p>
                 </div>
               ) : (
