@@ -991,7 +991,7 @@ const HomePage: React.FC = () => {
                 {/* Text and Line - Right side of element */}
                 <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-gray-400 text-right font-semibold mb-2"
+                    className="text-black text-right font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       fontSize: '1.1rem'
@@ -1033,7 +1033,7 @@ const HomePage: React.FC = () => {
                 {/* Text and Line - Right side of element */}
                 <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-gray-400 text-right font-semibold mb-2"
+                    className="text-black text-right font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       fontSize: '1.1rem'
@@ -1075,7 +1075,7 @@ const HomePage: React.FC = () => {
                 {/* Text and Line - Right side of element */}
                 <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-gray-400 text-right font-semibold mb-2"
+                    className="text-black text-right font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       fontSize: '1.1rem'
@@ -1117,7 +1117,7 @@ const HomePage: React.FC = () => {
                 {/* Text and Line - Right side of element */}
                 <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   <p 
-                    className="text-gray-400 text-right font-semibold mb-2"
+                    className="text-black text-right font-semibold mb-2"
                     style={{ 
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       fontSize: '1.1rem'
