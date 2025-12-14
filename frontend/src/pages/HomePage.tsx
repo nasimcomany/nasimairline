@@ -1223,7 +1223,7 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 50% 60%)'
+                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
                     }}
                   ></div>
                   {/* Content */}
@@ -1281,7 +1281,7 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 50% 60%)'
+                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
                     }}
                   ></div>
                   {/* Content */}
@@ -1339,7 +1339,7 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 50% 60%)'
+                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
                     }}
                   ></div>
                   {/* Content */}
@@ -1397,7 +1397,7 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 50% 60%)'
+                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
                     }}
                   ></div>
                   {/* Content */}
