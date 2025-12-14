@@ -1209,13 +1209,13 @@ const HomePage: React.FC = () => {
                   }}
                 />
                 {/* Text Overlay with triangular glass background */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '140px' }}>
+                <div className="absolute bottom-0 left-0 right-0" style={{ height: '140px' }}>
                   {/* Triangular glass background from left */}
                   <div 
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(0 40%, 50% 0%, 50% 100%, 0% 100%)'
+                      clipPath: 'polygon(0 60%, 50% 0%, 50% 100%, 0% 100%)'
                     }}
                   ></div>
                   {/* Triangular glass background from right */}
@@ -1223,11 +1223,11 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 40%, 100% 100%, 50% 100%)'
+                      clipPath: 'polygon(50% 0%, 100% 60%, 100% 100%, 50% 100%)'
                     }}
                   ></div>
                   {/* Content */}
-                  <div className="relative p-4 h-full flex flex-col justify-start">
+                  <div className="relative p-4 h-full flex flex-col justify-end">
                     <div className="text-sm text-gray-700 mb-2 text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {language === 'fa' ? '۱۴۰۴/۰۹/۲۲' : language === 'ar' ? '۱۴۰۴/۰۹/۲۲' : '2025/12/13'}
                     </div>
@@ -1267,13 +1267,13 @@ const HomePage: React.FC = () => {
                   }}
                 />
                 {/* Text Overlay with triangular glass background */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '140px' }}>
+                <div className="absolute bottom-0 left-0 right-0" style={{ height: '140px' }}>
                   {/* Triangular glass background from left */}
                   <div 
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(0 40%, 50% 0%, 50% 100%, 0% 100%)'
+                      clipPath: 'polygon(0 60%, 50% 0%, 50% 100%, 0% 100%)'
                     }}
                   ></div>
                   {/* Triangular glass background from right */}
@@ -1281,11 +1281,11 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 40%, 100% 100%, 50% 100%)'
+                      clipPath: 'polygon(50% 0%, 100% 60%, 100% 100%, 50% 100%)'
                     }}
                   ></div>
                   {/* Content */}
-                  <div className="relative p-4 h-full flex flex-col justify-start">
+                  <div className="relative p-4 h-full flex flex-col justify-end">
                     <div className="text-sm text-gray-700 mb-2 text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {language === 'fa' ? '۱۴۰۴/۰۹/۲۳' : language === 'ar' ? '۱۴۰۴/۰۹/۲۳' : '2025/12/14'}
                     </div>
@@ -1325,13 +1325,13 @@ const HomePage: React.FC = () => {
                   }}
                 />
                 {/* Text Overlay with triangular glass background */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '140px' }}>
+                <div className="absolute bottom-0 left-0 right-0" style={{ height: '140px' }}>
                   {/* Triangular glass background from left */}
                   <div 
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(0 40%, 50% 0%, 50% 100%, 0% 100%)'
+                      clipPath: 'polygon(0 60%, 50% 0%, 50% 100%, 0% 100%)'
                     }}
                   ></div>
                   {/* Triangular glass background from right */}
@@ -1339,11 +1339,11 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 40%, 100% 100%, 50% 100%)'
+                      clipPath: 'polygon(50% 0%, 100% 60%, 100% 100%, 50% 100%)'
                     }}
                   ></div>
                   {/* Content */}
-                  <div className="relative p-4 h-full flex flex-col justify-start">
+                  <div className="relative p-4 h-full flex flex-col justify-end">
                     <div className="text-sm text-gray-700 mb-2 text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {language === 'fa' ? '۱۴۰۴/۰۹/۲۳' : language === 'ar' ? '۱۴۰۴/۰۹/۲۳' : '2025/12/14'}
                     </div>
@@ -1383,13 +1383,13 @@ const HomePage: React.FC = () => {
                   }}
                 />
                 {/* Text Overlay with triangular glass background */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '140px' }}>
+                <div className="absolute bottom-0 left-0 right-0" style={{ height: '140px' }}>
                   {/* Triangular glass background from left */}
                   <div 
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(0 40%, 50% 0%, 50% 100%, 0% 100%)'
+                      clipPath: 'polygon(0 60%, 50% 0%, 50% 100%, 0% 100%)'
                     }}
                   ></div>
                   {/* Triangular glass background from right */}
@@ -1397,11 +1397,11 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 40%, 100% 100%, 50% 100%)'
+                      clipPath: 'polygon(50% 0%, 100% 60%, 100% 100%, 50% 100%)'
                     }}
                   ></div>
                   {/* Content */}
-                  <div className="relative p-4 h-full flex flex-col justify-start">
+                  <div className="relative p-4 h-full flex flex-col justify-end">
                     <div className="text-sm text-gray-700 mb-2 text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {language === 'fa' ? '۱۴۰۴/۰۹/۲۲' : language === 'ar' ? '۱۴۰۴/۰۹/۲۲' : '2025/12/13'}
                     </div>
