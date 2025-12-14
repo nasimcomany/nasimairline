@@ -1198,67 +1198,75 @@ const HomePage: React.FC = () => {
           {/* Offers Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Offer 1: Muscat - Tehran */}
-            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <div className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
               <div className="relative h-96 overflow-hidden">
                 <img
                   src="/images/azadi-tower.jpg"
                   alt="مسقط - تهران"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   onError={(e) => {
                     e.currentTarget.src = '/images/airport-plane-photo_991869-62.jpg';
                   }}
                 />
-                {/* Text Overlay with triangular glass background */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '140px' }}>
-                  {/* Triangular glass background from left */}
+                {/* Unified Overlay Design - No Gap */}
+                <div className="absolute top-0 left-0 right-0" style={{ height: '100px' }}>
+                  {/* Main Glass Overlay - More Glassy */}
                   <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
+                    className="absolute inset-0 backdrop-blur-2xl transition-all duration-300 group-hover:backdrop-blur-3xl"
                     style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.2) 100%)',
+                      borderTopLeftRadius: '12px',
+                      borderTopRightRadius: '12px',
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.05)'
                     }}
                   ></div>
-                  {/* Triangular glass background from right */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
-                    style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
-                    }}
-                  ></div>
-                  {/* Triangular glass background from right to left (inverse) */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
-                    style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(95% 0%, 0% 0%, 100% 100%, 100% 60%)'
-                    }}
-                  ></div>
-                  {/* Content */}
-                  <div className="relative p-4 h-full flex flex-col justify-start">
-                    <div className="text-sm text-gray-700 mb-2 text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                      {language === 'fa' ? '۱۴۰۴/۰۹/۲۲' : language === 'ar' ? '۱۴۰۴/۰۹/۲۲' : '2025/12/13'}
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  
+                  {/* Content Container */}
+                  <div className="relative h-full flex items-center justify-between px-6">
+                    {/* Left: Flight Info & Price */}
+                    <div className="flex flex-col items-start gap-2">
+                      {/* Flight Route */}
+                      <div className="flex items-center gap-2">
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {language === 'fa' ? 'مسقط' : language === 'ar' ? 'مسقط' : 'Muscat'}
+                        </span>
+                        <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {language === 'fa' ? 'تهران' : language === 'ar' ? 'طهران' : 'Tehran'}
+                        </span>
+                      </div>
+                      {/* Price */}
+                      <div className={`text-xl font-bold text-gray-900 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                        direction: language === 'en' ? 'ltr' : 'rtl'
                       }}>
-                        {language === 'fa' ? 'مسقط' : language === 'ar' ? 'مسقط' : 'Muscat'}
-                      </span>
-                      <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
-                      <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'تهران' : language === 'ar' ? 'طهران' : 'Tehran'}
-                      </span>
+                        {language === 'fa' ? '۱۲,۰۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۲,۰۰۰,۰۰۰ ريال' : '12,000,000 Toman'}
+                      </div>
                     </div>
-                    <div className={`text-lg font-bold text-gray-900 text-center ${fontClass}`} style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      direction: language === 'en' ? 'ltr' : 'rtl'
-                    }}>
-                      {language === 'fa' ? '۱۲,۰۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۲,۰۰۰,۰۰۰ ريال' : '12,000,000 Toman'}
+                    
+                    {/* Right: Date Section */}
+                    <div className="flex items-center">
+                      <div className="px-4 py-2 bg-white/30 rounded-lg backdrop-blur-sm border border-white/40">
+                        <div className="text-xs font-medium text-gray-800" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          {language === 'fa' ? '۱۴۰۴/۰۹/۲۲' : language === 'ar' ? '۱۴۰۴/۰۹/۲۲' : '2025/12/13'}
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  
+                  {/* Buy Ticket Button - Appears on Hover */}
+                  <button
+                    className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full group-hover:translate-y-2 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-lg shadow-lg font-semibold text-sm whitespace-nowrap z-10"
+                    style={{
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                    }}
+                  >
+                    {language === 'fa' ? 'خرید بلیط' : language === 'ar' ? 'شراء التذكرة' : 'Buy Ticket'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -1274,55 +1282,53 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
                   }}
                 />
-                {/* Text Overlay with triangular glass background */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '140px' }}>
-                  {/* Triangular glass background from left */}
+                {/* Unified Overlay Design - No Gap */}
+                <div className="absolute top-0 left-0 right-0" style={{ height: '100px' }}>
+                  {/* Main Glass Overlay */}
                   <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
+                    className="absolute inset-0 backdrop-blur-xl"
                     style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(229, 231, 235, 0.6) 50%, rgba(255, 255, 255, 0.45) 100%)',
+                      borderTopLeftRadius: '12px',
+                      borderTopRightRadius: '12px',
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.1)'
                     }}
                   ></div>
-                  {/* Triangular glass background from right */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
-                    style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
-                    }}
-                  ></div>
-                  {/* Triangular glass background from right to left (inverse) */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
-                    style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(95% 0%, 0% 0%, 100% 100%, 100% 60%)'
-                    }}
-                  ></div>
-                  {/* Content */}
-                  <div className="relative p-4 h-full flex flex-col justify-start">
-                    <div className="text-sm text-gray-700 mb-2 text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                      {language === 'fa' ? '۱۴۰۴/۰۹/۲۳' : language === 'ar' ? '۱۴۰۴/۰۹/۲۳' : '2025/12/14'}
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  
+                  {/* Content Container */}
+                  <div className="relative h-full flex items-center justify-between px-6">
+                    {/* Left: Flight Info & Price */}
+                    <div className="flex flex-col items-start gap-2">
+                      {/* Flight Route */}
+                      <div className="flex items-center gap-2">
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
+                        </span>
+                        <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai'}
+                        </span>
+                      </div>
+                      {/* Price */}
+                      <div className={`text-xl font-bold text-gray-900 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                        direction: language === 'en' ? 'ltr' : 'rtl'
                       }}>
-                        {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
-                      </span>
-                      <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
-                      <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai'}
-                      </span>
+                        {language === 'fa' ? '۱۳,۷۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۳,۷۰۰,۰۰۰ ريال' : '13,700,000 Toman'}
+                      </div>
                     </div>
-                    <div className={`text-lg font-bold text-gray-900 text-center ${fontClass}`} style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      direction: language === 'en' ? 'ltr' : 'rtl'
-                    }}>
-                      {language === 'fa' ? '۱۳,۷۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۳,۷۰۰,۰۰۰ ريال' : '13,700,000 Toman'}
+                    
+                    {/* Right: Date Section */}
+                    <div className="flex items-center">
+                      <div className="px-4 py-2 bg-white/30 rounded-lg backdrop-blur-sm border border-white/40">
+                        <div className="text-xs font-medium text-gray-800" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          {language === 'fa' ? '۱۴۰۴/۰۹/۲۳' : language === 'ar' ? '۱۴۰۴/۰۹/۲۳' : '2025/12/14'}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1340,55 +1346,54 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg';
                   }}
                 />
-                {/* Text Overlay with triangular glass background */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '140px' }}>
-                  {/* Triangular glass background from left */}
+                {/* Dual Overlay Design - Left and Right */}
+                {/* Unified Overlay Design - No Gap */}
+                <div className="absolute top-0 left-0 right-0" style={{ height: '100px' }}>
+                  {/* Main Glass Overlay */}
                   <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
+                    className="absolute inset-0 backdrop-blur-xl"
                     style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(229, 231, 235, 0.6) 50%, rgba(255, 255, 255, 0.45) 100%)',
+                      borderTopLeftRadius: '12px',
+                      borderTopRightRadius: '12px',
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.1)'
                     }}
                   ></div>
-                  {/* Triangular glass background from right */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
-                    style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
-                    }}
-                  ></div>
-                  {/* Triangular glass background from right to left (inverse) */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
-                    style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(95% 0%, 0% 0%, 100% 100%, 100% 60%)'
-                    }}
-                  ></div>
-                  {/* Content */}
-                  <div className="relative p-4 h-full flex flex-col justify-start">
-                    <div className="text-sm text-gray-700 mb-2 text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                      {language === 'fa' ? '۱۴۰۴/۰۹/۲۳' : language === 'ar' ? '۱۴۰۴/۰۹/۲۳' : '2025/12/14'}
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  
+                  {/* Content Container */}
+                  <div className="relative h-full flex items-center justify-between px-6">
+                    {/* Left: Flight Info & Price */}
+                    <div className="flex flex-col items-start gap-2">
+                      {/* Flight Route */}
+                      <div className="flex items-center gap-2">
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
+                        </span>
+                        <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {language === 'fa' ? 'مسقط' : language === 'ar' ? 'مسقط' : 'Muscat'}
+                        </span>
+                      </div>
+                      {/* Price */}
+                      <div className={`text-xl font-bold text-gray-900 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                        direction: language === 'en' ? 'ltr' : 'rtl'
                       }}>
-                        {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
-                      </span>
-                      <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
-                      <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'مسقط' : language === 'ar' ? 'مسقط' : 'Muscat'}
-                      </span>
+                        {language === 'fa' ? '۱۶,۵۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۶,۵۰۰,۰۰۰ ريال' : '16,500,000 Toman'}
+                      </div>
                     </div>
-                    <div className={`text-lg font-bold text-gray-900 text-center ${fontClass}`} style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      direction: language === 'en' ? 'ltr' : 'rtl'
-                    }}>
-                      {language === 'fa' ? '۱۶,۵۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۶,۵۰۰,۰۰۰ ريال' : '16,500,000 Toman'}
+                    
+                    {/* Right: Date Section */}
+                    <div className="flex items-center">
+                      <div className="px-4 py-2 bg-white/30 rounded-lg backdrop-blur-sm border border-white/40">
+                        <div className="text-xs font-medium text-gray-800" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          {language === 'fa' ? '۱۴۰۴/۰۹/۲۳' : language === 'ar' ? '۱۴۰۴/۰۹/۲۳' : '2025/12/14'}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1406,55 +1411,53 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg';
                   }}
                 />
-                {/* Text Overlay with triangular glass background */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '140px' }}>
-                  {/* Triangular glass background from left */}
+                {/* Unified Overlay Design - No Gap */}
+                <div className="absolute top-0 left-0 right-0" style={{ height: '100px' }}>
+                  {/* Main Glass Overlay */}
                   <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
+                    className="absolute inset-0 backdrop-blur-xl"
                     style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(229, 231, 235, 0.6) 50%, rgba(255, 255, 255, 0.45) 100%)',
+                      borderTopLeftRadius: '12px',
+                      borderTopRightRadius: '12px',
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.1)'
                     }}
                   ></div>
-                  {/* Triangular glass background from right */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
-                    style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
-                    }}
-                  ></div>
-                  {/* Triangular glass background from right to left (inverse) */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-2xl"
-                    style={{
-                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(95% 0%, 0% 0%, 100% 100%, 100% 60%)'
-                    }}
-                  ></div>
-                  {/* Content */}
-                  <div className="relative p-4 h-full flex flex-col justify-start">
-                    <div className="text-sm text-gray-700 mb-2 text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                      {language === 'fa' ? '۱۴۰۴/۰۹/۲۲' : language === 'ar' ? '۱۴۰۴/۰۹/۲۲' : '2025/12/13'}
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  
+                  {/* Content Container */}
+                  <div className="relative h-full flex items-center justify-between px-6">
+                    {/* Left: Flight Info & Price */}
+                    <div className="flex flex-col items-start gap-2">
+                      {/* Flight Route */}
+                      <div className="flex items-center gap-2">
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
+                        </span>
+                        <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {language === 'fa' ? 'نجف' : language === 'ar' ? 'النجف' : 'Najaf'}
+                        </span>
+                      </div>
+                      {/* Price */}
+                      <div className={`text-xl font-bold text-gray-900 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                        direction: language === 'en' ? 'ltr' : 'rtl'
                       }}>
-                        {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
-                      </span>
-                      <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
-                      <span className={`text-gray-900 font-semibold ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'نجف' : language === 'ar' ? 'النجف' : 'Najaf'}
-                      </span>
+                        {language === 'fa' ? '۱۷,۸۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۷,۸۰۰,۰۰۰ ريال' : '17,800,000 Toman'}
+                      </div>
                     </div>
-                    <div className={`text-lg font-bold text-gray-900 text-center ${fontClass}`} style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      direction: language === 'en' ? 'ltr' : 'rtl'
-                    }}>
-                      {language === 'fa' ? '۱۷,۸۰۰,۰۰۰ تومان' : language === 'ar' ? '۱۷,۸۰۰,۰۰۰ ريال' : '17,800,000 Toman'}
+                    
+                    {/* Right: Date Section */}
+                    <div className="flex items-center">
+                      <div className="px-4 py-2 bg-white/30 rounded-lg backdrop-blur-sm border border-white/40">
+                        <div className="text-xs font-medium text-gray-800" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          {language === 'fa' ? '۱۴۰۴/۰۹/۲۲' : language === 'ar' ? '۱۴۰۴/۰۹/۲۲' : '2025/12/13'}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
