@@ -1215,7 +1215,7 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
                     }}
                   ></div>
                   {/* Triangular glass background from right */}
@@ -1223,7 +1223,15 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                    }}
+                  ></div>
+                  {/* Triangular glass background from right to left (inverse) */}
+                  <div 
+                    className="absolute inset-0 backdrop-blur-2xl"
+                    style={{
+                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
+                      clipPath: 'polygon(95% 0%, 0% 0%, 100% 100%, 100% 60%)'
                     }}
                   ></div>
                   {/* Content */}
@@ -1273,7 +1281,7 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
                     }}
                   ></div>
                   {/* Triangular glass background from right */}
@@ -1281,7 +1289,15 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                    }}
+                  ></div>
+                  {/* Triangular glass background from right to left (inverse) */}
+                  <div 
+                    className="absolute inset-0 backdrop-blur-2xl"
+                    style={{
+                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
+                      clipPath: 'polygon(95% 0%, 0% 0%, 100% 100%, 100% 60%)'
                     }}
                   ></div>
                   {/* Content */}
@@ -1331,7 +1347,7 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
                     }}
                   ></div>
                   {/* Triangular glass background from right */}
@@ -1339,7 +1355,15 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                    }}
+                  ></div>
+                  {/* Triangular glass background from right to left (inverse) */}
+                  <div 
+                    className="absolute inset-0 backdrop-blur-2xl"
+                    style={{
+                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
+                      clipPath: 'polygon(95% 0%, 0% 0%, 100% 100%, 100% 60%)'
                     }}
                   ></div>
                   {/* Content */}
@@ -1389,7 +1413,7 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
                     }}
                   ></div>
                   {/* Triangular glass background from right */}
@@ -1397,7 +1421,15 @@ const HomePage: React.FC = () => {
                     className="absolute inset-0 backdrop-blur-2xl"
                     style={{
                       backgroundColor: 'rgba(229, 231, 235, 0.3)',
-                      clipPath: 'polygon(50% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                      clipPath: 'polygon(5% 0%, 100% 0%, 0% 100%, 0% 60%)'
+                    }}
+                  ></div>
+                  {/* Triangular glass background from right to left (inverse) */}
+                  <div 
+                    className="absolute inset-0 backdrop-blur-2xl"
+                    style={{
+                      backgroundColor: 'rgba(229, 231, 235, 0.3)',
+                      clipPath: 'polygon(95% 0%, 0% 0%, 100% 100%, 100% 60%)'
                     }}
                   ></div>
                   {/* Content */}
