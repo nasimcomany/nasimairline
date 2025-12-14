@@ -1176,14 +1176,14 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Offers Section */}
-      <section className="relative z-10 py-12 sm:py-16 bg-gray-100">
+      <section className="relative z-10 py-6 sm:py-8 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
-          <div className="text-center mb-8 sm:mb-12">
+          <div className="text-center mb-4 sm:mb-6">
             <h2
-              className={`text-gray-900 ${fontClass}`}
+              className="text-gray-900"
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
                 fontWeight: 'bold',
                 lineHeight: '1.4',
@@ -1199,7 +1199,7 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Offer 1: Muscat - Tehran */}
             <div className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
-              <div className="relative h-96 overflow-hidden">
+              <div className="relative h-[420px] overflow-hidden">
                 <img
                   src="/images/azadi-tower.jpg"
                   alt="مسقط - تهران"
@@ -1209,20 +1209,30 @@ const HomePage: React.FC = () => {
                   }}
                 />
                 {/* Unified Overlay Design - No Gap */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '100px' }}>
-                  {/* Main Glass Overlay - More Glassy */}
+                <div className="absolute top-0 left-0 right-0 transition-all duration-500 h-[100px] group-hover:h-[140px]">
+                  {/* Main Glass Overlay - Ultra Glassy */}
                   <div 
-                    className="absolute inset-0 backdrop-blur-2xl transition-all duration-300 group-hover:backdrop-blur-3xl"
+                    className="absolute inset-0 backdrop-blur-3xl transition-all duration-300 group-hover:backdrop-blur-[40px]"
                     style={{
-                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.2) 100%)',
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.12) 100%)',
                       borderTopLeftRadius: '12px',
                       borderTopRightRadius: '12px',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.05)'
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.03)'
                     }}
                   ></div>
                   
+                  {/* Buy Ticket Button - Appears on Hover */}
+                  <button
+                    className="absolute top-0 left-4 right-4 transform -translate-y-full group-hover:translate-y-3 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white py-3 rounded-lg shadow-lg font-semibold text-sm z-10 w-[calc(100%-2rem)]"
+                    style={{
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                    }}
+                  >
+                    {language === 'fa' ? 'خرید بلیط' : language === 'ar' ? 'شراء التذكرة' : 'Buy Ticket'}
+                  </button>
+                  
                   {/* Content Container */}
-                  <div className="relative h-full flex items-center justify-between px-6">
+                  <div className="relative h-full flex items-center justify-between px-6 transition-all duration-500 group-hover:pt-10">
                     {/* Left: Flight Info & Price */}
                     <div className="flex flex-col items-start gap-2">
                       {/* Flight Route */}
@@ -1232,7 +1242,7 @@ const HomePage: React.FC = () => {
                         }}>
                           {language === 'fa' ? 'مسقط' : language === 'ar' ? 'مسقط' : 'Muscat'}
                         </span>
-                        <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                        <PaperAirplaneIcon className="w-4 h-4 text-blue-900 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
                         <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
                           fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                         }}>
@@ -1257,46 +1267,46 @@ const HomePage: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Offer 2: Mashhad - Dubai */}
+            <div className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+              <div className="relative h-[420px] overflow-hidden">
+                <img
+                  src="/images/burj-khalifa.jpg"
+                  alt="مشهد - دبی"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                  }}
+                />
+                {/* Unified Overlay Design - No Gap */}
+                <div className="absolute top-0 left-0 right-0 transition-all duration-500 h-[100px] group-hover:h-[140px]">
+                  {/* Main Glass Overlay - Ultra Glassy */}
+                  <div 
+                    className="absolute inset-0 backdrop-blur-3xl transition-all duration-300 group-hover:backdrop-blur-[40px]"
+                    style={{
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.12) 100%)',
+                      borderTopLeftRadius: '12px',
+                      borderTopRightRadius: '12px',
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.03)'
+                    }}
+                  ></div>
                   
                   {/* Buy Ticket Button - Appears on Hover */}
                   <button
-                    className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full group-hover:translate-y-2 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-lg shadow-lg font-semibold text-sm whitespace-nowrap z-10"
+                    className="absolute top-0 left-4 right-4 transform -translate-y-full group-hover:translate-y-3 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white py-3 rounded-lg shadow-lg font-semibold text-sm z-10 w-[calc(100%-2rem)]"
                     style={{
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                     }}
                   >
                     {language === 'fa' ? 'خرید بلیط' : language === 'ar' ? 'شراء التذكرة' : 'Buy Ticket'}
                   </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Offer 2: Mashhad - Dubai */}
-            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative h-96 overflow-hidden">
-                <img
-                  src="/images/burj-khalifa.jpg"
-                  alt="مشهد - دبی"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
-                  }}
-                />
-                {/* Unified Overlay Design - No Gap */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '100px' }}>
-                  {/* Main Glass Overlay */}
-                  <div 
-                    className="absolute inset-0 backdrop-blur-xl"
-                    style={{
-                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(229, 231, 235, 0.6) 50%, rgba(255, 255, 255, 0.45) 100%)',
-                      borderTopLeftRadius: '12px',
-                      borderTopRightRadius: '12px',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.1)'
-                    }}
-                  ></div>
                   
                   {/* Content Container */}
-                  <div className="relative h-full flex items-center justify-between px-6">
+                  <div className="relative h-full flex items-center justify-between px-6 transition-all duration-500 group-hover:pt-10">
                     {/* Left: Flight Info & Price */}
                     <div className="flex flex-col items-start gap-2">
                       {/* Flight Route */}
@@ -1306,7 +1316,7 @@ const HomePage: React.FC = () => {
                         }}>
                           {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
                         </span>
-                        <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                        <PaperAirplaneIcon className="w-4 h-4 text-blue-900 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
                         <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
                           fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                         }}>
@@ -1336,32 +1346,41 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Offer 3: Mashhad - Muscat */}
-            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative h-96 overflow-hidden">
+            <div className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+              <div className="relative h-[420px] overflow-hidden">
                 <img
                   src="/images/sultan-qaboos-mosque.jpg"
                   alt="مشهد - مسقط"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   onError={(e) => {
                     e.currentTarget.src = '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg';
                   }}
                 />
-                {/* Dual Overlay Design - Left and Right */}
                 {/* Unified Overlay Design - No Gap */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '100px' }}>
-                  {/* Main Glass Overlay */}
+                <div className="absolute top-0 left-0 right-0 transition-all duration-500 h-[100px] group-hover:h-[140px]">
+                  {/* Main Glass Overlay - Ultra Glassy */}
                   <div 
-                    className="absolute inset-0 backdrop-blur-xl"
+                    className="absolute inset-0 backdrop-blur-3xl transition-all duration-300 group-hover:backdrop-blur-[40px]"
                     style={{
-                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(229, 231, 235, 0.6) 50%, rgba(255, 255, 255, 0.45) 100%)',
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.12) 100%)',
                       borderTopLeftRadius: '12px',
                       borderTopRightRadius: '12px',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.1)'
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.03)'
                     }}
                   ></div>
                   
+                  {/* Buy Ticket Button - Appears on Hover */}
+                  <button
+                    className="absolute top-0 left-4 right-4 transform -translate-y-full group-hover:translate-y-3 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white py-3 rounded-lg shadow-lg font-semibold text-sm z-10 w-[calc(100%-2rem)]"
+                    style={{
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                    }}
+                  >
+                    {language === 'fa' ? 'خرید بلیط' : language === 'ar' ? 'شراء التذكرة' : 'Buy Ticket'}
+                  </button>
+                  
                   {/* Content Container */}
-                  <div className="relative h-full flex items-center justify-between px-6">
+                  <div className="relative h-full flex items-center justify-between px-6 transition-all duration-500 group-hover:pt-10">
                     {/* Left: Flight Info & Price */}
                     <div className="flex flex-col items-start gap-2">
                       {/* Flight Route */}
@@ -1371,7 +1390,7 @@ const HomePage: React.FC = () => {
                         }}>
                           {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
                         </span>
-                        <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                        <PaperAirplaneIcon className="w-4 h-4 text-blue-900 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
                         <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
                           fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                         }}>
@@ -1401,31 +1420,41 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Offer 4: Mashhad - Najaf */}
-            <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative h-96 overflow-hidden">
+            <div className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+              <div className="relative h-[420px] overflow-hidden">
                 <img
                   src="/images/imam-ali-shrine.jpg"
                   alt="مشهد - نجف"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   onError={(e) => {
                     e.currentTarget.src = '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg';
                   }}
                 />
                 {/* Unified Overlay Design - No Gap */}
-                <div className="absolute top-0 left-0 right-0" style={{ height: '100px' }}>
-                  {/* Main Glass Overlay */}
+                <div className="absolute top-0 left-0 right-0 transition-all duration-500 h-[100px] group-hover:h-[140px]">
+                  {/* Main Glass Overlay - Ultra Glassy */}
                   <div 
-                    className="absolute inset-0 backdrop-blur-xl"
+                    className="absolute inset-0 backdrop-blur-3xl transition-all duration-300 group-hover:backdrop-blur-[40px]"
                     style={{
-                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(229, 231, 235, 0.6) 50%, rgba(255, 255, 255, 0.45) 100%)',
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.12) 100%)',
                       borderTopLeftRadius: '12px',
                       borderTopRightRadius: '12px',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.1)'
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.03)'
                     }}
                   ></div>
                   
+                  {/* Buy Ticket Button - Appears on Hover */}
+                  <button
+                    className="absolute top-0 left-4 right-4 transform -translate-y-full group-hover:translate-y-3 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white py-3 rounded-lg shadow-lg font-semibold text-sm z-10 w-[calc(100%-2rem)]"
+                    style={{
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                    }}
+                  >
+                    {language === 'fa' ? 'خرید بلیط' : language === 'ar' ? 'شراء التذكرة' : 'Buy Ticket'}
+                  </button>
+                  
                   {/* Content Container */}
-                  <div className="relative h-full flex items-center justify-between px-6">
+                  <div className="relative h-full flex items-center justify-between px-6 transition-all duration-500 group-hover:pt-10">
                     {/* Left: Flight Info & Price */}
                     <div className="flex flex-col items-start gap-2">
                       {/* Flight Route */}
@@ -1435,7 +1464,7 @@ const HomePage: React.FC = () => {
                         }}>
                           {language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad'}
                         </span>
-                        <PaperAirplaneIcon className="w-4 h-4 text-red-600 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                        <PaperAirplaneIcon className="w-4 h-4 text-blue-900 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
                         <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
                           fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                         }}>
@@ -3717,5 +3746,6 @@ const HomePage: React.FC = () => {
     </div>
   );
 };
+
 
 export default HomePage;
