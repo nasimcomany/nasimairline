@@ -224,7 +224,6 @@ const HomePage: React.FC = () => {
   const [visibleCardIds, setVisibleCardIds] = useState<number[]>([1, 2, 3, 4]);
   const [queueCardIds, setQueueCardIds] = useState<number[]>([5, 6, 7, 8, 9, 10]);
   const [newCardId, setNewCardId] = useState<number | null>(null);
-  const [isShifting, setIsShifting] = useState(false);
   
   // Use refs to access current state in interval
   const visibleRef = useRef(visibleCardIds);
@@ -281,8 +280,7 @@ const HomePage: React.FC = () => {
       // Move first card from queue to visible
       const cardToShow = currentQueue[0];
       
-      // Start shifting animation
-      setIsShifting(true);
+      // Mark new card for slide-in animation
       setNewCardId(cardToShow);
       
       // Update visible cards: remove first, add first from queue
@@ -291,11 +289,10 @@ const HomePage: React.FC = () => {
       // Update queue: remove first, add hidden card to end
       setQueueCardIds([...currentQueue.slice(1), cardToHide]);
       
-      // Clear animation states after animation completes
+      // Clear new card mark after animation completes
       setTimeout(() => {
-        setIsShifting(false);
         setNewCardId(null);
-      }, 1200); // Animation duration
+      }, 600); // Slide-in animation duration
     }, 3500); // 3.5 seconds
 
     return () => clearInterval(interval);
@@ -1349,23 +1346,15 @@ const HomePage: React.FC = () => {
           @keyframes slideInFromRight {
             from {
               opacity: 0;
-              transform: translateX(400px);
+              transform: translateX(40px);
             }
             to {
               opacity: 1;
               transform: translateX(0);
             }
           }
-          @keyframes slideLeft {
-            from {
-              transform: translateX(0);
-            }
-            to {
-              transform: translateX(calc(-25% - 1.5rem));
-            }
-          }
         `}</style>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-28" style={{ overflow: 'hidden' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'hidden' }}>
           {/* Section Title */}
           <div className="text-center mb-4 sm:mb-6">
             <h2
@@ -1394,7 +1383,7 @@ const HomePage: React.FC = () => {
                 className="group bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden cursor-pointer"
                 style={{
                   animation: isNewCard 
-                    ? 'slideInFromRight 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
+                    ? 'slideInFromRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
                     : 'none',
                   direction: 'ltr',
                   transition: isNewCard ? 'none' : 'all 0.3s ease-in-out'
@@ -1479,10 +1468,7 @@ const HomePage: React.FC = () => {
               <div 
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" 
                     style={{
-                  direction: 'ltr',
-                  transition: isShifting ? 'transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'all 0.4s ease-in-out',
-                  overflow: 'visible',
-                  transform: isShifting ? 'translateX(-25%)' : 'translateX(0)'
+                  direction: 'ltr'
                     }}
                   >
                 {visibleCardIds.map((cardId, index) => {
