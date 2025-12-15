@@ -223,6 +223,7 @@ const HomePage: React.FC = () => {
   // State for managing visible cards and queue
   const [visibleCardIds, setVisibleCardIds] = useState<number[]>([1, 2, 3, 4]);
   const [queueCardIds, setQueueCardIds] = useState<number[]>([5, 6, 7, 8, 9, 10]);
+  const [newCardId, setNewCardId] = useState<number | null>(null);
   
   // Use refs to access current state in interval
   const visibleRef = useRef(visibleCardIds);
@@ -279,11 +280,19 @@ const HomePage: React.FC = () => {
       // Move first card from queue to visible
       const cardToShow = currentQueue[0];
       
+      // Mark new card for animation
+      setNewCardId(cardToShow);
+      
       // Update visible cards: remove first, add first from queue
       setVisibleCardIds([...currentVisible.slice(1), cardToShow]);
       
       // Update queue: remove first, add hidden card to end
       setQueueCardIds([...currentQueue.slice(1), cardToHide]);
+      
+      // Clear new card mark after animation completes
+      setTimeout(() => {
+        setNewCardId(null);
+      }, 600); // Animation duration
     }, 3500); // 3.5 seconds
 
     return () => clearInterval(interval);
@@ -1333,6 +1342,18 @@ const HomePage: React.FC = () => {
 
       {/* Special Offers Section */}
       <section className="relative z-10 py-6 sm:py-8 bg-gray-100">
+        <style>{`
+          @keyframes slideInFromLeft {
+            from {
+              opacity: 0;
+              transform: translateX(-100px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+        `}</style>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
           <div className="text-center mb-4 sm:mb-6">
@@ -1353,8 +1374,16 @@ const HomePage: React.FC = () => {
 
           {/* Helper function to render offer card */}
           {(() => {
-            const renderOfferCard = (card: OfferCard) => (
-              <div key={card.id} className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+            const renderOfferCard = (card: OfferCard): React.ReactElement => {
+              const isNewCard = newCardId === card.id;
+              return (
+              <div 
+                key={card.id} 
+                className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                style={{
+                  animation: isNewCard ? 'slideInFromLeft 0.6s ease-out' : 'none'
+                }}
+              >
                 <div className="relative h-[420px] overflow-hidden">
                   <img
                     src={card.image}
@@ -1426,7 +1455,8 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            );
+              );
+            };
 
             return (
               /* Offers Grid */
