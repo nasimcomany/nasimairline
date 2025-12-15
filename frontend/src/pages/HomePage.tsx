@@ -120,103 +120,103 @@ const HomePage: React.FC = () => {
   const allOfferCards: OfferCard[] = [
     {
       id: 1,
-      from: { fa: 'مسقط', ar: 'مسقط', en: 'Muscat' },
-      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      price: { fa: '۱۲,۰۰۰,۰۰۰ تومان', ar: '۱۲,۰۰۰,۰۰۰ ريال', en: '12,000,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۲', ar: '۱۴۰۴/۰۹/۲۲', en: '2025/12/13' },
-      image: '/images/azadi-tower.jpg',
-      alt: 'مسقط - تهران',
+      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
+      to: { fa: 'دبی', ar: 'دبي', en: 'Dubai' },
+      price: { fa: '۱۵,۸۰۰,۰۰۰ تومان', ar: '۱۵,۸۰۰,۰۰۰ ريال', en: '15,800,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۰۵', ar: '۱۴۰۴/۱۰/۰۵', en: '2025/12/26' },
+      image: '/images/tehran.jpg',
+      alt: 'تهران - دبی',
       fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
     },
     {
       id: 2,
       from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      to: { fa: 'دبی', ar: 'دبي', en: 'Dubai' },
-      price: { fa: '۱۳,۷۰۰,۰۰۰ تومان', ar: '۱۳,۷۰۰,۰۰۰ ريال', en: '13,700,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۳', ar: '۱۴۰۴/۰۹/۲۳', en: '2025/12/14' },
-      image: '/images/burj-khalifa.jpg',
-      alt: 'مشهد - دبی',
+      to: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
+      price: { fa: '۹,۵۰۰,۰۰۰ تومان', ar: '۹,۵۰۰,۰۰۰ ريال', en: '9,500,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۰۸', ar: '۱۴۰۴/۱۰/۰۸', en: '2025/12/29' },
+      image: '/images/mashhad.jpeg',
+      alt: 'مشهد - کیش',
       fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
     },
     {
       id: 3,
-      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      to: { fa: 'مسقط', ar: 'مسقط', en: 'Muscat' },
-      price: { fa: '۱۶,۵۰۰,۰۰۰ تومان', ar: '۱۶,۵۰۰,۰۰۰ ريال', en: '16,500,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۳', ar: '۱۴۰۴/۰۹/۲۳', en: '2025/12/14' },
-      image: '/images/sultan-qaboos-mosque.jpg',
-      alt: 'مشهد - مسقط',
+      from: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
+      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
+      price: { fa: '۶,۲۰۰,۰۰۰ تومان', ar: '۶,۲۰۰,۰۰۰ ريال', en: '6,200,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۱۰', ar: '۱۴۰۴/۱۰/۱۰', en: '2025/12/31' },
+      image: '/images/isfahan.jpg',
+      alt: 'اصفهان - تهران',
       fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
     },
     {
       id: 4,
-      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      to: { fa: 'نجف', ar: 'النجف', en: 'Najaf' },
-      price: { fa: '۱۷,۸۰۰,۰۰۰ تومان', ar: '۱۷,۸۰۰,۰۰۰ ريال', en: '17,800,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۲', ar: '۱۴۰۴/۰۹/۲۲', en: '2025/12/13' },
-      image: '/images/imam-ali-shrine.jpg',
-      alt: 'مشهد - نجف',
+      from: { fa: 'تبریز', ar: 'تبريز', en: 'Tabriz' },
+      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
+      price: { fa: '۸,۹۰۰,۰۰۰ تومان', ar: '۸,۹۰۰,۰۰۰ ريال', en: '8,900,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۱۲', ar: '۱۴۰۴/۱۰/۱۲', en: '2026/01/02' },
+      image: '/images/tabriz.jpg',
+      alt: 'تبریز - مشهد',
       fallbackImage: '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg'
     },
     {
       id: 5,
-      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'دبی', ar: 'دبي', en: 'Dubai' },
-      price: { fa: '۱۴,۲۰۰,۰۰۰ تومان', ar: '۱۴,۲۰۰,۰۰۰ ريال', en: '14,200,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۴', ar: '۱۴۰۴/۰۹/۲۴', en: '2025/12/15' },
-      image: '/images/burj-khalifa.jpg',
-      alt: 'تهران - دبی',
-      fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
+      from: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
+      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
+      price: { fa: '۱۰,۳۰۰,۰۰۰ تومان', ar: '۱۰,۳۰۰,۰۰۰ ريال', en: '10,300,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۱۵', ar: '۱۴۰۴/۱۰/۱۵', en: '2026/01/05' },
+      image: '/images/kish.jpg',
+      alt: 'کیش - تهران',
+      fallbackImage: '/images/airport-crew.jpg'
     },
     {
       id: 6,
-      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'مسقط', ar: 'مسقط', en: 'Muscat' },
-      price: { fa: '۱۵,۳۰۰,۰۰۰ تومان', ar: '۱۵,۳۰۰,۰۰۰ ريال', en: '15,300,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۵', ar: '۱۴۰۴/۰۹/۲۵', en: '2025/12/16' },
-      image: '/images/sultan-qaboos-mosque.jpg',
-      alt: 'تهران - مسقط',
-      fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
-    },
-    {
-      id: 7,
-      from: { fa: 'دبی', ar: 'دبي', en: 'Dubai' },
-      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      price: { fa: '۱۴,۵۰۰,۰۰۰ تومان', ar: '۱۴,۵۰۰,۰۰۰ ريال', en: '14,500,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۶', ar: '۱۴۰۴/۰۹/۲۶', en: '2025/12/17' },
-      image: '/images/azadi-tower.jpg',
-      alt: 'دبی - تهران',
+      from: { fa: 'آبادان', ar: 'أبادان', en: 'Abadan' },
+      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
+      price: { fa: '۱۱,۷۰۰,۰۰۰ تومان', ar: '۱۱,۷۰۰,۰۰۰ ريال', en: '11,700,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۱۸', ar: '۱۴۰۴/۱۰/۱۸', en: '2026/01/08' },
+      image: '/images/abadan.jpeg',
+      alt: 'آبادان - مشهد',
       fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
     },
     {
-      id: 8,
-      from: { fa: 'مسقط', ar: 'مسقط', en: 'Muscat' },
-      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۱۷,۲۰۰,۰۰۰ تومان', ar: '۱۷,۲۰۰,۰۰۰ ريال', en: '17,200,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۷', ar: '۱۴۰۴/۰۹/۲۷', en: '2025/12/18' },
-      image: '/images/imam-ali-shrine.jpg',
-      alt: 'مسقط - مشهد',
+      id: 7,
+      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
+      to: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
+      price: { fa: '۷,۴۰۰,۰۰۰ تومان', ar: '۷,۴۰۰,۰۰۰ ريال', en: '7,400,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۲۰', ar: '۱۴۰۴/۱۰/۲۰', en: '2026/01/10' },
+      image: '/images/tehran.jpg',
+      alt: 'تهران - اصفهان',
       fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
     },
     {
+      id: 8,
+      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
+      to: { fa: 'تبریز', ar: 'تبريز', en: 'Tabriz' },
+      price: { fa: '۹,۸۰۰,۰۰۰ تومان', ar: '۹,۸۰۰,۰۰۰ ريال', en: '9,800,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۲۲', ar: '۱۴۰۴/۱۰/۲۲', en: '2026/01/12' },
+      image: '/images/mashhad.jpeg',
+      alt: 'مشهد - تبریز',
+      fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
+    },
+    {
       id: 9,
-      from: { fa: 'نجف', ar: 'النجف', en: 'Najaf' },
+      from: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
       to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۱۸,۱۰۰,۰۰۰ تومان', ar: '۱۸,۱۰۰,۰۰۰ ريال', en: '18,100,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۸', ar: '۱۴۰۴/۰۹/۲۸', en: '2025/12/19' },
-      image: '/images/imam-ali-shrine.jpg',
-      alt: 'نجف - مشهد',
-      fallbackImage: '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg'
+      price: { fa: '۱۲,۱۰۰,۰۰۰ تومان', ar: '۱۲,۱۰۰,۰۰۰ ريال', en: '12,100,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۲۵', ar: '۱۴۰۴/۱۰/۲۵', en: '2026/01/15' },
+      image: '/images/kish.jpg',
+      alt: 'کیش - مشهد',
+      fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
     },
     {
       id: 10,
       from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۱۱,۵۰۰,۰۰۰ تومان', ar: '۱۱,۵۰۰,۰۰۰ ريال', en: '11,500,000 Toman' },
-      date: { fa: '۱۴۰۴/۰۹/۲۹', ar: '۱۴۰۴/۰۹/۲۹', en: '2025/12/20' },
-      image: '/images/imam-ali-shrine.jpg',
-      alt: 'تهران - مشهد',
-      fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
+      to: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
+      price: { fa: '۸,۶۰۰,۰۰۰ تومان', ar: '۸,۶۰۰,۰۰۰ ريال', en: '8,600,000 Toman' },
+      date: { fa: '۱۴۰۴/۱۰/۲۸', ar: '۱۴۰۴/۱۰/۲۸', en: '2026/01/18' },
+      image: '/images/tehran.jpg',
+      alt: 'تهران - کیش',
+      fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
     }
   ];
 
@@ -1388,7 +1388,7 @@ const HomePage: React.FC = () => {
                     </button>
                     
                     {/* Content Container */}
-                    <div className="relative h-full flex items-center justify-between px-6 transition-all duration-500 group-hover:pt-10">
+                    <div className="relative h-full flex items-center justify-between px-6 transition-all duration-500 group-hover:pt-10" style={{ direction: 'ltr' }}>
                       {/* Left: Flight Info & Price */}
                       <div className="flex flex-col items-start gap-2">
                         {/* Flight Route */}
@@ -1398,7 +1398,7 @@ const HomePage: React.FC = () => {
                           }}>
                             {card.from[language]}
                           </span>
-                          <PaperAirplaneIcon className="w-4 h-4 text-blue-900 transform" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
+                          <PaperAirplaneIcon className="w-4 h-4 text-blue-900" />
                           <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
                             fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                           }}>
@@ -1408,7 +1408,7 @@ const HomePage: React.FC = () => {
                         {/* Price */}
                         <div className={`text-xl font-bold text-gray-900 ${fontClass}`} style={{
                           fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                          direction: language === 'en' ? 'ltr' : 'rtl'
+                          direction: 'ltr'
                         }}>
                           {card.price[language]}
                         </div>
@@ -1417,7 +1417,7 @@ const HomePage: React.FC = () => {
                       {/* Right: Date Section */}
                       <div className="flex items-center">
                         <div className="px-4 py-2 bg-white/30 rounded-lg backdrop-blur-sm border border-white/40">
-                          <div className="text-xs font-medium text-gray-800" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          <div className="text-xs font-medium text-gray-800" style={{ direction: 'ltr' }}>
                             {card.date[language]}
                           </div>
                         </div>
@@ -1430,7 +1430,7 @@ const HomePage: React.FC = () => {
 
             return (
               /* Offers Grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ direction: 'ltr' }}>
                 {visibleCardIds.map(cardId => {
                   const card = allOfferCards.find(c => c.id === cardId);
                   return card ? renderOfferCard(card) : null;
