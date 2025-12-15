@@ -224,6 +224,7 @@ const HomePage: React.FC = () => {
   const [visibleCardIds, setVisibleCardIds] = useState<number[]>([1, 2, 3, 4]);
   const [queueCardIds, setQueueCardIds] = useState<number[]>([5, 6, 7, 8, 9, 10]);
   const [newCardId, setNewCardId] = useState<number | null>(null);
+  const [removingCard, setRemovingCard] = useState<OfferCard | null>(null);
   
   // Use refs to access current state in interval
   const visibleRef = useRef(visibleCardIds);
@@ -276,23 +277,33 @@ const HomePage: React.FC = () => {
       }
       
       // Move first visible card to end of queue
-      const cardToHide = currentVisible[0];
+      const cardToHideId = currentVisible[0];
       // Move first card from queue to visible
-      const cardToShow = currentQueue[0];
+      const cardToShowId = currentQueue[0];
+      const cardToHide = allOfferCards.find(c => c.id === cardToHideId) || null;
       
-      // Mark new card for slide-in animation
-      setNewCardId(cardToShow);
+      // Remember the card that is leaving so we can animate its exit
+      setRemovingCard(cardToHide);
+      // Mark new card for slide-in animation (will be visible after arrays update)
+      setNewCardId(cardToShowId);
       
       // Update visible cards: remove first, add first from queue
-      setVisibleCardIds([...currentVisible.slice(1), cardToShow]);
+      setVisibleCardIds(prev => {
+        const [, ...rest] = prev; // drop first (cardToHideId)
+        return [...rest, cardToShowId];
+      });
       
       // Update queue: remove first, add hidden card to end
-      setQueueCardIds([...currentQueue.slice(1), cardToHide]);
+      setQueueCardIds(prev => {
+        const [, ...rest] = prev; // drop first (cardToShowId)
+        return [...rest, cardToHideId];
+      });
       
-      // Clear new card mark after animation completes
+      // Clear animation markers after animations complete
       setTimeout(() => {
+        setRemovingCard(null);
         setNewCardId(null);
-      }, 600); // Slide-in animation duration
+      }, 600); // animation duration (must match CSS)
     }, 3500); // 3.5 seconds
 
     return () => clearInterval(interval);
@@ -1111,7 +1122,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Services Section */}
-      <section className="relative z-10 py-8 sm:py-16 bg-white" style={{ marginTop: '-50px' }}>
+      <section className="relative z-10 py-8 sm:py-16 bg-white" style={{ marginTop: '-70px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Section Title */}
           <div className="text-center mb-6 sm:mb-12">
@@ -1341,7 +1352,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Offers Section */}
-      <section className="relative z-10 py-6 sm:py-8 bg-gray-100">
+      <section className="relative z-10 py-6 sm:py-8 bg-gray-100" style={{ marginTop: '-40px' }}>
         <style>{`
           @keyframes slideInFromRight {
             from {
@@ -1351,6 +1362,16 @@ const HomePage: React.FC = () => {
             to {
               opacity: 1;
               transform: translateX(0);
+            }
+          }
+          @keyframes slideOutToLeft {
+            from {
+              opacity: 1;
+              transform: translateX(0);
+            }
+            to {
+              opacity: 0;
+              transform: translateX(-40px);
             }
           }
         `}</style>
@@ -1374,23 +1395,29 @@ const HomePage: React.FC = () => {
 
           {/* Helper function to render offer card */}
           {(() => {
-            const renderOfferCard = (card: OfferCard, index: number): React.ReactElement => {
-              const isNewCard = newCardId === card.id;
+            const renderOfferCard = (card: OfferCard, index: number, variant: 'normal' | 'outgoing' = 'normal'): React.ReactElement => {
+              const isNewCard = variant === 'normal' && newCardId === card.id;
+              const isOutgoing = variant === 'outgoing';
+
+              let animation = 'none';
+              if (isNewCard) {
+                animation = 'slideInFromRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+              } else if (isOutgoing) {
+                animation = 'slideOutToLeft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+              }
               
               return (
               <div 
-                key={card.id} 
+                key={`${card.id}-${variant}-${index}`} 
                 className="group bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden cursor-pointer"
                 style={{
-                  animation: isNewCard 
-                    ? 'slideInFromRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
-                    : 'none',
+                  animation,
                   direction: 'ltr',
-                  transition: isNewCard ? 'none' : 'all 0.3s ease-in-out'
+                  transition: isNewCard || isOutgoing ? 'none' : 'all 0.3s ease-in-out'
                 }}
               >
               <div className="relative h-[420px] overflow-hidden">
-                <img
+              <img
                   src={card.image}
                   alt={card.alt}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -1465,17 +1492,24 @@ const HomePage: React.FC = () => {
 
             return (
               /* Offers Grid */
-              <div 
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" 
-                    style={{
-                  direction: 'ltr'
-                    }}
-                  >
-                {visibleCardIds.map((cardId, index) => {
-                  const card = allOfferCards.find(c => c.id === cardId);
-                  return card ? renderOfferCard(card, index) : null;
-                })}
-                      </div>
+              <div className="relative">
+                <div 
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" 
+                      style={{
+                    direction: 'ltr'
+                      }}
+                    >
+                  {visibleCardIds.map((cardId, index) => {
+                    const card = allOfferCards.find(c => c.id === cardId);
+                    return card ? renderOfferCard(card, index, 'normal') : null;
+                  })}
+                </div>
+                {removingCard && (
+                  <div className="pointer-events-none absolute inset-y-0 left-0 w-full sm:w-1/2 lg:w-1/4 pr-6">
+                    {renderOfferCard(removingCard, -1, 'outgoing')}
+                  </div>
+                )}
+              </div>
             );
           })()}
                       </div>
