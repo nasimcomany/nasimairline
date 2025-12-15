@@ -224,6 +224,7 @@ const HomePage: React.FC = () => {
   const [visibleCardIds, setVisibleCardIds] = useState<number[]>([1, 2, 3, 4]);
   const [queueCardIds, setQueueCardIds] = useState<number[]>([5, 6, 7, 8, 9, 10]);
   const [newCardId, setNewCardId] = useState<number | null>(null);
+  const [removingCardId, setRemovingCardId] = useState<number | null>(null);
   
   // Use refs to access current state in interval
   const visibleRef = useRef(visibleCardIds);
@@ -280,19 +281,26 @@ const HomePage: React.FC = () => {
       // Move first card from queue to visible
       const cardToShow = currentQueue[0];
       
-      // Mark new card for animation
-      setNewCardId(cardToShow);
+      // Mark cards for animation
+      setRemovingCardId(cardToHide);
       
-      // Update visible cards: remove first, add first from queue
-      setVisibleCardIds([...currentVisible.slice(1), cardToShow]);
-      
-      // Update queue: remove first, add hidden card to end
-      setQueueCardIds([...currentQueue.slice(1), cardToHide]);
-      
-      // Clear new card mark after animation completes
+      // Wait for fade out animation, then update cards
       setTimeout(() => {
-        setNewCardId(null);
-      }, 600); // Animation duration
+        // Update visible cards: remove first, add first from queue
+        setVisibleCardIds([...currentVisible.slice(1), cardToShow]);
+        
+        // Update queue: remove first, add hidden card to end
+        setQueueCardIds([...currentQueue.slice(1), cardToHide]);
+        
+        // Clear removing card mark and mark new card
+        setRemovingCardId(null);
+        setNewCardId(cardToShow);
+        
+        // Clear new card mark after slide in animation completes
+        setTimeout(() => {
+          setNewCardId(null);
+        }, 1200); // Slide in animation duration
+      }, 400); // Fade out duration
     }, 3500); // 3.5 seconds
 
     return () => clearInterval(interval);
@@ -1343,14 +1351,24 @@ const HomePage: React.FC = () => {
       {/* Special Offers Section */}
       <section className="relative z-10 py-6 sm:py-8 bg-gray-100">
         <style>{`
-          @keyframes slideInFromLeft {
+          @keyframes slideInFromRight {
             from {
               opacity: 0;
-              transform: translateX(-100px);
+              transform: translateX(400px);
             }
             to {
               opacity: 1;
               transform: translateX(0);
+            }
+          }
+          @keyframes fadeOutSlideLeft {
+            from {
+              opacity: 1;
+              transform: translateX(0);
+            }
+            to {
+              opacity: 0;
+              transform: translateX(-200px);
             }
           }
         `}</style>
@@ -1376,12 +1394,19 @@ const HomePage: React.FC = () => {
           {(() => {
             const renderOfferCard = (card: OfferCard): React.ReactElement => {
               const isNewCard = newCardId === card.id;
+              const isRemoving = removingCardId === card.id;
+              
               return (
               <div 
                 key={card.id} 
                 className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
                 style={{
-                  animation: isNewCard ? 'slideInFromLeft 0.6s ease-out' : 'none'
+                  animation: isNewCard 
+                    ? 'slideInFromRight 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
+                    : isRemoving 
+                    ? 'fadeOutSlideLeft 0.4s ease-in' 
+                    : 'none',
+                  direction: 'ltr'
                 }}
               >
                 <div className="relative h-[420px] overflow-hidden">
@@ -1460,7 +1485,14 @@ const HomePage: React.FC = () => {
 
             return (
               /* Offers Grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" style={{ direction: 'ltr' }}>
+              <div 
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" 
+                style={{ 
+                  direction: 'ltr',
+                  transition: 'all 0.4s ease-in-out',
+                  overflow: 'visible'
+                }}
+              >
                 {visibleCardIds.map(cardId => {
                   const card = allOfferCards.find(c => c.id === cardId);
                   return card ? renderOfferCard(card) : null;
