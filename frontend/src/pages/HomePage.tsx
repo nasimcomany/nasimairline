@@ -1365,7 +1365,7 @@ const HomePage: React.FC = () => {
             }
           }
         `}</style>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-28" style={{ overflow: 'hidden' }}>
           {/* Section Title */}
           <div className="text-center mb-4 sm:mb-6">
             <h2
@@ -1482,7 +1482,7 @@ const HomePage: React.FC = () => {
                   direction: 'ltr',
                   transition: isShifting ? 'transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'all 0.4s ease-in-out',
                   overflow: 'visible',
-                  transform: isShifting ? 'translateX(calc(-25% - 0.10rem))' : 'translateX(0)'
+                  transform: isShifting ? 'translateX(-25%)' : 'translateX(0)'
                     }}
                   >
                 {visibleCardIds.map((cardId, index) => {
