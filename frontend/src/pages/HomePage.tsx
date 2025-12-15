@@ -3086,7 +3086,7 @@ const HomePage: React.FC = () => {
       )}
 
       {/* FAQ Section - Attached to Footer with Premium Trapezoid Design */}
-      <section id="faq" className="relative z-10 bg-white" style={{ marginTop: '0', marginBottom: '0' }}>
+      <section id="faq" className="relative z-10 bg-white" style={{ marginTop: '-70px', marginBottom: '0' }}>
         {/* Premium Trapezoid Shape Container */}
         <div className="relative" style={{ height: '240px', marginBottom: '0', overflow: 'hidden' }}>
           {/* Premium Trapezoid Shape SVG - bottom edge wider than top (inverted trapezoid) */}
