@@ -224,7 +224,7 @@ const HomePage: React.FC = () => {
   const [visibleCardIds, setVisibleCardIds] = useState<number[]>([1, 2, 3, 4]);
   const [queueCardIds, setQueueCardIds] = useState<number[]>([5, 6, 7, 8, 9, 10]);
   const [newCardId, setNewCardId] = useState<number | null>(null);
-  const [removingCardId, setRemovingCardId] = useState<number | null>(null);
+  const [isShifting, setIsShifting] = useState(false);
   
   // Use refs to access current state in interval
   const visibleRef = useRef(visibleCardIds);
@@ -281,26 +281,21 @@ const HomePage: React.FC = () => {
       // Move first card from queue to visible
       const cardToShow = currentQueue[0];
       
-      // Mark cards for animation
-      setRemovingCardId(cardToHide);
+      // Start shifting animation
+      setIsShifting(true);
+      setNewCardId(cardToShow);
       
-      // Wait for fade out animation, then update cards
+      // Update visible cards: remove first, add first from queue
+      setVisibleCardIds([...currentVisible.slice(1), cardToShow]);
+      
+      // Update queue: remove first, add hidden card to end
+      setQueueCardIds([...currentQueue.slice(1), cardToHide]);
+      
+      // Clear animation states after animation completes
       setTimeout(() => {
-        // Update visible cards: remove first, add first from queue
-        setVisibleCardIds([...currentVisible.slice(1), cardToShow]);
-        
-        // Update queue: remove first, add hidden card to end
-        setQueueCardIds([...currentQueue.slice(1), cardToHide]);
-        
-        // Clear removing card mark and mark new card
-        setRemovingCardId(null);
-        setNewCardId(cardToShow);
-        
-        // Clear new card mark after slide in animation completes
-        setTimeout(() => {
-          setNewCardId(null);
-        }, 1200); // Slide in animation duration
-      }, 400); // Fade out duration
+        setIsShifting(false);
+        setNewCardId(null);
+      }, 1200); // Animation duration
     }, 3500); // 3.5 seconds
 
     return () => clearInterval(interval);
@@ -1361,14 +1356,12 @@ const HomePage: React.FC = () => {
               transform: translateX(0);
             }
           }
-          @keyframes fadeOutSlideLeft {
+          @keyframes slideLeft {
             from {
-              opacity: 1;
               transform: translateX(0);
             }
             to {
-              opacity: 0;
-              transform: translateX(-200px);
+              transform: translateX(calc(-25% - 1.5rem));
             }
           }
         `}</style>
@@ -1392,94 +1385,92 @@ const HomePage: React.FC = () => {
 
           {/* Helper function to render offer card */}
           {(() => {
-            const renderOfferCard = (card: OfferCard): React.ReactElement => {
+            const renderOfferCard = (card: OfferCard, index: number): React.ReactElement => {
               const isNewCard = newCardId === card.id;
-              const isRemoving = removingCardId === card.id;
               
               return (
               <div 
                 key={card.id} 
-                className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                className="group bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden cursor-pointer"
                 style={{
                   animation: isNewCard 
                     ? 'slideInFromRight 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
-                    : isRemoving 
-                    ? 'fadeOutSlideLeft 0.4s ease-in' 
                     : 'none',
-                  direction: 'ltr'
+                  direction: 'ltr',
+                  transition: isNewCard ? 'none' : 'all 0.3s ease-in-out'
                 }}
               >
-                <div className="relative h-[420px] overflow-hidden">
-                  <img
-                    src={card.image}
-                    alt={card.alt}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      e.currentTarget.src = card.fallbackImage;
+              <div className="relative h-[420px] overflow-hidden">
+                <img
+                  src={card.image}
+                  alt={card.alt}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  onError={(e) => {
+                    e.currentTarget.src = card.fallbackImage;
+                  }}
+                />
+                {/* Unified Overlay Design - No Gap */}
+                <div className="absolute top-0 left-0 right-0 transition-all duration-500 h-[100px] group-hover:h-[140px]">
+                  {/* Main Glass Overlay - Ultra Glassy */}
+                  <div 
+                    className="absolute inset-0 backdrop-blur-3xl transition-all duration-300 group-hover:backdrop-blur-[40px]"
+                    style={{
+                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.12) 100%)',
+                      borderTopLeftRadius: '12px',
+                      borderTopRightRadius: '12px',
+                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.03)'
                     }}
-                  />
-                  {/* Unified Overlay Design - No Gap */}
-                  <div className="absolute top-0 left-0 right-0 transition-all duration-500 h-[100px] group-hover:h-[140px]">
-                    {/* Main Glass Overlay - Ultra Glassy */}
-                    <div 
-                      className="absolute inset-0 backdrop-blur-3xl transition-all duration-300 group-hover:backdrop-blur-[40px]"
-                      style={{
-                        background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.12) 100%)',
-                        borderTopLeftRadius: '12px',
-                        borderTopRightRadius: '12px',
-                        boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.03)'
-                      }}
-                    ></div>
-                    
-                    {/* Buy Ticket Button - Appears on Hover */}
-                    <button
-                      className="absolute top-0 left-4 right-4 transform -translate-y-full group-hover:translate-y-3 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white py-3 rounded-lg shadow-lg font-semibold text-sm z-10 w-[calc(100%-2rem)]"
-                      style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}
-                    >
-                      {language === 'fa' ? 'خرید بلیط' : language === 'ar' ? 'شراء التذكرة' : 'Buy Ticket'}
-                    </button>
-                    
-                    {/* Content Container */}
+                  ></div>
+                  
+                  {/* Buy Ticket Button - Appears on Hover */}
+                  <button
+                    className="absolute top-0 left-4 right-4 transform -translate-y-full group-hover:translate-y-3 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white py-3 rounded-lg shadow-lg font-semibold text-sm z-10 w-[calc(100%-2rem)]"
+                    style={{
+                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                    }}
+                  >
+                    {language === 'fa' ? 'خرید بلیط' : language === 'ar' ? 'شراء التذكرة' : 'Buy Ticket'}
+                  </button>
+                  
+                  {/* Content Container */}
                     <div className="relative h-full flex items-center justify-between px-6 transition-all duration-500 group-hover:pt-10" style={{ direction: 'ltr' }}>
-                      {/* Left: Flight Info & Price */}
-                      <div className="flex flex-col items-start gap-2">
-                        {/* Flight Route */}
-                        <div className="flex items-center gap-2">
-                          <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
-                            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                          }}>
-                            {card.from[language]}
-                          </span>
-                          <PaperAirplaneIcon className="w-4 h-4 text-blue-900" />
-                          <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
-                            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                          }}>
-                            {card.to[language]}
-                          </span>
-                        </div>
-                        {/* Price */}
-                        <div className={`text-xl font-bold text-gray-900 ${fontClass}`} style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                          direction: 'ltr'
+                    {/* Left: Flight Info & Price */}
+                    <div className="flex flex-col items-start gap-2">
+                      {/* Flight Route */}
+                      <div className="flex items-center gap-2">
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                         }}>
-                          {card.price[language]}
-                        </div>
+                            {card.from[language]}
+                        </span>
+                          <PaperAirplaneIcon className="w-4 h-4 text-blue-900" />
+                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                            {card.to[language]}
+                        </span>
                       </div>
-                      
-                      {/* Right: Date Section */}
-                      <div className="flex items-center">
-                        <div className="px-4 py-2 bg-white/30 rounded-lg backdrop-blur-sm border border-white/40">
+                      {/* Price */}
+                      <div className={`text-xl font-bold text-gray-900 ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                          direction: 'ltr'
+                      }}>
+                          {card.price[language]}
+                      </div>
+                    </div>
+                    
+                    {/* Right: Date Section */}
+                    <div className="flex items-center">
+                      <div className="px-4 py-2 bg-white/30 rounded-lg backdrop-blur-sm border border-white/40">
                           <div className="text-xs font-medium text-gray-800" style={{ direction: 'ltr' }}>
                             {card.date[language]}
-                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
               );
             };
 
@@ -1487,35 +1478,36 @@ const HomePage: React.FC = () => {
               /* Offers Grid */
               <div 
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" 
-                style={{ 
+                    style={{
                   direction: 'ltr',
-                  transition: 'all 0.4s ease-in-out',
-                  overflow: 'visible'
-                }}
-              >
-                {visibleCardIds.map(cardId => {
+                  transition: isShifting ? 'transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'all 0.4s ease-in-out',
+                  overflow: 'visible',
+                  transform: isShifting ? 'translateX(calc(-25% - 0.10rem))' : 'translateX(0)'
+                    }}
+                  >
+                {visibleCardIds.map((cardId, index) => {
                   const card = allOfferCards.find(c => c.id === cardId);
-                  return card ? renderOfferCard(card) : null;
+                  return card ? renderOfferCard(card, index) : null;
                 })}
-              </div>
+                      </div>
             );
           })()}
-        </div>
+                      </div>
       </section>
-
+                    
       {/* COMMENTED OUT: عضویت در برنامه وفاداری نسیم ایر banner section */}
       {/* <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
             className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
-            style={{
+                    style={{
               borderRadius: '12px',
               overflow: 'visible'
-            }}
+                    }}
           >
             <div 
               className="flex items-center" 
-              style={{ 
+                    style={{
                 position: 'absolute',
                 right: '-20px',
                 top: '50%',
