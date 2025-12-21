@@ -1072,18 +1072,6 @@ const HomePage: React.FC = () => {
 
           {/* Flight Search Form at Bottom */}
           <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8">
-            <div className="flex justify-center mb-0">
-              <button 
-                className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-6 sm:px-10 py-3 sm:py-4 rounded-lg transition-colors text-sm sm:text-lg"
-                style={{ 
-                  letterSpacing: '0.5px',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-                  marginBottom: '0'
-                }}
-              >
-                {t('common.learnMore') || 'بیشتر بدانید'}
-              </button>
-            </div>
             <EmiratesFlightSearchForm />
               </div>
             </div>

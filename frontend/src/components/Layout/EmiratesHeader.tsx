@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store';
+import { useDispatch } from 'react-redux';
+import { useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
 import { 
   Bars3Icon, 
@@ -52,7 +52,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const loginDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { language, t, fontClass, setLanguage } = useLanguage();
@@ -213,7 +213,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             className="hidden lg:flex items-center absolute right-[290px]" 
             style={{ 
               bottom: '-60px',
-              transform: isScrolled ? 'translateY(-120px)' : 'translateY(0)',
+              transform: isScrolled ? 'translateY(-40px)' : 'translateY(0)',
               transition: 'transform 2.0s ease-in-out'
             }}
           >
