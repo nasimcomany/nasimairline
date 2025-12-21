@@ -85,13 +85,13 @@ const EmiratesFlightSearchForm: React.FC = () => {
   return (
     <div className="bg-gray-200 rounded-lg shadow-2xl overflow-hidden">
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 overflow-x-auto">
+      <div className="flex border-b border-gray-300/30 overflow-x-auto bg-white/20 backdrop-blur-2xl" style={{ backdropFilter: 'blur(20px)' }}>
         <button
           onClick={() => setActiveTab('search')}
           className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'search'
-              ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-200'
-              : 'text-gray-600 bg-gray-200 hover:text-gray-900 hover:bg-gray-300'
+              ? 'text-blue-900 border-b-2 border-blue-900 bg-white/30'
+              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-white/15'
           } ${fontClass}`}
           style={{ fontSize: '13px' }}
         >
@@ -102,8 +102,8 @@ const EmiratesFlightSearchForm: React.FC = () => {
           onClick={() => setActiveTab('manage')}
           className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'manage'
-              ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-200'
-              : 'text-gray-600 bg-gray-200 hover:text-gray-900 hover:bg-gray-300'
+              ? 'text-blue-900 border-b-2 border-blue-900 bg-white/30'
+              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-white/15'
           } ${fontClass}`}
           style={{ fontSize: '13px' }}
         >
@@ -114,8 +114,8 @@ const EmiratesFlightSearchForm: React.FC = () => {
           onClick={() => setActiveTab('services')}
           className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'services'
-              ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-200'
-              : 'text-gray-600 bg-gray-200 hover:text-gray-900 hover:bg-gray-300'
+              ? 'text-blue-900 border-b-2 border-blue-900 bg-white/30'
+              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-white/15'
           } ${fontClass}`}
           style={{ fontSize: '13px' }}
         >
@@ -126,8 +126,8 @@ const EmiratesFlightSearchForm: React.FC = () => {
           onClick={() => setActiveTab('whatson')}
           className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'whatson'
-              ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-200'
-              : 'text-gray-600 bg-gray-200 hover:text-gray-900 hover:bg-gray-300'
+              ? 'text-blue-900 border-b-2 border-blue-900 bg-white/30'
+              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-white/15'
           } ${fontClass}`}
           style={{ fontSize: '13px' }}
         >
@@ -138,8 +138,8 @@ const EmiratesFlightSearchForm: React.FC = () => {
           onClick={() => setActiveTab('status')}
           className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'status'
-              ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-200'
-              : 'text-gray-600 bg-gray-200 hover:text-gray-900 hover:bg-gray-300'
+              ? 'text-blue-900 border-b-2 border-blue-900 bg-white/30'
+              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-white/15'
           } ${fontClass}`}
           style={{ fontSize: '13px' }}
         >
