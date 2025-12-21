@@ -99,6 +99,7 @@ const HomePage: React.FC = () => {
   const [show3DViewer, setShow3DViewer] = useState(false);
   const [showWeatherModal, setShowWeatherModal] = useState(false);
   const [hoveredService, setHoveredService] = useState<number | null>(null);
+  const [activeFlightTab, setActiveFlightTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
 
   const reservedSeats = ['A1', 'B2', 'C3', 'D4', 'A5', 'B6'];
   
@@ -892,7 +893,7 @@ const HomePage: React.FC = () => {
           className="absolute inset-x-0 top-0 overflow-hidden"
           style={{
             backgroundPosition: 'center center',
-            bottom: '196px' // Shorter from bottom
+            bottom: '238px' // Shorter from bottom
           }}
         >
           {/* Slider - All images positioned absolutely */}
@@ -1039,7 +1040,7 @@ const HomePage: React.FC = () => {
         {/* Hero Content */}
         <div className="relative z-10 flex-1 flex flex-col">
           {/* Promotional Text - Centered */}
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-start justify-center" style={{ paddingTop: '120px' }}>
             <div className="text-center max-w-4xl px-4 sm:px-6">
               <h1 
                 className="text-white mb-6"
@@ -1071,8 +1072,8 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Flight Search Form at Bottom */}
-          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8">
-            <EmiratesFlightSearchForm />
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8" style={{ marginTop: activeFlightTab === 'search' ? '60px' : '20px', padding: '30px' }}>
+            <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
               </div>
             </div>
       </section>
