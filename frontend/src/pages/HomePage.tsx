@@ -892,7 +892,7 @@ const HomePage: React.FC = () => {
           className="absolute inset-x-0 top-0 overflow-hidden"
           style={{
             backgroundPosition: 'center center',
-            bottom: '120px' // 12cm shorter from bottom (120px)
+            bottom: '196px' // Shorter from bottom
           }}
         >
           {/* Slider - All images positioned absolutely */}
