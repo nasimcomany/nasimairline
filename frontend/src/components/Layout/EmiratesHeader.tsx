@@ -196,53 +196,6 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         <div className="flex-1 bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center justify-between">
         <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
 
-          {/* Logo on the left */}
-          <div className="hidden lg:flex items-center absolute left-4">
-            <Link to="/" className="flex items-center">
-              <img 
-                src="/images/nasim0.png" 
-                alt="نسیم ایر" 
-                className="object-contain"
-                style={{ 
-                  width: '180px',
-                  height: 'auto',
-                  maxWidth: '180px'
-                }}
-              />
-            </Link>
-          </div>
-
-          {/* Logo with Blue Flag - Horizontal on the right */}
-          <div className="hidden lg:flex items-center absolute right-0">
-            <Link to="/" className="flex items-center">
-              <div 
-                className="bg-blue-900 flex items-center justify-center py-2"
-                style={{ 
-                  height: '81px',
-                  paddingLeft: '40px',
-                  paddingRight: '20px',
-                  boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
-                  zIndex: 60,
-                  borderTopLeftRadius: '20px',
-                  borderBottomLeftRadius: '20px',
-                  cursor: 'pointer'
-                }}
-              >
-                <img 
-                  src="/images/nasim0.png" 
-                  alt="نسیم ایر" 
-                  className="object-contain"
-                  style={{ 
-                    width: '200px',
-                    height: 'auto',
-                    maxWidth: '200px',
-                    transform: 'translate(-20px, -5px)'
-                  }}
-                />
-              </div>
-            </Link>
-          </div>
-
           {/* Logo with Blue Flag - Smaller copy in center */}
           <div className="hidden lg:flex items-center absolute right-[330px]">
             <Link to="/" className="flex items-center">
@@ -254,7 +207,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   paddingRight: '10px',
                   boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
                   zIndex: 60,
-                  borderRadius: '20px',
+                  borderTopLeftRadius: '0',
+                  borderTopRightRadius: '0',
+                  borderBottomLeftRadius: '20px',
+                  borderBottomRightRadius: '20px',
                   cursor: 'pointer'
                 }}
               >
