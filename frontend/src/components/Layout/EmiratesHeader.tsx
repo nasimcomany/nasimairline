@@ -190,19 +190,19 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 relative">
-      <div className="flex h-20 relative">
+    <header className="sticky top-0 z-50 relative" style={{ overflow: 'visible' }}>
+      <div className="flex h-20 relative" style={{ overflow: 'visible' }}>
         {/* Dark Navigation Section - Glassmorphism */}
         <div className="flex-1 bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center justify-between">
         <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
 
           {/* Logo with Blue Flag - Smaller copy in center */}
-          <div className="hidden lg:flex items-center absolute right-[330px]">
+          <div className="hidden lg:flex items-center absolute right-[290px]" style={{ bottom: '-60px' }}>
             <Link to="/" className="flex items-center">
               <div 
                 className="bg-blue-900 flex items-center justify-center"
                 style={{ 
-                  height: '81px',
+                  height: '120px',
                   paddingLeft: '20px',
                   paddingRight: '10px',
                   boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
@@ -222,7 +222,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     width: '130px',
                     height: 'auto',
                     maxWidth: '130px',
-                    transform: 'translate(-10px, 0) scale(1.27)'
+                    transform: 'translate(-10px, 20px) scale(1.27)'
                   }}
                 />
               </div>
