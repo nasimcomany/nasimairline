@@ -49,6 +49,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [selectedDestinationIndex, setSelectedDestinationIndex] = useState<number | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [isScrolled, setIsScrolled] = useState(false);
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const loginDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -189,6 +190,17 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     };
   }, []);
 
+  // Handle scroll to collapse flag
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 50); // Start collapsing after 50px scroll
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 relative" style={{ overflow: 'visible' }}>
       <div className="flex h-20 relative" style={{ overflow: 'visible' }}>
@@ -197,7 +209,14 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
 
           {/* Logo with Blue Flag - Smaller copy in center */}
-          <div className="hidden lg:flex items-center absolute right-[290px]" style={{ bottom: '-60px' }}>
+          <div 
+            className="hidden lg:flex items-center absolute right-[290px]" 
+            style={{ 
+              bottom: '-60px',
+              transform: isScrolled ? 'translateY(-120px)' : 'translateY(0)',
+              transition: 'transform 0.3s ease-in-out'
+            }}
+          >
             <Link to="/" className="flex items-center">
               <div 
                 className="bg-blue-900 flex items-center justify-center"
