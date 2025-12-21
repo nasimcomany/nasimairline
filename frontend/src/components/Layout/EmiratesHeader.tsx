@@ -214,7 +214,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             style={{ 
               bottom: '-60px',
               transform: isScrolled ? 'translateY(-120px)' : 'translateY(0)',
-              transition: 'transform 0.3s ease-in-out'
+              transition: 'transform 2.0s ease-in-out'
             }}
           >
             <Link to="/" className="flex items-center">
