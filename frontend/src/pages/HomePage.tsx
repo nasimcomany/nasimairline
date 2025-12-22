@@ -1072,7 +1072,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Flight Search Form at Bottom */}
-          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8" style={{ marginTop: activeFlightTab === 'search' ? '60px' : '20px', padding: '30px' }}>
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8" style={{ marginTop: '60px', padding: '30px' }}>
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
               </div>
             </div>

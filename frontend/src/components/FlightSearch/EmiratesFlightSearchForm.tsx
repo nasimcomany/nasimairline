@@ -160,8 +160,9 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
       </div>
 
       {/* Tab Content */}
+      <div className="bg-gray-200" style={{ minHeight: '180px' }}>
       {activeTab === 'search' && (
-        <form onSubmit={handleSearch} className="p-6 bg-gray-200">
+        <form onSubmit={handleSearch} className="p-6">
           {/* Trip Type Selector - Compact */}
           <div className="flex gap-2 mb-4">
             <button
@@ -299,7 +300,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
       )}
 
       {activeTab === 'manage' && (
-        <div className="p-6 bg-gray-200">
+        <div className="p-6">
           <div className="flex gap-2 items-end">
             {/* National ID / Passport */}
             <div className="flex-1">
@@ -345,7 +346,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
 
       {/* Services Tab */}
       {activeTab === 'services' && (
-        <div className="p-6 bg-gray-200">
+        <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <button
               onClick={() => navigate('/services/seat-selection')}
@@ -389,7 +390,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
 
       {/* What's On Flight Tab */}
       {activeTab === 'whatson' && (
-        <div className="p-6 bg-gray-200">
+        <div className="p-6">
           <div className="flex gap-2 items-end">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
@@ -427,7 +428,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
 
       {/* Flight Status Tab */}
       {activeTab === 'status' && (
-        <div className="p-6 bg-gray-200">
+        <div className="p-6">
           <div className="flex gap-2 items-end">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
@@ -466,6 +467,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
