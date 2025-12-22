@@ -1340,8 +1340,127 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* عضویت در برنامه وفاداری نسیم ایر banner section */}
+      <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
+          <div 
+            className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
+            style={{
+              borderRadius: '12px',
+              overflow: 'visible'
+            }}
+          >
+            <div 
+              className="flex items-center" 
+              style={{ 
+                position: 'absolute',
+                right: '-20px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10,
+                height: '0'
+              }}
+            >
+              <div 
+                className="rounded-full flex flex-col items-center justify-center"
+                style={{ 
+                  width: '100px',
+                  height: '100px',
+                  background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
+                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  marginRight: '-12px',
+                  transform: 'rotate(2deg) translateZ(0)'
+                }}
+              >
+                <div 
+                  className="text-gray-700 font-bold"
+                  style={{
+                    fontSize: '11px',
+                    writingMode: 'vertical-rl',
+                    textOrientation: 'mixed',
+                    letterSpacing: '1.2px'
+                  }}
+                >
+                  SILVER
+                </div>
+              </div>
+              <div 
+                className="rounded-full flex flex-col items-center justify-center"
+                style={{ 
+                  width: '100px',
+                  height: '100px',
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  marginRight: '-12px',
+                  transform: 'rotate(-3deg) translateZ(0)'
+                }}
+              >
+                <div 
+                  className="text-white font-bold"
+                  style={{
+                    fontSize: '11px',
+                    writingMode: 'vertical-rl',
+                    textOrientation: 'mixed',
+                    letterSpacing: '1.2px'
+                  }}
+                >
+                  GOLD
+                </div>
+              </div>
+              <div 
+                className="rounded-full flex flex-col items-center justify-center"
+                style={{ 
+                  width: '100px',
+                  height: '100px',
+                  background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  transform: 'rotate(4deg) translateZ(0)'
+                }}
+              >
+                <div 
+                  className="text-white font-bold"
+                  style={{
+                    fontSize: '11px',
+                    writingMode: 'vertical-rl',
+                    textOrientation: 'mixed',
+                    letterSpacing: '1.2px'
+                  }}
+                >
+                  PLATINUM
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 text-center md:text-left" style={{ paddingRight: language === 'en' ? '0' : '0' }}>
+              <h3 className={`text-base sm:text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                direction: language === 'en' ? 'ltr' : 'rtl'
+              }}>
+                {t('home.loyalty.joinTitle')}
+              </h3>
+              <p className={`text-gray-400 text-xs md:text-sm ${fontClass}`} style={{ 
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                direction: language === 'en' ? 'ltr' : 'rtl'
+              }}>
+                {t('home.loyalty.joinDescription')}
+              </p>
+            </div>
+
+            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-xs sm:text-sm" style={{ 
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              direction: language === 'en' ? 'ltr' : 'rtl'
+            }}>
+              {t('home.loyalty.joinNow')}
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Special Offers Section */}
-      <section className="relative z-10 py-6 sm:py-8 bg-gray-100" style={{ marginTop: '-40px' }}>
+      <section className="relative z-10 py-6 sm:py-8 bg-gray-100" style={{ marginTop: '10px' }}>
         <style>{`
           @keyframes slideInFromRight {
             from {
@@ -1503,147 +1622,6 @@ const HomePage: React.FC = () => {
           })()}
                       </div>
       </section>
-                    
-      {/* COMMENTED OUT: عضویت در برنامه وفاداری نسیم ایر banner section */}
-      {/* <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
-          <div 
-            className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
-                    style={{
-              borderRadius: '12px',
-              overflow: 'visible'
-                    }}
-          >
-            <div 
-              className="flex items-center" 
-                    style={{
-                position: 'absolute',
-                right: '-20px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                zIndex: 10,
-                height: '0'
-              }}
-            >
-
-      {/* COMMENTED OUT: عضویت در برنامه وفاداری نسیم ایر banner section */}
-      {/* <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
-          <div 
-            className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
-            style={{
-              borderRadius: '12px',
-              overflow: 'visible'
-            }}
-          >
-            <div 
-              className="flex items-center" 
-              style={{ 
-                position: 'absolute',
-                right: '-20px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                zIndex: 10,
-                height: '0'
-              }}
-            >
-              <div 
-                className="rounded-full flex flex-col items-center justify-center"
-                style={{ 
-                  width: '100px',
-                  height: '100px',
-                  background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
-                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  marginRight: '-12px',
-                  transform: 'rotate(2deg) translateZ(0)'
-                }}
-              >
-                <div 
-                  className="text-gray-700 font-bold"
-                  style={{
-                    fontSize: '11px',
-                    writingMode: 'vertical-rl',
-                    textOrientation: 'mixed',
-                    letterSpacing: '1.2px'
-                  }}
-                >
-                  SILVER
-                </div>
-              </div>
-              <div 
-                className="rounded-full flex flex-col items-center justify-center"
-                style={{ 
-                  width: '100px',
-                  height: '100px',
-                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  marginRight: '-12px',
-                  transform: 'rotate(-3deg) translateZ(0)'
-                }}
-              >
-                <div 
-                  className="text-white font-bold"
-                  style={{
-                    fontSize: '11px',
-                    writingMode: 'vertical-rl',
-                    textOrientation: 'mixed',
-                    letterSpacing: '1.2px'
-                  }}
-                >
-                  GOLD
-                </div>
-              </div>
-              <div 
-                className="rounded-full flex flex-col items-center justify-center"
-                style={{ 
-                  width: '100px',
-                  height: '100px',
-                  background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
-                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  transform: 'rotate(4deg) translateZ(0)'
-                }}
-              >
-                <div 
-                  className="text-white font-bold"
-                  style={{
-                    fontSize: '11px',
-                    writingMode: 'vertical-rl',
-                    textOrientation: 'mixed',
-                    letterSpacing: '1.2px'
-                  }}
-                >
-                  PLATINUM
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 text-center md:text-left" style={{ paddingRight: language === 'en' ? '0' : '0' }}>
-              <h3 className={`text-base sm:text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                direction: language === 'en' ? 'ltr' : 'rtl'
-              }}>
-                {t('home.loyalty.joinTitle')}
-              </h3>
-              <p className={`text-gray-400 text-xs md:text-sm ${fontClass}`} style={{ 
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                direction: language === 'en' ? 'ltr' : 'rtl'
-              }}>
-                {t('home.loyalty.joinDescription')}
-              </p>
-            </div>
-
-            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-xs sm:text-sm" style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: language === 'en' ? 'ltr' : 'rtl'
-            }}>
-              {t('home.loyalty.joinNow')}
-            </button>
-          </div>
-        </div>
-      </section> */}
 
       {/* Skywards+ Section - Emirates Style */}
       <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '55px' }}>
