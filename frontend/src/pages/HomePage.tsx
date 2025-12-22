@@ -1756,7 +1756,7 @@ const HomePage: React.FC = () => {
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{
-                  borderRadius: '6px',
+                  borderRadius: '16px',
                   border: '0.5px solid #d1d5db',
                   boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                   opacity: 0.95,
@@ -1783,7 +1783,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="relative w-full overflow-hidden" style={{ 
                   height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '6px'
+                  borderRadius: '16px'
                 }}>
                   <img 
                     src="/images/two.png" 
@@ -1804,7 +1804,7 @@ const HomePage: React.FC = () => {
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
-                  borderRadius: '6px',
+                  borderRadius: '16px',
                   border: '0.5px solid #d1d5db',
                   boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                   opacity: 0.95,
@@ -1830,7 +1830,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="relative w-full overflow-hidden" style={{ 
                   height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '6px'
+                  borderRadius: '16px'
                 }}>
                   <img 
                     src="/images/three.png" 
@@ -1851,7 +1851,7 @@ const HomePage: React.FC = () => {
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
-                  borderRadius: '6px',
+                  borderRadius: '16px',
                   border: '0.5px solid #d1d5db',
                   boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                   opacity: 0.95,
@@ -1878,7 +1878,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="relative w-full overflow-hidden" style={{ 
                   height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '6px'
+                  borderRadius: '16px'
                 }}>
                   <img 
                     src="/images/four.png" 
@@ -1899,7 +1899,7 @@ const HomePage: React.FC = () => {
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
-                  borderRadius: '6px',
+                  borderRadius: '16px',
                   border: '0.5px solid #d1d5db',
                   boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                   opacity: 0.95,
@@ -1925,7 +1925,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="relative w-full overflow-hidden" style={{ 
                   height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '6px'
+                  borderRadius: '16px'
                 }}>
                   <img 
                     src="/images/five.png" 
@@ -1947,7 +1947,7 @@ const HomePage: React.FC = () => {
             <div 
               className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
               style={{ 
-                borderRadius: '6px',
+                borderRadius: '16px',
                 border: '0.5px solid #d1d5db',
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                 opacity: 0.95,
@@ -1970,7 +1970,7 @@ const HomePage: React.FC = () => {
               {/* Large Image - Using one.png */}
               <div className="relative w-full overflow-hidden" style={{ 
                 height: '500px',
-                borderRadius: '6px'
+                borderRadius: '16px'
               }}>
                 <img 
                   src="/images/one.png" 
