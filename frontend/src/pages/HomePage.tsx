@@ -3072,123 +3072,76 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* FAQ Section - Attached to Footer with Premium Trapezoid Design */}
-      <section id="faq" className="relative bg-white" style={{ marginTop: '-50px', marginBottom: '0', zIndex: 10 }}>
-        {/* Premium Trapezoid Shape Container */}
-        <div className="relative" style={{ height: '180px', marginBottom: '0', overflow: 'hidden' }}>
-          {/* Premium Trapezoid Shape SVG - bottom edge wider than top (inverted trapezoid) */}
-          <svg 
-            className="absolute bottom-0 left-0 w-full h-full" 
-            viewBox="0 0 100 100" 
-            preserveAspectRatio="none"
-            style={{ overflow: 'visible' }}
-          >
-            {/* Inverted Trapezoid: bottom edge wider, top edge narrower, very minimal angle, shorter from top, bottom edge closer to center */}
-            <path 
-              d="M 3 100 L 12 30 L 88 30 L 97 100 Z" 
-              fill="#e5e7eb" 
-              stroke="none"
-            />
-            {/* Thin black line on top edge - slightly thicker to match visual appearance */}
-            <path 
-              d="M 12 30 L 88 30" 
-              fill="none"
-              stroke="#000000"
-              strokeWidth="0.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {/* Thin black line on left and right edges only (not bottom) */}
-            <path 
-              d="M 3 100 L 12 30 M 97 100 L 88 30" 
-              fill="none"
-              stroke="#000000"
-              strokeWidth="0.12"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+      {/* FAQ Section - مینیمال با لبه پایینی منحنی - چسبیده به فوتر */}
+      <section id="faq" className="relative flex justify-center" style={{ position: 'relative', top: '30px', marginBottom: '0', zIndex: 10, padding: '0 20px 0 20px' }}>
+        {/* Container - مینیمال و در وسط */}
+        <div className="relative" style={{ width: '90%', maxWidth: '600px', height: '60px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRect)', WebkitClipPath: 'url(#curvedBottomRect)' }}>
+          {/* SVG clipPath برای لبه پایینی منحنی */}
+          <svg width="0" height="0" style={{ position: 'absolute' }}>
+            <defs>
+              <clipPath id="curvedBottomRect" clipPathUnits="objectBoundingBox">
+                {/* Trapezoid با لبه پایینی منحنی - ضلع‌های چپ و راست با شیب بیشتر - گوشه‌ها rounded */}
+                {/* radius = 0.12 برای rounded corners */}
+                {/* لبه بالا باریک‌تر برای شیب بیشتر */}
+                <path d="M 0.2 0.12 
+                         C 0.2 0.06 0.23 0 0.27 0 
+                         L 0.73 0 
+                         C 0.77 0 0.8 0.06 0.8 0.12 
+                         L 0.9 0.7 
+                         C 0.98 0.78 1 0.85 0.92 0.93 
+                         Q 0.5 1 0.08 0.93 
+                         C 0 0.85 0.02 0.78 0.1 0.7 
+                         Z" />
+              </clipPath>
+            </defs>
           </svg>
           
-          {/* Premium Content inside the trapezoid shape */}
-          <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
+          {/* Content - کامنت شده */}
+          {/* <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '50px', paddingBottom: '25px' }}>
             <div className="max-w-7xl mx-auto w-full">
-              {/* Premium Minimal Title inside shape - moved down more */}
-              <div className="text-center mb-3">
-                <h2 
-                  className={`text-base sm:text-lg font-semibold text-gray-900 ${fontClass}`} 
-                  style={{ 
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                    letterSpacing: '0.5px'
-                  }}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <button
+                  onClick={() => setSelectedFAQ('booking')}
+                  className="group bg-white rounded-lg p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-gray-300 text-center"
+                  style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
                 >
-                  {language === 'fa' ? 'سؤالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
-                </h2>
-              </div>
+                  <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass}`}>
+                    {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
+                  </h3>
+                </button>
 
-              {/* Premium Luxury FAQ Categories - Modern Minimal Design */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" style={{ marginTop: '20px' }}>
-              {/* Category 1: رزرو پرواز */}
-              <button
-                onClick={() => setSelectedFAQ('booking')}
-                className="group bg-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
-                style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
-              >
-                <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
-                  letterSpacing: '0.3px'
-                }}>
-                  {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
-                </h3>
-              </button>
+                <button
+                  onClick={() => setSelectedFAQ('services')}
+                  className="group bg-white rounded-lg p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-gray-300 text-center"
+                  style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+                >
+                  <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass}`}>
+                    {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
+                  </h3>
+                </button>
 
-              {/* Category 2: خدمات مسافران */}
-              <button
-                onClick={() => setSelectedFAQ('services')}
-                className="group bg-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
-                style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
-              >
-                <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
-                  letterSpacing: '0.3px'
-                }}>
-                  {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
-                </h3>
-              </button>
+                <button
+                  onClick={() => setSelectedFAQ('flight-info')}
+                  className="group bg-white rounded-lg p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-gray-300 text-center"
+                  style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+                >
+                  <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass}`}>
+                    {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
+                  </h3>
+                </button>
 
-              {/* Category 3: اطلاعات پرواز */}
-              <button
-                onClick={() => setSelectedFAQ('flight-info')}
-                className="group bg-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
-                style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
-              >
-                <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
-                  letterSpacing: '0.3px'
-                }}>
-                  {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
-                </h3>
-              </button>
-
-              {/* Category 4: پشتیبانی و تماس */}
-              <button
-                onClick={() => setSelectedFAQ('support')}
-                className="group bg-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
-                style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
-              >
-                <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
-                  letterSpacing: '0.3px'
-                }}>
-                  {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
-                </h3>
-              </button>
+                <button
+                  onClick={() => setSelectedFAQ('support')}
+                  className="group bg-white rounded-lg p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-gray-300 text-center"
+                  style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+                >
+                  <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass}`}>
+                    {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
+                  </h3>
+                </button>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Thick Horizontal Line Separator */}
-        <div className="relative" style={{ height: '4px', backgroundColor: '#e5e7eb', marginTop: '0' }}>
-        </div>
-
-        {/* Thin Elegant Black Line Separator */}
-        <div className="relative" style={{ height: '1px', backgroundColor: '#000000', marginTop: '-5px' }}>
+          </div> */}
         </div>
       </section>
 
@@ -3375,7 +3328,7 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Footer - Emirates Style */}
-      <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff' }}>
+      <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '0', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* درباره نسیم ایر Column */}
