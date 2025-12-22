@@ -1689,7 +1689,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Destinations Section - Images Only (No Text) */}
-      <section className="relative z-10 py-6 sm:py-12 bg-white">
+      <section className="relative py-6 sm:py-12 bg-white" style={{ paddingBottom: '60px', overflow: 'visible', zIndex: 20 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title Section - Same style as Section 2 */}
           <div className="text-center mb-4 sm:mb-8">
@@ -1749,7 +1749,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-6 justify-center items-center" style={{ perspective: '1000px' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-6 justify-center items-center" style={{ perspective: '1000px', overflow: 'visible' }}>
             {/* 4 Small Images - Left Side (2/3 width, 2x2 grid) - First in order */}
             <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-2 gap-1 sm:gap-2 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible' }}>
               {/* Image 1 - two.png - Left page of book */}
@@ -1766,7 +1766,9 @@ const HomePage: React.FC = () => {
                   transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                   width: '68%',
                   maxWidth: '100%',
-                  marginRight: '170px'
+                  marginRight: '170px',
+                  position: 'relative',
+                  zIndex: 25
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#d1d5db';
@@ -1781,9 +1783,10 @@ const HomePage: React.FC = () => {
                   e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
                 }}
               >
-                <div className="relative w-full overflow-hidden" style={{ 
+                <div className="relative w-full" style={{ 
                   height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '16px'
+                  borderRadius: '16px',
+                  overflow: 'hidden'
                 }}>
                   <img 
                     src="/images/two.png" 
@@ -1794,7 +1797,8 @@ const HomePage: React.FC = () => {
                       transition: 'opacity 0.3s ease',
                       height: '100%',
                       width: '100%',
-                      imageRendering: '-webkit-optimize-contrast'
+                      imageRendering: '-webkit-optimize-contrast',
+                      borderRadius: '16px'
                     }}
                   />
                 </div>
@@ -1813,7 +1817,9 @@ const HomePage: React.FC = () => {
                   transformOrigin: 'left center',
                   transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                   width: '68%',
-                  maxWidth: '100%'
+                  maxWidth: '100%',
+                  position: 'relative',
+                  zIndex: 25
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#d1d5db';
@@ -1828,9 +1834,10 @@ const HomePage: React.FC = () => {
                   e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
                 }}
               >
-                <div className="relative w-full overflow-hidden" style={{ 
+                <div className="relative w-full" style={{ 
                   height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '16px'
+                  borderRadius: '16px',
+                  overflow: 'hidden'
                 }}>
                   <img 
                     src="/images/three.png" 
@@ -1841,7 +1848,8 @@ const HomePage: React.FC = () => {
                       transition: 'opacity 0.3s ease',
                       height: '100%',
                       width: '100%',
-                      imageRendering: '-webkit-optimize-contrast'
+                      imageRendering: '-webkit-optimize-contrast',
+                      borderRadius: '16px'
                     }}
                   />
                     </div>
@@ -1861,7 +1869,9 @@ const HomePage: React.FC = () => {
                   transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                   width: '68%',
                   maxWidth: '100%',
-                  marginRight: '170px'
+                  marginRight: '170px',
+                  position: 'relative',
+                  zIndex: 25
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#d1d5db';
@@ -1876,9 +1886,10 @@ const HomePage: React.FC = () => {
                   e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
                 }}
               >
-                <div className="relative w-full overflow-hidden" style={{ 
+                <div className="relative w-full" style={{ 
                   height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '16px'
+                  borderRadius: '16px',
+                  overflow: 'hidden'
                 }}>
                   <img 
                     src="/images/four.png" 
@@ -1889,7 +1900,8 @@ const HomePage: React.FC = () => {
                       transition: 'opacity 0.3s ease',
                       height: '100%',
                       width: '100%',
-                      imageRendering: '-webkit-optimize-contrast'
+                      imageRendering: '-webkit-optimize-contrast',
+                      borderRadius: '16px'
                     }}
                   />
                 </div>
@@ -1908,7 +1920,9 @@ const HomePage: React.FC = () => {
                   transformOrigin: 'left center',
                   transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                   width: '68%',
-                  maxWidth: '100%'
+                  maxWidth: '100%',
+                  position: 'relative',
+                  zIndex: 25
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#d1d5db';
@@ -1923,9 +1937,10 @@ const HomePage: React.FC = () => {
                   e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
                 }}
               >
-                <div className="relative w-full overflow-hidden" style={{ 
+                <div className="relative w-full" style={{ 
                   height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '16px'
+                  borderRadius: '16px',
+                  overflow: 'hidden'
                 }}>
                   <img 
                     src="/images/five.png" 
@@ -1936,7 +1951,8 @@ const HomePage: React.FC = () => {
                       transition: 'opacity 0.3s ease',
                       height: '100%',
                       width: '100%',
-                      imageRendering: '-webkit-optimize-contrast'
+                      imageRendering: '-webkit-optimize-contrast',
+                      borderRadius: '16px'
                     }}
                   />
                 </div>
@@ -1952,7 +1968,9 @@ const HomePage: React.FC = () => {
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                 opacity: 0.95,
                 transform: 'translateY(0) translateX(40px)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                zIndex: 25
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = '#d1d5db';
@@ -1968,9 +1986,10 @@ const HomePage: React.FC = () => {
               }}
             >
               {/* Large Image - Using one.png */}
-              <div className="relative w-full overflow-hidden" style={{ 
+              <div className="relative w-full" style={{ 
                 height: '500px',
-                borderRadius: '16px'
+                borderRadius: '16px',
+                overflow: 'hidden'
               }}>
                 <img 
                   src="/images/one.png" 
@@ -1980,7 +1999,8 @@ const HomePage: React.FC = () => {
                     objectPosition: 'center center',
                     transition: 'opacity 0.3s ease',
                     imageRendering: '-webkit-optimize-contrast',
-                    transform: 'translateY(15px)'
+                    transform: 'translateY(15px)',
+                    borderRadius: '16px'
                   }}
                 />
               </div>
@@ -3075,9 +3095,9 @@ const HomePage: React.FC = () => {
       )}
 
       {/* FAQ Section - Attached to Footer with Premium Trapezoid Design */}
-      <section id="faq" className="relative z-10 bg-white" style={{ marginTop: '-70px', marginBottom: '0' }}>
+      <section id="faq" className="relative bg-white" style={{ marginTop: '-50px', marginBottom: '0', zIndex: 10 }}>
         {/* Premium Trapezoid Shape Container */}
-        <div className="relative" style={{ height: '240px', marginBottom: '0', overflow: 'hidden' }}>
+        <div className="relative" style={{ height: '180px', marginBottom: '0', overflow: 'hidden' }}>
           {/* Premium Trapezoid Shape SVG - bottom edge wider than top (inverted trapezoid) */}
           <svg 
             className="absolute bottom-0 left-0 w-full h-full" 
@@ -3112,12 +3132,12 @@ const HomePage: React.FC = () => {
           </svg>
           
           {/* Premium Content inside the trapezoid shape */}
-          <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '90px', paddingBottom: '30px' }}>
+          <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '60px', paddingBottom: '20px' }}>
             <div className="max-w-7xl mx-auto w-full">
               {/* Premium Minimal Title inside shape - moved down more */}
-              <div className="text-center mb-5">
+              <div className="text-center mb-3">
                 <h2 
-                  className={`text-lg sm:text-xl font-semibold text-gray-900 ${fontClass}`} 
+                  className={`text-base sm:text-lg font-semibold text-gray-900 ${fontClass}`} 
                   style={{ 
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     letterSpacing: '0.5px'
@@ -3128,14 +3148,14 @@ const HomePage: React.FC = () => {
               </div>
 
               {/* Premium Luxury FAQ Categories - Modern Minimal Design */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5" style={{ marginTop: '35px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" style={{ marginTop: '20px' }}>
               {/* Category 1: رزرو پرواز */}
               <button
                 onClick={() => setSelectedFAQ('booking')}
-                className="group bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
+                className="group bg-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
                 style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                <h3 className={`text-sm sm:text-base font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
+                <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
                   letterSpacing: '0.3px'
                 }}>
                   {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
@@ -3145,10 +3165,10 @@ const HomePage: React.FC = () => {
               {/* Category 2: خدمات مسافران */}
               <button
                 onClick={() => setSelectedFAQ('services')}
-                className="group bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
+                className="group bg-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
                 style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                <h3 className={`text-sm sm:text-base font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
+                <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
                   letterSpacing: '0.3px'
                 }}>
                   {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
@@ -3158,10 +3178,10 @@ const HomePage: React.FC = () => {
               {/* Category 3: اطلاعات پرواز */}
               <button
                 onClick={() => setSelectedFAQ('flight-info')}
-                className="group bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
+                className="group bg-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
                 style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                <h3 className={`text-sm sm:text-base font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
+                <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
                   letterSpacing: '0.3px'
                 }}>
                   {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
@@ -3171,10 +3191,10 @@ const HomePage: React.FC = () => {
               {/* Category 4: پشتیبانی و تماس */}
               <button
                 onClick={() => setSelectedFAQ('support')}
-                className="group bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
+                className="group bg-white rounded-xl p-3 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300/50 hover:border-gray-400 text-center transform hover:scale-105"
                 style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
-                <h3 className={`text-sm sm:text-base font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
+                <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass} tracking-wide`} style={{
                   letterSpacing: '0.3px'
                 }}>
                   {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
@@ -3377,19 +3397,19 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Footer - Emirates Style */}
-      <footer className="relative z-10 bg-gray-200 text-gray-900 py-8 sm:py-16">
+      <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* درباره نسیم ایر Column */}
             <div>
-              <h4 className={`text-sm font-medium mb-6 text-gray-900 ${fontClass}`} style={{
+              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'درباره نسیم ایر' : language === 'ar' ? 'حول نسيم إير' : 'About Nasim Air'}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3397,17 +3417,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <DocumentTextIcon className="w-4 h-4 text-gray-900" />
+                    <DocumentTextIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'تاریخچه نسیم ایر' : language === 'ar' ? 'تاريخ نسيم إير' : 'Nasim Air History'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3415,17 +3435,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    <ShieldCheckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'مجوز سازمان هواپیمایی' : language === 'ar' ? 'ترخيص منظمة الطيران' : 'Aviation License'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3433,17 +3453,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <UserGroupIcon className="w-4 h-4 text-gray-900" />
+                    <UserGroupIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'فرصت‌های شغلی' : language === 'ar' ? 'فرص العمل' : 'Careers'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3451,17 +3471,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <PhoneIcon className="w-4 h-4 text-gray-900" />
+                    <PhoneIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'تماس با ما' : language === 'ar' ? 'اتصل بنا' : 'Contact Us'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3469,12 +3489,12 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <NewspaperIcon className="w-4 h-4 text-gray-900" />
+                    <NewspaperIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'مرکز رسانه' : language === 'ar' ? 'مركز الإعلام' : 'Media Center'}
                   </a>
                 </li>
@@ -3483,14 +3503,14 @@ const HomePage: React.FC = () => {
 
             {/* خدمات Column */}
             <div>
-              <h4 className={`text-sm font-medium mb-6 text-gray-900 ${fontClass}`} style={{
+              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'خدمات' : language === 'ar' ? 'الخدمات' : 'Services'}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3498,17 +3518,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <PaperAirplaneIcon className="w-4 h-4 text-gray-900" />
+                    <PaperAirplaneIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'رزرو پرواز داخلی' : language === 'ar' ? 'حجز رحلة داخلية' : 'Domestic Flights'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3516,17 +3536,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <GlobeAltIcon className="w-4 h-4 text-gray-900" />
+                    <GlobeAltIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'رزرو پرواز بین‌المللی' : language === 'ar' ? 'حجز رحلة دولية' : 'International Flights'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3534,17 +3554,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <UserIcon className="w-4 h-4 text-gray-900" />
+                    <UserIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3552,17 +3572,17 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <TruckIcon className="w-4 h-4 text-gray-900" />
+                    <TruckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'بار اضافی' : language === 'ar' ? 'أمتعة إضافية' : 'Extra Baggage'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     borderBottom: '2px solid transparent',
                     paddingBottom: '4px',
@@ -3570,12 +3590,12 @@ const HomePage: React.FC = () => {
                     alignItems: 'center'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#000';
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
-                    <SparklesIcon className="w-4 h-4 text-gray-900" />
+                    <SparklesIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'خدمات ویژه' : language === 'ar' ? 'خدمات خاصة' : 'Special Services'}
                   </a>
                 </li>
@@ -3584,49 +3604,49 @@ const HomePage: React.FC = () => {
 
             {/* اطلاعات پرواز Column */}
             <div>
-              <h4 className={`text-sm font-medium mb-6 text-gray-900 ${fontClass}`} style={{
+              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <ClockIcon className="w-4 h-4 text-gray-900" />
+                    <ClockIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'وضعیت پرواز' : language === 'ar' ? 'حالة الرحلة' : 'Flight Status'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <MapPinIcon className="w-4 h-4 text-gray-900" />
+                    <MapPinIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'مقصدهای پروازی' : language === 'ar' ? 'الوجهات' : 'Destinations'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <CheckCircleIcon className="w-4 h-4 text-gray-900" />
+                    <CheckCircleIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'چک این آنلاین' : language === 'ar' ? 'تسجيل الوصول عبر الإنترنت' : 'Online Check-in'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <ClipboardDocumentIcon className="w-4 h-4 text-gray-900" />
+                    <ClipboardDocumentIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'مدیریت رزرو' : language === 'ar' ? 'إدارة الحجز' : 'Manage Booking'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <QuestionMarkCircleIcon className="w-4 h-4 text-gray-900" />
+                    <QuestionMarkCircleIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}
                   </a>
                 </li>
@@ -3636,7 +3656,7 @@ const HomePage: React.FC = () => {
                       e.preventDefault();
                       setShowWeatherModal(true);
                     }}
-                    className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} 
+                    className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} 
                     style={{
                       fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       background: 'none',
@@ -3647,7 +3667,7 @@ const HomePage: React.FC = () => {
                       textAlign: language === 'fa' || language === 'ar' ? 'right' : 'left'
                     }}
                   >
-                    <CloudIcon className="w-4 h-4 text-gray-900" />
+                    <CloudIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'وضعیت آب و هوا' : language === 'ar' ? 'حالة الطقس' : 'Weather'}
                   </button>
                 </li>
@@ -3656,60 +3676,61 @@ const HomePage: React.FC = () => {
 
             {/* مجوزها و اعتبارات Column */}
             <div>
-              <h4 className={`text-sm font-medium mb-6 text-gray-900 ${fontClass}`} style={{
+              <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
               }}>{language === 'fa' ? 'مجوزها و اعتبارات' : language === 'ar' ? 'التراخيص والاعتمادات' : 'Licenses & Credentials'}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="https://www.enamad.ir" target="_blank" rel="noopener noreferrer" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="https://www.enamad.ir" target="_blank" rel="noopener noreferrer" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    <ShieldCheckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'نماد اعتماد الکترونیکی (اینماد)' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge (Enamad)'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    <ShieldCheckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO License'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    <ShieldCheckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'استانداردهای ایمنی' : language === 'ar' ? 'معايير السلامة' : 'Safety Standards'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    <ShieldCheckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'گواهینامه‌های بین‌المللی' : language === 'ar' ? 'الشهادات الدولية' : 'International Certificates'}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-all ${fontClass}`} style={{
+                  <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}>
-                    <ShieldCheckIcon className="w-4 h-4 text-gray-900" />
+                    <ShieldCheckIcon className="w-4 h-4 text-white" />
                     {language === 'fa' ? 'حریم خصوصی و امنیت' : language === 'ar' ? 'الخصوصية والأمان' : 'Privacy & Security'}
                   </a>
                 </li>
               </ul>
             </div>
           </div>
-          <div className={`border-t border-gray-400 mt-12 pt-8 ${fontClass}`} style={{
+          <div className={`border-t mt-12 pt-8 ${fontClass}`} style={{
+            borderColor: '#3b82f6',
             fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
           }}>
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm font-medium text-gray-900 text-center md:text-right">
+              <p className="text-sm font-medium text-white text-center md:text-right">
                 &copy; 2024 {t('common.nasimAir')} {t('footer.copyright') || 'تمام حقوق محفوظ است'}.
               </p>
               <div className="flex items-center justify-center gap-4">
@@ -3717,13 +3738,13 @@ const HomePage: React.FC = () => {
                   href="https://www.enamad.ir" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors"
+                  className="flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
                 >
-                  <ShieldCheckIcon className="w-5 h-5 text-gray-900" />
+                  <ShieldCheckIcon className="w-5 h-5 text-white" />
                   <span>{language === 'fa' ? 'نماد اعتماد الکترونیکی' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge'}</span>
                 </a>
-                <span className="text-gray-600">|</span>
-                <span className="text-sm text-gray-700">
+                <span className="text-gray-400">|</span>
+                <span className="text-sm text-white">
                   {language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO Licensed'}
                 </span>
               </div>
