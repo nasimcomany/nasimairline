@@ -38,7 +38,8 @@ import {
   CreditCardIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CloudIcon
+  CloudIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 
 const HomePage: React.FC = () => {
@@ -3080,11 +3081,11 @@ const HomePage: React.FC = () => {
             <clipPath id="curvedBottomRect" clipPathUnits="objectBoundingBox">
               <path id="curvedBottomPath" d="M 0.18 0.12 
                        C 0.18 0.06 0.21 0 0.27 0 
-                       L 0.73 0 
+                       C 0.45 0 0.55 0 0.73 0 
                        C 0.79 0 0.82 0.06 0.82 0.12 
-                       L 0.92 0.93 
+                       C 0.88 0.35 0.88 0.6 0.92 0.93 
                        Q 0.5 1 0.08 0.93 
-                       L 0.18 0.12 
+                       C 0.12 0.6 0.12 0.35 0.18 0.12 
                        Z" />
             </clipPath>
             <clipPath id="curvedBottomRectSmall" clipPathUnits="objectBoundingBox">
@@ -3103,19 +3104,62 @@ const HomePage: React.FC = () => {
         
         {/* Container - مینیمال و در وسط */}
         <div className="relative" style={{ width: '90%', maxWidth: '900px', height: '90px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRect)', WebkitClipPath: 'url(#curvedBottomRect)' }}>
-          {/* SVG border overlay برای نمایش دقیق شکل */}
+          {/* SVG border overlay برای نمایش دقیق شکل - بدون ضلع بالا */}
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1 1" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
-            <path d="M 0.18 0.12 
-                     C 0.18 0.06 0.21 0 0.27 0 
-                     L 0.73 0 
-                     C 0.79 0 0.82 0.06 0.82 0.12 
-                     L 0.92 0.93 
-                     Q 0.5 1 0.08 0.93 
-                     L 0.18 0.12 Z" 
+            {/* فقط ضلع راست */}
+            <path d="M 0.82 0.12 
+                     C 0.88 0.35 0.88 0.6 0.92 0.93" 
+                  fill="none" 
+                  stroke="#1e3a8a" 
+                  strokeWidth="0.002" />
+            {/* فقط ضلع پایین */}
+            <path d="M 0.92 0.93 
+                     Q 0.5 1 0.08 0.93" 
+                  fill="none" 
+                  stroke="#1e3a8a" 
+                  strokeWidth="0.002" />
+            {/* فقط ضلع چپ */}
+            <path d="M 0.08 0.93 
+                     C 0.12 0.6 0.12 0.35 0.18 0.12" 
                   fill="none" 
                   stroke="#1e3a8a" 
                   strokeWidth="0.002" />
           </svg>
+          
+          {/* FAQ Items - مینیمال و کوچک با استایل مشابه فوتر */}
+          <div className="absolute inset-0 flex items-center justify-center px-4" style={{ marginTop: '-26px', gap: '28px' }}>
+            {[
+              { id: 'booking', name: language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking', icon: DocumentTextIcon },
+              { id: 'services', name: language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services', icon: UserGroupIcon },
+              { id: 'flight-info', name: language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information', icon: InformationCircleIcon },
+              { id: 'support', name: language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact', icon: PhoneIcon }
+            ].map((faq) => {
+              const IconComponent = faq.icon;
+              return (
+                <button
+                  key={faq.id}
+                  onClick={() => setSelectedFAQ(faq.id)}
+                  className={`group flex items-center gap-1.5 text-base font-medium text-white hover:text-gray-300 transition-all ${fontClass}`}
+                  style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    borderBottom: '2px solid transparent',
+                    paddingBottom: '2px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderBottomColor = '#ffffff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderBottomColor = 'transparent';
+                  }}
+                >
+                  <IconComponent className="w-5 h-5 text-white" />
+                  <span className="whitespace-nowrap">{faq.name}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
         
         {/* شکل کوچک چپ */}
