@@ -3073,76 +3073,56 @@ const HomePage: React.FC = () => {
       )}
 
       {/* FAQ Section - مینیمال با لبه پایینی منحنی - چسبیده به فوتر */}
-      <section id="faq" className="relative flex justify-center" style={{ position: 'relative', top: '30px', marginBottom: '0', zIndex: 10, padding: '0 20px 0 20px' }}>
+      <section id="faq" className="relative flex justify-center items-center" style={{ position: 'relative', top: '30px', marginBottom: '0', zIndex: 10, padding: '0 20px 0 20px', gap: '0' }}>
+        {/* SVG clipPath definitions */}
+        <svg width="0" height="0" style={{ position: 'absolute' }}>
+          <defs>
+            <clipPath id="curvedBottomRect" clipPathUnits="objectBoundingBox">
+              <path id="curvedBottomPath" d="M 0.18 0.12 
+                       C 0.18 0.06 0.21 0 0.27 0 
+                       L 0.73 0 
+                       C 0.79 0 0.82 0.06 0.82 0.12 
+                       L 0.92 0.93 
+                       Q 0.5 1 0.08 0.93 
+                       L 0.18 0.12 
+                       Z" />
+            </clipPath>
+            <clipPath id="curvedBottomRectSmall" clipPathUnits="objectBoundingBox">
+              {/* شکل کوچک با شیب 45 درجه - لبه بالا خیلی باریک */}
+              <path d="M 0.45 0.1 
+                       C 0.45 0.05 0.48 0 0.5 0 
+                       L 0.5 0 
+                       C 0.52 0 0.55 0.05 0.55 0.1 
+                       L 1 1 
+                       Q 0.5 1 0 1 
+                       L 0.45 0.1 
+                       Z" />
+            </clipPath>
+          </defs>
+        </svg>
+        
         {/* Container - مینیمال و در وسط */}
-        <div className="relative" style={{ width: '90%', maxWidth: '600px', height: '60px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRect)', WebkitClipPath: 'url(#curvedBottomRect)' }}>
-          {/* SVG clipPath برای لبه پایینی منحنی */}
-          <svg width="0" height="0" style={{ position: 'absolute' }}>
-            <defs>
-              <clipPath id="curvedBottomRect" clipPathUnits="objectBoundingBox">
-                {/* Trapezoid با لبه پایینی منحنی - ضلع‌های چپ و راست با شیب بیشتر - گوشه‌ها rounded */}
-                {/* radius = 0.12 برای rounded corners */}
-                {/* لبه بالا باریک‌تر برای شیب بیشتر */}
-                <path d="M 0.2 0.12 
-                         C 0.2 0.06 0.23 0 0.27 0 
-                         L 0.73 0 
-                         C 0.77 0 0.8 0.06 0.8 0.12 
-                         L 0.9 0.7 
-                         C 0.98 0.78 1 0.85 0.92 0.93 
-                         Q 0.5 1 0.08 0.93 
-                         C 0 0.85 0.02 0.78 0.1 0.7 
-                         Z" />
-              </clipPath>
-            </defs>
+        <div className="relative" style={{ width: '90%', maxWidth: '900px', height: '90px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRect)', WebkitClipPath: 'url(#curvedBottomRect)' }}>
+          {/* SVG border overlay برای نمایش دقیق شکل */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1 1" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
+            <path d="M 0.18 0.12 
+                     C 0.18 0.06 0.21 0 0.27 0 
+                     L 0.73 0 
+                     C 0.79 0 0.82 0.06 0.82 0.12 
+                     L 0.92 0.93 
+                     Q 0.5 1 0.08 0.93 
+                     L 0.18 0.12 Z" 
+                  fill="none" 
+                  stroke="#1e3a8a" 
+                  strokeWidth="0.002" />
           </svg>
-          
-          {/* Content - کامنت شده */}
-          {/* <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8" style={{ paddingTop: '50px', paddingBottom: '25px' }}>
-            <div className="max-w-7xl mx-auto w-full">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                <button
-                  onClick={() => setSelectedFAQ('booking')}
-                  className="group bg-white rounded-lg p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-gray-300 text-center"
-                  style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
-                >
-                  <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass}`}>
-                    {language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking'}
-                  </h3>
-                </button>
-
-                <button
-                  onClick={() => setSelectedFAQ('services')}
-                  className="group bg-white rounded-lg p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-gray-300 text-center"
-                  style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
-                >
-                  <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass}`}>
-                    {language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services'}
-                  </h3>
-                </button>
-
-                <button
-                  onClick={() => setSelectedFAQ('flight-info')}
-                  className="group bg-white rounded-lg p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-gray-300 text-center"
-                  style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
-                >
-                  <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass}`}>
-                    {language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information'}
-                  </h3>
-                </button>
-
-                <button
-                  onClick={() => setSelectedFAQ('support')}
-                  className="group bg-white rounded-lg p-2.5 sm:p-3 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-gray-300 text-center"
-                  style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
-                >
-                  <h3 className={`text-xs sm:text-sm font-semibold text-gray-900 ${fontClass}`}>
-                    {language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact'}
-                  </h3>
-                </button>
-              </div>
-            </div>
-          </div> */}
         </div>
+        
+        {/* شکل کوچک چپ */}
+        <div className="absolute" style={{ width: '45px', height: '100px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRectSmall)', WebkitClipPath: 'url(#curvedBottomRectSmall)', transform: 'rotate(-44deg)', right: 'calc(50% + min(45vw, -450px) + 100px)', top: '0' }}></div>
+        
+        {/* شکل کوچک راست */}
+        <div className="absolute" style={{ width: '45px', height: '100px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRectSmall)', WebkitClipPath: 'url(#curvedBottomRectSmall)', transform: 'rotate(44deg)', left: 'calc(50% + min(45vw, -450px) + 100px)', top: '0' }}></div>
       </section>
 
       {/* FAQ Modal */}
