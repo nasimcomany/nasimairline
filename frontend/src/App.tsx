@@ -27,6 +27,9 @@ import TicketPage from './pages/TicketPage';
 import ComplaintPage from './pages/ComplaintPage';
 import MagazinePage from './pages/MagazinePage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
+import IranologyPage from './pages/IranologyPage';
+import CityArticlesPage from './pages/CityArticlesPage';
+import IranologyArticleDetailPage from './pages/IranologyArticleDetailPage';
 import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
 
@@ -63,6 +66,9 @@ function App() {
               <Route path="/complaint" element={<ComplaintPage />} />
               <Route path="/magazine" element={<MagazinePage />} />
               <Route path="/magazine/:slug" element={<ArticleDetailPage />} />
+              <Route path="/iranology" element={<IranologyPage />} />
+              <Route path="/iranology/:slug" element={<CityArticlesPage />} />
+              <Route path="/iranology/:city_slug/:slug" element={<IranologyArticleDetailPage />} />
             </Routes>
             {/* Chat Widget - Available on all pages */}
             <ChatWidget />

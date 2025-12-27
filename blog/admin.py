@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
-from .models import Article, Category, Tag, Comment, SEOData, InternalLink, ExternalLink, Backlink
+from .models import Article, Category, Tag, Comment, SEOData, InternalLink, ExternalLink, Backlink, IranCity, IranologyArticle
 
 
 @admin.register(Category)
@@ -375,3 +375,123 @@ class SEODataAdmin(admin.ModelAdmin):
     list_filter = ['robots_index', 'robots_follow', 'sitemap_changefreq']
     search_fields = ['article__title']
     autocomplete_fields = ['article']
+
+
+@admin.register(IranCity)
+class IranCityAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for IranCity model
+    """
+    list_display = ['name', 'name_en', 'province', 'province_en', 'is_active', 'order', 'article_count', 'view_count', 'created_at']
+    list_filter = ['province', 'is_active', 'created_at']
+    search_fields = ['name', 'name_en', 'province', 'province_en', 'description']
+    list_editable = ['is_active', 'order']
+    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ['uuid', 'view_count', 'created_at', 'updated_at']
+    fieldsets = (
+        ('اطلاعات پایه', {
+            'fields': ('name', 'name_en', 'slug', 'province', 'province_en', 'description', 'is_active', 'order')
+        }),
+        ('رسانه', {
+            'fields': ('featured_image', 'image_alt')
+        }),
+        ('SEO', {
+            'fields': ('meta_title', 'meta_description', 'meta_keywords'),
+            'classes': ('collapse',),
+        }),
+        ('آمار', {
+            'fields': ('view_count', 'article_count'),
+            'classes': ('collapse',),
+        }),
+        ('اطلاعات اضافی', {
+            'fields': ('uuid', 'created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+    
+    def article_count(self, obj):
+        """Display article count"""
+        count = obj.articles.filter(status='PUBLISHED').count()
+        if count > 0:
+            url = reverse('admin:blog_iranologyarticle_changelist') + f'?city__id__exact={obj.id}'
+            return format_html('<a href="{}">{} مقاله</a>', url, count)
+        return '0 مقاله'
+    article_count.short_description = 'تعداد مقالات'
+
+
+@admin.register(IranologyArticle)
+class IranologyArticleAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for IranologyArticle model
+    """
+    list_display = [
+        'title', 'city', 'author', 'status', 'is_featured',
+        'view_count', 'reading_time', 'published_at'
+    ]
+    list_filter = [
+        'status', 'is_featured', 'city',
+        'author', 'published_at', 'created_at'
+    ]
+    search_fields = ['title', 'slug', 'excerpt', 'content', 'meta_keywords']
+    list_editable = ['status', 'is_featured']
+    prepopulated_fields = {'slug': ('title',)}
+    autocomplete_fields = ['author', 'city']
+    readonly_fields = [
+        'uuid', 'view_count', 'reading_time', 'created_at', 'updated_at'
+    ]
+    date_hierarchy = 'published_at'
+    
+    # Use CKEditor with upload capability for content field
+    formfield_overrides = {
+        'RichTextUploadingField': {'widget': CKEditorUploadingWidget(config_name='seo_optimized')},
+    }
+    
+    fieldsets = (
+        ('اطلاعات پایه', {
+            'fields': ('title', 'slug', 'excerpt', 'content', 'author', 'city')
+        }),
+        ('رسانه', {
+            'fields': ('featured_image', 'image_alt')
+        }),
+        ('SEO', {
+            'fields': ('meta_title', 'meta_description', 'meta_keywords'),
+            'description': 'این فیلدها برای ایندکس شدن در گوگل بسیار مهم هستند'
+        }),
+        ('وضعیت و نمایش', {
+            'fields': ('status', 'is_featured', 'published_at')
+        }),
+        ('آمار', {
+            'fields': ('view_count', 'reading_time'),
+            'classes': ('collapse',),
+        }),
+        ('اطلاعات اضافی', {
+            'fields': ('uuid', 'created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+    
+    def province(self, obj):
+        """Display province"""
+        return obj.city.province if obj.city else '-'
+    province.short_description = 'استان'
+    
+    actions = ['make_published', 'make_draft', 'make_featured']
+    
+    def make_published(self, request, queryset):
+        """Mark selected articles as published"""
+        from django.utils import timezone
+        updated = queryset.update(status='PUBLISHED', published_at=timezone.now())
+        self.message_user(request, f'{updated} مقاله منتشر شد.')
+    make_published.short_description = 'منتشر کردن مقالات انتخاب شده'
+    
+    def make_draft(self, request, queryset):
+        """Mark selected articles as draft"""
+        updated = queryset.update(status='DRAFT')
+        self.message_user(request, f'{updated} مقاله به پیش‌نویس تبدیل شد.')
+    make_draft.short_description = 'تبدیل به پیش‌نویس'
+    
+    def make_featured(self, request, queryset):
+        """Mark selected articles as featured"""
+        updated = queryset.update(is_featured=True)
+        self.message_user(request, f'{updated} مقاله ویژه شد.')
+    make_featured.short_description = 'ویژه کردن مقالات'

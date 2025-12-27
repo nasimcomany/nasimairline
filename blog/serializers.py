@@ -3,7 +3,7 @@ Serializers for blog app
 """
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Article, Category, Tag, Comment, SEOData
+from .models import Article, Category, Tag, Comment, SEOData, IranCity, IranologyArticle
 
 User = get_user_model()
 
@@ -196,4 +196,114 @@ class SEODataSerializer(serializers.ModelSerializer):
             'sitemap_priority', 'sitemap_changefreq', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class IranCitySerializer(serializers.ModelSerializer):
+    """
+    Serializer for IranCity model
+    """
+    article_count = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
+    featured_image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = IranCity
+        fields = [
+            'uuid', 'name', 'name_en', 'slug', 'province', 'province_en',
+            'description', 'featured_image', 'featured_image_url', 'image_alt',
+            'meta_title', 'meta_description', 'meta_keywords',
+            'is_active', 'order', 'view_count', 'article_count', 'url',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['uuid', 'view_count', 'created_at', 'updated_at']
+    
+    def get_article_count(self, obj):
+        """Get published article count for this city"""
+        return obj.articles.filter(status='PUBLISHED').count()
+    
+    def get_url(self, obj):
+        """Get absolute URL"""
+        return obj.get_absolute_url()
+    
+    def get_featured_image_url(self, obj):
+        """Get featured image URL"""
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return None
+
+
+class IranologyArticleListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for IranologyArticle list view (lightweight)
+    """
+    author_name = serializers.CharField(source='author.get_full_name', read_only=True)
+    city_name = serializers.CharField(source='city.name', read_only=True)
+    city_slug = serializers.CharField(source='city.slug', read_only=True)
+    city_province = serializers.CharField(source='city.province', read_only=True)
+    url = serializers.SerializerMethodField()
+    featured_image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = IranologyArticle
+        fields = [
+            'uuid', 'title', 'slug', 'excerpt', 'author', 'author_name',
+            'city', 'city_name', 'city_slug', 'city_province',
+            'featured_image', 'featured_image_url', 'image_alt',
+            'is_featured', 'view_count', 'reading_time',
+            'published_at', 'url', 'created_at'
+        ]
+        read_only_fields = ['uuid', 'view_count', 'reading_time', 'created_at']
+    
+    def get_url(self, obj):
+        """Get absolute URL"""
+        return obj.get_absolute_url()
+    
+    def get_featured_image_url(self, obj):
+        """Get featured image URL"""
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return None
+
+
+class IranologyArticleDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer for IranologyArticle detail view (full)
+    """
+    author_name = serializers.CharField(source='author.get_full_name', read_only=True)
+    city = IranCitySerializer(read_only=True)
+    url = serializers.SerializerMethodField()
+    featured_image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = IranologyArticle
+        fields = [
+            'uuid', 'title', 'slug', 'excerpt', 'content', 'author', 'author_name',
+            'city', 'featured_image', 'featured_image_url', 'image_alt',
+            'meta_title', 'meta_description', 'meta_keywords',
+            'status', 'is_featured', 'view_count', 'reading_time',
+            'published_at', 'url', 'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'uuid', 'view_count', 'reading_time', 'published_at',
+            'created_at', 'updated_at'
+        ]
+    
+    def get_url(self, obj):
+        """Get absolute URL"""
+        return obj.get_absolute_url()
+    
+    def get_featured_image_url(self, obj):
+        """Get featured image URL"""
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return None
 

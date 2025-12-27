@@ -162,6 +162,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         { label: t('nav.weather') || 'وضعیت آب و هوا', path: '/#weather' },
         { label: t('nav.complaint') || 'ثبت شکایت', path: '/tickets' },
         { label: t('nav.magazine') || 'مجله', path: '/magazine' },
+        { label: t('nav.iranology') || 'ایران‌شناسی', path: '/iranology' },
         { label: t('nav.photoGallery') || 'گالری عکس', path: '/gallery' },
       ]
     }
