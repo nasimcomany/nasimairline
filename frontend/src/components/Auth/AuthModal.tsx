@@ -88,15 +88,32 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       return;
     }
 
-    // Validate national ID
-    if (!validateNationalId(loginForm.nationalId)) {
+    // Validate input: must be either national ID (10 digits) or passport number (6-20 alphanumeric)
+    const input = loginForm.nationalId.trim();
+    
+    // Check if it's a national ID (10 digits) or passport number (6-20 alphanumeric)
+    const isNationalId = /^\d{10}$/.test(input);
+    const isPassportNumber = /^[A-Z0-9]{6,20}$/.test(input);
+    
+    if (!isNationalId && !isPassportNumber) {
+      if (input.length === 10 && !isNationalId) {
+        setError(t('auth.invalidNationalId'));
+      } else {
+        setError(t('auth.nationalIdOrPassportInvalid'));
+      }
+      return;
+    }
+    
+    // If it's a national ID, validate checksum
+    if (isNationalId && !validateNationalId(input)) {
       setError(t('auth.invalidNationalId'));
       return;
     }
 
     try {
+      // Construct email: nationalId@nasimair.com or passportNumber@nasimair.com
       await dispatch(loginUser({
-        email: loginForm.nationalId,
+        email: `${input}@nasimair.com`,
         password: loginForm.password
       })).unwrap();
       
@@ -123,9 +140,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       return;
     }
 
-    // Validate national ID
-    if (!validateNationalId(registerForm.nationalId)) {
+    // Validate national ID (only for Iranian nationality)
+    if (registerForm.nationality === 'iranian' && !validateNationalId(registerForm.nationalId)) {
       setError(t('auth.invalidNationalId'));
+      return;
+    }
+    
+    // Basic validation for passport number (for non-Iranian)
+    if (registerForm.nationality !== 'iranian' && registerForm.nationalId.length < 6) {
+      setError(t('auth.invalidPassport'));
       return;
     }
 
@@ -151,7 +174,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     }
 
     try {
-      await dispatch(registerUser({
+      const registerData: any = {
         email: `${registerForm.nationalId}@nasimair.com`,
         password: registerForm.password,
         password_confirm: registerForm.confirmPassword,
@@ -160,7 +183,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         phone_number: '',
         date_of_birth: registerForm.birthDate,
         nationality: registerForm.nationality
-      })).unwrap();
+      };
+      
+      // اگر ملیت ایرانی بود، national_id بفرست، در غیر این صورت passport_number
+      if (registerForm.nationality === 'iranian') {
+        registerData.national_id = registerForm.nationalId;
+      } else {
+        registerData.passport_number = registerForm.nationalId;
+      }
+      
+      await dispatch(registerUser(registerData)).unwrap();
 
       setSuccess(t('auth.registerSuccess'));
       
@@ -226,19 +258,28 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
           {/* Login Form */}
           {mode === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
-              {/* National ID */}
+              {/* National ID / Passport Number */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.nationalId')}
+                  <span className="block text-xs font-normal text-gray-500 mt-1" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('auth.foreignNationalMessage')}
+                  </span>
                 </label>
                 <input
                   type="text"
                   value={loginForm.nationalId}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, nationalId: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                  onChange={(e) => {
+                    // Accept both numbers (for national ID) and alphanumeric (for passport)
+                    const value = e.target.value.toUpperCase();
+                    // Allow numbers, letters, and common passport characters
+                    const cleaned = value.replace(/[^A-Z0-9]/g, '');
+                    setLoginForm(prev => ({ ...prev, nationalId: cleaned.slice(0, 20) }));
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                   style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
-                  placeholder={t('auth.nationalIdPlaceholder')}
-                  maxLength={10}
+                  placeholder={t('auth.nationalIdOrPassportPlaceholder')}
+                  maxLength={20}
                   required
                 />
               </div>
@@ -331,19 +372,33 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 />
               </div>
 
-              {/* National ID */}
+              {/* National ID / Passport Number */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                  {t('auth.nationalIdRegister')}
+                  {registerForm.nationality === 'iranian' 
+                    ? t('auth.nationalIdRegister') 
+                    : t('auth.passportNumber')}
                 </label>
                 <input
                   type="text"
                   value={registerForm.nationalId}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, nationalId: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                  onChange={(e) => {
+                    if (registerForm.nationality === 'iranian') {
+                      // فقط اعداد و حداکثر 10 رقم برای کد ملی
+                      setRegisterForm(prev => ({ ...prev, nationalId: e.target.value.replace(/\D/g, '').slice(0, 10) }));
+                    } else {
+                      // برای پاسپورت: حروف و اعداد، حداکثر 20 کاراکتر
+                      setRegisterForm(prev => ({ ...prev, nationalId: e.target.value.toUpperCase().slice(0, 20) }));
+                    }
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
-                  placeholder={t('auth.nationalIdPlaceholder')}
-                  maxLength={10}
+                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: registerForm.nationality === 'iranian' ? 'ltr' : 'ltr', textAlign: 'right' }}
+                  placeholder={
+                    registerForm.nationality === 'iranian' 
+                      ? t('auth.nationalIdPlaceholder') 
+                      : t('auth.passportPlaceholder')
+                  }
+                  maxLength={registerForm.nationality === 'iranian' ? 10 : 20}
                   required
                 />
               </div>
