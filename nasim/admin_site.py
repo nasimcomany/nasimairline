@@ -13,9 +13,9 @@ class LimitedAdminSite(AdminSite):
     """
     Custom Admin Site that limits access to only blog and gallery apps
     """
-    site_header = 'پنل مدیریت محدود - مقالات و گالری'
+    site_header = 'پنل مدیریت محدود - مقالات، ایران‌شناسی و گالری'
     site_title = 'پنل محدود'
-    index_title = 'مدیریت مقالات و گالری'
+    index_title = 'مدیریت مقالات، ایران‌شناسی و گالری'
     
     def has_permission(self, request):
         """
@@ -61,12 +61,14 @@ limited_admin_site.register(User, UserAdmin)
 # Register blog models to limited admin site
 from blog.models import (
     Article, Category, Tag, Comment, SEOData,
-    InternalLink, ExternalLink, Backlink
+    InternalLink, ExternalLink, Backlink,
+    IranCity, IranologyArticle
 )
 from blog.admin import (
     CategoryAdmin, TagAdmin, ArticleAdmin, 
     CommentAdmin, SEODataAdmin,
-    InternalLinkAdmin, ExternalLinkAdmin, BacklinkAdmin
+    InternalLinkAdmin, ExternalLinkAdmin, BacklinkAdmin,
+    IranCityAdmin, IranologyArticleAdmin
 )
 
 limited_admin_site.register(Article, ArticleAdmin)
@@ -77,6 +79,8 @@ limited_admin_site.register(SEOData, SEODataAdmin)
 limited_admin_site.register(InternalLink, InternalLinkAdmin)
 limited_admin_site.register(ExternalLink, ExternalLinkAdmin)
 limited_admin_site.register(Backlink, BacklinkAdmin)
+limited_admin_site.register(IranCity, IranCityAdmin)
+limited_admin_site.register(IranologyArticle, IranologyArticleAdmin)
 
 # Register gallery models to limited admin site
 from gallery.models import GalleryCategory, GalleryAlbum, GalleryImage

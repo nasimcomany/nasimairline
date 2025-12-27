@@ -400,7 +400,7 @@ class IranCityAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
         ('آمار', {
-            'fields': ('view_count', 'article_count'),
+            'fields': ('view_count',),
             'classes': ('collapse',),
         }),
         ('اطلاعات اضافی', {
