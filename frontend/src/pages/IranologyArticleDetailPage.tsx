@@ -140,7 +140,7 @@ const IranologyArticleDetailPage: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         <EmiratesHeader />
         <div className="text-center py-20">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           <p
             className={`mt-4 text-gray-600 ${fontClass}`}
             style={{
@@ -182,14 +182,14 @@ const IranologyArticleDetailPage: React.FC = () => {
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <button
               onClick={() => navigate('/iranology')}
-              className="hover:text-green-600 transition-colors"
+              className="hover:text-blue-600 transition-colors"
             >
               {language === 'fa' ? 'ایران‌شناسی' : language === 'ar' ? 'الإيرانولوجيا' : 'Iranology'}
             </button>
             <span>/</span>
             <button
               onClick={() => navigate(`/iranology/${article.city.slug}`)}
-              className="hover:text-green-600 transition-colors"
+              className="hover:text-blue-600 transition-colors"
             >
               {article.city.name}
             </button>
@@ -204,7 +204,7 @@ const IranologyArticleDetailPage: React.FC = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate(`/iranology/${article.city.slug}`)}
-          className={`mb-6 flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors ${fontClass}`}
+          className={`mb-6 flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors ${fontClass}`}
           style={{
             fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
             direction: language === 'en' ? 'ltr' : 'rtl'
@@ -234,7 +234,7 @@ const IranologyArticleDetailPage: React.FC = () => {
           <div className="flex items-center gap-4 mb-4">
             <Link
               to={`/iranology/${article.city.slug}`}
-              className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
             >
               <MapPinIcon className="w-5 h-5" />
               <span className="font-semibold">{article.city.name}</span>
@@ -276,7 +276,7 @@ const IranologyArticleDetailPage: React.FC = () => {
             </div>
             <button
               onClick={shareArticle}
-              className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
             >
               <ShareIcon className="w-5 h-5" />
               <span>{language === 'fa' ? 'اشتراک' : language === 'ar' ? 'مشاركة' : 'Share'}</span>
@@ -339,7 +339,7 @@ const IranologyArticleDetailPage: React.FC = () => {
                   )}
                   <div className="p-6">
                     <h3
-                      className={`text-xl font-bold text-gray-900 mb-3 hover:text-green-600 transition-colors line-clamp-2 ${fontClass}`}
+                      className={`text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors line-clamp-2 ${fontClass}`}
                       style={{
                         fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                         direction: language === 'en' ? 'ltr' : 'rtl'

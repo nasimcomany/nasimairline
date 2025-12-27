@@ -108,11 +108,11 @@ const IranologyPage: React.FC = () => {
       <EmiratesHeader />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-green-900 via-green-800 to-emerald-900 text-white py-20 sm:py-28">
+      <section className="relative bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex justify-center mb-6">
-              <MapPinIcon className="w-16 h-16 sm:w-20 sm:h-20 text-green-300" />
+              <MapPinIcon className="w-16 h-16 sm:w-20 sm:h-20 text-blue-300" />
             </div>
             <h1
               className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 ${fontClass}`}
@@ -124,7 +124,7 @@ const IranologyPage: React.FC = () => {
               {language === 'fa' ? 'ایران‌شناسی' : language === 'ar' ? 'الإيرانولوجيا' : 'Iranology'}
             </h1>
             <p
-              className={`text-lg sm:text-xl text-green-100 max-w-2xl mx-auto ${fontClass}`}
+              className={`text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto ${fontClass}`}
               style={{
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
@@ -155,7 +155,7 @@ const IranologyPage: React.FC = () => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${fontClass}`}
+                 className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${fontClass}`}
                 style={{
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   direction: language === 'en' ? 'ltr' : 'rtl',
@@ -172,11 +172,11 @@ const IranologyPage: React.FC = () => {
                   setSelectedProvince(null);
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  selectedProvince === null
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } ${fontClass}`}
+                 className={`px-4 py-2 rounded-lg transition-all ${
+                   selectedProvince === null
+                     ? 'bg-blue-600 text-white'
+                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                 } ${fontClass}`}
                 style={{
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
@@ -190,11 +190,11 @@ const IranologyPage: React.FC = () => {
                     setSelectedProvince(province.province);
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-lg transition-all ${
-                    selectedProvince === province.province
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  } ${fontClass}`}
+                   className={`px-4 py-2 rounded-lg transition-all ${
+                     selectedProvince === province.province
+                       ? 'bg-blue-600 text-white'
+                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                   } ${fontClass}`}
                   style={{
                     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}
@@ -212,7 +212,7 @@ const IranologyPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="text-center py-20">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               <p
                 className={`mt-4 text-gray-600 ${fontClass}`}
                 style={{
