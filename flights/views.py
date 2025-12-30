@@ -230,8 +230,9 @@ class NiraAPIViewSet(viewsets.ViewSet):
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)
         else:
+            # Return full error details for debugging
             return Response(
-                {'error': result.get('error', 'Unknown error')},
+                result,  # Return full result object with all debug info
                 status=status.HTTP_400_BAD_REQUEST
             )
     

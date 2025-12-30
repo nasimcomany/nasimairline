@@ -24,11 +24,11 @@ class NiraClient:
         Initialize Nira client with settings
         """
         self.base_url = getattr(settings, 'NIRA_BASE_URL', '')
-        self.ibe_url = f"{self.base_url}/ibe" if self.base_url else None
+        self.api_url = f"{self.base_url}/api/Res" if self.base_url else None
         self.ws_url = f"{self.base_url}/ws1/NRSCWS.jsp" if self.base_url else None
         self.office_user = getattr(settings, 'NIRA_OFFICE_USER', '')
         self.office_pass = getattr(settings, 'NIRA_OFFICE_PASS', '')
-        self.timeout = getattr(settings, 'NIRA_API_TIMEOUT', 30)
+        self.timeout = getattr(settings, 'NIRA_API_TIMEOUT', 60)  # Default 60 seconds for slow APIs
         
         if not self.base_url:
             logger.warning("NIRA_BASE_URL is not set in settings")
@@ -111,10 +111,16 @@ class NiraClient:
                 adult_qty=1
             )
         """
-        if not self.ibe_url:
+        if not self.api_url:
             return {
                 'success': False,
                 'error': 'Nira API URL is not configured'
+            }
+        
+        if not self.office_user or not self.office_pass:
+            return {
+                'success': False,
+                'error': 'Nira Office credentials are not configured'
             }
         
         # Convert dates to Jalali format
@@ -123,26 +129,51 @@ class NiraClient:
         if round_trip and return_date:
             return_date_jalali = self._convert_to_jalali(return_date)
         
-        # Build query parameters
-        params = {
-            'origin': origin.upper(),
-            'destination': destination.upper(),
-            'departureDate': departure_date_jalali,
-            'roundTrip': 'true' if round_trip else 'false',
-            'adultQty': str(adult_qty),
-            'childQty': str(child_qty),
-            'infantQty': str(infant_qty),
+        # Create OfficePass with current date and time (format: {OfficeUser}_{YYYY-MM-DD HH:MM:SS})
+        import base64
+        from datetime import datetime
+        now = datetime.now()
+        office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
+        office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
+        
+        # Build query parameters for URL (OfficeUser and OfficePass)
+        query_params = {
+            'OfficeUser': self.office_user,
+            'OfficePass': office_pass_encoded,
         }
         
-        if round_trip and return_date_jalali:
-            params['returnDate'] = return_date_jalali
+        # Build request body as JSON (with correct field names)
+        json_data = {
+            'Origin': origin.upper(),
+            'Destination': destination.upper(),
+            'Date': departure_date_jalali,
+            'AdultNo': adult_qty,
+            'ChildNo': child_qty,
+            'InfantNo': infant_qty,
+            'isForeign': None,
+        }
+        
+        # Add round trip fields if needed
+        if round_trip:
+            json_data['roundTrip'] = True
+            if return_date_jalali:
+                json_data['ReturnDate'] = return_date_jalali
+        else:
+            json_data['roundTrip'] = False
         
         try:
-            # Make request to Nira API
-            response = requests.get(
-                f"{self.ibe_url}/Availability",
-                params=params,
-                timeout=self.timeout
+            # Make POST request to Nira API with JSON body
+            response = requests.post(
+                f"{self.api_url}/FlightAvailability",
+                params=query_params,  # OfficeUser and OfficePass in query string
+                json=json_data,  # Flight parameters as JSON in POST body
+                headers={
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json, text/plain, */*',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                },
+                timeout=self.timeout,
+                allow_redirects=True
             )
             
             # Check response status
@@ -164,17 +195,22 @@ class NiraClient:
                         'content_type': response.headers.get('Content-Type', '')
                     }
             else:
+                # Log the actual URL and response for debugging
                 return {
                     'success': False,
                     'error': f'API returned status code {response.status_code}',
                     'status_code': response.status_code,
+                    'url': response.url,  # Show the actual URL called
+                    'request_url': f"{self.api_url}/FlightAvailability",  # Show what we tried to call
+                    'base_url': self.base_url,  # Show base URL
+                    'api_url': self.api_url,  # Show API URL
                     'response': response.text[:500]  # First 500 chars
                 }
                 
         except requests.exceptions.Timeout:
             return {
                 'success': False,
-                'error': 'Request timeout - Nira API did not respond in time'
+                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.'
             }
         except requests.exceptions.ConnectionError:
             return {
@@ -252,7 +288,7 @@ class NiraClient:
         except requests.exceptions.Timeout:
             return {
                 'success': False,
-                'error': 'Request timeout - Nira API did not respond in time'
+                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.'
             }
         except requests.exceptions.ConnectionError:
             return {
@@ -331,7 +367,7 @@ class NiraClient:
         except requests.exceptions.Timeout:
             return {
                 'success': False,
-                'error': 'Request timeout - Nira API did not respond in time'
+                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.'
             }
         except requests.exceptions.ConnectionError:
             return {

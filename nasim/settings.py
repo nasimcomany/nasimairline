@@ -355,7 +355,7 @@ ADMIN_WHATSAPP_NUMBER = os.environ.get('ADMIN_WHATSAPP_NUMBER', '+989379146130')
 NIRA_BASE_URL = os.environ.get('NIRA_BASE_URL', '')  # URL پایه سیستم نیرا (مثال: https://airline.example.com)
 NIRA_OFFICE_USER = os.environ.get('NIRA_OFFICE_USER', '')  # نام کاربری Office برای دسترسی به Web Service
 NIRA_OFFICE_PASS = os.environ.get('NIRA_OFFICE_PASS', '')  # رمز عبور Office
-NIRA_API_TIMEOUT = int(os.environ.get('NIRA_API_TIMEOUT', '30'))  # Timeout برای درخواست‌های API (ثانیه)
+NIRA_API_TIMEOUT = int(os.environ.get('NIRA_API_TIMEOUT', '60'))  # Timeout برای درخواست‌های API (ثانیه) - افزایش یافت به 60
 
 CORS_ALLOW_HEADERS = [
     'accept',
