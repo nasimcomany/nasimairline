@@ -350,6 +350,13 @@ WHATSAPP_API_KEY = os.environ.get('WHATSAPP_API_KEY', '')  # API Key
 WHATSAPP_PHONE_ID = os.environ.get('WHATSAPP_PHONE_ID', '')  # Phone ID (برای Twilio)
 ADMIN_WHATSAPP_NUMBER = os.environ.get('ADMIN_WHATSAPP_NUMBER', '+989379146130')  # شماره واتساپ ادمین (مثال: +989123456789)
 
+# تنظیمات API نیرا (Nira) برای سیستم فروش اینترنتی
+# این مقادیر را در فایل .env تنظیم کنید
+NIRA_BASE_URL = os.environ.get('NIRA_BASE_URL', '')  # URL پایه سیستم نیرا (مثال: https://airline.example.com)
+NIRA_OFFICE_USER = os.environ.get('NIRA_OFFICE_USER', '')  # نام کاربری Office برای دسترسی به Web Service
+NIRA_OFFICE_PASS = os.environ.get('NIRA_OFFICE_PASS', '')  # رمز عبور Office
+NIRA_API_TIMEOUT = int(os.environ.get('NIRA_API_TIMEOUT', '30'))  # Timeout برای درخواست‌های API (ثانیه)
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',

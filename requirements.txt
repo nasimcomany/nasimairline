@@ -36,3 +36,6 @@ django-ckeditor==6.7.0
 
 # HTTP Requests (for WhatsApp API)
 requests==2.31.0
+
+# Persian Date Conversion (for Nira API)
+persiantools==5.0.0

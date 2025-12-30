@@ -18,6 +18,11 @@ from .serializers import (
     FlightDetailSerializer,
     FlightSearchSerializer
 )
+from .nira_serializers import (
+    NiraAvailabilityRequestSerializer,
+    NiraRoutesRequestSerializer
+)
+from .nira_client import NiraClient
 
 
 class AirportViewSet(viewsets.ModelViewSet):
@@ -161,3 +166,119 @@ class FlightViewSet(viewsets.ModelViewSet):
             'cabin_class': cabin_class,
             'price': flight.get_price(cabin_class)
         })
+
+
+class NiraAPIViewSet(viewsets.ViewSet):
+    """
+    ViewSet for Nira API integration
+    Provides endpoints for Availability and Routes APIs
+    """
+    permission_classes = [permissions.AllowAny]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.nira_client = NiraClient()
+    
+    @action(detail=False, methods=['post'], url_path='availability')
+    def check_availability(self, request):
+        """
+        Check flight availability using Nira IBE API
+        
+        POST /api/flights/nira/availability/
+        
+        Request body:
+        {
+            "origin": "THR",
+            "destination": "MHD",
+            "departure_date": "2023-11-04",
+            "round_trip": true,
+            "return_date": "2023-11-06",
+            "adult_qty": 1,
+            "child_qty": 0,
+            "infant_qty": 0
+        }
+        """
+        serializer = NiraAvailabilityRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        validated_data = serializer.validated_data
+        
+        # Convert date string to datetime
+        departure_date = datetime.combine(
+            validated_data['departure_date'],
+            datetime.min.time()
+        )
+        return_date = None
+        if validated_data.get('return_date'):
+            return_date = datetime.combine(
+                validated_data['return_date'],
+                datetime.min.time()
+            )
+        
+        # Call Nira API
+        result = self.nira_client.check_availability(
+            origin=validated_data['origin'],
+            destination=validated_data['destination'],
+            departure_date=departure_date,
+            round_trip=validated_data.get('round_trip', False),
+            return_date=return_date,
+            adult_qty=validated_data.get('adult_qty', 1),
+            child_qty=validated_data.get('child_qty', 0),
+            infant_qty=validated_data.get('infant_qty', 0)
+        )
+        
+        if result['success']:
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {'error': result.get('error', 'Unknown error')},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=False, methods=['get'], url_path='routes/origins')
+    def get_origin_cities(self, request):
+        """
+        Get list of origin cities from Nira Routes API
+        
+        GET /api/flights/nira/routes/origins/
+        """
+        result = self.nira_client.get_origin_cities()
+        
+        if result['success']:
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {'error': result.get('error', 'Unknown error')},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=False, methods=['get'], url_path='routes/destinations')
+    def get_destinations(self, request):
+        """
+        Get list of destinations from a specific origin
+        
+        GET /api/flights/nira/routes/destinations/?origin=THR
+        
+        Query parameters:
+        - origin: Origin airport IATA code (required)
+        """
+        serializer = NiraRoutesRequestSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        
+        origin = serializer.validated_data.get('origin', '')
+        
+        if not origin:
+            return Response(
+                {'error': 'Origin parameter is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        result = self.nira_client.get_destinations(origin=origin)
+        
+        if result['success']:
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {'error': result.get('error', 'Unknown error')},
+                status=status.HTTP_400_BAD_REQUEST
+            )
