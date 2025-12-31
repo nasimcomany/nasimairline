@@ -271,12 +271,32 @@ class NiraClient:
             if response.status_code == 200:
                 try:
                     data = response.json()
+                    # Check if response is "SIGN" (authentication error)
+                    if isinstance(data, str) and data.strip() == "SIGN":
+                        return {
+                            'success': False,
+                            'error': 'Authentication failed - OfficePass might be incorrect or expired. Check OfficeUser and OfficePass.',
+                            'status_code': response.status_code,
+                            'url': response.url,
+                            'office_user': self.office_user,
+                            'debug': 'Response was "SIGN" which indicates authentication failure'
+                        }
                     return {
                         'success': True,
                         'data': data,
                         'status_code': response.status_code
                     }
                 except ValueError:
+                    # If not JSON, check if it's "SIGN" string
+                    if response.text.strip() == "SIGN":
+                        return {
+                            'success': False,
+                            'error': 'Authentication failed - OfficePass might be incorrect or expired. Check OfficeUser and OfficePass.',
+                            'status_code': response.status_code,
+                            'url': response.url,
+                            'office_user': self.office_user,
+                            'debug': 'Response was "SIGN" which indicates authentication failure'
+                        }
                     # If not JSON, might be XML or HTML
                     return {
                         'success': True,
@@ -295,7 +315,9 @@ class NiraClient:
         except requests.exceptions.Timeout:
             return {
                 'success': False,
-                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.'
+                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.',
+                'timeout': self.timeout,
+                'url': self.ws_url
             }
         except requests.exceptions.ConnectionError:
             return {
