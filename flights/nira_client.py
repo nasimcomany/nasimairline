@@ -239,19 +239,26 @@ class NiraClient:
                 'error': 'Nira Web Service URL is not configured'
             }
         
-        if not self.office_user or not self.office_pass:
+        if not self.office_user:
             return {
                 'success': False,
                 'error': 'Nira Office credentials are not configured'
             }
         
+        # Create OfficePass with current date and time (format: {OfficeUser}_{YYYY-MM-DD HH:MM:SS})
+        import base64
+        from datetime import datetime
+        now = datetime.now()
+        office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
+        office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
+        
         # Build query parameters
         params = {
             'ModuleType': 'SP',
             'ModuleName': 'RoutesApp',
-            'origin': '',  # Empty to get all origin cities
+            'Origin': '',  # Empty to get all origin cities (capital O)
             'OfficeUser': self.office_user,
-            'OfficePass': self.office_pass,
+            'OfficePass': office_pass_encoded,  # Use encoded password with date
         }
         
         try:
@@ -318,19 +325,26 @@ class NiraClient:
                 'error': 'Nira Web Service URL is not configured'
             }
         
-        if not self.office_user or not self.office_pass:
+        if not self.office_user:
             return {
                 'success': False,
                 'error': 'Nira Office credentials are not configured'
             }
         
+        # Create OfficePass with current date and time (format: {OfficeUser}_{YYYY-MM-DD HH:MM:SS})
+        import base64
+        from datetime import datetime
+        now = datetime.now()
+        office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
+        office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
+        
         # Build query parameters
         params = {
             'ModuleType': 'SP',
             'ModuleName': 'RoutesApp',
-            'origin': origin.upper(),  # IATA code of origin
+            'Origin': origin.upper(),  # IATA code of origin (capital O)
             'OfficeUser': self.office_user,
-            'OfficePass': self.office_pass,
+            'OfficePass': office_pass_encoded,  # Use encoded password with date
         }
         
         try:
