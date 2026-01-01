@@ -117,7 +117,7 @@ class NiraClient:
                 'error': 'Nira API URL is not configured'
             }
         
-        if not self.office_user or not self.office_pass:
+        if not self.office_user:
             return {
                 'success': False,
                 'error': 'Nira Office credentials are not configured'
