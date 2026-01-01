@@ -16,6 +16,7 @@ import {
 import { cities } from '../data/cities';
 import CustomSelect from '../components/CustomSelect/CustomSelect';
 import { useLanguage } from '../contexts/LanguageContext';
+import { checkAvailability, FlightAvailability, getOriginCities, OriginCity } from '../services/niraApi';
 
 interface Flight {
   id: string;
@@ -30,6 +31,7 @@ interface Flight {
   availableSeats: number;
   class: 'economy' | 'business' | 'first';
   stops: number;
+  originalData: FlightAvailability;
 }
 
 const FlightResultsPage: React.FC = () => {
@@ -43,70 +45,89 @@ const FlightResultsPage: React.FC = () => {
   const [filterStops, setFilterStops] = useState<'all' | 'direct' | 'one'>('all');
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockFlights: Flight[] = [
-        {
-          id: '1',
-          airline: 'Nasim Air',
-          flightNumber: 'NA101',
-          origin: searchParams?.origin || 'THR',
-          destination: searchParams?.destination || 'DXB',
-          departureTime: '08:00',
-          arrivalTime: '10:30',
-          duration: '2h 30m',
-          price: 3500000,
-          availableSeats: 12,
-          class: 'economy',
-          stops: 0
-        },
-        {
-          id: '2',
-          airline: 'Nasim Air',
-          flightNumber: 'NA103',
-          origin: searchParams?.origin || 'THR',
-          destination: searchParams?.destination || 'DXB',
-          departureTime: '14:00',
-          arrivalTime: '16:30',
-          duration: '2h 30m',
-          price: 3200000,
-          availableSeats: 8,
-          class: 'economy',
-          stops: 0
-        },
-        {
-          id: '3',
-          airline: 'Nasim Air',
-          flightNumber: 'NA105',
-          origin: searchParams?.origin || 'THR',
-          destination: searchParams?.destination || 'DXB',
-          departureTime: '18:30',
-          arrivalTime: '21:00',
-          duration: '2h 30m',
-          price: 2900000,
-          availableSeats: 15,
-          class: 'economy',
-          stops: 0
-        },
-        {
-          id: '4',
-          airline: 'Nasim Air',
-          flightNumber: 'NA201',
-          origin: searchParams?.origin || 'THR',
-          destination: searchParams?.destination || 'DXB',
-          departureTime: '10:00',
-          arrivalTime: '12:30',
-          duration: '2h 30m',
-          price: 7500000,
-          availableSeats: 6,
-          class: 'business',
-          stops: 0
-        },
-      ];
-      
-      setFlights(mockFlights);
-      setLoading(false);
-    }, 1000);
+    const fetchFlights = async () => {
+      if (!searchParams) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        
+        // Get passenger counts
+        const passengers = typeof searchParams.passengers === 'object' 
+          ? searchParams.passengers 
+          : { adults: 1, children: 0, infants: 0 };
+
+        // Call NIRA API
+        const availableFlights = await checkAvailability({
+          origin: searchParams.origin,
+          destination: searchParams.destination,
+          departure_date: searchParams.departureDate,
+          round_trip: searchParams.tripType === 'roundtrip',
+          return_date: searchParams.returnDate,
+          adult_qty: passengers.adults,
+          child_qty: passengers.children,
+          infant_qty: passengers.infants,
+        });
+
+        // Convert API response to Flight format
+        const convertedFlights: Flight[] = availableFlights.flatMap((flight, index) => {
+          return flight.ClassStatus.map((classStatus, classIndex) => {
+            // Parse departure and arrival times
+            const departureDateTime = new Date(flight.DepartureDateTime);
+            const arrivalDateTime = new Date(flight.ArrivalDateTime);
+            
+            // Calculate duration
+            const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
+            const hours = Math.floor(durationMs / (1000 * 60 * 60));
+            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            const duration = `${hours}h ${minutes}m`;
+
+            // Map cabin class
+            let flightClass: 'economy' | 'business' | 'first' = 'economy';
+            if (classStatus.CabinClass.toLowerCase().includes('business')) {
+              flightClass = 'business';
+            } else if (classStatus.CabinClass.toLowerCase().includes('first')) {
+              flightClass = 'first';
+            }
+
+            return {
+              id: `${flight.FlightNo}-${index}-${classIndex}`,
+              airline: flight.AirLineCode || 'NSN',
+              flightNumber: flight.FlightNo,
+              origin: flight.Origin,
+              destination: flight.Destination,
+              departureTime: departureDateTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              }),
+              arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              }),
+              duration: duration,
+              price: classStatus.TotalPrice || 0,
+              availableSeats: classStatus.Status === 'C' ? 10 : 0, // C means available
+              class: flightClass,
+              stops: 0, // NIRA API doesn't provide stops info directly
+              originalData: flight,
+            };
+          });
+        });
+
+        setFlights(convertedFlights);
+      } catch (error) {
+        console.error('Error fetching flights:', error);
+        setFlights([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFlights();
   }, [searchParams]);
 
   if (!searchParams) {

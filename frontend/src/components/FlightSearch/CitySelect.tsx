@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPinIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { cities, City } from '../../data/cities';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { getOriginCities, OriginCity } from '../../services/niraApi';
 
 interface CitySelectProps {
   value: string;
@@ -18,25 +18,41 @@ const CitySelect: React.FC<CitySelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [cities, setCities] = useState<OriginCity[]>([]);
+  const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { language } = useLanguage();
 
-  const selectedCity = cities.find(city => city.code === value);
+  // Fetch cities from API on component mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        setLoading(true);
+        const originCities = await getOriginCities();
+        setCities(originCities);
+      } catch (error) {
+        console.error('Error loading cities:', error);
+        // Fallback to empty array if API fails
+        setCities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCities();
+  }, []);
+
+  const selectedCity = cities.find(city => city.CITY === value);
   
-  const getCityName = (city: City) => {
-    return language === 'en' ? city.name : city.nameFa;
-  };
-  
-  const getCountryName = (city: City) => {
-    return language === 'en' ? city.country : city.countryFa;
+  const getCityName = (city: OriginCity) => {
+    return language === 'en' ? city.CITYNAME_EN : city.CITYNAME_FA;
   };
 
   const filteredCities = cities.filter(city =>
-    city.nameFa.includes(searchTerm) ||
-    city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    city.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    city.countryFa.includes(searchTerm)
+    city.CITYNAME_FA.includes(searchTerm) ||
+    city.CITYNAME_EN.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    city.CITY.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -81,10 +97,12 @@ const CitySelect: React.FC<CitySelectProps> = ({
       >
         <div className="flex items-center gap-1">
           <MapPinIcon className="w-4 h-4 text-gray-400" />
-          {selectedCity ? (
+          {loading ? (
+            <span className="text-sm text-gray-400">در حال بارگذاری...</span>
+          ) : selectedCity ? (
             <div className={language === 'en' ? 'text-left' : 'text-right'}>
               <div className="text-sm text-gray-900 font-bold">{getCityName(selectedCity)}</div>
-              <div className="text-xs text-gray-500">{selectedCity.code}</div>
+              <div className="text-xs text-gray-500">{selectedCity.CITY}</div>
             </div>
           ) : (
             <span className="text-sm text-gray-400">{placeholder}</span>
@@ -116,14 +134,18 @@ const CitySelect: React.FC<CitySelectProps> = ({
 
           {/* Cities List */}
           <div className="max-h-80 overflow-y-auto">
-            {filteredCities.length > 0 ? (
+            {loading ? (
+              <div className="px-4 py-8 text-center text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                در حال بارگذاری...
+              </div>
+            ) : filteredCities.length > 0 ? (
               filteredCities.map((city) => (
                 <button
-                  key={city.code}
+                  key={city.CITY}
                   type="button"
-                  onClick={() => handleSelect(city.code)}
+                  onClick={() => handleSelect(city.CITY)}
                   className={`w-full px-4 py-3 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0 ${
-                    city.code === value ? 'bg-blue-50' : ''
+                    city.CITY === value ? 'bg-blue-50' : ''
                   }`}
                   style={{
                     fontFamily: 'DigiHamisheBold, Arial, sans-serif'
@@ -133,10 +155,10 @@ const CitySelect: React.FC<CitySelectProps> = ({
                     <div className={language === 'en' ? 'text-left' : 'text-right'}>
                       <div className="font-bold text-gray-900">{getCityName(city)}</div>
                       <div className="text-sm text-gray-600">
-                        {language === 'en' ? `${city.nameFa} - ${getCountryName(city)}` : `${city.name} - ${getCountryName(city)}`}
+                        {language === 'en' ? city.CITYNAME_FA : city.CITYNAME_EN}
                       </div>
                     </div>
-                    <div className="text-sm font-bold text-blue-900">{city.code}</div>
+                    <div className="text-sm font-bold text-blue-900">{city.CITY}</div>
                   </div>
                 </button>
               ))
