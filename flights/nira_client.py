@@ -87,6 +87,8 @@ class NiraClient:
     ) -> Dict[str, Any]:
         """
         Check flight availability using Nira IBE API
+        طبق مستندات: GET /ibe/Availability با QueryString
+        تلاش می‌کنیم با header های مناسب JSON بگیریم
         
         Args:
             origin: Origin airport IATA code (e.g., 'THR')
@@ -111,10 +113,10 @@ class NiraClient:
                 adult_qty=1
             )
         """
-        if not self.api_url:
+        if not self.base_url:
             return {
                 'success': False,
-                'error': 'Nira API URL is not configured'
+                'error': 'Nira Base URL is not configured'
             }
         
         if not self.office_user:
@@ -135,6 +137,107 @@ class NiraClient:
         now = datetime.now()
         office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
         office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
+        
+        # Build query parameters طبق مستندات: همه پارامترها در QueryString
+        params = {
+            'origin': origin.upper(),
+            'destination': destination.upper(),
+            'departureDate': departure_date_jalali,  # تاریخ شمسی
+            'roundTrip': 'true' if round_trip else 'false',
+            'adultQty': adult_qty,
+            'childQty': child_qty,
+            'infantQty': infant_qty,
+            'OfficeUser': self.office_user,
+            'OfficePass': office_pass_encoded,
+        }
+        
+        # Add return date if round trip
+        if round_trip and return_date_jalali:
+            params['returnDate'] = return_date_jalali
+        
+        # First try: GET request طبق مستندات با Accept header برای JSON
+        try:
+            response = requests.get(
+                f"{self.base_url}/ibe/Availability",
+                params=params,  # همه پارامترها در QueryString
+                headers={
+                    'Accept': 'application/json',  # فقط JSON قبول کن
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'X-Requested-With': 'XMLHttpRequest'  # نشان می‌دهد که درخواست AJAX است
+                },
+                timeout=self.timeout,
+                allow_redirects=True
+            )
+            
+            # Check if response is JSON
+            content_type = response.headers.get('Content-Type', '').lower()
+            if 'application/json' in content_type or response.text.strip().startswith('{'):
+                try:
+                    data = response.json()
+                    return {
+                        'success': True,
+                        'data': data,
+                        'status_code': response.status_code
+                    }
+                except ValueError:
+                    pass  # Fall through to check if it's HTML
+            
+            # If response is HTML, try fallback to /api/Res/FlightAvailability
+            if response.status_code == 200 and ('text/html' in content_type or response.text.strip().startswith('<!')):
+                logger.warning("Received HTML from /ibe/Availability, trying fallback endpoint")
+                # Fallback: Use the working endpoint
+                return self._check_availability_fallback(
+                    origin, destination, departure_date, round_trip, return_date,
+                    adult_qty, child_qty, infant_qty, departure_date_jalali, return_date_jalali, office_pass_encoded
+                )
+            
+            # If not JSON and not HTML, return as is
+            return {
+                'success': True,
+                'data': response.text,
+                'status_code': response.status_code,
+                'content_type': content_type
+            }
+            
+        except requests.exceptions.Timeout:
+            return {
+                'success': False,
+                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds.'
+            }
+        except requests.exceptions.ConnectionError:
+            return {
+                'success': False,
+                'error': 'Connection error - Could not connect to Nira API'
+            }
+        except Exception as e:
+            logger.error(f"Error calling Nira Availability API: {e}")
+            return {
+                'success': False,
+                'error': f'Unexpected error: {str(e)}'
+            }
+    
+    def _check_availability_fallback(
+        self,
+        origin: str,
+        destination: str,
+        departure_date: datetime,
+        round_trip: bool,
+        return_date: Optional[datetime],
+        adult_qty: int,
+        child_qty: int,
+        infant_qty: int,
+        departure_date_jalali: str,
+        return_date_jalali: Optional[str],
+        office_pass_encoded: str
+    ) -> Dict[str, Any]:
+        """
+        Fallback method: Use /api/Res/FlightAvailability if /ibe/Availability returns HTML
+        """
+        if not self.api_url:
+            return {
+                'success': False,
+                'error': 'Nira API URL is not configured for fallback'
+            }
         
         # Build query parameters for URL (OfficeUser and OfficePass)
         query_params = {
@@ -187,7 +290,7 @@ class NiraClient:
                         'status_code': response.status_code
                     }
                 except ValueError:
-                    # If not JSON, return HTML/text response
+                    # If not JSON, return text response
                     return {
                         'success': True,
                         'data': response.text,
