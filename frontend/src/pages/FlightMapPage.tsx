@@ -15,44 +15,45 @@ import {
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
-// Coordinates for major Iranian cities on the map (normalized to fit Iran's actual shape)
-// Based on actual geographic coordinates mapped to SVG viewBox
+// Coordinates for major Iranian cities on the map
+// Precisely adjusted to match react-iran-map SVG viewBox (0-600)
+// Based on actual geographic positions within their provinces
 const cityCoordinates: Record<string, { x: number; y: number }> = {
-  'THR': { x: 420, y: 280 }, // Tehran
-  'MHD': { x: 620, y: 200 }, // Mashhad
-  'IKA': { x: 420, y: 280 }, // Tehran Imam Khomeini
-  'IFN': { x: 360, y: 380 }, // Isfahan
-  'SYZ': { x: 300, y: 520 }, // Shiraz
-  'TBZ': { x: 240, y: 160 }, // Tabriz
-  'AWZ': { x: 180, y: 480 }, // Ahvaz
-  'BND': { x: 380, y: 620 }, // Bandar Abbas
-  'KIH': { x: 480, y: 680 }, // Kish
-  'GSM': { x: 460, y: 680 }, // Qeshm
-  'RAS': { x: 360, y: 220 }, // Rasht
-  'OMH': { x: 180, y: 140 }, // Urmia
-  'KER': { x: 320, y: 520 }, // Kerman
-  'ZAH': { x: 560, y: 520 }, // Zahedan
-  'XBJ': { x: 600, y: 360 }, // Birjand
-  'ZBR': { x: 660, y: 620 }, // Chabahar
-  'SRY': { x: 460, y: 240 }, // Sari
-  'GBT': { x: 440, y: 220 }, // Gorgan
-  'KSH': { x: 260, y: 320 }, // Kermanshah
-  'SDG': { x: 280, y: 280 }, // Sanandaj
-  'ADU': { x: 220, y: 180 }, // Ardabil
-  'IIL': { x: 200, y: 360 }, // Ilam
-  'BUZ': { x: 320, y: 580 }, // Bushehr
-  'BXR': { x: 360, y: 560 }, // Bam
-  'LRR': { x: 280, y: 580 }, // Lar
-  'MRX': { x: 220, y: 500 }, // Mahshahr
-  'AZD': { x: 360, y: 460 }, // Yazd
-  'NJF': { x: 120, y: 420 }, // Najaf (Iraq)
-  'IST': { x: 80, y: 180 }, // Istanbul
-  'DXB': { x: 500, y: 720 }, // Dubai
-  'MCT': { x: 600, y: 720 }, // Muscat
-  'SHJ': { x: 490, y: 710 }, // Sharjah
-  'TBS': { x: 260, y: 80 }, // Tbilisi
-  'TAS': { x: 700, y: 220 }, // Tashkent
-  'DYU': { x: 700, y: 180 }, // Dushanbe
+  'THR': { x: 248, y: 195 }, // Tehran - Tehran province (north-central)
+  'IKA': { x: 245, y: 200 }, // Tehran Imam Khomeini - slightly south of Tehran
+  'MHD': { x: 430, y: 140 }, // Mashhad - Razavi Khorasan (northeast, more accurate)
+  'IFN': { x: 218, y: 275 }, // Isfahan - Isfahan province (center)
+  'SYZ': { x: 175, y: 385 }, // Shiraz - Fars province (south-central)
+  'TBZ': { x: 138, y: 118 }, // Tabriz - East Azerbaijan (northwest)
+  'AWZ': { x: 108, y: 355 }, // Ahvaz - Khuzestan (southwest)
+  'BND': { x: 228, y: 460 }, // Bandar Abbas - Hormozgan (south)
+  'KIH': { x: 295, y: 495 }, // Kish - Hormozgan (island, more separated from Qeshm)
+  'GSM': { x: 270, y: 525 }, // Qeshm - Hormozgan (island, more separated from Kish)
+  'RAS': { x: 198, y: 162 }, // Rasht - Gilan (north, Caspian coast)
+  'OMH': { x: 98, y: 102 }, // Urmia - West Azerbaijan (northwest)
+  'KER': { x: 188, y: 385 }, // Kerman - Kerman province (southeast)
+  'ZAH': { x: 425, y: 385 }, // Zahedan - Sistan and Baluchestan (east)
+  'XBJ': { x: 385, y: 265 }, // Birjand - South Khorasan (east)
+  'ZBR': { x: 490, y: 460 }, // Chabahar - Sistan and Baluchestan (southeast)
+  'SRY': { x: 272, y: 178 }, // Sari - Mazandaran (north, Caspian coast)
+  'GBT': { x: 262, y: 163 }, // Gorgan - Golestan (north, Caspian coast)
+  'KSH': { x: 152, y: 238 }, // Kermanshah - Kermanshah province (west)
+  'SDG': { x: 162, y: 208 }, // Sanandaj - Kurdistan (west)
+  'ADU': { x: 128, y: 132 }, // Ardabil - Ardabil province (northwest)
+  'IIL': { x: 118, y: 268 }, // Ilam - Ilam province (west)
+  'BUZ': { x: 188, y: 430 }, // Bushehr - Bushehr province (south)
+  'BXR': { x: 268, y: 415 }, // Bam - Kerman (southeast)
+  'LRR': { x: 208, y: 430 }, // Lar - Fars (south)
+  'MRX': { x: 128, y: 370 }, // Mahshahr - Khuzestan (south)
+  'AZD': { x: 238, y: 340 }, // Yazd - Yazd province (center)
+  'NJF': { x: 68, y: 312 }, // Najaf (Iraq) - outside Iran
+  'IST': { x: 48, y: 132 }, // Istanbul - outside Iran
+  'DXB': { x: 372, y: 535 }, // Dubai - outside Iran
+  'MCT': { x: 447, y: 535 }, // Muscat - outside Iran
+  'SHJ': { x: 367, y: 525 }, // Sharjah - outside Iran
+  'TBS': { x: 153, y: 58 }, // Tbilisi - outside Iran
+  'TAS': { x: 522, y: 162 }, // Tashkent - outside Iran
+  'DYU': { x: 522, y: 132 }, // Dushanbe - outside Iran
 };
 
 interface Flight {
@@ -117,6 +118,7 @@ const FlightMapPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingCities, setLoadingCities] = useState(true);
   const [showFlights, setShowFlights] = useState(false);
+  const [destinationCities, setDestinationCities] = useState<string[]>([]); // Cities with available flights from selected city
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -134,19 +136,172 @@ const FlightMapPage: React.FC = () => {
     fetchCities();
   }, []);
 
+  const availableCityCodes = React.useMemo(() => 
+    cities.map(c => c.CITY).filter(code => cityCoordinates[code]),
+    [cities]
+  );
+
+  // Update destination cities when date changes
+  useEffect(() => {
+    if (selectedCity) {
+      // Re-fetch flights and destinations when date changes
+      const updateFlights = async () => {
+        const cityCode = selectedCity;
+        setDestinationCities([]);
+        
+        try {
+          const departureDate = selectedDate.toISOString().split('T')[0];
+          const availableDestinations: string[] = [];
+          
+          // Check flights from selected city to all other cities
+          const checkPromises = availableCityCodes
+            .filter(code => code !== cityCode)
+            .map(async (destCode) => {
+              try {
+                const flights = await checkAvailability({
+                  origin: cityCode,
+                  destination: destCode,
+                  departure_date: departureDate,
+                  round_trip: false,
+                  adult_qty: 1,
+                  child_qty: 0,
+                  infant_qty: 0,
+                });
+                
+                if (flights && flights.length > 0) {
+                  const hasAvailableFlights = flights.some(flight => 
+                    flight.ClassStatus && flight.ClassStatus.length > 0
+                  );
+                  if (hasAvailableFlights) {
+                    availableDestinations.push(destCode);
+                  }
+                }
+              } catch (error) {
+                // Silently fail
+              }
+            });
+          
+          await Promise.all(checkPromises);
+          setDestinationCities(availableDestinations);
+          
+          // Also update flights list
+          const availableFlights = await checkAvailability({
+            origin: 'THR',
+            destination: cityCode,
+            departure_date: departureDate,
+            round_trip: false,
+            adult_qty: 1,
+            child_qty: 0,
+            infant_qty: 0,
+          });
+
+          const convertedFlights: Flight[] = availableFlights.flatMap((flight, index) => {
+            return flight.ClassStatus.map((classStatus, classIndex) => {
+              const departureDateTime = new Date(flight.DepartureDateTime);
+              const arrivalDateTime = new Date(flight.ArrivalDateTime);
+              
+              const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
+              const hours = Math.floor(durationMs / (1000 * 60 * 60));
+              const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+              const duration = `${hours}h ${minutes}m`;
+
+              let flightClass: 'economy' | 'business' | 'first' = 'economy';
+              if (classStatus.CabinClass.toLowerCase().includes('business')) {
+                flightClass = 'business';
+              } else if (classStatus.CabinClass.toLowerCase().includes('first')) {
+                flightClass = 'first';
+              }
+
+              return {
+                id: `${flight.FlightNo}-${index}-${classIndex}`,
+                airline: flight.AirLineCode || 'NSN',
+                flightNumber: flight.FlightNo,
+                origin: flight.Origin,
+                destination: flight.Destination,
+                departureTime: departureDateTime.toLocaleTimeString('en-US', { 
+                  hour: '2-digit', 
+                  minute: '2-digit',
+                  hour12: false 
+                }),
+                arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
+                  hour: '2-digit', 
+                  minute: '2-digit',
+                  hour12: false 
+                }),
+                duration: duration,
+                price: classStatus.TotalPrice || 0,
+                availableSeats: classStatus.Status === 'C' ? 10 : 0,
+                class: flightClass,
+                stops: 0,
+                originalData: flight,
+              };
+            });
+          });
+
+          setFlights(convertedFlights);
+          setShowFlights(true);
+        } catch (error) {
+          console.error('Error updating flights:', error);
+        }
+      };
+      
+      updateFlights();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, selectedCity, availableCityCodes]);
+
   const handleCityClick = async (cityCode: string) => {
     setSelectedCity(cityCode);
     setShowFlights(false);
     setFlights([]);
+    setDestinationCities([]);
     
     try {
       setLoading(true);
       
-      // Use Tehran as origin and selected city as destination
+      // Use selected city as origin and check all available destinations
+      const departureDate = selectedDate.toISOString().split('T')[0];
+      const availableDestinations: string[] = [];
+      
+      // Check flights from selected city to all other cities
+      const checkPromises = availableCityCodes
+        .filter(code => code !== cityCode)
+        .map(async (destCode) => {
+          try {
+            const flights = await checkAvailability({
+              origin: cityCode,
+              destination: destCode,
+              departure_date: departureDate,
+              round_trip: false,
+              adult_qty: 1,
+              child_qty: 0,
+              infant_qty: 0,
+            });
+            
+            // If there are available flights, add to destinations
+            if (flights && flights.length > 0) {
+              const hasAvailableFlights = flights.some(flight => 
+                flight.ClassStatus && flight.ClassStatus.length > 0
+              );
+              if (hasAvailableFlights) {
+                availableDestinations.push(destCode);
+              }
+            }
+          } catch (error) {
+            // Silently fail for individual city checks
+            console.log(`No flights from ${cityCode} to ${destCode}`);
+          }
+        });
+      
+      // Wait for all checks to complete
+      await Promise.all(checkPromises);
+      setDestinationCities(availableDestinations);
+      
+      // Also fetch flights for display (using Tehran as origin for now)
       const availableFlights = await checkAvailability({
         origin: 'THR',
         destination: cityCode,
-        departure_date: selectedDate.toISOString().split('T')[0],
+        departure_date: departureDate,
         round_trip: false,
         adult_qty: 1,
         child_qty: 0,
@@ -216,8 +371,6 @@ const FlightMapPage: React.FC = () => {
   const getCityCoordinates = (cityCode: string) => {
     return cityCoordinates[cityCode] || { x: 420, y: 280 };
   };
-
-  const availableCityCodes = cities.map(c => c.CITY).filter(code => cityCoordinates[code]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -309,26 +462,17 @@ const FlightMapPage: React.FC = () => {
                             svg path:not([fill]) {
                               fill: #1e40af !important;
                             }
-                            /* Make province text visible and white with stroke for better readability */
+                            /* Hide province names on the map - we only want city names */
                             svg text {
-                              fill: #ffffff !important;
-                              font-size: 11px !important;
-                              font-weight: bold !important;
-                              stroke: #1e40af !important;
-                              stroke-width: 1px !important;
-                              paint-order: stroke fill !important;
-                              opacity: 1 !important;
-                              visibility: visible !important;
-                              display: block !important;
+                              display: none !important;
+                              visibility: hidden !important;
+                              opacity: 0 !important;
                             }
-                            /* Ensure text elements are visible */
-                            svg g text,
-                            svg text[fill],
-                            svg text[stroke] {
-                              fill: #ffffff !important;
-                              stroke: #1e40af !important;
-                              stroke-width: 1px !important;
-                              font-weight: bold !important;
+                            /* But keep city names visible in our overlay */
+                            svg[viewBox="0 0 600 600"] text {
+                              display: block !important;
+                              visibility: visible !important;
+                              opacity: 1 !important;
                             }
                           `}</style>
                           <IranMap
@@ -362,9 +506,9 @@ const FlightMapPage: React.FC = () => {
                               {/* City Markers */}
                               {availableCityCodes.map((cityCode) => {
                                 const coords = getCityCoordinates(cityCode);
-                                // Scale coordinates to match react-iran-map dimensions
-                                const scaledX = (coords.x / 1000) * 600;
-                                const scaledY = (coords.y / 1000) * 600;
+                                // Coordinates are already adjusted for react-iran-map (0-600 range)
+                                const scaledX = coords.x;
+                                const scaledY = coords.y;
                                 const isSelected = selectedCity === cityCode;
                                 
                                 return (
@@ -376,64 +520,57 @@ const FlightMapPage: React.FC = () => {
                                     <circle
                                       cx={scaledX}
                                       cy={scaledY}
-                                      r={isSelected ? 10 : 6}
+                                      r={isSelected ? 8 : 5}
                                       fill={isSelected ? "#dc2626" : "#1e40af"}
                                       stroke="white"
-                                      strokeWidth="2"
+                                      strokeWidth="1.5"
                                       className="cursor-pointer hover:opacity-80 transition-all"
                                       onClick={() => handleCityClick(cityCode)}
                                       style={{ pointerEvents: 'all', cursor: 'pointer' }}
                                     />
-                                    {/* City Label */}
+                                    {/* City Label - Only city name */}
                                     <text
                                       x={scaledX}
-                                      y={scaledY - 15}
+                                      y={scaledY - 12}
                                       textAnchor="middle"
-                                      className="text-xs font-bold fill-gray-800 pointer-events-none"
+                                      className="text-xs font-bold pointer-events-none"
                                       style={{ 
                                         fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                                         pointerEvents: 'none',
-                                        fontSize: '12px'
+                                        fontSize: '11px',
+                                        fontWeight: 'bold',
+                                        fill: '#ffffff',
+                                        stroke: '#1e40af',
+                                        strokeWidth: '1px',
+                                        paintOrder: 'stroke fill'
                                       }}
                                     >
                                       {getCityName(cityCode)}
-                                    </text>
-                                    {/* City Code */}
-                                    <text
-                                      x={scaledX}
-                                      y={scaledY + 8}
-                                      textAnchor="middle"
-                                      className="text-[10px] fill-gray-600 pointer-events-none"
-                                      style={{ 
-                                        fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                                        pointerEvents: 'none',
-                                        fontSize: '10px'
-                                      }}
-                                    >
-                                      {cityCode}
                                     </text>
                                   </g>
                                 );
                               })}
                               
-                              {/* Connection Lines from Tehran to other cities */}
-                              {selectedCity && selectedCity !== 'THR' && (() => {
-                                const thrCoords = getCityCoordinates('THR');
+                              {/* Red lines from selected city to destination cities with available flights */}
+                              {selectedCity && destinationCities.length > 0 && destinationCities.map((destCityCode) => {
                                 const selectedCoords = getCityCoordinates(selectedCity);
+                                const destCoords = getCityCoordinates(destCityCode);
+                                
                                 return (
                                   <line
-                                    x1={(thrCoords.x / 1000) * 600}
-                                    y1={(thrCoords.y / 1000) * 600}
-                                    x2={(selectedCoords.x / 1000) * 600}
-                                    y2={(selectedCoords.y / 1000) * 600}
-                                    stroke="#3b82f6"
-                                    strokeWidth="2"
-                                    strokeDasharray="5,5"
-                                    opacity="0.7"
+                                    key={`line-${selectedCity}-${destCityCode}`}
+                                    x1={selectedCoords.x}
+                                    y1={selectedCoords.y}
+                                    x2={destCoords.x}
+                                    y2={destCoords.y}
+                                    stroke="#dc2626"
+                                    strokeWidth="2.5"
+                                    strokeDasharray="4,4"
+                                    opacity="0.8"
                                     style={{ pointerEvents: 'none' }}
                                   />
                                 );
-                              })()}
+                              })}
                             </svg>
                           </div>
                         </div>
