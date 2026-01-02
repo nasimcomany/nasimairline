@@ -71,6 +71,10 @@ const FlightResultsPage: React.FC = () => {
           infant_qty: passengers.infants,
         });
 
+        // Log full API response for debugging
+        console.log('🔍 Full API Response:', JSON.stringify(availableFlights, null, 2));
+        console.log('🔍 First Flight ClassStatus:', availableFlights[0]?.ClassStatus);
+
         // Convert API response to Flight format
         const convertedFlights: Flight[] = availableFlights.flatMap((flight, index) => {
           return flight.ClassStatus.map((classStatus, classIndex) => {

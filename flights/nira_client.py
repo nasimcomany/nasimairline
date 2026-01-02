@@ -253,7 +253,7 @@ class NiraClient:
             'AdultNo': adult_qty,
             'ChildNo': child_qty,
             'InfantNo': infant_qty,
-            'isForeign': None,
+            'isForeign': False,  # False for domestic flights, True for international
         }
         
         # Add round trip fields if needed
@@ -265,6 +265,11 @@ class NiraClient:
             json_data['roundTrip'] = False
         
         try:
+            # Log request details for debugging
+            logger.info(f"🔍 Nira API Request URL: {self.api_url}/FlightAvailability")
+            logger.info(f"🔍 Nira API Query Params: {query_params}")
+            logger.info(f"🔍 Nira API JSON Body: {json_data}")
+            
             # Make POST request to Nira API with JSON body
             response = requests.post(
                 f"{self.api_url}/FlightAvailability",
@@ -279,11 +284,24 @@ class NiraClient:
                 allow_redirects=True
             )
             
+            # Log response details for debugging
+            logger.info(f"🔍 Nira API Response Status: {response.status_code}")
+            logger.info(f"🔍 Nira API Response Headers: {dict(response.headers)}")
+            
             # Check response status
             if response.status_code == 200:
                 try:
                     # Try to parse JSON response
                     data = response.json()
+                    logger.info(f"🔍 Nira API Response Data (first 500 chars): {str(data)[:500]}")
+                    # Log TotalPrice from first flight if available
+                    if isinstance(data, dict) and 'AvailableFlights' in data:
+                        flights = data.get('AvailableFlights', [])
+                        if flights and len(flights) > 0:
+                            first_flight = flights[0]
+                            if 'ClassStatus' in first_flight and len(first_flight['ClassStatus']) > 0:
+                                first_class = first_flight['ClassStatus'][0]
+                                logger.info(f"🔍 First Flight TotalPrice: {first_class.get('TotalPrice', 'N/A')}")
                     return {
                         'success': True,
                         'data': data,
