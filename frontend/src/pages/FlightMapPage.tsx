@@ -71,6 +71,41 @@ interface Flight {
   originalData: FlightAvailability;
 }
 
+// All Iran provinces data for react-iran-map
+const allProvincesData = {
+  tehran: 0,
+  isfahan: 0,
+  fars: 0,
+  khorasanRazavi: 0,
+  khorasanJonubi: 0,
+  khorasanShomali: 0,
+  kerman: 0,
+  yazd: 0,
+  khorasan: 0,
+  sistan: 0,
+  hormozgan: 0,
+  bushehr: 0,
+  chaharMahal: 0,
+  kohgiluyeh: 0,
+  lorestan: 0,
+  ilam: 0,
+  kermanshah: 0,
+  kurdistan: 0,
+  westAzerbaijan: 0,
+  eastAzerbaijan: 0,
+  ardebil: 0,
+  gilan: 0,
+  mazandaran: 0,
+  golestan: 0,
+  semnan: 0,
+  markazi: 0,
+  qom: 0,
+  alborz: 0,
+  qazvin: 0,
+  zanjan: 0,
+  hamadan: 0
+};
+
 const FlightMapPage: React.FC = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
@@ -266,15 +301,47 @@ const FlightMapPage: React.FC = () => {
                       {/* Iran Map using react-iran-map library */}
                       <div className="w-full h-full flex items-center justify-center">
                         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                          <style>{`
+                            /* Force all provinces to have blue color */
+                            svg path[fill] {
+                              fill: #1e40af !important;
+                            }
+                            svg path:not([fill]) {
+                              fill: #1e40af !important;
+                            }
+                            /* Make province text visible and white with stroke for better readability */
+                            svg text {
+                              fill: #ffffff !important;
+                              font-size: 11px !important;
+                              font-weight: bold !important;
+                              stroke: #1e40af !important;
+                              stroke-width: 1px !important;
+                              paint-order: stroke fill !important;
+                              opacity: 1 !important;
+                              visibility: visible !important;
+                              display: block !important;
+                            }
+                            /* Ensure text elements are visible */
+                            svg g text,
+                            svg text[fill],
+                            svg text[stroke] {
+                              fill: #ffffff !important;
+                              stroke: #1e40af !important;
+                              stroke-width: 1px !important;
+                              font-weight: bold !important;
+                            }
+                          `}</style>
                           <IranMap
-                            data={{}}
+                            data={allProvincesData}
                             width={600}
-                            textColor="#000"
-                            deactiveProvinceColor="#fef3c7"
-                            selectedProvinceColor="#f59e0b"
-                            colorRange="254, 243, 199"
+                            textColor="#ffffff"
+                            deactiveProvinceColor="#1e40af"
+                            selectedProvinceColor="#1e40af"
+                            defaultSelectedProvince=""
+                            colorRange="30, 58, 175"
                             selectProvinceHandler={(province: string) => {
-                              // Handle province selection if needed
+                              // Log province name to see all available provinces
+                              console.log('Selected province:', province);
                             }}
                           />
                           
