@@ -159,11 +159,14 @@ const FlightMapPage: React.FC = () => {
             const destinations = await getDestinations(cityCode);
             validDestinations = destinations
               .map(d => d.CITY)
-              .filter(code => code && code !== cityCode && cityCoordinates[code]);
+              .filter(code => code && code !== cityCode);
+            console.log(`Destinations from API for ${cityCode}:`, validDestinations);
           } catch (error) {
             console.error(`Error getting destinations for ${cityCode}:`, error);
-            // If API fails, fall back to checking all cities
-            validDestinations = availableCityCodes.filter(code => code && code !== cityCode && cityCoordinates[code]);
+            // If API fails, don't proceed
+            setFlights([]);
+            setShowFlights(false);
+            return;
           }
           
           // Check flights from selected city to valid destinations and collect all flights
@@ -171,15 +174,11 @@ const FlightMapPage: React.FC = () => {
           const allFlights: FlightAvailability[] = [];
           
           for (const destCode of validDestinations) {
-            // Skip if destination code is not in cityCoordinates (invalid city)
-            if (!cityCoordinates[destCode]) {
-              continue;
-            }
-            
             try {
               // Small delay to avoid overwhelming the API
               await new Promise(resolve => setTimeout(resolve, 150));
               
+              console.log(`Checking flights from ${cityCode} to ${destCode} on ${departureDate}`);
               const flights = await checkAvailability({
                 origin: cityCode,
                 destination: destCode,
@@ -190,6 +189,8 @@ const FlightMapPage: React.FC = () => {
                 infant_qty: 0,
               });
               
+              console.log(`Flights from ${cityCode} to ${destCode}:`, flights?.length || 0);
+              
               if (flights && Array.isArray(flights) && flights.length > 0) {
                 // Add destination if we have any flights (even with empty ClassStatus)
                 availableDestinations.push(destCode);
@@ -197,10 +198,11 @@ const FlightMapPage: React.FC = () => {
                 allFlights.push(...flights);
               }
             } catch (error) {
-              // Silently fail for individual city checks
-              console.log(`No flights from ${cityCode} to ${destCode}`);
+              console.error(`Error checking flights from ${cityCode} to ${destCode}:`, error);
             }
           }
+          
+          console.log(`Total flights collected: ${allFlights.length}`);
           
           setDestinationCities(availableDestinations);
           
@@ -307,11 +309,15 @@ const FlightMapPage: React.FC = () => {
         const destinations = await getDestinations(cityCode);
         validDestinations = destinations
           .map(d => d.CITY)
-          .filter(code => code && code !== cityCode && cityCoordinates[code]);
+          .filter(code => code && code !== cityCode);
+        console.log(`Destinations from API for ${cityCode}:`, validDestinations);
       } catch (error) {
         console.error(`Error getting destinations for ${cityCode}:`, error);
-        // If API fails, fall back to checking all cities
-        validDestinations = availableCityCodes.filter(code => code && code !== cityCode && cityCoordinates[code]);
+        // If API fails, don't proceed
+        setFlights([]);
+        setShowFlights(false);
+        setLoading(false);
+        return;
       }
       
       // Check flights from selected city to valid destinations and collect all flights
@@ -319,15 +325,11 @@ const FlightMapPage: React.FC = () => {
       const allFlights: FlightAvailability[] = [];
       
       for (const destCode of validDestinations) {
-        // Skip if destination code is not in cityCoordinates (invalid city)
-        if (!cityCoordinates[destCode]) {
-          continue;
-        }
-        
         try {
           // Small delay to avoid overwhelming the API
           await new Promise(resolve => setTimeout(resolve, 150));
           
+          console.log(`Checking flights from ${cityCode} to ${destCode} on ${departureDate}`);
           const flights = await checkAvailability({
             origin: cityCode,
             destination: destCode,
@@ -338,6 +340,8 @@ const FlightMapPage: React.FC = () => {
             infant_qty: 0,
           });
           
+          console.log(`Flights from ${cityCode} to ${destCode}:`, flights?.length || 0);
+          
           // If there are available flights, add to destinations and collect flights
           if (flights && Array.isArray(flights) && flights.length > 0) {
             // Add destination if we have any flights (even with empty ClassStatus)
@@ -346,10 +350,11 @@ const FlightMapPage: React.FC = () => {
             allFlights.push(...flights);
           }
         } catch (error) {
-          // Silently fail for individual city checks
-          console.log(`No flights from ${cityCode} to ${destCode}`);
+          console.error(`Error checking flights from ${cityCode} to ${destCode}:`, error);
         }
       }
+      
+      console.log(`Total flights collected: ${allFlights.length}`);
       
       setDestinationCities(availableDestinations);
       
