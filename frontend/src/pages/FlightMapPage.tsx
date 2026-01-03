@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getOriginCities, checkAvailability, FlightAvailability, OriginCity } from '../services/niraApi';
+import { getOriginCities, getDestinations, checkAvailability, FlightAvailability, OriginCity } from '../services/niraApi';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IranMap } from 'react-iran-map';
@@ -153,35 +153,48 @@ const FlightMapPage: React.FC = () => {
           const departureDate = selectedDate.toISOString().split('T')[0];
           const availableDestinations: string[] = [];
           
-          // Check flights from selected city to all other cities
-          const checkPromises = availableCityCodes
-            .filter(code => code !== cityCode)
-            .map(async (destCode) => {
-              try {
-                const flights = await checkAvailability({
-                  origin: cityCode,
-                  destination: destCode,
-                  departure_date: departureDate,
-                  round_trip: false,
-                  adult_qty: 1,
-                  child_qty: 0,
-                  infant_qty: 0,
-                });
-                
-                if (flights && flights.length > 0) {
-                  const hasAvailableFlights = flights.some(flight => 
-                    flight.ClassStatus && flight.ClassStatus.length > 0
-                  );
-                  if (hasAvailableFlights) {
-                    availableDestinations.push(destCode);
-                  }
-                }
-              } catch (error) {
-                // Silently fail
-              }
-            });
+          // First, get valid destinations for this origin city from API
+          let validDestinations: string[] = [];
+          try {
+            const destinations = await getDestinations(cityCode);
+            validDestinations = destinations.map(d => d.CITY);
+          } catch (error) {
+            console.error(`Error getting destinations for ${cityCode}:`, error);
+            // If API fails, fall back to checking all cities
+            validDestinations = availableCityCodes.filter(code => code !== cityCode);
+          }
           
-          await Promise.all(checkPromises);
+          // Check flights from selected city to valid destinations only
+          // Add delay between requests to avoid rate limiting
+          for (const destCode of validDestinations) {
+            try {
+              // Small delay to avoid overwhelming the API
+              await new Promise(resolve => setTimeout(resolve, 150));
+              
+              const flights = await checkAvailability({
+                origin: cityCode,
+                destination: destCode,
+                departure_date: departureDate,
+                round_trip: false,
+                adult_qty: 1,
+                child_qty: 0,
+                infant_qty: 0,
+              });
+              
+              if (flights && flights.length > 0) {
+                const hasAvailableFlights = flights.some(flight => 
+                  flight.ClassStatus && flight.ClassStatus.length > 0
+                );
+                if (hasAvailableFlights) {
+                  availableDestinations.push(destCode);
+                }
+              }
+            } catch (error) {
+              // Silently fail for individual city checks
+              console.log(`No flights from ${cityCode} to ${destCode}`);
+            }
+          }
+          
           setDestinationCities(availableDestinations);
           
           // Also update flights list
@@ -259,42 +272,53 @@ const FlightMapPage: React.FC = () => {
     try {
       setLoading(true);
       
-      // Use selected city as origin and check all available destinations
+      // Use selected city as origin and check available destinations
       const departureDate = selectedDate.toISOString().split('T')[0];
       const availableDestinations: string[] = [];
       
-      // Check flights from selected city to all other cities
-      const checkPromises = availableCityCodes
-        .filter(code => code !== cityCode)
-        .map(async (destCode) => {
-          try {
-            const flights = await checkAvailability({
-              origin: cityCode,
-              destination: destCode,
-              departure_date: departureDate,
-              round_trip: false,
-              adult_qty: 1,
-              child_qty: 0,
-              infant_qty: 0,
-            });
-            
-            // If there are available flights, add to destinations
-            if (flights && flights.length > 0) {
-              const hasAvailableFlights = flights.some(flight => 
-                flight.ClassStatus && flight.ClassStatus.length > 0
-              );
-              if (hasAvailableFlights) {
-                availableDestinations.push(destCode);
-              }
-            }
-          } catch (error) {
-            // Silently fail for individual city checks
-            console.log(`No flights from ${cityCode} to ${destCode}`);
-          }
-        });
+      // First, get valid destinations for this origin city from API
+      let validDestinations: string[] = [];
+      try {
+        const destinations = await getDestinations(cityCode);
+        validDestinations = destinations.map(d => d.CITY);
+      } catch (error) {
+        console.error(`Error getting destinations for ${cityCode}:`, error);
+        // If API fails, fall back to checking all cities
+        validDestinations = availableCityCodes.filter(code => code !== cityCode);
+      }
       
-      // Wait for all checks to complete
-      await Promise.all(checkPromises);
+      // Check flights from selected city to valid destinations only
+      // Add delay between requests to avoid rate limiting
+      for (const destCode of validDestinations) {
+        try {
+          // Small delay to avoid overwhelming the API
+          await new Promise(resolve => setTimeout(resolve, 150));
+          
+          const flights = await checkAvailability({
+            origin: cityCode,
+            destination: destCode,
+            departure_date: departureDate,
+            round_trip: false,
+            adult_qty: 1,
+            child_qty: 0,
+            infant_qty: 0,
+          });
+          
+          // If there are available flights, add to destinations
+          if (flights && flights.length > 0) {
+            const hasAvailableFlights = flights.some(flight => 
+              flight.ClassStatus && flight.ClassStatus.length > 0
+            );
+            if (hasAvailableFlights) {
+              availableDestinations.push(destCode);
+            }
+          }
+        } catch (error) {
+          // Silently fail for individual city checks
+          console.log(`No flights from ${cityCode} to ${destCode}`);
+        }
+      }
+      
       setDestinationCities(availableDestinations);
       
       // Also fetch flights for display (using Tehran as origin for now)
