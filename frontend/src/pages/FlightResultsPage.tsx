@@ -77,17 +77,44 @@ const FlightResultsPage: React.FC = () => {
 
         // Convert API response to Flight format
         const convertedFlights: Flight[] = availableFlights.flatMap((flight, index) => {
-          return flight.ClassStatus.map((classStatus, classIndex) => {
-            // Parse departure and arrival times
-            const departureDateTime = new Date(flight.DepartureDateTime);
-            const arrivalDateTime = new Date(flight.ArrivalDateTime);
-            
-            // Calculate duration
-            const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
-            const hours = Math.floor(durationMs / (1000 * 60 * 60));
-            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-            const duration = `${hours}h ${minutes}m`;
+          const departureDateTime = new Date(flight.DepartureDateTime);
+          const arrivalDateTime = new Date(flight.ArrivalDateTime);
+          
+          // Calculate duration
+          const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
+          const hours = Math.floor(durationMs / (1000 * 60 * 60));
+          const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+          const duration = `${hours}h ${minutes}m`;
 
+          // If ClassStatus is empty, create a single flight entry with default values
+          if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
+            return [{
+              id: `${flight.FlightNo}-${index}-0`,
+              airline: flight.AirLineCode || 'NSN',
+              flightNumber: flight.FlightNo,
+              origin: flight.Origin,
+              destination: flight.Destination,
+              departureTime: departureDateTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              }),
+              arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              }),
+              duration: duration,
+              price: 0,
+              availableSeats: 0,
+              class: 'economy' as const,
+              stops: 0,
+              originalData: flight,
+            }];
+          }
+
+          // If ClassStatus has items, create entries for each class
+          return flight.ClassStatus.map((classStatus, classIndex) => {
             // Map cabin class
             let flightClass: 'economy' | 'business' | 'first' = 'economy';
             if (classStatus.CabinClass.toLowerCase().includes('business')) {
