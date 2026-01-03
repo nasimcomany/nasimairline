@@ -157,16 +157,25 @@ const FlightMapPage: React.FC = () => {
           let validDestinations: string[] = [];
           try {
             const destinations = await getDestinations(cityCode);
-            validDestinations = destinations.map(d => d.CITY);
+            validDestinations = destinations
+              .map(d => d.CITY)
+              .filter(code => code && code !== cityCode && cityCoordinates[code]);
           } catch (error) {
             console.error(`Error getting destinations for ${cityCode}:`, error);
             // If API fails, fall back to checking all cities
-            validDestinations = availableCityCodes.filter(code => code !== cityCode);
+            validDestinations = availableCityCodes.filter(code => code && code !== cityCode && cityCoordinates[code]);
           }
           
-          // Check flights from selected city to valid destinations only
+          // Check flights from selected city to valid destinations and collect all flights
           // Add delay between requests to avoid rate limiting
+          const allFlights: FlightAvailability[] = [];
+          
           for (const destCode of validDestinations) {
+            // Skip if destination code is not in cityCoordinates (invalid city)
+            if (!cityCoordinates[destCode]) {
+              continue;
+            }
+            
             try {
               // Small delay to avoid overwhelming the API
               await new Promise(resolve => setTimeout(resolve, 150));
@@ -181,12 +190,14 @@ const FlightMapPage: React.FC = () => {
                 infant_qty: 0,
               });
               
-              if (flights && flights.length > 0) {
+              if (flights && Array.isArray(flights) && flights.length > 0) {
                 const hasAvailableFlights = flights.some(flight => 
-                  flight.ClassStatus && flight.ClassStatus.length > 0
+                  flight.ClassStatus && Array.isArray(flight.ClassStatus) && flight.ClassStatus.length > 0
                 );
                 if (hasAvailableFlights) {
                   availableDestinations.push(destCode);
+                  // Add all flights from this origin to destination
+                  allFlights.push(...flights);
                 }
               }
             } catch (error) {
@@ -197,18 +208,11 @@ const FlightMapPage: React.FC = () => {
           
           setDestinationCities(availableDestinations);
           
-          // Also update flights list
-          const availableFlights = await checkAvailability({
-            origin: 'THR',
-            destination: cityCode,
-            departure_date: departureDate,
-            round_trip: false,
-            adult_qty: 1,
-            child_qty: 0,
-            infant_qty: 0,
-          });
-
-          const convertedFlights: Flight[] = availableFlights.flatMap((flight, index) => {
+          // Convert all collected flights to Flight format
+          const convertedFlights: Flight[] = allFlights.flatMap((flight, index) => {
+            if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
+              return [];
+            }
             return flight.ClassStatus.map((classStatus, classIndex) => {
               const departureDateTime = new Date(flight.DepartureDateTime);
               const arrivalDateTime = new Date(flight.ArrivalDateTime);
@@ -280,16 +284,25 @@ const FlightMapPage: React.FC = () => {
       let validDestinations: string[] = [];
       try {
         const destinations = await getDestinations(cityCode);
-        validDestinations = destinations.map(d => d.CITY);
+        validDestinations = destinations
+          .map(d => d.CITY)
+          .filter(code => code && code !== cityCode && cityCoordinates[code]);
       } catch (error) {
         console.error(`Error getting destinations for ${cityCode}:`, error);
         // If API fails, fall back to checking all cities
-        validDestinations = availableCityCodes.filter(code => code !== cityCode);
+        validDestinations = availableCityCodes.filter(code => code && code !== cityCode && cityCoordinates[code]);
       }
       
-      // Check flights from selected city to valid destinations only
+      // Check flights from selected city to valid destinations and collect all flights
       // Add delay between requests to avoid rate limiting
+      const allFlights: FlightAvailability[] = [];
+      
       for (const destCode of validDestinations) {
+        // Skip if destination code is not in cityCoordinates (invalid city)
+        if (!cityCoordinates[destCode]) {
+          continue;
+        }
+        
         try {
           // Small delay to avoid overwhelming the API
           await new Promise(resolve => setTimeout(resolve, 150));
@@ -304,13 +317,15 @@ const FlightMapPage: React.FC = () => {
             infant_qty: 0,
           });
           
-          // If there are available flights, add to destinations
-          if (flights && flights.length > 0) {
+          // If there are available flights, add to destinations and collect flights
+          if (flights && Array.isArray(flights) && flights.length > 0) {
             const hasAvailableFlights = flights.some(flight => 
-              flight.ClassStatus && flight.ClassStatus.length > 0
+              flight.ClassStatus && Array.isArray(flight.ClassStatus) && flight.ClassStatus.length > 0
             );
             if (hasAvailableFlights) {
               availableDestinations.push(destCode);
+              // Add all flights from this origin to destination
+              allFlights.push(...flights);
             }
           }
         } catch (error) {
@@ -321,19 +336,11 @@ const FlightMapPage: React.FC = () => {
       
       setDestinationCities(availableDestinations);
       
-      // Also fetch flights for display (using Tehran as origin for now)
-      const availableFlights = await checkAvailability({
-        origin: 'THR',
-        destination: cityCode,
-        departure_date: departureDate,
-        round_trip: false,
-        adult_qty: 1,
-        child_qty: 0,
-        infant_qty: 0,
-      });
-
-      // Convert API response to Flight format
-      const convertedFlights: Flight[] = availableFlights.flatMap((flight, index) => {
+      // Convert all collected flights to Flight format
+      const convertedFlights: Flight[] = allFlights.flatMap((flight, index) => {
+        if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
+          return [];
+        }
         return flight.ClassStatus.map((classStatus, classIndex) => {
           const departureDateTime = new Date(flight.DepartureDateTime);
           const arrivalDateTime = new Date(flight.ArrivalDateTime);
@@ -616,8 +623,8 @@ const FlightMapPage: React.FC = () => {
                 >
                   <PaperAirplaneIcon className="w-6 h-6 text-blue-900" />
                   {language === 'fa' 
-                    ? `پروازهای تهران به ${getCityName(selectedCity!)}`
-                    : `Flights from Tehran to ${getCityName(selectedCity!)}`}
+                    ? `پروازهای ${getCityName(selectedCity!)} به سایر شهرها`
+                    : `Flights from ${getCityName(selectedCity!)} to other cities`}
                 </h2>
                 <button
                   onClick={() => {
