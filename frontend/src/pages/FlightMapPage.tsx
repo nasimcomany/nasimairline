@@ -191,14 +191,10 @@ const FlightMapPage: React.FC = () => {
               });
               
               if (flights && Array.isArray(flights) && flights.length > 0) {
-                const hasAvailableFlights = flights.some(flight => 
-                  flight.ClassStatus && Array.isArray(flight.ClassStatus) && flight.ClassStatus.length > 0
-                );
-                if (hasAvailableFlights) {
-                  availableDestinations.push(destCode);
-                  // Add all flights from this origin to destination
-                  allFlights.push(...flights);
-                }
+                // Add destination if we have any flights (even with empty ClassStatus)
+                availableDestinations.push(destCode);
+                // Add all flights from this origin to destination
+                allFlights.push(...flights);
               }
             } catch (error) {
               // Silently fail for individual city checks
@@ -210,18 +206,43 @@ const FlightMapPage: React.FC = () => {
           
           // Convert all collected flights to Flight format
           const convertedFlights: Flight[] = allFlights.flatMap((flight, index) => {
-            if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
-              return [];
-            }
-            return flight.ClassStatus.map((classStatus, classIndex) => {
-              const departureDateTime = new Date(flight.DepartureDateTime);
-              const arrivalDateTime = new Date(flight.ArrivalDateTime);
-              
-              const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
-              const hours = Math.floor(durationMs / (1000 * 60 * 60));
-              const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-              const duration = `${hours}h ${minutes}m`;
+            const departureDateTime = new Date(flight.DepartureDateTime);
+            const arrivalDateTime = new Date(flight.ArrivalDateTime);
+            
+            const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
+            const hours = Math.floor(durationMs / (1000 * 60 * 60));
+            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            const duration = `${hours}h ${minutes}m`;
 
+            // If ClassStatus is empty, create a single flight entry with default values
+            if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
+              return [{
+                id: `${flight.FlightNo}-${index}-0`,
+                airline: flight.AirLineCode || 'NSN',
+                flightNumber: flight.FlightNo,
+                origin: flight.Origin,
+                destination: flight.Destination,
+                departureTime: departureDateTime.toLocaleTimeString('en-US', { 
+                  hour: '2-digit', 
+                  minute: '2-digit',
+                  hour12: false 
+                }),
+                arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
+                  hour: '2-digit', 
+                  minute: '2-digit',
+                  hour12: false 
+                }),
+                duration: duration,
+                price: 0,
+                availableSeats: 0,
+                class: 'economy' as const,
+                stops: 0,
+                originalData: flight,
+              }];
+            }
+
+            // If ClassStatus has items, create entries for each class
+            return flight.ClassStatus.map((classStatus, classIndex) => {
               let flightClass: 'economy' | 'business' | 'first' = 'economy';
               if (classStatus.CabinClass.toLowerCase().includes('business')) {
                 flightClass = 'business';
@@ -319,14 +340,10 @@ const FlightMapPage: React.FC = () => {
           
           // If there are available flights, add to destinations and collect flights
           if (flights && Array.isArray(flights) && flights.length > 0) {
-            const hasAvailableFlights = flights.some(flight => 
-              flight.ClassStatus && Array.isArray(flight.ClassStatus) && flight.ClassStatus.length > 0
-            );
-            if (hasAvailableFlights) {
-              availableDestinations.push(destCode);
-              // Add all flights from this origin to destination
-              allFlights.push(...flights);
-            }
+            // Add destination if we have any flights (even with empty ClassStatus)
+            availableDestinations.push(destCode);
+            // Add all flights from this origin to destination
+            allFlights.push(...flights);
           }
         } catch (error) {
           // Silently fail for individual city checks
@@ -338,18 +355,43 @@ const FlightMapPage: React.FC = () => {
       
       // Convert all collected flights to Flight format
       const convertedFlights: Flight[] = allFlights.flatMap((flight, index) => {
-        if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
-          return [];
-        }
-        return flight.ClassStatus.map((classStatus, classIndex) => {
-          const departureDateTime = new Date(flight.DepartureDateTime);
-          const arrivalDateTime = new Date(flight.ArrivalDateTime);
-          
-          const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
-          const hours = Math.floor(durationMs / (1000 * 60 * 60));
-          const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-          const duration = `${hours}h ${minutes}m`;
+        const departureDateTime = new Date(flight.DepartureDateTime);
+        const arrivalDateTime = new Date(flight.ArrivalDateTime);
+        
+        const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
+        const hours = Math.floor(durationMs / (1000 * 60 * 60));
+        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+        const duration = `${hours}h ${minutes}m`;
 
+        // If ClassStatus is empty, create a single flight entry with default values
+        if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
+          return [{
+            id: `${flight.FlightNo}-${index}-0`,
+            airline: flight.AirLineCode || 'NSN',
+            flightNumber: flight.FlightNo,
+            origin: flight.Origin,
+            destination: flight.Destination,
+            departureTime: departureDateTime.toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            }),
+            arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            }),
+            duration: duration,
+            price: 0,
+            availableSeats: 0,
+            class: 'economy' as const,
+            stops: 0,
+            originalData: flight,
+          }];
+        }
+
+        // If ClassStatus has items, create entries for each class
+        return flight.ClassStatus.map((classStatus, classIndex) => {
           let flightClass: 'economy' | 'business' | 'first' = 'economy';
           if (classStatus.CabinClass.toLowerCase().includes('business')) {
             flightClass = 'business';
