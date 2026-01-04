@@ -144,21 +144,21 @@ const CitySelect: React.FC<CitySelectProps> = ({
                   key={city.CITY}
                   type="button"
                   onClick={() => handleSelect(city.CITY)}
-                  className={`w-full px-4 py-3 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0 ${
+                  className={`w-full px-3 py-1.5 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0 ${
                     city.CITY === value ? 'bg-blue-50' : ''
                   }`}
                   style={{
                     fontFamily: 'DigiHamisheBold, Arial, sans-serif'
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className={language === 'en' ? 'text-left' : 'text-right'}>
-                      <div className="font-bold text-gray-900">{getCityName(city)}</div>
-                      <div className="text-sm text-gray-600">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className={`flex-1 min-w-0 ${language === 'en' ? 'text-left' : 'text-right'}`}>
+                      <div className="text-sm font-bold text-gray-900 truncate leading-tight">{getCityName(city)}</div>
+                      <div className="text-xs text-gray-600 truncate leading-tight">
                         {language === 'en' ? city.CITYNAME_FA : city.CITYNAME_EN}
                       </div>
                     </div>
-                    <div className="text-sm font-bold text-blue-900">{city.CITY}</div>
+                    <div className="text-xs font-bold text-blue-900 whitespace-nowrap flex-shrink-0">{city.CITY}</div>
                   </div>
                 </button>
               ))

@@ -170,35 +170,45 @@ const FlightMapPage: React.FC = () => {
           }
           
           // Check flights from selected city to valid destinations and collect all flights
-          // Add delay between requests to avoid rate limiting
+          // Use parallel requests in batches for better performance
           const allFlights: FlightAvailability[] = [];
+          const BATCH_SIZE = 4; // Process 4 requests at a time
           
-          for (const destCode of validDestinations) {
-            try {
-              // Small delay to avoid overwhelming the API
-              await new Promise(resolve => setTimeout(resolve, 150));
-              
-              console.log(`Checking flights from ${cityCode} to ${destCode} on ${departureDate}`);
-              const flights = await checkAvailability({
-                origin: cityCode,
-                destination: destCode,
-                departure_date: departureDate,
-                round_trip: false,
-                adult_qty: 1,
-                child_qty: 0,
-                infant_qty: 0,
-              });
-              
-              console.log(`Flights from ${cityCode} to ${destCode}:`, flights?.length || 0);
-              
+          for (let i = 0; i < validDestinations.length; i += BATCH_SIZE) {
+            const batch = validDestinations.slice(i, i + BATCH_SIZE);
+            const batchPromises = batch.map(async (destCode) => {
+              try {
+                console.log(`Checking flights from ${cityCode} to ${destCode} on ${departureDate}`);
+                const flights = await checkAvailability({
+                  origin: cityCode,
+                  destination: destCode,
+                  departure_date: departureDate,
+                  round_trip: false,
+                  adult_qty: 1,
+                  child_qty: 0,
+                  infant_qty: 0,
+                });
+                
+                console.log(`Flights from ${cityCode} to ${destCode}:`, flights?.length || 0);
+                return { destCode, flights };
+              } catch (error) {
+                console.error(`Error checking flights from ${cityCode} to ${destCode}:`, error);
+                return { destCode, flights: [] };
+              }
+            });
+            
+            const batchResults = await Promise.all(batchPromises);
+            
+            batchResults.forEach(({ destCode, flights }) => {
               if (flights && Array.isArray(flights) && flights.length > 0) {
-                // Add destination if we have any flights (even with empty ClassStatus)
                 availableDestinations.push(destCode);
-                // Add all flights from this origin to destination
                 allFlights.push(...flights);
               }
-            } catch (error) {
-              console.error(`Error checking flights from ${cityCode} to ${destCode}:`, error);
+            });
+            
+            // Small delay between batches to avoid overwhelming the API
+            if (i + BATCH_SIZE < validDestinations.length) {
+              await new Promise(resolve => setTimeout(resolve, 50));
             }
           }
           
@@ -321,36 +331,45 @@ const FlightMapPage: React.FC = () => {
       }
       
       // Check flights from selected city to valid destinations and collect all flights
-      // Add delay between requests to avoid rate limiting
+      // Use parallel requests in batches for better performance
       const allFlights: FlightAvailability[] = [];
+      const BATCH_SIZE = 4; // Process 4 requests at a time
       
-      for (const destCode of validDestinations) {
-        try {
-          // Small delay to avoid overwhelming the API
-          await new Promise(resolve => setTimeout(resolve, 150));
-          
-          console.log(`Checking flights from ${cityCode} to ${destCode} on ${departureDate}`);
-          const flights = await checkAvailability({
-            origin: cityCode,
-            destination: destCode,
-            departure_date: departureDate,
-            round_trip: false,
-            adult_qty: 1,
-            child_qty: 0,
-            infant_qty: 0,
-          });
-          
-          console.log(`Flights from ${cityCode} to ${destCode}:`, flights?.length || 0);
-          
-          // If there are available flights, add to destinations and collect flights
+      for (let i = 0; i < validDestinations.length; i += BATCH_SIZE) {
+        const batch = validDestinations.slice(i, i + BATCH_SIZE);
+        const batchPromises = batch.map(async (destCode) => {
+          try {
+            console.log(`Checking flights from ${cityCode} to ${destCode} on ${departureDate}`);
+            const flights = await checkAvailability({
+              origin: cityCode,
+              destination: destCode,
+              departure_date: departureDate,
+              round_trip: false,
+              adult_qty: 1,
+              child_qty: 0,
+              infant_qty: 0,
+            });
+            
+            console.log(`Flights from ${cityCode} to ${destCode}:`, flights?.length || 0);
+            return { destCode, flights };
+          } catch (error) {
+            console.error(`Error checking flights from ${cityCode} to ${destCode}:`, error);
+            return { destCode, flights: [] };
+          }
+        });
+        
+        const batchResults = await Promise.all(batchPromises);
+        
+        batchResults.forEach(({ destCode, flights }) => {
           if (flights && Array.isArray(flights) && flights.length > 0) {
-            // Add destination if we have any flights (even with empty ClassStatus)
             availableDestinations.push(destCode);
-            // Add all flights from this origin to destination
             allFlights.push(...flights);
           }
-        } catch (error) {
-          console.error(`Error checking flights from ${cityCode} to ${destCode}:`, error);
+        });
+        
+        // Small delay between batches to avoid overwhelming the API
+        if (i + BATCH_SIZE < validDestinations.length) {
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
       }
       
