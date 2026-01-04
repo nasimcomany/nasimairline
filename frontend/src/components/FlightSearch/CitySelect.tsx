@@ -80,10 +80,27 @@ const CitySelect: React.FC<CitySelectProps> = ({
   };
 
   return (
-    <div ref={dropdownRef} className="relative">
-      <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-        {label}
-      </label>
+    <>
+      <style>{`
+        .city-select-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .city-select-scrollbar::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 4px;
+        }
+        .city-select-scrollbar::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+        .city-select-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+      `}</style>
+      <div ref={dropdownRef} className="relative">
+        <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+          {label}
+        </label>
       
       {/* Selected City Display */}
       <button
@@ -112,9 +129,9 @@ const CitySelect: React.FC<CitySelectProps> = ({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-96 overflow-hidden">
+        <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl overflow-hidden">
           {/* Search Input */}
-          <div className="p-3 border-b border-gray-200 sticky top-0 bg-white">
+          <div className="p-3 border-b border-gray-200 sticky top-0 bg-white z-10">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -133,7 +150,14 @@ const CitySelect: React.FC<CitySelectProps> = ({
           </div>
 
           {/* Cities List */}
-          <div className="max-h-80 overflow-y-auto">
+          <div 
+            className="overflow-y-auto city-select-scrollbar"
+            style={{
+              maxHeight: '100px',
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#cbd5e1 #f1f5f9'
+            }}
+          >
             {loading ? (
               <div className="px-4 py-8 text-center text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 در حال بارگذاری...
@@ -170,7 +194,8 @@ const CitySelect: React.FC<CitySelectProps> = ({
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
