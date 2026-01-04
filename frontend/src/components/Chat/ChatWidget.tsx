@@ -288,7 +288,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       {isOpen && (
         <div
           ref={chatContainerRef}
-          className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] bg-white rounded-lg shadow-2xl flex flex-col border border-gray-200"
+          className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] bg-white rounded-lg shadow-2xl flex flex-col border border-gray-200 overflow-hidden"
         >
           {/* Chat Header */}
           <div className="bg-blue-900 text-white p-4 rounded-t-lg flex items-center justify-between">
@@ -310,7 +310,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
           </div>
           
           {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 min-h-0">
             {isLoading && messages.length === 0 ? (
               <div className="text-center text-gray-500 py-8">
                 {t('chat.loading')}
@@ -372,28 +372,28 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
           
           {/* Guest Info Form (for non-authenticated users) */}
           {!isAuthenticated && (
-            <div className="px-4 py-2 bg-gray-100 border-t border-gray-200">
-              <div className="flex gap-2 mb-2">
+            <div className="px-3 py-2 bg-gray-100 border-t border-gray-200 flex-shrink-0">
+              <div className="flex gap-2 w-full">
                 <input
                   type="text"
                   placeholder={t('chat.guestName')}
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 min-w-0 px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <input
                   type="email"
                   placeholder={t('chat.guestEmail')}
                   value={guestEmail}
                   onChange={(e) => setGuestEmail(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 min-w-0 px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
           )}
           
           {/* Message Input */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white rounded-b-lg">
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white rounded-b-lg flex-shrink-0">
             <div className="flex gap-2">
               <input
                 type="text"
