@@ -6,7 +6,6 @@ import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { 
   PaperAirplaneIcon,
   ClockIcon,
-  CurrencyDollarIcon,
   UserGroupIcon,
   CheckCircleIcon,
   XMarkIcon,
@@ -16,7 +15,7 @@ import {
 import { cities } from '../data/cities';
 import CustomSelect from '../components/CustomSelect/CustomSelect';
 import { useLanguage } from '../contexts/LanguageContext';
-import { checkAvailability, FlightAvailability, getOriginCities, OriginCity } from '../services/niraApi';
+import { checkAvailability, FlightAvailability } from '../services/niraApi';
 
 interface Flight {
   id: string;
@@ -32,6 +31,12 @@ interface Flight {
   class: 'economy' | 'business' | 'first';
   stops: number;
   originalData: FlightAvailability;
+  // فیلدهای جدید برای اطلاعات لحظه‌ای
+  actualDepartureTime?: string;
+  actualArrivalTime?: string;
+  delayMinutes?: number;
+  departureGate?: string;
+  arrivalGate?: string;
 }
 
 const FlightResultsPage: React.FC = () => {
@@ -108,7 +113,25 @@ const FlightResultsPage: React.FC = () => {
               price: 0,
               availableSeats: 0,
               class: 'economy' as const,
-              stops: 0,
+              stops: flight.Stops || 0,
+              // فیلدهای جدید
+              actualDepartureTime: flight.ActualDepartureDateTime 
+                ? new Date(flight.ActualDepartureDateTime).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: false 
+                  })
+                : undefined,
+              actualArrivalTime: flight.ActualArrivalDateTime
+                ? new Date(flight.ActualArrivalDateTime).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: false 
+                  })
+                : undefined,
+              delayMinutes: flight.DelayMinutes,
+              departureGate: flight.DepartureGate,
+              arrivalGate: flight.ArrivalGate,
               originalData: flight,
             }];
           }
@@ -143,7 +166,25 @@ const FlightResultsPage: React.FC = () => {
               price: classStatus.TotalPrice || 0,
               availableSeats: classStatus.Status === 'C' ? 10 : 0, // C means available
               class: flightClass,
-              stops: 0, // NIRA API doesn't provide stops info directly
+              stops: flight.Stops || 0, // استفاده از فیلد جدید
+              // فیلدهای جدید
+              actualDepartureTime: flight.ActualDepartureDateTime 
+                ? new Date(flight.ActualDepartureDateTime).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: false 
+                  })
+                : undefined,
+              actualArrivalTime: flight.ActualArrivalDateTime
+                ? new Date(flight.ActualArrivalDateTime).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: false 
+                  })
+                : undefined,
+              delayMinutes: flight.DelayMinutes,
+              departureGate: flight.DepartureGate,
+              arrivalGate: flight.ArrivalGate,
               originalData: flight,
             };
           });
@@ -237,7 +278,6 @@ const FlightResultsPage: React.FC = () => {
                     ? `${searchParams.passengers} ${t('flights.passenger')}`
                     : (() => {
                         const p = searchParams.passengers;
-                        const total = (p?.adults || 0) + (p?.children || 0) + (p?.infants || 0);
                         const parts = [];
                         if (p?.adults) parts.push(`${p.adults} ${t('passengers.adult')}`);
                         if (p?.children) parts.push(`${p.children} ${t('passengers.child')}`);
@@ -383,6 +423,24 @@ const FlightResultsPage: React.FC = () => {
                             <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {flight.departureTime}
                             </div>
+                            {/* نمایش زمان واقعی اگر تأخیر داشته باشد */}
+                            {flight.actualDepartureTime && flight.actualDepartureTime !== flight.departureTime && (
+                              <div className="text-xs text-orange-600 font-bold mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                                ⏰ واقعی: {flight.actualDepartureTime}
+                              </div>
+                            )}
+                            {/* نمایش تأخیر */}
+                            {flight.delayMinutes && flight.delayMinutes > 0 && (
+                              <div className="text-xs text-red-600 font-bold mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                                ⚠️ تأخیر: {flight.delayMinutes} دقیقه
+                              </div>
+                            )}
+                            {/* نمایش گیت پرواز */}
+                            {flight.departureGate && (
+                              <div className="text-xs text-blue-600 font-bold mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                                🚪 گیت: {flight.departureGate}
+                              </div>
+                            )}
                             <div className="text-xs sm:text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {getCityName(originCity)}
                             </div>
@@ -404,6 +462,18 @@ const FlightResultsPage: React.FC = () => {
                             <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                               {flight.arrivalTime}
                             </div>
+                            {/* نمایش زمان واقعی فرود اگر تأخیر داشته باشد */}
+                            {flight.actualArrivalTime && flight.actualArrivalTime !== flight.arrivalTime && (
+                              <div className="text-xs text-orange-600 font-bold mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                                ⏰ واقعی: {flight.actualArrivalTime}
+                              </div>
+                            )}
+                            {/* نمایش گیت فرود */}
+                            {flight.arrivalGate && (
+                              <div className="text-xs text-blue-600 font-bold mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                                🚪 گیت: {flight.arrivalGate}
+                              </div>
+                            )}
                             <div className="text-xs sm:text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {getCityName(destCity)}
                             </div>

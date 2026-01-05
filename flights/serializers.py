@@ -180,7 +180,8 @@ class FlightSerializer(BaseFlightSerializer):
             'departure_date', 'arrival_date', 'duration', 
             'economy_price', 'business_price', 'first_class_price',
             'economy_available', 'business_available', 'first_class_available',
-            'status', 'flight_type', 'gate', 'terminal', 'route',
+            'status', 'flight_type', 'gate', 'departure_gate', 'arrival_gate', 'terminal', 'route',
+            'actual_departure_time', 'actual_arrival_time', 'delay_minutes', 'stops',
             'is_available', 'lowest_price', 'metadata',
             'created_at', 'updated_at'
         ]
@@ -220,7 +221,8 @@ class FlightDetailSerializer(BaseFlightSerializer):
             'departure_date', 'arrival_date', 'duration', 
             'economy_price', 'business_price', 'first_class_price',
             'economy_available', 'business_available', 'first_class_available',
-            'status', 'flight_type', 'gate', 'terminal', 'route',
+            'status', 'flight_type', 'gate', 'departure_gate', 'arrival_gate', 'terminal', 'route',
+            'actual_departure_time', 'actual_arrival_time', 'delay_minutes', 'stops',
             'booking_count', 'is_available', 'lowest_price', 'occupancy_rate', 'metadata',
             'created_at', 'updated_at'
         ]

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import {
   PaperAirplaneIcon,
@@ -8,7 +8,6 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   XCircleIcon,
-  CalendarDaysIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
@@ -21,32 +20,86 @@ interface FlightStatus {
   scheduledDeparture: string;
   actualDeparture: string;
   scheduledArrival: string;
-  estimatedArrival: string;
-  gate: string;
+  actualArrival: string;
+  departureGate?: string;
+  arrivalGate?: string;
   terminal: string;
   delay: number; // minutes
+  stops: number;
 }
 
 const FlightStatusPage: React.FC = () => {
   const navigate = useNavigate();
+  const { flightId } = useParams<{ flightId: string }>();
+  const [flight, setFlight] = useState<FlightStatus | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const mockFlight: FlightStatus = {
-    flightNumber: 'NA101',
-    airline: 'Nasim Air',
-    status: 'on-time',
-    origin: 'Tehran (THR)',
-    destination: 'Dubai (DXB)',
-    scheduledDeparture: '08:00',
-    actualDeparture: '08:00',
-    scheduledArrival: '10:30',
-    estimatedArrival: '10:30',
-    gate: 'A12',
-    terminal: '1',
-    delay: 0
-  };
+  useEffect(() => {
+    const fetchFlightStatus = async () => {
+      if (!flightId) {
+        setLoading(false);
+        return;
+      }
 
-  const [flight] = useState<FlightStatus>(mockFlight);
+      try {
+        setLoading(true);
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${API_BASE_URL}/api/flights/flights/${flightId}/realtime_status/`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch flight status');
+        }
+
+        const data = await response.json();
+        const flightData = data.flight;
+
+        // تبدیل داده‌های API به فرمت FlightStatus
+        const scheduledDep = new Date(flightData.departure_time);
+        const actualDep = flightData.actual_departure_time 
+          ? new Date(flightData.actual_departure_time)
+          : scheduledDep;
+        const scheduledArr = new Date(flightData.arrival_time);
+        const actualArr = flightData.actual_arrival_time
+          ? new Date(flightData.actual_arrival_time)
+          : scheduledArr;
+
+        setFlight({
+          flightNumber: flightData.flight_number,
+          airline: 'نسیم گشت',
+          status: flightData.delay_minutes > 0 ? 'delayed' : 'on-time',
+          origin: `${flightData.origin_detail?.name || ''} (${flightData.origin_detail?.code || ''})`,
+          destination: `${flightData.destination_detail?.name || ''} (${flightData.destination_detail?.code || ''})`,
+          scheduledDeparture: scheduledDep.toLocaleTimeString('fa-IR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          actualDeparture: actualDep.toLocaleTimeString('fa-IR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          scheduledArrival: scheduledArr.toLocaleTimeString('fa-IR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          actualArrival: actualArr.toLocaleTimeString('fa-IR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          departureGate: flightData.departure_gate,
+          arrivalGate: flightData.arrival_gate,
+          terminal: flightData.terminal || '1',
+          delay: flightData.delay_minutes || 0,
+          stops: flightData.stops || 0,
+        });
+      } catch (error) {
+        console.error('Error fetching flight status:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFlightStatus();
+  }, [flightId]);
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -94,6 +147,28 @@ const FlightStatusPage: React.FC = () => {
         };
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <EmiratesHeader />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!flight) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <EmiratesHeader />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <p className="text-xl text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>پرواز یافت نشد</p>
+        </div>
+      </div>
+    );
+  }
 
   const statusConfig = getStatusConfig(flight.status);
 
@@ -166,15 +241,22 @@ const FlightStatusPage: React.FC = () => {
                   <div className="text-3xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                     {flight.actualDeparture}
                   </div>
+                  {flight.actualDeparture !== flight.scheduledDeparture && (
+                    <div className="text-sm text-gray-500 line-through mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      {flight.scheduledDeparture}
+                    </div>
+                  )}
                   <div className="flex items-center justify-center gap-2 text-gray-700 mb-1">
                     <MapPinIcon className="w-5 h-5" />
                     <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                       {flight.origin}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    زمان برنامه‌ریزی: {flight.scheduledDeparture}
-                  </div>
+                  {flight.departureGate && (
+                    <div className="text-xs text-blue-600 font-bold mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      🚪 گیت: {flight.departureGate}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col items-center justify-center">
@@ -182,23 +264,30 @@ const FlightStatusPage: React.FC = () => {
                     <PaperAirplaneIcon className="w-6 h-6 text-blue-900 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-90 bg-white" />
                   </div>
                   <div className="text-xs text-gray-400 mt-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    پرواز مستقیم
+                    {flight.stops === 0 ? 'پرواز مستقیم' : `${flight.stops} توقف`}
                   </div>
                 </div>
 
                 <div className="text-center">
                   <div className="text-3xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    {flight.estimatedArrival}
+                    {flight.actualArrival}
                   </div>
+                  {flight.actualArrival !== flight.scheduledArrival && (
+                    <div className="text-sm text-gray-500 line-through mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      {flight.scheduledArrival}
+                    </div>
+                  )}
                   <div className="flex items-center justify-center gap-2 text-gray-700 mb-1">
                     <MapPinIcon className="w-5 h-5" />
                     <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                       {flight.destination}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    زمان برنامه‌ریزی: {flight.scheduledArrival}
-                  </div>
+                  {flight.arrivalGate && (
+                    <div className="text-xs text-blue-600 font-bold mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      🚪 گیت: {flight.arrivalGate}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -214,10 +303,10 @@ const FlightStatusPage: React.FC = () => {
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                   <div className="text-sm text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    گیت
+                    گیت پرواز
                   </div>
                   <div className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    {flight.gate}
+                    {flight.departureGate || '---'}
                   </div>
                 </div>
               </div>

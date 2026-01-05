@@ -23,6 +23,7 @@ from .nira_serializers import (
     NiraRoutesRequestSerializer
 )
 from .nira_client import NiraClient
+from .flight_status_service import FlightStatusService
 
 
 class AirportViewSet(viewsets.ModelViewSet):
@@ -165,6 +166,53 @@ class FlightViewSet(viewsets.ModelViewSet):
             'requested_passengers': passengers,
             'cabin_class': cabin_class,
             'price': flight.get_price(cabin_class)
+        })
+    
+    @action(detail=True, methods=['get'], permission_classes=[permissions.AllowAny])
+    def realtime_status(self, request, pk=None):
+        """
+        دریافت اطلاعات لحظه‌ای پرواز (زمان واقعی، تأخیر، گیت، تعداد توقف)
+        
+        این endpoint از FlightStatusService استفاده می‌کند.
+        اگر API Key ها تنظیم نشده باشند، None برمی‌گرداند.
+        """
+        flight = self.get_object()
+        status_service = FlightStatusService()
+        
+        # دریافت اطلاعات لحظه‌ای
+        realtime_data = status_service.get_flight_status(
+            flight_number=flight.flight_number,
+            origin=flight.origin.code,
+            destination=flight.destination.code,
+            scheduled_departure=flight.departure_time
+        )
+        
+        # اگر اطلاعات لحظه‌ای دریافت شد، به‌روزرسانی می‌کنیم
+        if realtime_data:
+            flight.actual_departure_time = realtime_data.get('actual_departure_time')
+            flight.actual_arrival_time = realtime_data.get('actual_arrival_time')
+            flight.delay_minutes = realtime_data.get('delay_minutes')
+            flight.departure_gate = realtime_data.get('gate')
+            flight.arrival_gate = realtime_data.get('arrival_gate')
+            flight.stops = realtime_data.get('stops', 0)
+            flight.save()
+        
+        # اگر تعداد توقف از Nira API محاسبه نشده باشد، از FlightDurationTime محاسبه می‌کنیم
+        if not flight.stops and flight.duration:
+            duration_str = str(flight.duration)
+            flight.stops = status_service.calculate_stops_from_duration(
+                duration=duration_str,
+                origin=flight.origin.code,
+                destination=flight.destination.code
+            )
+            flight.save()
+        
+        # برگرداندن اطلاعات پرواز با serializer
+        serializer = FlightDetailSerializer(flight)
+        return Response({
+            'flight': serializer.data,
+            'realtime_available': realtime_data is not None,
+            'message': 'Real-time data retrieved successfully' if realtime_data else 'Real-time data not available (API keys not configured)'
         })
 
 

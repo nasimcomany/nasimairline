@@ -41,6 +41,13 @@ export interface FlightAvailability {
   ArrivalTerminal: string;
   JourneyType: string;
   AirLineCode: string;
+  // فیلدهای جدید برای اطلاعات لحظه‌ای (از API های خارجی)
+  ActualDepartureDateTime?: string;  // زمان واقعی پرواز
+  ActualArrivalDateTime?: string;     // زمان واقعی فرود
+  DelayMinutes?: number;              // تأخیر به دقیقه
+  DepartureGate?: string;             // گیت پرواز
+  ArrivalGate?: string;               // گیت فرود
+  Stops?: number;                     // تعداد توقف
 }
 
 export interface AvailabilityResponse {

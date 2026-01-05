@@ -357,6 +357,22 @@ NIRA_OFFICE_USER = os.environ.get('NIRA_OFFICE_USER', '')  # نام کاربری
 NIRA_OFFICE_PASS = os.environ.get('NIRA_OFFICE_PASS', '')  # رمز عبور Office
 NIRA_API_TIMEOUT = int(os.environ.get('NIRA_API_TIMEOUT', '60'))  # Timeout برای درخواست‌های API (ثانیه) - افزایش یافت به 60
 
+# تنظیمات API برای دریافت اطلاعات لحظه‌ای پروازها
+# این API ها برای دریافت زمان واقعی، تأخیر، گیت و تعداد توقف استفاده می‌شوند
+# وقتی API Key ها آماده شدند، فقط باید در فایل .env تنظیم شوند
+
+# سازمان هواپیمایی کشوری (CAO)
+CAO_API_URL = os.environ.get('CAO_API_URL', '')  # URL API سازمان هواپیمایی کشوری
+CAO_API_KEY = os.environ.get('CAO_API_KEY', '')  # API Key سازمان هواپیمایی کشوری
+
+# فرودگاه‌ها (امام خمینی، مهرآباد و غیره)
+AIRPORT_API_URL = os.environ.get('AIRPORT_API_URL', '')  # URL API فرودگاه‌ها
+AIRPORT_API_KEY = os.environ.get('AIRPORT_API_KEY', '')  # API Key فرودگاه‌ها
+
+# سرویس‌های بین‌المللی (برای پروازهای خارجی - اختیاری)
+FLIGHTAWARE_API_KEY = os.environ.get('FLIGHTAWARE_API_KEY', '')  # API Key FlightAware (برای پروازهای بین‌المللی)
+AVIATIONSTACK_API_KEY = os.environ.get('AVIATIONSTACK_API_KEY', '')  # API Key AviationStack (برای پروازهای بین‌المللی)
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',

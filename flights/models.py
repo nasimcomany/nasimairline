@@ -319,7 +319,34 @@ class Flight(models.Model):
         default='DIRECT',
     )
     gate = models.CharField(_('گیت'), max_length=10, null=True, blank=True)
+    departure_gate = models.CharField(_('گیت پرواز'), max_length=10, null=True, blank=True)
+    arrival_gate = models.CharField(_('گیت فرود'), max_length=10, null=True, blank=True)
     terminal = models.CharField(_('ترمینال'), max_length=10, null=True, blank=True)
+    
+    # Real-time Information (از API های خارجی)
+    actual_departure_time = models.DateTimeField(
+        _('زمان واقعی پرواز'),
+        null=True,
+        blank=True,
+        help_text=_('زمان واقعی پرواز (از API های خارجی)'),
+    )
+    actual_arrival_time = models.DateTimeField(
+        _('زمان واقعی فرود'),
+        null=True,
+        blank=True,
+        help_text=_('زمان واقعی فرود (از API های خارجی)'),
+    )
+    delay_minutes = models.IntegerField(
+        _('تأخیر به دقیقه'),
+        null=True,
+        blank=True,
+        help_text=_('تأخیر پرواز به دقیقه (از API های خارجی)'),
+    )
+    stops = models.PositiveIntegerField(
+        _('تعداد توقف'),
+        default=0,
+        help_text=_('تعداد توقف پرواز (می‌تواند از FlightDurationTime محاسبه شود)'),
+    )
     
     # Timestamps
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True, db_index=True)
