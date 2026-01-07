@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import EmiratesFlightSearchForm from '../components/FlightSearch/EmiratesFlightSearchForm';
 import WeatherWidget from '../components/Weather/WeatherWidget';
@@ -43,6 +44,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const { t, fontClass, language } = useLanguage();
   const [isLoaded, setIsLoaded] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -1450,10 +1452,13 @@ const HomePage: React.FC = () => {
               </p>
             </div>
 
-            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-xs sm:text-sm" style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: language === 'en' ? 'ltr' : 'rtl'
-            }}>
+            <button 
+              onClick={() => navigate('/membership')}
+              className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-xs sm:text-sm" style={{ 
+                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                direction: language === 'en' ? 'ltr' : 'rtl'
+              }}
+            >
               {t('home.loyalty.joinNow')}
             </button>
           </div>
