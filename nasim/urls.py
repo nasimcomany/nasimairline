@@ -48,6 +48,7 @@ urlpatterns = [
         path('blog/', include('blog.urls')),
         path('gallery/', include('gallery.urls')),
         path('support/', include('support.urls')),
+        path('customer-service/', include('customer_service.urls')),
         path('main/', include('main.urls')),
     ])),
     

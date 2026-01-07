@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'blog',  # Blog and SEO content management
     'gallery',  # Gallery and media management
     'support',  # Support and ticket system
+    'customer_service',  # Customer service and tier management
     'main',  # اپ قبلی
 ]
 
