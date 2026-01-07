@@ -42,9 +42,35 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   const [sessionId, setSessionId] = useState<string>(propSessionId || '');
   const [lastMessageTime, setLastMessageTime] = useState<string>('');
   
+  // Captcha state
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+', answer: 0 });
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaError, setCaptchaError] = useState('');
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Generate new captcha
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 20) + 1;
+    const num2 = Math.floor(Math.random() * 20) + 1;
+    const operators = ['+', '-'];
+    const operator = operators[Math.floor(Math.random() * operators.length)];
+    const answer = operator === '+' ? num1 + num2 : num1 - num2;
+    setCaptcha({ num1, num2, operator, answer });
+    setCaptchaInput('');
+    setCaptchaError('');
+  };
+
+  // Generate captcha when chat opens or when needed
+  useEffect(() => {
+    if (isOpen) {
+      generateCaptcha();
+      setShowCaptcha(false);
+    }
+  }, [isOpen]);
   
   // Generate or get session ID
   useEffect(() => {
@@ -227,6 +253,20 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       alert('لطفاً نام یا ایمیل خود را وارد کنید');
       return;
     }
+
+    // Check if captcha needs to be shown/validated
+    if (!showCaptcha) {
+      // Show captcha before sending first message
+      setShowCaptcha(true);
+      return;
+    }
+
+    // Validate captcha
+    if (parseInt(captchaInput) !== captcha.answer) {
+      setCaptchaError('کپچا اشتباه است. لطفاً دوباره تلاش کنید.');
+      generateCaptcha();
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -253,6 +293,9 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       }
       
       setNewMessage('');
+      setCaptchaInput('');
+      setShowCaptcha(false);
+      generateCaptcha();
       // Reload messages to get the new one (با session_id جدید)
       await loadMessages();
     } catch (error: any) {
@@ -268,6 +311,14 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     if (!isOpen) {
       // Load messages when opening
       loadMessages();
+    }
+  };
+
+  const handleMessageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    // Show captcha when user starts typing
+    if (!showCaptcha && e.target.value.trim().length > 0) {
+      setShowCaptcha(true);
     }
   };
   
@@ -394,18 +445,56 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
           
           {/* Message Input */}
           <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white rounded-b-lg flex-shrink-0">
+            {/* Captcha - Show when user starts typing */}
+            {showCaptcha && (
+              <div className="mb-3 pb-3 border-b border-gray-200">
+                <label className="block text-sm font-semibold text-gray-700 mb-2 persian-font-vazir">
+                  کپچا
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-2 text-center">
+                    <span className="text-lg font-bold text-blue-900 persian-font-vazir" style={{ direction: 'ltr' }}>
+                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={generateCaptcha}
+                    className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs persian-font-vazir"
+                  >
+                    تغییر
+                  </button>
+                </div>
+                <input
+                  type="number"
+                  value={captchaInput}
+                  onChange={(e) => {
+                    setCaptchaInput(e.target.value);
+                    setCaptchaError('');
+                  }}
+                  placeholder="پاسخ را وارد کنید"
+                  className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 persian-font-vazir"
+                  style={{ direction: 'ltr', textAlign: 'right' }}
+                  required={showCaptcha}
+                />
+                {captchaError && (
+                  <p className="text-red-500 text-xs mt-1 persian-font-vazir">{captchaError}</p>
+                )}
+              </div>
+            )}
+            
             <div className="flex gap-2">
               <input
                 type="text"
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={handleMessageInputChange}
                 placeholder={t('chat.placeholder')}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
                 disabled={isLoading}
               />
               <button
                 type="submit"
-                disabled={isLoading || !newMessage.trim()}
+                disabled={isLoading || !newMessage.trim() || (showCaptcha && !captchaInput.trim())}
                 className="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PaperAirplaneIcon className="w-5 h-5" />
@@ -419,4 +508,3 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
 };
 
 export default ChatWidget;
-
