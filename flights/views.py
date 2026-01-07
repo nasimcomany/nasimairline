@@ -275,6 +275,47 @@ class NiraAPIViewSet(viewsets.ViewSet):
             infant_qty=validated_data.get('infant_qty', 0)
         )
         
+        # اگر پاسخ موفقیت آمیز بود، داده های لحظه ای را اضافه میکنیم
+        if result.get('success') and result.get('data', {}).get('AvailableFlights'):
+            status_service = FlightStatusService()
+            available_flights = result['data']['AvailableFlights']
+            
+            for flight in available_flights:
+                try:
+                    # تبدیل تاریخ و زمان به datetime object
+                    departure_datetime_str = flight.get('DepartureDateTime')
+                    if departure_datetime_str:
+                        departure_datetime = datetime.strptime(
+                            departure_datetime_str,
+                            '%Y-%m-%dT%H:%M:%S'
+                        )
+                        # اگر naive است، timezone aware می‌کنیم
+                        if timezone.is_naive(departure_datetime):
+                            departure_datetime = timezone.make_aware(departure_datetime)
+                        
+                        # دریافت اطلاعات لحظه ای
+                        realtime_data = status_service.get_flight_status(
+                            flight_number=flight.get('FlightNumber'),
+                            origin=validated_data['origin'],
+                            destination=validated_data['destination'],
+                            scheduled_departure=departure_datetime
+                        )
+                        
+                        # اگر اطلاعات لحظه ای دریافت شد به پرواز اضافه میکنیم
+                        if realtime_data:
+                            flight['realtime_status'] = {
+                                'actual_departure_time': realtime_data.get('actual_departure_time'),
+                                'actual_arrival_time': realtime_data.get('actual_arrival_time'),
+                                'delay_minutes': realtime_data.get('delay_minutes'),
+                                'gate': realtime_data.get('gate'),
+                                'arrival_gate': realtime_data.get('arrival_gate'),
+                                'status': realtime_data.get('status')
+                            }
+                except (ValueError, KeyError, Exception) as e:
+                    # اگر خطایی در دریافت اطلاعات لحظه ای رخ داد، ادامه می‌دهیم
+                    # بدون اینکه کل پاسخ را خراب کنیم
+                    continue
+        
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)
         else:
