@@ -1347,7 +1347,7 @@ const HomePage: React.FC = () => {
       <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
-            className="bg-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
+            className="bg-blue-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
             style={{
               borderRadius: '12px',
               overflow: 'visible'
@@ -1365,7 +1365,7 @@ const HomePage: React.FC = () => {
               }}
             >
               <div 
-                className="rounded-full flex flex-col items-center justify-center"
+                className="square-full flex flex-col items-center justify-center"
                 style={{ 
                   width: '100px',
                   height: '100px',
@@ -1373,7 +1373,7 @@ const HomePage: React.FC = () => {
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   marginRight: '-12px',
-                  transform: 'rotate(2deg) translateZ(0)'
+                  transform: 'rotate(-40deg) translateZ(0)'
                 }}
               >
                 <div 
@@ -1382,45 +1382,48 @@ const HomePage: React.FC = () => {
                     fontSize: '11px',
                     writingMode: 'vertical-rl',
                     textOrientation: 'mixed',
-                    letterSpacing: '1.2px'
+                    letterSpacing: '2px'
                   }}
                 >
                   SILVER
                 </div>
               </div>
               <div 
-                className="rounded-full flex flex-col items-center justify-center"
+                className="square-full flex flex-col items-center justify-center"
                 style={{ 
                   width: '100px',
                   height: '100px',
                   background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  marginRight: '-12px',
-                  transform: 'rotate(-3deg) translateZ(0)'
+                  transform: 'rotate(-40deg)',
+                  display: 'flex',
+                  alignItems:'center',
+                  justifyContent: 'center'
                 }}
               >
                 <div 
                   className="text-white font-bold"
                   style={{
                     fontSize: '11px',
-                    writingMode: 'vertical-rl',
-                    textOrientation: 'mixed',
-                    letterSpacing: '1.2px'
+                    display: 'flex',
+                    alignItems:'center',
+                    justifyContent: 'center',
+                    rotate: 'revert'
                   }}
                 >
                   GOLD
                 </div>
               </div>
               <div 
-                className="rounded-full flex flex-col items-center justify-center"
+                className="square-full flex flex-col items-center justify-center"
                 style={{ 
                   width: '100px',
                   height: '100px',
                   background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
-                  transform: 'rotate(4deg) translateZ(0)'
+                  transform: 'rotate(-40deg) translateZ(0)'
                 }}
               >
                 <div 
