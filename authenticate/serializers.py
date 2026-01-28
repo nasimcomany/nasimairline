@@ -37,7 +37,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'email': {'required': True},
             'first_name': {'required': True},
             'last_name': {'required': True},
-            'phone_number': {'required': True},
+            'phone_number': {'required': False},
         }
     
     def validate(self, attrs):
