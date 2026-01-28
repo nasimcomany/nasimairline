@@ -3083,100 +3083,103 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* FAQ Section - مینیمال با لبه پایینی منحنی - چسبیده به فوتر */}
-      <section id="faq" className="relative flex justify-center items-center" style={{ position: 'relative', top: '30px', marginBottom: '0', zIndex: 10, padding: '0 20px 0 20px', gap: '0' }}>
-        {/* SVG clipPath definitions */}
-        <svg width="0" height="0" style={{ position: 'absolute' }}>
-          <defs>
-            <clipPath id="curvedBottomRect" clipPathUnits="objectBoundingBox">
-              <path id="curvedBottomPath" d="M 0.18 0.12 
-                       C 0.18 0.06 0.21 0 0.27 0 
-                       C 0.45 0 0.55 0 0.73 0 
-                       C 0.79 0 0.82 0.06 0.82 0.12 
-                       C 0.88 0.35 0.88 0.6 0.92 0.93 
-                       Q 0.5 1 0.08 0.93 
-                       C 0.12 0.6 0.12 0.35 0.18 0.12 
-                       Z" />
-            </clipPath>
-            <clipPath id="curvedBottomRectSmall" clipPathUnits="objectBoundingBox">
-              {/* شکل کوچک با شیب 45 درجه - لبه بالا خیلی باریک */}
-              <path d="M 0.45 0.1 
-                       C 0.45 0.05 0.48 0 0.5 0 
-                       L 0.5 0 
-                       C 0.52 0 0.55 0.05 0.55 0.1 
-                       L 1 1 
-                       Q 0.5 1 0 1 
-                       L 0.45 0.1 
-                       Z" />
-            </clipPath>
-          </defs>
-        </svg>
-        
-        {/* Container - مینیمال و در وسط */}
-        <div className="relative" style={{ width: '90%', maxWidth: '900px', height: '90px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRect)', WebkitClipPath: 'url(#curvedBottomRect)' }}>
-          {/* SVG border overlay برای نمایش دقیق شکل - بدون ضلع بالا */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1 1" preserveAspectRatio="none" style={{ pointerEvents: 'none' }}>
-            {/* فقط ضلع راست */}
-            <path d="M 0.82 0.12 
-                     C 0.88 0.35 0.88 0.6 0.92 0.93" 
-                  fill="none" 
-                  stroke="#1e3a8a" 
-                  strokeWidth="0.002" />
-            {/* فقط ضلع پایین */}
-            <path d="M 0.92 0.93 
-                     Q 0.5 1 0.08 0.93" 
-                  fill="none" 
-                  stroke="#1e3a8a" 
-                  strokeWidth="0.002" />
-            {/* فقط ضلع چپ */}
-            <path d="M 0.08 0.93 
-                     C 0.12 0.6 0.12 0.35 0.18 0.12" 
-                  fill="none" 
-                  stroke="#1e3a8a" 
-                  strokeWidth="0.002" />
-          </svg>
-          
-          {/* FAQ Items - مینیمال و کوچک با استایل مشابه فوتر */}
-          <div className="absolute inset-0 flex items-center justify-center px-4" style={{ marginTop: '-26px', gap: '28px' }}>
-            {[
-              { id: 'booking', name: language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking', icon: DocumentTextIcon },
-              { id: 'services', name: language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services', icon: UserGroupIcon },
-              { id: 'flight-info', name: language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information', icon: InformationCircleIcon },
-              { id: 'support', name: language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact', icon: PhoneIcon }
-            ].map((faq) => {
-              const IconComponent = faq.icon;
-              return (
-                <button
-                  key={faq.id}
-                  onClick={() => setSelectedFAQ(faq.id)}
-                  className={`group flex items-center gap-1.5 text-base font-medium text-white hover:text-gray-300 transition-all ${fontClass}`}
-                  style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                    borderBottom: '2px solid transparent',
-                    paddingBottom: '2px',
-                    display: 'inline-flex',
-                    alignItems: 'center'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderBottomColor = '#ffffff';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderBottomColor = 'transparent';
-                  }}
-                >
-                  <IconComponent className="w-5 h-5 text-white" />
-                  <span className="whitespace-nowrap">{faq.name}</span>
-                </button>
-              );
-            })}
-          </div>
+      {/* FAQ Section - استایل جدید دایره‌ای و جدا از فوتر */}
+      <section
+        id="faq"
+        className="relative flex flex-col justify-center items-center"
+        style={{
+          marginTop: '40px',
+          marginBottom: '80px',
+          padding: '0 20px',
+          zIndex: 10,
+          gap: '48px'
+        }}
+      >
+        {/* عنوان و توضیح بخش FAQ */}
+        <div className="text-center max-w-2xl">
+          <h2 
+            style={{
+              fontSize: 'clamp(24px, 6vw, 42px)',
+              fontWeight: language === 'fa' ? 300 : 400,
+              letterSpacing: '0.2px',
+              marginBottom: '8px',
+              color: '#000000',
+              opacity: 1,
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+            }}
+          >
+            {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+          </h2>
+          <p 
+            style={{
+              fontSize: '16.5px',
+              fontWeight: language === 'fa' ? 300 : 400,
+              letterSpacing: '0.2px',
+              marginBottom: '0',
+              color: '#000000',
+              opacity: 1,
+              fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+            }}
+          >
+            {language === 'fa' 
+              ? 'پاسخ سوالات رایج خود را در مورد رزرو، پرواز، خدمات و پشتیبانی پیدا کنید'
+              : language === 'ar'
+              ? 'ابحث عن إجابات لأسئلتك الشائعة حول الحجز والرحلات والخدمات والدعم'
+              : 'Find answers to your common questions about booking, flights, services and support'}
+          </p>
         </div>
-        
-        {/* شکل کوچک چپ */}
-        <div className="absolute" style={{ width: '45px', height: '100px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRectSmall)', WebkitClipPath: 'url(#curvedBottomRectSmall)', transform: 'rotate(-44deg)', right: 'calc(50% + min(45vw, -450px) + 100px)', top: '0' }}></div>
-        
-        {/* شکل کوچک راست */}
-        <div className="absolute" style={{ width: '45px', height: '100px', overflow: 'hidden', backgroundColor: '#1e3a8a', clipPath: 'url(#curvedBottomRectSmall)', WebkitClipPath: 'url(#curvedBottomRectSmall)', transform: 'rotate(44deg)', left: 'calc(50% + min(45vw, -450px) + 100px)', top: '0' }}></div>
+
+        {/* دایره‌های FAQ */}
+        <div className="flex justify-center items-center" style={{ gap: '42px' }}>
+          {[
+            { id: 'booking', name: language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking', icon: DocumentTextIcon },
+            { id: 'services', name: language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services', icon: UserGroupIcon },
+            { id: 'flight-info', name: language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information', icon: InformationCircleIcon },
+            { id: 'support', name: language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact', icon: PhoneIcon }
+          ].map((faq) => {
+            const IconComponent = faq.icon;
+            return (
+              <button
+                key={faq.id}
+                onClick={() => setSelectedFAQ(faq.id)}
+                className="group flex flex-col items-center justify-center text-white transition-all"
+                style={{
+                  fontFamily:
+                    language === 'fa'
+                      ? "'Vazirmatn', sans-serif"
+                      : language === 'en'
+                      ? 'Arial, sans-serif'
+                      : "'Noto Sans Arabic', sans-serif",
+                  width: '195px',
+                  height: '195px',
+                  borderRadius: '9999px',
+                  
+                  boxShadow: '0 18px 35px rgba(0,0,0,0.4)',
+                  transform: 'translateY(0)',
+                  transition: 'all 0.25s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px) scale(1.03)';
+                  e.currentTarget.style.boxShadow = '0 22px 40px rgba(0,0,0,0.55)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 18px 35px rgba(0,0,0,0.4)';
+                }}
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <IconComponent className="w-9 h-9 text-white" />
+                </div>
+                <span
+                  className={`text-sm sm:text-base font-medium text-center ${fontClass}`}
+                  style={{ lineHeight: 1.4 }}
+                >
+                  {faq.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </section>
 
       {/* FAQ Modal */}
