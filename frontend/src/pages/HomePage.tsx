@@ -1380,9 +1380,10 @@ const HomePage: React.FC = () => {
                   className="text-gray-700 font-bold"
                   style={{
                     fontSize: '11px',
-                    writingMode: 'revert',
-                    textOrientation: 'mixed',
-                    letterSpacing: '2px'
+                    letterSpacing: '2px',
+                    transform: 'rotate(40deg)', // خنثی‌کردن چرخش والد
+                    transformOrigin: 'center',
+                    display: 'inline-block'   
                   }}
                 >
                   SILVER
@@ -1403,13 +1404,13 @@ const HomePage: React.FC = () => {
                 }}
               >
                 <div 
-                  className="text-white font-bold"
+                  className="text-gray-700 font-bold"
                   style={{
                     fontSize: '11px',
-                    display: 'flex',
-                    alignItems:'center',
-                    justifyContent: 'center',
-                    rotate: 'revert'
+                    letterSpacing: '2px',
+                    transform: 'rotate(40deg)', // خنثی‌کردن چرخش والد
+                    transformOrigin: 'center',
+                    display: 'inline-block'   
                   }}
                 >
                   GOLD
@@ -1426,13 +1427,14 @@ const HomePage: React.FC = () => {
                   transform: 'rotate(-40deg) translateZ(0)'
                 }}
               >
-                <div 
-                  className="text-white font-bold"
+               <div 
+                  className="text-gray-700 font-bold"
                   style={{
                     fontSize: '11px',
-                    writingMode: 'vertical-rl',
-                    textOrientation: 'mixed',
-                    letterSpacing: '1.2px'
+                    letterSpacing: '2px',
+                    transform: 'rotate(40deg)', // خنثی‌کردن چرخش والد
+                    transformOrigin: 'center',
+                    display: 'inline-block'   
                   }}
                 >
                   PLATINUM
