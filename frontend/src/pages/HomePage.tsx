@@ -1380,7 +1380,7 @@ const HomePage: React.FC = () => {
                   className="text-gray-700 font-bold"
                   style={{
                     fontSize: '11px',
-                    writingMode: 'vertical-rl',
+                    writingMode: 'revert',
                     textOrientation: 'mixed',
                     letterSpacing: '2px'
                   }}
