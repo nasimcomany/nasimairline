@@ -60,7 +60,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       setError('');
       setSuccess('');
     }
-  }, [isOpen, mode]);
+  }, [isOpen]);
 
   useEffect(() => {
     setMode(initialMode);
@@ -82,7 +82,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     setError('');
 
     // Validate captcha
-    if (parseInt(loginForm.captcha) !== captcha.answer) {
+    const captchaAnswer = parseInt(loginForm.captcha.trim());
+    if (isNaN(captchaAnswer) || captchaAnswer !== captcha.answer) {
       setError(t('auth.captchaError'));
       generateCaptcha();
       setLoginForm(prev => ({ ...prev, captcha: '' }));
@@ -146,7 +147,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     setError('');
 
     // Validate captcha
-    if (parseInt(registerForm.captcha) !== captcha.answer) {
+    const captchaAnswer = parseInt(registerForm.captcha.trim());
+    if (isNaN(captchaAnswer) || captchaAnswer !== captcha.answer) {
       setError(t('auth.captchaError'));
       generateCaptcha();
       setRegisterForm(prev => ({ ...prev, captcha: '' }));
