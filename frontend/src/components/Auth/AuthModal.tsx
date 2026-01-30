@@ -77,7 +77,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     return (remainder < 2 && check === remainder) || (remainder >= 2 && check === 11 - remainder);
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -110,6 +110,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       setError(t('auth.invalidNationalId'));
       return;
     }
+
+    // ✨ نمایش مودال شرایط قبل از لاگین
+    setShowTermsModal(true);
+  };
+
+  // ✨ لاگین پس از موافقت با شرایط
+  const handleAgreeLoginTerms = async () => {
+    setShowTermsModal(false);
+    setError('');
+
+    const input = loginForm.nationalId.trim();
 
     try {
       // Construct email: nationalId@nasimair.com or passportNumber@nasimair.com
@@ -613,7 +624,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 </button>
                 <button
                   type="button"
-                  onClick={handleAgreeTerms}
+                  onClick={mode === 'login' ? handleAgreeLoginTerms : handleAgreeTerms}
                   disabled={!!error}
                   className={`flex-1 py-2.5 px-4 rounded-xl font-medium text-white transition-all duration-200 ${
                     error 

@@ -27,7 +27,7 @@ class UserRegistrationView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         """Create user and return JWT tokens"""
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         
@@ -67,8 +67,14 @@ class UserLoginView(generics.GenericAPIView):
     
     def post(self, request, *args, **kwargs):
         """Login user and return JWT tokens"""
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         user = serializer.validated_data['user']
         
         # Generate JWT tokens
@@ -109,22 +115,33 @@ def user_profile(request):
 
 
 @api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])
 def logout(request):
     """
     Logout user (blacklist refresh token)
     """
     try:
         refresh_token = request.data.get('refresh')
-        if refresh_token:
+        if not refresh_token:
+            return Response(
+                {'error': 'Refresh token الزامی است.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
             token = RefreshToken(refresh_token)
             token.blacklist()
+        except Exception as token_error:
+            # اگر token معتبر نباشه یا قبلاً blacklist شده باشه، باز هم موفقیت برمی‌گردونیم
+            # چون هدف logout کردن کاربره و اگه token معتبر نباشه، یعنی قبلاً logout کرده
+            pass
+        
         return Response(
             {'message': 'با موفقیت خارج شدید.'},
             status=status.HTTP_200_OK
         )
     except Exception as e:
         return Response(
-            {'error': 'خطا در خروج از سیستم.'},
+            {'error': f'خطا در خروج از سیستم: {str(e)}'},
             status=status.HTTP_400_BAD_REQUEST
         )

@@ -3083,289 +3083,338 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* FAQ Section - استایل جدید دایره‌ای و جدا از فوتر */}
-      <section
-        id="faq"
-        className="relative flex flex-col justify-center items-center"
-        style={{
-          marginTop: '40px',
-          marginBottom: '80px',
-          padding: '0 20px',
-          zIndex: 10,
-          gap: '48px'
-        }}
-      >
-        {/* عنوان و توضیح بخش FAQ */}
-        <div className="text-center max-w-2xl">
-          <h2 
+    {/* FAQ Section - استایل جدید دایره‌ای و جدا از فوتر */}
+<section
+  id="faq"
+  className="relative flex flex-col justify-center items-center"
+  style={{
+    marginTop: '-10px',
+    marginBottom: '80px',
+    padding: '0 20px',
+    zIndex: 10,
+    gap: '24px'
+  }}
+>
+  {/* عنوان و توضیح بخش FAQ */}
+  <div className="text-center max-w-2xl">
+    <h2 
+      style={{
+        fontSize: 'clamp(24px, 6vw, 42px)',
+        fontWeight: language === 'fa' ? 300 : 400,
+        letterSpacing: '0.2px',
+        marginBottom: '8px',
+        color: '#000000',
+        opacity: 1,
+        fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+      }}
+    >
+      {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+    </h2>
+    <p 
+      style={{
+        fontSize: '16.5px',
+        fontWeight: language === 'fa' ? 300 : 400,
+        letterSpacing: '0.2px',
+        marginBottom: '0',
+        color: '#000000',
+        opacity: 1,
+        fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+      }}
+    >
+      {language === 'fa' 
+        ? 'پاسخ سوالات رایج خود را در مورد رزرو، پرواز، خدمات و پشتیبانی پیدا کنید'
+        : language === 'ar'
+        ? 'ابحث عن إجابات لأسئلتك الشائعة حول الحجز والرحلات والخدمات والدعم'
+        : 'Find answers to your common questions about booking, flights, services and support'}
+    </p>
+  </div>
+
+  {/* دایره‌های FAQ با عکس و توضیح زیر دایره‌ها */}
+  <div className="flex justify-center items-center flex-wrap" style={{ gap: '42px', padding: '20px 0' }}>
+    {[
+      { 
+        id: 'booking', 
+        icon: '/images/1fq.jpeg',
+        description: language === 'fa' ? 'راهنمای رزرو و خرید بلیط' : language === 'ar' ? 'دليل الحجز وشراء التذاكر' : 'Booking guide'
+      },
+      { 
+        id: 'services', 
+        icon: '/images/2fq.jpeg',
+        description: language === 'fa' ? 'امکانات و خدمات در پرواز' : language === 'ar' ? 'المرافق والخدمات' : 'Flight amenities'
+      },
+      { 
+        id: 'flight-info', 
+        icon: '/images/3fq.jpeg',
+        description: language === 'fa' ? 'وضعیت پرواز و جزئیات' : language === 'ar' ? 'حالة الرحلة والتفاصيل' : 'Flight status'
+      },
+      { 
+        id: 'support', 
+        icon: '/images/4fq.jpeg',
+        description: language === 'fa' ? 'راه‌های ارتباط با پشتیبانی' : language === 'ar' ? 'طرق الاتصال بالدعم' : 'Contact support'
+      }
+    ].map((faq) => {
+      return (
+        <div key={faq.id} className="flex flex-col items-center">
+          <button
+            onClick={() => setSelectedFAQ(faq.id)}
+            className="group flex items-center justify-center text-white transition-all"
             style={{
-              fontSize: 'clamp(24px, 6vw, 42px)',
-              fontWeight: language === 'fa' ? 300 : 400,
-              letterSpacing: '0.2px',
-              marginBottom: '8px',
-              color: '#000000',
-              opacity: 1,
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+              fontFamily:
+                language === 'fa'
+                  ? "'Vazirmatn', sans-serif"
+                  : language === 'en'
+                  ? 'Arial, sans-serif'
+                  : "'Noto Sans Arabic', sans-serif",
+              width: '195px',
+              height: '195px',
+              borderRadius: '9999px',
+              border:'3px solid #1e40af',
+              boxShadow: '0 18px 35px rgba(0,0,0,0.4)',
+              transform: 'translateY(0)',
+              transition: 'all 0.25s ease',
+              backgroundImage: `url(${faq.icon})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              position: 'relative'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-6px) scale(1.03)';
+              e.currentTarget.style.boxShadow = '0 22px 40px rgba(0,0,0,0.55)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.boxShadow = '0 18px 35px rgba(0,0,0,0.4)';
             }}
           >
-            {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
-          </h2>
-          <p 
-            style={{
-              fontSize: '16.5px',
-              fontWeight: language === 'fa' ? 300 : 400,
-              letterSpacing: '0.2px',
-              marginBottom: '0',
+            {/* لایه تاریک برای خوانایی بهتر متن */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              borderRadius: '9999px',
+              zIndex: 1
+            }}></div>
+            
+            {/* نام دایره (فقط نام، بدون توضیح) */}
+            <span
+              className={`text-sm sm:text-base font-medium text-center ${fontClass}`}
+              style={{ 
+                position: 'relative',
+                zIndex: 2,
+                lineHeight: 1.4,
+                color: '#ffffff',
+                textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+              }}
+            >
+             
+            </span>
+          </button>
+          
+          {/* توضیح زیر دایره (خارج از دایره) */}
+          <span
+            className={`text-xs text-center mt-3 ${fontClass}`}
+            style={{ 
+              lineHeight: 3,
               color: '#000000',
-              opacity: 1,
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+              fontSize: '16px'
             }}
           >
-            {language === 'fa' 
-              ? 'پاسخ سوالات رایج خود را در مورد رزرو، پرواز، خدمات و پشتیبانی پیدا کنید'
-              : language === 'ar'
-              ? 'ابحث عن إجابات لأسئلتك الشائعة حول الحجز والرحلات والخدمات والدعم'
-              : 'Find answers to your common questions about booking, flights, services and support'}
-          </p>
+            {faq.description}
+          </span>
         </div>
+      );
+    })}
+  </div>
+</section>
 
-        {/* دایره‌های FAQ */}
-        <div className="flex justify-center items-center" style={{ gap: '42px' }}>
-          {[
-            { id: 'booking', name: language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking', icon: DocumentTextIcon },
-            { id: 'services', name: language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services', icon: UserGroupIcon },
-            { id: 'flight-info', name: language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information', icon: InformationCircleIcon },
-            { id: 'support', name: language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact', icon: PhoneIcon }
-          ].map((faq) => {
-            const IconComponent = faq.icon;
-            return (
-              <button
-                key={faq.id}
-                onClick={() => setSelectedFAQ(faq.id)}
-                className="group flex flex-col items-center justify-center text-white transition-all"
-                style={{
-                  fontFamily:
-                    language === 'fa'
-                      ? "'Vazirmatn', sans-serif"
-                      : language === 'en'
-                      ? 'Arial, sans-serif'
-                      : "'Noto Sans Arabic', sans-serif",
-                  width: '195px',
-                  height: '195px',
-                  borderRadius: '9999px',
-                  
-                  boxShadow: '0 18px 35px rgba(0,0,0,0.4)',
-                  transform: 'translateY(0)',
-                  transition: 'all 0.25s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-6px) scale(1.03)';
-                  e.currentTarget.style.boxShadow = '0 22px 40px rgba(0,0,0,0.55)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                  e.currentTarget.style.boxShadow = '0 18px 35px rgba(0,0,0,0.4)';
-                }}
-              >
-                <div className="flex items-center justify-center mb-2">
-                  <IconComponent className="w-9 h-9 text-white" />
-                </div>
-                <span
-                  className={`text-sm sm:text-base font-medium text-center ${fontClass}`}
-                  style={{ lineHeight: 1.4 }}
-                >
-                  {faq.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+{/* FAQ Modal */}
+{selectedFAQ && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div 
+      className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+      onClick={() => setSelectedFAQ(null)}
+    ></div>
+    <div className="relative bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+      {/* Header */}
+      <div className="bg-gray-900 px-6 py-4 border-b border-gray-700 flex items-center justify-between">
+        <h3 className={`text-xl font-semibold text-white ${fontClass}`} style={{
+          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+        }}>
+          {selectedFAQ === 'booking' && (language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking')}
+          {selectedFAQ === 'services' && (language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services')}
+          {selectedFAQ === 'flight-info' && (language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information')}
+          {selectedFAQ === 'support' && (language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact')}
+        </h3>
+        <button
+          onClick={() => setSelectedFAQ(null)}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
+          <XMarkIcon className="w-6 h-6" />
+        </button>
+      </div>
 
-      {/* FAQ Modal */}
-      {selectedFAQ && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setSelectedFAQ(null)}
-          ></div>
-          <div className="relative bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="bg-gray-900 px-6 py-4 border-b border-gray-700 flex items-center justify-between">
-              <h3 className={`text-xl font-semibold text-white ${fontClass}`} style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-              }}>
-                {selectedFAQ === 'booking' && (language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking')}
-                {selectedFAQ === 'services' && (language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services')}
-                {selectedFAQ === 'flight-info' && (language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information')}
-                {selectedFAQ === 'support' && (language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact')}
-              </h3>
-              <button
-                onClick={() => setSelectedFAQ(null)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="px-6 py-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-              <div className="space-y-6">
-                {selectedFAQ === 'booking' && (
-                  <>
-                    <div>
-                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'چگونه می‌توانم پرواز خود را رزرو کنم؟' : language === 'ar' ? 'كيف يمكنني حجز رحلتي؟' : 'How can I book my flight?'}
-                      </h4>
-                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' 
-                          ? 'شما می‌توانید به راحتی از طریق وب‌سایت نسیم ایر، اپلیکیشن موبایل یا تماس با مرکز رزرواسیون ما پرواز خود را رزرو کنید. ما با مجوز رسمی از سازمان هواپیمایی کشوری و دارای نماد اعتماد الکترونیکی هستیم و تمامی تراکنش‌های شما به صورت امن انجام می‌شود.'
-                          : language === 'ar'
-                          ? 'يمكنك بسهولة حجز رحلتك من خلال موقع نسيم إير الإلكتروني أو تطبيق الهاتف المحمول أو الاتصال بمركز الحجز لدينا. نحن مرخصون رسمياً من منظمة الطيران المدني ونتحلى بشارة الثقة الإلكترونية، وجميع معاملاتك تتم بأمان.'
-                          : 'You can easily book your flight through Nasim Air website, mobile app, or by contacting our reservation center. We are officially licensed by the Civil Aviation Organization and have an electronic trust badge, and all your transactions are secure.'}
-              </p>
-            </div>
-            <div>
-                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'آیا امکان تغییر یا لغو رزرو وجود دارد؟' : language === 'ar' ? 'هل يمكن تغيير أو إلغاء الحجز؟' : 'Can I change or cancel my booking?'}
-                      </h4>
-                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa'
-                          ? 'بله، شما می‌توانید با توجه به قوانین و شرایط بلیط خود، تغییرات یا لغو را از طریق پنل کاربری یا تماس با پشتیبانی انجام دهید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای رضایت شما انجام می‌دهیم.'
-                          : language === 'ar'
-                          ? 'نعم، يمكنك إجراء التغييرات أو الإلغاء من خلال لوحة المستخدم أو الاتصال بالدعم وفقاً لقواعد وشروط تذكرتك. كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإرضائك.'
-                          : 'Yes, you can make changes or cancellations through your user panel or by contacting support, according to your ticket rules and conditions. As a trusted Iranian airline, we do our best to satisfy you.'}
-                      </p>
-                    </div>
-                  </>
-                )}
-
-                {selectedFAQ === 'services' && (
-                  <>
-                    <div>
-                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'چه خدماتی در طول پرواز ارائه می‌شود؟' : language === 'ar' ? 'ما هي الخدمات المقدمة أثناء الرحلة؟' : 'What services are provided during the flight?'}
-                      </h4>
-                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa'
-                          ? 'نسیم ایر با افتخار خدمات متنوعی از جمله پذیرایی، اینترنت وای‌فای، سرگرمی‌های پرواز و خدمات ویژه برای مسافران VIP ارائه می‌دهد. تمامی خدمت‌رسانان ما آموزش‌دیده و متعهد به ارائه بهترین تجربه سفر برای شما هستند.'
-                          : language === 'ar'
-                          ? 'تقدم نسيم إير بفخر خدمات متنوعة تشمل الضيافة والإنترنت اللاسلكي ووسائل الترفيه وخدمات خاصة لركاب VIP. جميع موظفينا مدربون وملتزمون بتقديم أفضل تجربة سفر لك.'
-                          : 'Nasim Air proudly provides various services including catering, WiFi internet, in-flight entertainment, and special services for VIP passengers. All our staff are trained and committed to providing you with the best travel experience.'}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'آیا امکان حمل بار اضافی وجود دارد؟' : language === 'ar' ? 'هل يمكن نقل أمتعة إضافية؟' : 'Can I carry extra baggage?'}
-                      </h4>
-                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa'
-                          ? 'بله، شما می‌توانید با پرداخت هزینه اضافی، بار اضافی حمل کنید. اطلاعات دقیق در مورد وزن و ابعاد مجاز را می‌توانید در وب‌سایت ما مشاهده کنید. ما به عنوان یک ایرلاین معتبر، تمام قوانین بین‌المللی را رعایت می‌کنیم.'
-                          : language === 'ar'
-                          ? 'نعم، يمكنك نقل أمتعة إضافية مقابل دفع رسوم إضافية. يمكنك الاطلاع على معلومات دقيقة حول الوزن والأبعاد المسموحة على موقعنا. كشركة طيران موثوقة، نلتزم بجميع القوانين الدولية.'
-                          : 'Yes, you can carry extra baggage for an additional fee. You can find detailed information about allowed weight and dimensions on our website. As a trusted airline, we comply with all international regulations.'}
-                      </p>
-                    </div>
-                  </>
-                )}
-
-                {selectedFAQ === 'flight-info' && (
-                  <>
-                    <div>
-                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'چگونه می‌توانم وضعیت پرواز خود را بررسی کنم؟' : language === 'ar' ? 'كيف يمكنني التحقق من حالة رحلتي؟' : 'How can I check my flight status?'}
-                      </h4>
-                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa'
-                          ? 'شما می‌توانید از طریق وب‌سایت نسیم ایر، اپلیکیشن موبایل یا با وارد کردن شماره پرواز در بخش "وضعیت پرواز" اطلاعات دقیق پرواز خود را مشاهده کنید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای اطلاع‌رسانی به موقع انجام می‌دهیم.'
-                          : language === 'ar'
-                          ? 'يمكنك الاطلاع على معلومات دقيقة لرحلتك من خلال موقع نسيم إير أو تطبيق الهاتف المحمول أو بإدخال رقم الرحلة في قسم "حالة الرحلة". كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإعلامك في الوقت المناسب.'
-                          : 'You can view detailed information about your flight through the Nasim Air website, mobile app, or by entering the flight number in the "Flight Status" section. As a trusted Iranian airline, we do our best to inform you in a timely manner.'}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'چه زمانی باید در فرودگاه حاضر شوم؟' : language === 'ar' ? 'متى يجب أن أكون في المطار؟' : 'When should I arrive at the airport?'}
-                      </h4>
-                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa'
-                          ? 'برای پروازهای داخلی حداقل 90 دقیقه و برای پروازهای بین‌المللی حداقل 3 ساعت قبل از زمان پرواز در فرودگاه حاضر شوید. نسیم ایر با رعایت تمام استانداردهای امنیتی و ایمنی، تجربه سفر امنی را برای شما فراهم می‌کند.'
-                          : language === 'ar'
-                          ? 'للرحلات الداخلية، يجب أن تكون في المطار قبل 90 دقيقة على الأقل، وللرحلات الدولية قبل 3 ساعات على الأقل من وقت الرحلة. تلتزم نسيم إير بجميع معايير الأمن والسلامة لتوفير تجربة سفر آمنة لك.'
-                          : 'For domestic flights, arrive at least 90 minutes before, and for international flights, at least 3 hours before the flight time. Nasim Air, complying with all security and safety standards, provides you with a safe travel experience.'}
-                      </p>
-                    </div>
-                  </>
-                )}
-
-                {selectedFAQ === 'support' && (
-                  <>
-                    <div>
-                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'چگونه می‌توانم با پشتیبانی نسیم ایر تماس بگیرم؟' : language === 'ar' ? 'كيف يمكنني الاتصال بدعم نسيم إير؟' : 'How can I contact Nasim Air support?'}
-                      </h4>
-                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa'
-                          ? 'شما می‌توانید از طریق شماره تلفن 021-91000000، ایمیل support@nasimair.ir یا چت آنلاین در وب‌سایت با تیم پشتیبانی ما در ارتباط باشید. تیم پشتیبانی نسیم ایر 24/7 آماده پاسخگویی به سوالات شماست. ما به عنوان یک ایرلاین معتبر ایرانی با نماد اعتماد الکترونیکی، متعهد به ارائه بهترین خدمات به شما هستیم.'
-                          : language === 'ar'
-                          ? 'يمكنك التواصل مع فريق الدعم لدينا عبر الهاتف 021-91000000 أو البريد الإلكتروني support@nasimair.ir أو الدردشة المباشرة على الموقع. فريق دعم نسيم إير جاهز للرد على استفساراتك على مدار الساعة. كشركة طيران إيرانية موثوقة بشارة الثقة الإلكترونية، ملتزمون بتقديم أفضل الخدمات لك.'
-                          : 'You can contact our support team via phone 021-91000000, email support@nasimair.ir, or online chat on the website. Nasim Air support team is available 24/7 to answer your questions. As a trusted Iranian airline with an electronic trust badge, we are committed to providing you with the best services.'}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa' ? 'آیا نسیم ایر دارای مجوز و اعتبار است؟' : language === 'ar' ? 'هل تمتلك نسيم إير ترخيصاً ومصداقية؟' : 'Is Nasim Air licensed and credible?'}
-                      </h4>
-                      <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {language === 'fa'
-                          ? 'بله، نسیم ایر با مجوز رسمی از سازمان هواپیمایی کشوری فعالیت می‌کند و دارای نماد اعتماد الکترونیکی (اینماد) است. ما تمام استانداردهای ایمنی و امنیتی بین‌المللی را رعایت می‌کنیم و به عنوان یک ایرلاین معتبر ایرانی، سال‌هاست که خدمات پروازی ایمن و با کیفیت ارائه می‌دهیم.'
-                          : language === 'ar'
-                          ? 'نعم، تعمل نسيم إير بترخيص رسمي من منظمة الطيران المدني وتحمل شارة الثقة الإلكترونية. نلتزم بجميع معايير الأمن والسلامة الدولية وكشركة طيران إيرانية موثوقة، نقدم منذ سنوات خدمات طيران آمنة وعالية الجودة.'
-                          : 'Yes, Nasim Air operates with an official license from the Civil Aviation Organization and has an electronic trust badge. We comply with all international safety and security standards, and as a trusted Iranian airline, we have been providing safe and quality flight services for years.'}
-                      </p>
-                    </div>
-                  </>
-                )}
+      {/* Content */}
+      <div className="px-6 py-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div className="space-y-6">
+          {selectedFAQ === 'booking' && (
+            <>
+              <div>
+                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' ? 'چگونه می‌توانم پرواز خود را رزرو کنم؟' : language === 'ar' ? 'كيف يمكنني حجز رحلتي؟' : 'How can I book my flight?'}
+                </h4>
+                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' 
+                    ? 'شما می‌توانید به راحتی از طریق وب‌سایت نسیم ایر، اپلیکیشن موبایل یا تماس با مرکز رزرواسیون ما پرواز خود را رزرو کنید. ما با مجوز رسمی از سازمان هواپیمایی کشوری و دارای نماد اعتماد الکترونیکی هستیم و تمامی تراکنش‌های شما به صورت امن انجام می‌شود.'
+                    : language === 'ar'
+                    ? 'يمكنك بسهولة حجز رحلتك من خلال موقع نسيم إير الإلكتروني أو تطبيق الهاتف المحمول أو الاتصال بمركز الحجز لدينا. نحن مرخصون رسمياً من منظمة الطيران المدني ونتحلى بشارة الثقة الإلكترونية، وجميع معاملاتك تتم بأمان.'
+                    : 'You can easily book your flight through Nasim Air website, mobile app, or by contacting our reservation center. We are officially licensed by the Civil Aviation Organization and have an electronic trust badge, and all your transactions are secure.'}
+                </p>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+              <div>
+                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' ? 'آیا امکان تغییر یا لغو رزرو وجود دارد؟' : language === 'ar' ? 'هل يمكن تغيير أو إلغاء الحجز؟' : 'Can I change or cancel my booking?'}
+                </h4>
+                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa'
+                    ? 'بله، شما می‌توانید با توجه به قوانین و شرایط بلیط خود، تغییرات یا لغو را از طریق پنل کاربری یا تماس با پشتیبانی انجام دهید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای رضایت شما انجام می‌دهیم.'
+                    : language === 'ar'
+                    ? 'نعم، يمكنك إجراء التغييرات أو الإلغاء من خلال لوحة المستخدم أو الاتصال بالدعم وفقاً لقواعد وشروط تذكرتك. كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإرضائك.'
+                    : 'Yes, you can make changes or cancellations through your user panel or by contacting support, according to your ticket rules and conditions. As a trusted Iranian airline, we do our best to satisfy you.'}
+                </p>
+              </div>
+            </>
+          )}
 
+          {selectedFAQ === 'services' && (
+            <>
+              <div>
+                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' ? 'چه خدماتی در طول پرواز ارائه می‌شود؟' : language === 'ar' ? 'ما هي الخدمات المقدمة أثناء الرحلة؟' : 'What services are provided during the flight?'}
+                </h4>
+                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa'
+                    ? 'نسیم ایر با افتخار خدمات متنوعی از جمله پذیرایی، اینترنت وای‌فای، سرگرمی‌های پرواز و خدمات ویژه برای مسافران VIP ارائه می‌دهد. تمامی خدمت‌رسانان ما آموزش‌دیده و متعهد به ارائه بهترین تجربه سفر برای شما هستند.'
+                    : language === 'ar'
+                    ? 'تقدم نسيم إير بفخر خدمات متنوعة تشمل الضيافة والإنترنت اللاسلكي ووسائل الترفيه وخدمات خاصة لركاب VIP. جميع موظفينا مدربون وملتزمون بتقديم أفضل تجربة سفر لك.'
+                    : 'Nasim Air proudly provides various services including catering, WiFi internet, in-flight entertainment, and special services for VIP passengers. All our staff are trained and committed to providing you with the best travel experience.'}
+                </p>
+              </div>
+              <div>
+                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' ? 'آیا امکان حمل بار اضافی وجود دارد؟' : language === 'ar' ? 'هل يمكن نقل أمتعة إضافية؟' : 'Can I carry extra baggage?'}
+                </h4>
+                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa'
+                    ? 'بله، شما می‌توانید با پرداخت هزینه اضافی، بار اضافی حمل کنید. اطلاعات دقیق در مورد وزن و ابعاد مجاز را می‌توانید در وب‌سایت ما مشاهده کنید. ما به عنوان یک ایرلاین معتبر، تمام قوانین بین‌المللی را رعایت می‌کنیم.'
+                    : language === 'ar'
+                    ? 'نعم، يمكنك نقل أمتعة إضافية مقابل دفع رسوم إضافية. يمكنك الاطلاع على معلومات دقيقة حول الوزن والأبعاد المسموحة على موقعنا. كشركة طيران موثوقة، نلتزم بجميع القوانين الدولية.'
+                    : 'Yes, you can carry extra baggage for an additional fee. You can find detailed information about allowed weight and dimensions on our website. As a trusted airline, we comply with all international regulations.'}
+                </p>
+              </div>
+            </>
+          )}
+
+          {selectedFAQ === 'flight-info' && (
+            <>
+              <div>
+                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' ? 'چگونه می‌توانم وضعیت پرواز خود را بررسی کنم؟' : language === 'ar' ? 'كيف يمكنني التحقق من حالة رحلتي؟' : 'How can I check my flight status?'}
+                </h4>
+                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa'
+                    ? 'شما می‌توانید از طریق وب‌سایت نسیم ایر، اپلیکیشن موبایل یا با وارد کردن شماره پرواز در بخش "وضعیت پرواز" اطلاعات دقیق پرواز خود را مشاهده کنید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای اطلاع‌رسانی به موقع انجام می‌دهیم.'
+                    : language === 'ar'
+                    ? 'يمكنك الاطلاع على معلومات دقيقة لرحلتك من خلال موقع نسيم إير أو تطبيق الهاتف المحمول أو بإدخال رقم الرحلة في قسم "حالة الرحلة". كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإعلامك في الوقت المناسب.'
+                    : 'You can view detailed information about your flight through the Nasim Air website, mobile app, or by entering the flight number in the "Flight Status" section. As a trusted Iranian airline, we do our best to inform you in a timely manner.'}
+                </p>
+              </div>
+              <div>
+                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' ? 'چه زمانی باید در فرودگاه حاضر شوم؟' : language === 'ar' ? 'متى يجب أن أكون في المطار؟' : 'When should I arrive at the airport?'}
+                </h4>
+                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa'
+                    ? 'برای پروازهای داخلی حداقل 90 دقیقه و برای پروازهای بین‌المللی حداقل 3 ساعت قبل از زمان پرواز در فرودگاه حاضر شوید. نسیم ایر با رعایت تمام استانداردهای امنیتی و ایمنی، تجربه سفر امنی را برای شما فراهم می‌کند.'
+                    : language === 'ar'
+                    ? 'للرحلات الداخلية، يجب أن تكون في المطار قبل 90 دقيقة على الأقل، وللرحلات الدولية قبل 3 ساعات على الأقل من وقت الرحلة. تلتزم نسيم إير بجميع معايير الأمن والسلامة لتوفير تجربة سفر آمنة لك.'
+                    : 'For domestic flights, arrive at least 90 minutes before, and for international flights, at least 3 hours before the flight time. Nasim Air, complying with all security and safety standards, provides you with a safe travel experience.'}
+                </p>
+              </div>
+            </>
+          )}
+
+          {selectedFAQ === 'support' && (
+            <>
+              <div>
+                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' ? 'چگونه می‌توانم با پشتیبانی نسیم ایر تماس بگیرم؟' : language === 'ar' ? 'كيف يمكنني الاتصال بدعم نسيم إير؟' : 'How can I contact Nasim Air support?'}
+                </h4>
+                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa'
+                    ? 'شما می‌توانید از طریق شماره تلفن 021-91000000، ایمیل support@nasimair.ir یا چت آنلاین در وب‌سایت با تیم پشتیبانی ما در ارتباط باشید. تیم پشتیبانی نسیم ایر 24/7 آماده پاسخگویی به سوالات شماست. ما به عنوان یک ایرلاین معتبر ایرانی با نماد اعتماد الکترونیکی، متعهد به ارائه بهترین خدمات به شما هستیم.'
+                    : language === 'ar'
+                    ? 'يمكنك التواصل مع فريق الدعم لدينا عبر الهاتف 021-91000000 أو البريد الإلكتروني support@nasimair.ir أو الدردشة المباشرة على الموقع. فريق دعم نسيم إير جاهز للرد على استفساراتك على مدار الساعة. كشركة طيران إيرانية موثوقة بشارة الثقة الإلكترونية، ملتزمون بتقديم أفضل الخدمات لك.'
+                    : 'You can contact our support team via phone 021-91000000, email support@nasimair.ir, or online chat on the website. Nasim Air support team is available 24/7 to answer your questions. As a trusted Iranian airline with an electronic trust badge, we are committed to providing you with the best services.'}
+                </p>
+              </div>
+              <div>
+                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa' ? 'آیا نسیم ایر دارای مجوز و اعتبار است؟' : language === 'ar' ? 'هل تمتلك نسيم إير ترخيصاً ومصداقية؟' : 'Is Nasim Air licensed and credible?'}
+                </h4>
+                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                }}>
+                  {language === 'fa'
+                    ? 'بله، نسیم ایر با مجوز رسمی از سازمان هواپیمایی کشوری فعالیت می‌کند و دارای نماد اعتماد الکترونیکی (اینماد) است. ما تمام استانداردهای ایمنی و امنیتی بین‌المللی را رعایت می‌کنیم و به عنوان یک ایرلاین معتبر ایرانی، سال‌هاست که خدمات پروازی ایمن و با کیفیت ارائه می‌دهیم.'
+                    : language === 'ar'
+                    ? 'نعم، تعمل نسيم إير بترخيص رسمي من منظمة الطيران المدني وتحمل شارة الثقة الإلكترونية. نلتزم بجميع معايير الأمن والسلامة الدولية وكشركة طيران إيرانية موثوقة، نقدم منذ سنوات خدمات طيران آمنة وعالية الجودة.'
+                    : 'Yes, Nasim Air operates with an official license from the Civil Aviation Organization and has an electronic trust badge. We comply with all international safety and security standards, and as a trusted Iranian airline, we have been providing safe and quality flight services for years.'}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
       {/* Footer - Emirates Style */}
-      <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '0', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
+      <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '-65px', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* درباره نسیم ایر Column */}

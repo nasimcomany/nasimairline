@@ -7,6 +7,7 @@ const GlassmorphismHeader: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [isLoginMenuOpen, setIsLoginMenuOpen] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const loginMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const loginMenuRef = useRef<HTMLDivElement>(null);
@@ -222,7 +223,7 @@ const GlassmorphismHeader: React.FC = () => {
                 >
                   <button
                     onClick={() => {
-                      navigate('/login');
+                      setShowTermsModal(true);
                       setIsLoginMenuOpen(false);
                     }}
                     className={`w-full px-4 py-2.5 ${language === 'en' ? 'text-left' : 'text-right'} hover:bg-blue-50 transition-colors duration-200 ${fontClass} text-gray-700 text-sm border-b border-gray-100`}
@@ -340,7 +341,7 @@ const GlassmorphismHeader: React.FC = () => {
               {/* Mobile Action Buttons */}
               <div className="pt-4 space-y-4">
                 <div className={`text-white/70 text-sm font-medium ${fontClass} mb-2`}>{t('nav.loginUsers')}:</div>
-                <button onClick={() => {navigate('/login'); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
+                <button onClick={() => {setShowTermsModal(true); setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
                   {t('nav.loginUsers')}
                 </button>
                 <button onClick={() => {window.location.href = '/limited-admin/'; setIsMobileMenuOpen(false);}} className={`w-full px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium ${fontClass} rounded-lg transition-all duration-300 shadow-lg`}>
@@ -378,6 +379,85 @@ const GlassmorphismHeader: React.FC = () => {
         )}
       </div>
 
+      {/* ✨ مودال شرایط هواپیمایی - در انتهای کامپوننت */}
+      {showTermsModal && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+          onClick={() => setShowTermsModal(false)}
+        >
+          <div 
+            className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl w-full max-w-md p-6 relative border border-white/40"
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              background: 'linear-gradient(145deg, rgba(255,255,255,0.92) 0%, rgba(240,248,255,0.85) 100%)',
+              boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.35)'
+            }}
+          >
+            <div className="absolute -top-4 -right-4 w-16 h-16 bg-blue-100 rounded-full opacity-70 blur-2xl"></div>
+            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-sky-100 rounded-full opacity-60 blur-3xl"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center mb-5 pb-3 border-b border-blue-100">
+                <div className="bg-blue-600 text-white rounded-full p-2 mr-3 shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <h2 className={`text-xl font-bold text-gray-800 ${fontClass}`}>
+                  شرایط برنامه وفاداری نسیم ایر
+                </h2>
+              </div>
+              
+              <div className="mb-6 max-h-60 overflow-y-auto pr-2">
+                <p className={`text-sm text-gray-700 leading-relaxed ${fontClass}`}>
+                  با ثبت‌نام در برنامه وفاداری «نسیم ایر»، شما موافقت می‌کنید که:
+                </p>
+                <ul className={`mt-3 space-y-2 pr-3 text-sm text-gray-800 ${fontClass}`}>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 ml-2 mt-1">•</span>
+                    <span>اطلاعات پروازهای شما جهت محاسبه و اهدای امتیاز وفاداری توسط شرکت هواپیمایی نسیم ایر جمع‌آوری گردد.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 ml-2 mt-1">•</span>
+                    <span>امتیازات کسب‌شده قابل استفاده برای تخفیف در خرید بلیط‌های آتی، ارتقاء کلاس پرواز و خدمات ویژه باشد.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 ml-2 mt-1">•</span>
+                    <span>شرکت نسیم ایر متعهد به رعایت کامل حریم خصوصی شما و عدم اشتراک‌گذاری داده‌ها با سایر جهات بدون رضایت کتبی شماست.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 ml-2 mt-1">•</span>
+                    <span>عدم پذیرش این شرایط، امکان عضویت در برنامه وفاداری را منتفی می‌سازد.</span>
+                  </li>
+                </ul>
+                <p className={`mt-4 text-xs text-gray-500 italic ${fontClass}`}>
+                  این موارد مطابق با قوانین هواپیمایی جمهوری اسلامی ایران و مقررات بین‌المللی حفظ حریم خصوصی تنظیم شده است.
+                </p>
+              </div>
+              
+              <div className="flex justify-between gap-3 pt-4 border-t border-blue-50">
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(false)}
+                  className="flex-1 py-2.5 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200"
+                >
+                  انصراف
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowTermsModal(false);
+                    navigate('/login');
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl font-medium text-white transition-all duration-200 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 shadow-lg hover:shadow-xl"
+                >
+                  موافقم و ادامه می‌دهم
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
