@@ -1471,7 +1471,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Offers Section */}
-      <section className="relative z-10 py-6 sm:py-8 bg-gray-100" style={{ marginTop: '10px' }}>
+      <section className="relative z-10 py-6 sm:py-8 bg-gray-100" style={{ marginTop: '20px' }}>
         <style>{`
           @keyframes slideInFromRight {
             from {

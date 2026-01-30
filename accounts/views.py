@@ -69,11 +69,31 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['put', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def update_profile(self, request):
-        """Update current user's profile"""
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(UserDetailSerializer(request.user).data)
+        """Update current user's profile - Only phone_number can be updated and only once"""
+        user = request.user
+        
+        # فقط شماره تلفن قابل ویرایش است
+        if 'phone_number' in request.data:
+            # اگر شماره تلفن قبلاً وجود داشته باشد، اجازه تغییر نمی‌دهیم
+            if user.phone_number and user.phone_number.strip():
+                return Response(
+                    {'error': 'شماره تلفن قبلاً ثبت شده و قابل تغییر نیست.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            # فقط شماره تلفن را به‌روزرسانی می‌کنیم
+            user.phone_number = request.data.get('phone_number')
+            user.save(update_fields=['phone_number'])
+        else:
+            # اگر فیلد دیگری غیر از phone_number ارسال شده باشد، خطا می‌دهیم
+            allowed_fields = {'phone_number'}
+            provided_fields = set(request.data.keys())
+            if provided_fields - allowed_fields:
+                return Response(
+                    {'error': 'فقط شماره تلفن قابل ویرایش است.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        return Response(UserDetailSerializer(user).data)
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def update_loyalty_points(self, request, pk=None):

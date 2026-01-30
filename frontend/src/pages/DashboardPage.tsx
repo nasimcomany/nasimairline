@@ -1,29 +1,126 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
+import { setUser } from '../store/slices/authSlice';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { authService } from '../services/authService';
 import { 
   UserIcon, 
-  TicketIcon, 
-  CreditCardIcon,
-  BellIcon,
   StarIcon,
-  SparklesIcon
+  SparklesIcon,
+  PencilIcon,
+  CheckIcon,
+  XMarkIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  IdentificationIcon,
+  CalendarIcon
 } from '@heroicons/react/24/outline';
+
+interface UserProfile {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
+  national_id?: string;
+  date_of_birth?: string;
+  gender?: string;
+  nationality?: string;
+  membership_level: string;
+  loyalty_points: number;
+  uuid?: string;
+  date_joined?: string;
+}
 
 const DashboardPage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
   const { t, fontClass, language } = useLanguage();
-  const navigate = useNavigate();
+  
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  // دریافت اطلاعات کامل پروفایل از API
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      
+      setFetching(true);
+      try {
+        const profile = await authService.getProfile();
+        setProfileData(profile as UserProfile);
+        setPhoneNumber(profile.phone_number || '');
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setProfileData(user as UserProfile);
+        setPhoneNumber(user.phone_number || '');
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(e.target.value);
+    setError('');
+    setSuccess('');
+  };
+
+  const handleSavePhone = async () => {
+    if (!phoneNumber.trim()) {
+      setError(language === 'fa' ? 'لطفاً شماره تلفن را وارد کنید' : language === 'ar' ? 'يرجى إدخال رقم الهاتف' : 'Please enter phone number');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await api.patch('/api/accounts/users/update_profile/', {
+        phone_number: phoneNumber.trim()
+      });
+
+      const updatedProfile = await authService.getProfile();
+      setProfileData(updatedProfile as UserProfile);
+      dispatch(setUser(updatedProfile));
+      localStorage.setItem('user', JSON.stringify(updatedProfile));
+      
+      setSuccess(language === 'fa' ? 'شماره تلفن با موفقیت ذخیره شد' : language === 'ar' ? 'تم حفظ رقم الهاتف بنجاح' : 'Phone number saved successfully');
+      setIsEditingPhone(false);
+      
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      console.error('Update error:', err);
+      setError(err.response?.data?.detail || err.response?.data?.error || (language === 'fa' ? 'خطا در ذخیره شماره تلفن' : language === 'ar' ? 'خطأ في حفظ رقم الهاتف' : 'Error saving phone number'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelPhone = () => {
+    setPhoneNumber(profileData?.phone_number || '');
+    setIsEditingPhone(false);
+    setError('');
+    setSuccess('');
+  };
 
   const getMembershipBadge = (level: string) => {
     const badges = {
-      bronze: 'bg-gradient-to-r from-amber-400 to-amber-600 text-white',
-      silver: 'bg-gradient-to-r from-gray-400 to-gray-600 text-white',
-      gold: 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white',
-      platinum: 'bg-gradient-to-r from-purple-400 to-purple-600 text-white'
+      bronze: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white',
+      silver: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white',
+      gold: 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white',
+      platinum: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
     };
     return badges[level as keyof typeof badges] || badges.bronze;
   };
@@ -38,182 +135,285 @@ const DashboardPage: React.FC = () => {
     return names[level as keyof typeof names] || names.bronze;
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString(language === 'fa' ? 'fa-IR' : language === 'ar' ? 'ar-SA' : 'en-US');
+    } catch {
+      return dateString;
+    }
+  };
+
   const fontStyle = {
     fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
   };
 
+  const canEditPhone = !profileData?.phone_number || profileData.phone_number.trim() === '';
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-white">
       <EmiratesHeader />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" style={{ paddingTop: 'calc(3rem + 80px)' }}>
         {/* Header Section */}
         <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
-              <SparklesIcon className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-3 bg-gradient-to-br from-blue-900 to-blue-800 rounded-xl shadow-xl">
+              <SparklesIcon className="h-7 w-7 text-white" />
             </div>
-            <h1 className={`text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent ${fontClass}`} style={fontStyle}>
-              {language === 'fa' ? 'داشبورد کاربری' : language === 'ar' ? 'لوحة التحكم' : 'User Dashboard'}
-            </h1>
-          </div>
-          <p className={`text-lg text-gray-600 ${fontClass} mt-2`} style={fontStyle}>
-            {language === 'fa' 
-              ? `خوش آمدید، ${user?.first_name} ${user?.last_name}` 
-              : language === 'ar' 
-              ? `مرحباً، ${user?.first_name} ${user?.last_name}` 
-              : `Welcome back, ${user?.first_name} ${user?.last_name}`}
-          </p>
-        </div>
-
-        {/* User Info Card - Premium Design */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-10 relative overflow-hidden">
-          {/* Decorative gradient background */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-transparent rounded-full blur-3xl opacity-50"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-50 to-transparent rounded-full blur-3xl opacity-50"></div>
-          
-          <div className="relative z-10">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              {/* Avatar Section */}
-              <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
-                  <UserIcon className="h-12 w-12 text-white" />
-                </div>
-                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-md">
-                  <div className="w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
-                </div>
-              </div>
-
-              {/* User Details */}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <h2 className={`text-2xl font-bold text-gray-900 ${fontClass}`} style={fontStyle}>
-                    {user?.first_name} {user?.last_name}
-                  </h2>
-                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold shadow-md ${getMembershipBadge(user?.membership_level?.toLowerCase() || 'bronze')} ${fontClass}`} style={fontStyle}>
-                    {getMembershipName(user?.membership_level?.toLowerCase() || 'bronze')}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <p className={`${fontClass}`} style={fontStyle}>{user?.email}</p>
-                  </div>
-                  {user?.phone_number && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      <p className={`${fontClass}`} style={fontStyle}>{user?.phone_number}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Loyalty Points Section */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100 min-w-[180px]">
-                <div className="flex items-center gap-2 mb-2">
-                  <StarIcon className="h-6 w-6 text-yellow-500" />
-                  <span className={`text-sm font-medium text-gray-600 ${fontClass}`} style={fontStyle}>
-                    {language === 'fa' ? 'امتیاز وفاداری' : language === 'ar' ? 'نقاط الولاء' : 'Loyalty Points'}
-                  </span>
-                </div>
-                <p className={`text-3xl font-bold text-gray-900 ${fontClass}`} style={fontStyle}>
-                  {user?.loyalty_points?.toLocaleString() || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions - Premium Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div 
-            className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-8 cursor-pointer hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
-            onClick={() => navigate('/flights/search')}
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-16 h-16 rounded-xl flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
-                <TicketIcon className="h-8 w-8 text-white" />
-              </div>
-              <h3 className={`text-xl font-bold text-gray-900 mb-2 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'رزرو بلیط' : language === 'ar' ? 'حجز التذاكر' : 'Book Flight'}
-              </h3>
-              <p className={`text-gray-600 text-sm leading-relaxed ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'جستجو و رزرو پرواز به مقاصد مختلف' : language === 'ar' ? 'البحث وحجز الرحلة إلى وجهات مختلفة' : 'Search and book flights to various destinations'}
-              </p>
-            </div>
-          </div>
-
-          <div 
-            className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-8 cursor-pointer hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
-            onClick={() => navigate('/payments')}
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <div className="bg-gradient-to-br from-green-500 to-green-600 w-16 h-16 rounded-xl flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
-                <CreditCardIcon className="h-8 w-8 text-white" />
-              </div>
-              <h3 className={`text-xl font-bold text-gray-900 mb-2 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'پرداخت‌ها' : language === 'ar' ? 'المدفوعات' : 'Payments'}
-              </h3>
-              <p className={`text-gray-600 text-sm leading-relaxed ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'مشاهده تاریخچه پرداخت‌ها و تراکنش‌ها' : language === 'ar' ? 'عرض سجل المدفوعات والمعاملات' : 'View payment history and transactions'}
-              </p>
-            </div>
-          </div>
-
-          <div 
-            className="group bg-white rounded-2xl shadow-lg border border-gray-100 p-8 cursor-pointer hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
-            onClick={() => navigate('/notifications')}
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-50 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 w-16 h-16 rounded-xl flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300">
-                <BellIcon className="h-8 w-8 text-white" />
-              </div>
-              <h3 className={`text-xl font-bold text-gray-900 mb-2 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'اعلان‌ها' : language === 'ar' ? 'الإشعارات' : 'Notifications'}
-              </h3>
-              <p className={`text-gray-600 text-sm leading-relaxed ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'پیام‌ها و اطلاع‌رسانی‌های مهم' : language === 'ar' ? 'الرسائل والإشعارات المهمة' : 'Important messages and notifications'}
+            <div>
+              <h1 className={`text-4xl font-bold text-blue-900 ${fontClass}`} style={fontStyle}>
+                {language === 'fa' ? 'پروفایل کاربری' : language === 'ar' ? 'الملف الشخصي' : 'User Profile'}
+              </h1>
+              <p className={`text-blue-700 text-lg mt-1 ${fontClass}`} style={fontStyle}>
+                {language === 'fa' 
+                  ? `خوش آمدید، ${profileData?.first_name || user?.first_name || ''} ${profileData?.last_name || user?.last_name || ''}` 
+                  : language === 'ar' 
+                  ? `مرحباً، ${profileData?.first_name || user?.first_name || ''} ${profileData?.last_name || user?.last_name || ''}` 
+                  : `Welcome back, ${profileData?.first_name || user?.first_name || ''} ${profileData?.last_name || user?.last_name || ''}`}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Recent Bookings - Premium Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 relative overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-indigo-50 to-transparent rounded-full blur-3xl opacity-30"></div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className={`text-2xl font-bold text-gray-900 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'رزروهای اخیر' : language === 'ar' ? 'الحجوزات الأخيرة' : 'Recent Bookings'}
-              </h2>
+        {/* Success/Error Messages */}
+        {success && (
+          <div className={`mb-6 bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-md ${fontClass}`} style={fontStyle}>
+            <div className="flex items-center gap-2">
+              <CheckIcon className="h-5 w-5" />
+              {success}
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className={`mb-6 bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg shadow-md ${fontClass}`} style={fontStyle}>
+            {error}
+          </div>
+        )}
+
+        {/* Profile Card - Premium Blue Design */}
+        <div className="bg-white rounded-3xl shadow-2xl border-2 border-blue-100 overflow-hidden">
+          {/* Header with Blue Gradient */}
+          <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 p-8 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full blur-3xl"></div>
             </div>
             
-            <div className="text-center py-16">
-              <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <TicketIcon className="h-12 w-12 text-gray-400" />
+            <div className="relative z-10 flex items-center gap-6">
+              <div className="relative">
+                <div className="w-32 h-32 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center border-2 border-white/30 shadow-2xl">
+                  <UserIcon className="h-20 w-20 text-white" />
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2 shadow-lg border-4 border-white">
+                  <div className="w-4 h-4 bg-white rounded-full"></div>
+                </div>
               </div>
-              <p className={`text-gray-500 text-lg mb-2 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'هنوز رزروی انجام نداده‌اید' : language === 'ar' ? 'لم تقم بأي حجز بعد' : 'No bookings yet'}
-              </p>
-              <p className={`text-gray-400 text-sm mb-8 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'شروع کنید و اولین سفر خود را رزرو کنید' : language === 'ar' ? 'ابدأ واحجز رحلتك الأولى' : 'Get started and book your first trip'}
-              </p>
-              <button 
-                onClick={() => navigate('/flights/search')}
-                className="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-700 hover:from-blue-700 hover:via-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
-                style={fontStyle}
-              >
-                {language === 'fa' ? 'جستجوی پرواز' : language === 'ar' ? 'البحث عن رحلة' : 'Search Flights'}
-              </button>
+              
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-3">
+                  <h2 className={`text-3xl font-bold text-white ${fontClass}`} style={fontStyle}>
+                    {profileData?.first_name || user?.first_name || ''} {profileData?.last_name || user?.last_name || ''}
+                  </h2>
+                  <span className={`inline-flex items-center px-5 py-2 rounded-full text-sm font-bold shadow-lg ${getMembershipBadge((profileData?.membership_level || user?.membership_level || 'bronze').toLowerCase())} ${fontClass}`} style={fontStyle}>
+                    {getMembershipName((profileData?.membership_level || user?.membership_level || 'bronze').toLowerCase())}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <StarIcon className="h-6 w-6 text-yellow-300" />
+                  <span className={`text-white/90 text-lg font-semibold ${fontClass}`} style={fontStyle}>
+                    {language === 'fa' ? 'امتیاز وفاداری:' : language === 'ar' ? 'نقاط الولاء:' : 'Loyalty Points:'}
+                  </span>
+                  <span className={`text-2xl font-bold text-white ${fontClass}`} style={fontStyle}>
+                    {(profileData?.loyalty_points || user?.loyalty_points || 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Profile Information */}
+          <div className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* First Name */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-blue-900 rounded-lg">
+                    <UserIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <label className={`text-sm font-bold text-blue-900 uppercase tracking-wide ${fontClass}`} style={fontStyle}>
+                    {language === 'fa' ? 'نام' : language === 'ar' ? 'الاسم الأول' : 'First Name'}
+                  </label>
+                </div>
+                <p className={`text-blue-900 text-xl font-semibold ${fontClass}`} style={fontStyle}>
+                  {profileData?.first_name || user?.first_name || '-'}
+                </p>
+              </div>
+
+              {/* Last Name */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-blue-900 rounded-lg">
+                    <UserIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <label className={`text-sm font-bold text-blue-900 uppercase tracking-wide ${fontClass}`} style={fontStyle}>
+                    {language === 'fa' ? 'نام خانوادگی' : language === 'ar' ? 'اسم العائلة' : 'Last Name'}
+                  </label>
+                </div>
+                <p className={`text-blue-900 text-xl font-semibold ${fontClass}`} style={fontStyle}>
+                  {profileData?.last_name || user?.last_name || '-'}
+                </p>
+              </div>
+
+              {/* National ID */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-blue-900 rounded-lg">
+                    <IdentificationIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <label className={`text-sm font-bold text-blue-900 uppercase tracking-wide ${fontClass}`} style={fontStyle}>
+                    {language === 'fa' ? 'کد ملی' : language === 'ar' ? 'الرقم الوطني' : 'National ID'}
+                  </label>
+                </div>
+                <p className={`text-blue-900 text-xl font-semibold ${fontClass}`} style={fontStyle}>
+                  {profileData?.national_id || (user as any)?.national_id || '-'}
+                </p>
+              </div>
+
+              {/* Email */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-blue-900 rounded-lg">
+                    <EnvelopeIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <label className={`text-sm font-bold text-blue-900 uppercase tracking-wide ${fontClass}`} style={fontStyle}>
+                    {language === 'fa' ? 'ایمیل' : language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                  </label>
+                </div>
+                <p className={`text-blue-900 text-xl font-semibold ${fontClass}`} style={fontStyle}>
+                  {profileData?.email || user?.email || '-'}
+                </p>
+              </div>
+
+              {/* Phone Number - Editable Only Once */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 md:col-span-2">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-900 rounded-lg">
+                      <PhoneIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <label className={`text-sm font-bold text-blue-900 uppercase tracking-wide ${fontClass}`} style={fontStyle}>
+                      {language === 'fa' ? 'شماره تلفن' : language === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
+                    </label>
+                  </div>
+                  {canEditPhone && !isEditingPhone && (
+                    <button
+                      onClick={() => setIsEditingPhone(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+                      style={fontStyle}
+                    >
+                      <PencilIcon className="h-4 w-4" />
+                      <span className={`text-sm font-medium ${fontClass}`}>
+                        {language === 'fa' ? 'ویرایش' : language === 'ar' ? 'تعديل' : 'Edit'}
+                      </span>
+                    </button>
+                  )}
+                </div>
+                
+                {isEditingPhone && canEditPhone ? (
+                  <div className="space-y-4">
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={handlePhoneChange}
+                      className={`w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 text-blue-900 text-lg font-semibold ${fontClass}`}
+                      style={fontStyle}
+                      placeholder={language === 'fa' ? '09123456789' : language === 'ar' ? '09123456789' : '09123456789'}
+                    />
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={handleSavePhone}
+                        disabled={loading}
+                        className="flex items-center gap-2 px-6 py-3 bg-blue-900 hover:bg-blue-800 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={fontStyle}
+                      >
+                        {loading ? (
+                          <>
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className={fontClass}>
+                              {language === 'fa' ? 'در حال ذخیره...' : language === 'ar' ? 'جاري الحفظ...' : 'Saving...'}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckIcon className="h-5 w-5" />
+                            <span className={`font-semibold ${fontClass}`}>
+                              {language === 'fa' ? 'ذخیره' : language === 'ar' ? 'حفظ' : 'Save'}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={handleCancelPhone}
+                        disabled={loading}
+                        className="flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={fontStyle}
+                      >
+                        <XMarkIcon className="h-5 w-5" />
+                        <span className={`font-semibold ${fontClass}`}>
+                          {language === 'fa' ? 'انصراف' : language === 'ar' ? 'إلغاء' : 'Cancel'}
+                        </span>
+                      </button>
+                    </div>
+                    <p className={`text-xs text-blue-700 ${fontClass}`} style={fontStyle}>
+                      {language === 'fa' ? '⚠️ توجه: شماره تلفن فقط یکبار قابل ثبت است و پس از ذخیره دیگر قابل تغییر نیست' : language === 'ar' ? '⚠️ ملاحظة: يمكن إدخال رقم الهاتف مرة واحدة فقط وبعد الحفظ لا يمكن تغييره' : '⚠️ Note: Phone number can only be set once and cannot be changed after saving'}
+                    </p>
+                  </div>
+                ) : (
+                  <p className={`text-blue-900 text-xl font-semibold ${fontClass}`} style={fontStyle}>
+                    {profileData?.phone_number || user?.phone_number || (language === 'fa' ? 'وارد نشده' : language === 'ar' ? 'غير مدخل' : 'Not set')}
+                  </p>
+                )}
+              </div>
+
+              {/* Date of Birth */}
+              {profileData?.date_of_birth && (
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-blue-900 rounded-lg">
+                      <CalendarIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <label className={`text-sm font-bold text-blue-900 uppercase tracking-wide ${fontClass}`} style={fontStyle}>
+                      {language === 'fa' ? 'تاریخ تولد' : language === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth'}
+                    </label>
+                  </div>
+                  <p className={`text-blue-900 text-xl font-semibold ${fontClass}`} style={fontStyle}>
+                    {formatDate(profileData.date_of_birth)}
+                  </p>
+                </div>
+              )}
+
+              {/* Registration Date */}
+              {profileData?.date_joined && (
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-blue-900 rounded-lg">
+                      <CalendarIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <label className={`text-sm font-bold text-blue-900 uppercase tracking-wide ${fontClass}`} style={fontStyle}>
+                      {language === 'fa' ? 'تاریخ عضویت' : language === 'ar' ? 'تاريخ العضوية' : 'Registration Date'}
+                    </label>
+                  </div>
+                  <p className={`text-blue-900 text-xl font-semibold ${fontClass}`} style={fontStyle}>
+                    {formatDate(profileData.date_joined)}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
