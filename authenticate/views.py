@@ -104,11 +104,57 @@ class UserLoginView(generics.GenericAPIView):
         return ip
 
 
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def verify_captcha(request):
+    """
+    Verify captcha for dashboard access
+    """
+    captcha_answer = request.data.get('captcha_answer')
+    captcha_num1 = request.data.get('captcha_num1')
+    captcha_num2 = request.data.get('captcha_num2')
+    captcha_operator = request.data.get('captcha_operator')
+    
+    if not all([captcha_answer, captcha_num1, captcha_num2, captcha_operator]):
+        return Response(
+            {'error': 'تمام فیلدهای کپچا الزامی است.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Calculate correct answer
+    if captcha_operator == '+':
+        correct_answer = captcha_num1 + captcha_num2
+    elif captcha_operator == '-':
+        correct_answer = captcha_num1 - captcha_num2
+    else:
+        return Response(
+            {'error': 'عملگر نامعتبر است.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Verify answer
+    try:
+        user_answer = int(captcha_answer)
+        if user_answer != correct_answer:
+            return Response(
+                {'error': 'کد امنیتی اشتباه است.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    except (ValueError, TypeError):
+        return Response(
+            {'error': 'پاسخ کپچا باید عدد باشد.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    return Response({'message': 'کد امنیتی تأیید شد.'}, status=status.HTTP_200_OK)
+
+
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def user_profile(request):
     """
     Get current user profile
+    Note: Captcha verification is handled on frontend before accessing this endpoint
     """
     serializer = UserSerializer(request.user)
     return Response(serializer.data)

@@ -40,6 +40,12 @@ const DashboardPage: React.FC = () => {
   const dispatch = useDispatch();
   const { t, fontClass, language } = useLanguage();
   
+  // Captcha state
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+', answer: 0 });
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaError, setCaptchaError] = useState('');
+  
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -47,6 +53,40 @@ const DashboardPage: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
+
+  // Generate new captcha
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 20) + 1;
+    const num2 = Math.floor(Math.random() * 20) + 1;
+    const operators = ['+', '-'];
+    const operator = operators[Math.floor(Math.random() * operators.length)];
+    const answer = operator === '+' ? num1 + num2 : num1 - num2;
+    setCaptcha({ num1, num2, operator, answer });
+    setCaptchaInput('');
+    setCaptchaError('');
+  };
+
+  // Generate captcha on mount - ALWAYS require captcha on page load
+  useEffect(() => {
+    // Always reset captcha verification on every page load/refresh
+    // This ensures users must solve captcha every time they access the dashboard
+    generateCaptcha();
+    setCaptchaVerified(false);
+    setCaptchaInput('');
+    setCaptchaError('');
+  }, []);
+
+  // Handle captcha verification
+  const handleCaptchaVerify = () => {
+    const answer = parseInt(captchaInput.trim());
+    if (isNaN(answer) || answer !== captcha.answer) {
+      setCaptchaError(language === 'fa' ? 'کد امنیتی اشتباه است' : language === 'ar' ? 'رمز الأمان غير صحيح' : 'Security code is incorrect');
+      generateCaptcha();
+      return;
+    }
+    setCaptchaVerified(true);
+    setCaptchaError('');
+  };
 
   // دریافت اطلاعات کامل پروفایل از API
   useEffect(() => {
@@ -150,6 +190,93 @@ const DashboardPage: React.FC = () => {
   };
 
   const canEditPhone = !profileData?.phone_number || profileData.phone_number.trim() === '';
+
+  // Show captcha modal if not verified
+  if (!captchaVerified) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-white flex items-center justify-center">
+        <EmiratesHeader />
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+          <div 
+            className="bg-white rounded-3xl shadow-2xl border-2 border-blue-200 p-8 max-w-md w-full relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-900 to-blue-800 rounded-2xl mb-4">
+                <SparklesIcon className="h-8 w-8 text-white" />
+              </div>
+              <h2 className={`text-2xl font-bold text-blue-900 mb-2 ${fontClass}`} style={fontStyle}>
+                {language === 'fa' ? 'تأیید امنیتی' : language === 'ar' ? 'التحقق الأمني' : 'Security Verification'}
+              </h2>
+              <p className={`text-gray-600 ${fontClass}`} style={fontStyle}>
+                {language === 'fa' 
+                  ? 'لطفاً کد امنیتی زیر را حل کنید' 
+                  : language === 'ar' 
+                  ? 'يرجى حل رمز الأمان أدناه' 
+                  : 'Please solve the security code below'}
+              </p>
+            </div>
+
+            {/* Captcha */}
+            <div className="mb-6">
+              <label className={`block text-sm font-bold text-gray-700 mb-3 ${fontClass}`} style={fontStyle}>
+                {language === 'fa' ? 'کد امنیتی' : language === 'ar' ? 'رمز الأمان' : 'Security Code'}
+              </label>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 text-center">
+                  <span className={`text-2xl font-bold text-blue-900 ${fontClass}`} style={{ ...fontStyle, direction: 'ltr' }}>
+                    ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={generateCaptcha}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+                  style={fontStyle}
+                >
+                  {language === 'fa' ? 'تغییر' : language === 'ar' ? 'تغيير' : 'Change'}
+                </button>
+              </div>
+              <input
+                type="text"
+                value={captchaInput}
+                onChange={(e) => {
+                  setCaptchaInput(e.target.value.replace(/\D/g, ''));
+                  setCaptchaError('');
+                }}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleCaptchaVerify();
+                  }
+                }}
+                className={`w-full px-4 py-3 border-2 ${captchaError ? 'border-red-300' : 'border-blue-300'} rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 text-lg font-semibold text-gray-900 ${fontClass}`}
+                style={{ ...fontStyle, direction: 'ltr', textAlign: 'right' }}
+                placeholder={language === 'fa' ? 'پاسخ را وارد کنید' : language === 'ar' ? 'أدخل الإجابة' : 'Enter the answer'}
+                autoFocus
+              />
+              {captchaError && (
+                <p className={`text-red-600 text-sm mt-2 ${fontClass}`} style={fontStyle}>
+                  {captchaError}
+                </p>
+              )}
+            </div>
+
+            {/* Verify Button */}
+            <button
+              onClick={handleCaptchaVerify}
+              disabled={!captchaInput.trim()}
+              className={`w-full py-3 px-6 bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${fontClass}`}
+              style={fontStyle}
+            >
+              {language === 'fa' ? 'تأیید و ادامه' : language === 'ar' ? 'تأكيد والمتابعة' : 'Verify and Continue'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-white">

@@ -11,6 +11,7 @@ from .views import (
     UserLoginView,
     user_profile,
     logout,
+    verify_captcha,
 )
 
 app_name = 'authenticate'
@@ -27,5 +28,8 @@ urlpatterns = [
     
     # User Profile
     path('profile/', user_profile, name='profile'),
+    
+    # Captcha Verification
+    path('verify-captcha/', verify_captcha, name='verify_captcha'),
 ]
 
