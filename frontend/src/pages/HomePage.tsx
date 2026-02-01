@@ -4,6 +4,7 @@ import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import EmiratesFlightSearchForm from '../components/FlightSearch/EmiratesFlightSearchForm';
 import WeatherWidget from '../components/Weather/WeatherWidget';
 import { useLanguage } from '../contexts/LanguageContext';
+import galleryService, { HeroSlider } from '../services/galleryService';
 import { 
   PaperAirplaneIcon, 
   BuildingOfficeIcon, 
@@ -53,14 +54,15 @@ const HomePage: React.FC = () => {
   const [selectedFAQ, setSelectedFAQ] = useState<string | null>(null);
   
   // Hero Slider state
-  // تصاویر هر 12 ثانیه به صورت افقی تغییر می‌کنند
-  const heroImages = [
+  // تصاویر از API دریافت می‌شوند و هر 12 ثانیه به صورت افقی تغییر می‌کنند
+  const [heroSliders, setHeroSliders] = useState<HeroSlider[]>([]);
+  const [heroImages, setHeroImages] = useState<string[]>([
     '/images/tstnasim.jpg',
     '/images/tstnasim2.jpg',
     '/images/tstnasim3.jpg',
     '/images/tstnasim4.jpg',
     '/images/tstnasim5.jpg'
-  ];
+  ]);
   const [currentHeroImageIndex, setCurrentHeroImageIndex] = useState(0);
 
   // Flight Search state
@@ -260,6 +262,33 @@ const HomePage: React.FC = () => {
     if (!flightInfo.to) setFlightInfo(prev => ({ ...prev, to: t('home.flightSearch.defaultTo') }));
     if (!flightInfo.passengers) setFlightInfo(prev => ({ ...prev, passengers: t('home.flightSearch.defaultPassengers') }));
   }, [t]);
+
+  // Fetch Hero Slider images from API
+  useEffect(() => {
+    const fetchHeroSliders = async () => {
+      try {
+        console.log('Fetching hero sliders from API...');
+        const sliders = await galleryService.getHeroSliders();
+        console.log('Hero sliders received:', sliders);
+        
+        if (sliders && sliders.length > 0) {
+          setHeroSliders(sliders);
+          // Extract image URLs from API response
+          const imageUrls = sliders.map(slider => slider.image_url);
+          console.log('Image URLs extracted:', imageUrls);
+          setHeroImages(imageUrls);
+        } else {
+          console.log('No sliders received from API, using default images');
+        }
+        // If no sliders from API, keep default images
+      } catch (error) {
+        console.error('Error loading hero sliders:', error);
+        // Keep default images on error
+      }
+    };
+
+    fetchHeroSliders();
+  }, []);
 
   // Hero Slider auto-play
   useEffect(() => {
@@ -899,121 +928,39 @@ const HomePage: React.FC = () => {
             bottom: '238px' // Shorter from bottom
           }}
         >
-          {/* Slider - All images positioned absolutely */}
-          {/* Image 1: tstnasim.jpg */}
-          <div
-            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
-            style={{
-              transform: `translateX(${0 - currentHeroImageIndex * 100}%)`,
-              left: '0%'
-            }}
-          >
-            <img
-              src="/images/tstnasim.jpg"
-              alt="Hero image 1"
-              className="w-full h-full object-cover"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                display: 'block'
-              }}
-            />
-            <div className="absolute inset-0 bg-black/10"></div>
-      </div>
-
-          {/* Image 2: tstnasim2.jpg */}
-          <div
-            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
-            style={{
-              transform: `translateX(${100 - currentHeroImageIndex * 100}%)`,
-              left: '0%'
-            }}
-          >
-            <img
-              src="/images/tstnasim2.jpg"
-              alt="Hero image 2"
-              className="w-full h-full object-cover"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                display: 'block'
-              }}
-            />
-            <div className="absolute inset-0 bg-black/10"></div>
-      </div>
-
-          {/* Image 3: tstnasim3.jpg */}
-          <div
-            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
-            style={{
-              transform: `translateX(${200 - currentHeroImageIndex * 100}%)`,
-              left: '0%'
-            }}
-          >
-            <img
-              src="/images/tstnasim3.jpg"
-              alt="Hero image 3"
-              className="w-full h-full object-cover"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                display: 'block'
-              }}
-            />
-            <div className="absolute inset-0 bg-black/10"></div>
-          </div>
-          
-          {/* Image 4: tstnasim4.jpg */}
-          <div
-            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
-            style={{
-              transform: `translateX(${300 - currentHeroImageIndex * 100}%)`,
-              left: '0%'
-            }}
-          >
-            <img
-              src="/images/tstnasim4.jpg"
-              alt="Hero image 4"
-              className="w-full h-full object-cover"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                display: 'block'
-              }}
-            />
-            <div className="absolute inset-0 bg-black/10"></div>
-          </div>
-          
-          {/* Image 5: tstnasim5.jpg */}
-          <div
-            className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
-            style={{
-              transform: `translateX(${400 - currentHeroImageIndex * 100}%)`,
-              left: '0%'
-            }}
-          >
-            <img
-              src="/images/tstnasim5.jpg"
-              alt="Hero image 5"
-              className="w-full h-full object-cover"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                display: 'block'
-              }}
-            />
-            <div className="absolute inset-0 bg-black/10"></div>
+          {/* Slider - Dynamic images from API */}
+          {heroImages.map((imageUrl, index) => {
+            const slider = heroSliders[index]; // Get corresponding slider data if available
+            return (
+              <div
+                key={index}
+                className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
+                style={{
+                  transform: `translateX(${index * 100 - currentHeroImageIndex * 100}%)`,
+                  left: '0%'
+                }}
+              >
+                <img
+                  src={imageUrl}
+                  alt={slider?.alt_text || `Hero image ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center center',
+                    display: 'block'
+                  }}
+                  onClick={() => {
+                    if (slider?.link_url) {
+                      window.open(slider.link_url, '_blank');
+                    }
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/10"></div>
               </div>
+            );
+          })}
             </div>
             
         {/* Navigation Arrows - Minimal and Elegant */}

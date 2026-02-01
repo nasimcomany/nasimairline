@@ -83,12 +83,13 @@ limited_admin_site.register(IranCity, IranCityAdmin)
 limited_admin_site.register(IranologyArticle, IranologyArticleAdmin)
 
 # Register gallery models to limited admin site
-from gallery.models import GalleryCategory, GalleryAlbum, GalleryImage
+from gallery.models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider
 from gallery.admin import (
-    GalleryCategoryAdmin, GalleryAlbumAdmin, GalleryImageAdmin
+    GalleryCategoryAdmin, GalleryAlbumAdmin, GalleryImageAdmin, HeroSliderAdmin
 )
 
 limited_admin_site.register(GalleryCategory, GalleryCategoryAdmin)
 limited_admin_site.register(GalleryAlbum, GalleryAlbumAdmin)
 limited_admin_site.register(GalleryImage, GalleryImageAdmin)
+limited_admin_site.register(HeroSlider, HeroSliderAdmin)
 

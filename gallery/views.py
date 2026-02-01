@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .models import GalleryCategory, GalleryAlbum, GalleryImage
+from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider
 from .serializers import (
     GalleryCategorySerializer,
     GalleryCategoryDetailSerializer,
@@ -14,6 +14,7 @@ from .serializers import (
     GalleryAlbumDetailSerializer,
     GalleryImageSerializer,
     GalleryImageDetailSerializer,
+    HeroSliderSerializer,
 )
 
 
@@ -135,4 +136,24 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
         limit = int(request.query_params.get('limit', 10))
         images = self.queryset[:limit]
         serializer = self.get_serializer(images, many=True)
+        return Response(serializer.data)
+
+
+class HeroSliderViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for HeroSlider model - Homepage banner images
+    Read-only for frontend, admin can manage via Django admin
+    """
+    queryset = HeroSlider.objects.filter(is_active=True).order_by('order', '-created_at')
+    serializer_class = HeroSliderSerializer
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['order', 'created_at']
+    ordering = ['order', '-created_at']
+    
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def active(self, request):
+        """Get all active hero slider images"""
+        sliders = self.get_queryset()
+        serializer = self.get_serializer(sliders, many=True)
         return Response(serializer.data)

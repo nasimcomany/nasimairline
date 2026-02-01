@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from django.core.exceptions import ValidationError
 from django.db import models
-from .models import GalleryCategory, GalleryAlbum, GalleryImage
+from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider
 
 
 class BaseGallerySerializer(serializers.ModelSerializer):
@@ -302,4 +302,39 @@ class GalleryImageDetailSerializer(BaseGallerySerializer):
     def get_url(self, obj):
         """Get absolute URL"""
         return obj.get_absolute_url()
+
+
+class HeroSliderSerializer(serializers.ModelSerializer):
+    """
+    Serializer for HeroSlider model - Homepage banner images
+    """
+    image_url = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = HeroSlider
+        fields = [
+            'id', 'uuid', 'title', 'image', 'image_url', 'alt_text',
+            'order', 'is_active', 'link_url', 'created_by', 
+            'created_by_name', 'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'id', 'uuid', 'image_url', 'created_by', 'created_by_name',
+            'created_at', 'updated_at'
+        ]
+    
+    def get_image_url(self, obj):
+        """Get full image URL"""
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+    
+    def get_created_by_name(self, obj):
+        """Get creator's full name"""
+        if obj.created_by:
+            return obj.created_by.get_full_name() or obj.created_by.email
+        return None
 

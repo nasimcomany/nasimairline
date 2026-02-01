@@ -532,3 +532,90 @@ class GalleryImage(models.Model):
         """Increment download count"""
         self.download_count += 1
         self.save(update_fields=['download_count'])
+
+
+class HeroSlider(models.Model):
+    """
+    Hero Slider model for homepage banner images
+    Both admin types can manage these images
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    title = models.CharField(
+        _('عنوان'),
+        max_length=200,
+        help_text=_('عنوان توضیحی برای تصویر'),
+    )
+    
+    image = models.ImageField(
+        _('تصویر'),
+        upload_to='hero_slider/',
+        validators=[validate_image_size, validate_image_format],
+        help_text=_('تصویر اصلی اسلایدر (حداکثر 10MB، توصیه می‌شود: 1920x1080)'),
+    )
+    
+    alt_text = models.CharField(
+        _('متن جایگزین'),
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text=_('متن جایگزین برای SEO و دسترسی‌پذیری'),
+    )
+    
+    order = models.PositiveIntegerField(
+        _('ترتیب نمایش'),
+        default=0,
+        db_index=True,
+        help_text=_('ترتیب نمایش در اسلایدر (عدد کمتر = اولویت بیشتر)'),
+    )
+    
+    is_active = models.BooleanField(
+        _('فعال'),
+        default=True,
+        db_index=True,
+        help_text=_('فعال/غیرفعال بودن تصویر در اسلایدر'),
+    )
+    
+    link_url = models.URLField(
+        _('لینک'),
+        null=True,
+        blank=True,
+        help_text=_('لینک اختیاری برای هدایت کاربر پس از کلیک'),
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='hero_sliders',
+        verbose_name=_('ایجاد شده توسط'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    
+    class Meta:
+        verbose_name = _('اسلایدر صفحه اصلی')
+        verbose_name_plural = _('اسلایدرهای صفحه اصلی')
+        ordering = ['order', '-created_at']
+        indexes = [
+            models.Index(fields=['is_active', 'order']),
+            models.Index(fields=['order', 'created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.title} (ترتیب: {self.order})"
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate alt text if not provided"""
+        if not self.alt_text:
+            self.alt_text = self.title
+        super().save(*args, **kwargs)

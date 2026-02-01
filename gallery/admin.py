@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from .models import GalleryCategory, GalleryAlbum, GalleryImage
+from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider
 
 User = get_user_model()
 
@@ -227,3 +227,72 @@ class GalleryImageAdmin(admin.ModelAdmin):
         updated = queryset.update(is_featured=True)
         self.message_user(request, f'{updated} تصویر ویژه شد.')
     make_featured.short_description = 'ویژه کردن تصاویر'
+
+
+@admin.register(HeroSlider)
+class HeroSliderAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for HeroSlider model
+    Both admin types (superuser and limited) can manage hero slider images
+    """
+    list_display = [
+        'slider_image_preview', 'title', 'order', 'is_active', 
+        'created_by', 'created_at', 'updated_at'
+    ]
+    list_filter = ['is_active', 'created_at', 'created_by']
+    search_fields = ['title', 'alt_text']
+    list_editable = ['order', 'is_active']
+    readonly_fields = ['uuid', 'created_at', 'updated_at', 'slider_image_display']
+    
+    fieldsets = (
+        ('اطلاعات اصلی', {
+            'fields': ('title', 'image', 'slider_image_display', 'alt_text', 'link_url')
+        }),
+        ('تنظیمات نمایش', {
+            'fields': ('order', 'is_active')
+        }),
+        ('اطلاعات اضافی', {
+            'fields': ('uuid', 'created_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+    
+    def slider_image_preview(self, obj):
+        """Display slider image preview in list"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="width: 80px; height: 45px; object-fit: cover; border-radius: 4px;" />',
+                obj.image.url
+            )
+        return '-'
+    slider_image_preview.short_description = 'تصویر'
+    
+    def slider_image_display(self, obj):
+        """Display full slider image in form"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 600px; max-height: 400px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />',
+                obj.image.url
+            )
+        return '-'
+    slider_image_display.short_description = 'پیش‌نمایش تصویر'
+    
+    def save_model(self, request, obj, form, change):
+        """Auto-set created_by on creation"""
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+    
+    actions = ['activate_sliders', 'deactivate_sliders']
+    
+    def activate_sliders(self, request, queryset):
+        """Activate selected sliders"""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} اسلایدر فعال شد.')
+    activate_sliders.short_description = 'فعال کردن اسلایدرهای انتخاب شده'
+    
+    def deactivate_sliders(self, request, queryset):
+        """Deactivate selected sliders"""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} اسلایدر غیرفعال شد.')
+    deactivate_sliders.short_description = 'غیرفعال کردن اسلایدرهای انتخاب شده'
