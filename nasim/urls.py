@@ -61,7 +61,16 @@ urlpatterns = [
     re_path(r'^images/(?P<path>.*)$', serve, {
         'document_root': os.path.join(settings.FRONTEND_BUILD_DIR, 'images') if os.path.exists(settings.FRONTEND_BUILD_DIR) else os.path.join(settings.BASE_DIR, 'frontend', 'public', 'images'),
     }),
-    re_path(r'^.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$', serve, {
+]
+
+# Serve media files in development (MUST be before static file patterns)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Serve other static files from React build (AFTER media files)
+urlpatterns += [
+    re_path(r'^(?!media/).*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$', serve, {
         'document_root': settings.STATIC_ROOT,
     }),
 ]
@@ -71,8 +80,3 @@ urlpatterns = [
 urlpatterns += [
     re_path(r'^(?!api|admin|limited-admin|ckeditor|media|static).*$', ReactAppView.as_view(), name='react-app'),
 ]
-
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
