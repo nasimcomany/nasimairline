@@ -6,6 +6,7 @@ import { getOriginCities, getDestinations, checkAvailability, FlightAvailability
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IranMap } from 'react-iran-map';
+import NeighboringCountryMap from '../components/Maps/NeighboringCountryMap';
 import { 
   MapPinIcon,
   CalendarDaysIcon,
@@ -674,6 +675,88 @@ const FlightMapPage: React.FC = () => {
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Neighboring Countries Maps Section */}
+          <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 
+              className="text-2xl font-bold text-gray-900 mb-6 text-center"
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+            >
+              {language === 'fa' ? '🗺️ کشورهای همسایه ایران' : language === 'ar' ? '🗺️ دول الجوار الإيرانية' : '🗺️ Iran\'s Neighboring Countries'}
+            </h2>
+            <p 
+              className="text-center text-gray-600 mb-8"
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+            >
+              {language === 'fa' 
+                ? 'ایران با ۶ کشور همسایه مرز مشترک دارد' 
+                : language === 'ar'
+                ? 'إيران لها حدود مشتركة مع ٦ دول مجاورة'
+                : 'Iran shares borders with 6 neighboring countries'}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <NeighboringCountryMap country="turkey" color="#dc2626" />
+              <NeighboringCountryMap country="iraq" color="#ea580c" />
+              <NeighboringCountryMap country="azerbaijan" color="#ca8a04" />
+              <NeighboringCountryMap country="turkmenistan" color="#16a34a" />
+              <NeighboringCountryMap country="afghanistan" color="#2563eb" />
+              <NeighboringCountryMap country="pakistan" color="#7c3aed" />
+            </div>
+            
+            {/* Info box about neighboring countries */}
+            <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
+              <h3 
+                className="text-lg font-bold text-gray-900 mb-3"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+              >
+                {language === 'fa' ? '📍 اطلاعات مرزهای ایران' : language === 'ar' ? '📍 معلومات حدود إيران' : '📍 Iran\'s Border Information'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">🇹🇷</span>
+                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <strong>{language === 'fa' ? 'ترکیه' : 'Turkey'}:</strong>
+                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'شمال غربی - ۵۰۰ کیلومتر مرز' : 'Northwest - 500 km border'}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">🇮🇶</span>
+                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <strong>{language === 'fa' ? 'عراق' : 'Iraq'}:</strong>
+                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'غرب - ۱,۴۵۸ کیلومتر مرز' : 'West - 1,458 km border'}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">🇦🇿</span>
+                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <strong>{language === 'fa' ? 'آذربایجان' : 'Azerbaijan'}:</strong>
+                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'شمال غربی - ۶۱۱ کیلومتر مرز' : 'Northwest - 611 km border'}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">🇹🇲</span>
+                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <strong>{language === 'fa' ? 'ترکمنستان' : 'Turkmenistan'}:</strong>
+                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'شمال شرقی - ۹۹۲ کیلومتر مرز' : 'Northeast - 992 km border'}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">🇦🇫</span>
+                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <strong>{language === 'fa' ? 'افغانستان' : 'Afghanistan'}:</strong>
+                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'شرق - ۹۳۶ کیلومتر مرز' : 'East - 936 km border'}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">🇵🇰</span>
+                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <strong>{language === 'fa' ? 'پاکستان' : 'Pakistan'}:</strong>
+                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'جنوب شرقی - ۹۰۹ کیلومتر مرز' : 'Southeast - 909 km border'}</span>
+                  </div>
                 </div>
               </div>
             </div>
