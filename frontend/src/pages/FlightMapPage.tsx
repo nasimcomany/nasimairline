@@ -525,6 +525,7 @@ const FlightMapPage: React.FC = () => {
                     dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy/MM/dd'}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                     wrapperClassName="w-full"
+                    readOnly={true}
                   />
                 </div>
                 {/* Current Date Display */}
@@ -559,6 +560,24 @@ const FlightMapPage: React.FC = () => {
                     >
                       {formatDateByLanguage(selectedDate, language)}
                     </span>
+                  </div>
+                </div>
+                {/* User Guide Message */}
+                <div className="mb-4 p-4 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-xl border-2 border-amber-200 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p 
+                        className="text-sm leading-relaxed text-gray-700"
+                        style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl', textAlign: 'right' }}
+                      >
+                        کاربر گرامی، لطفا پس از انتخاب شهر مبدا چند ثانیه صبر کنید تا لیست مقاصد به شما نشان داده شود و سپس به انتهای سایت مراجعه کنید
+                      </p>
+                    </div>
                   </div>
                 </div>
                 {selectedCity && (
