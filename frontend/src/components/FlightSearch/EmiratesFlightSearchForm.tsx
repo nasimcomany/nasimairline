@@ -224,7 +224,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </div>
 
             {/* Departure Date */}
-            <div className="flex-1" style={{ minWidth: '130px' }}>
+            <div className="flex-1" style={{ minWidth: '140px' }}>
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.departDate')}
               </label>
@@ -241,7 +241,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
 
             {/* Return Date */}
             {tripType === 'roundtrip' && (
-              <div className="flex-1" style={{ minWidth: '130px' }}>
+              <div className="flex-1" style={{ minWidth: '140px' }}>
                 <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                   {t('home.flightSearch.returnDate')}
                 </label>
@@ -267,7 +267,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </div>
 
             {/* Class */}
-            <div className="flex-1" style={{ minWidth: '120px' }}>
+            <div className="flex-1" style={{ minWidth: '140px' }}>
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.class')}
               </label>
