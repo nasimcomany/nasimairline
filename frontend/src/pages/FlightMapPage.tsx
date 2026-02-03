@@ -14,7 +14,8 @@ import {
   PaperAirplaneIcon,
   ClockIcon,
   XMarkIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  TicketIcon
 } from '@heroicons/react/24/outline';
 
 // Coordinates for major Iranian cities on the map
@@ -792,8 +793,8 @@ const FlightMapPage: React.FC = () => {
               <NeighboringCountryMap country="iraq" color="#ea580c" />
               <NeighboringCountryMap country="azerbaijan" color="#ca8a04" />
               <NeighboringCountryMap country="turkmenistan" color="#16a34a" />
-              <NeighboringCountryMap country="afghanistan" color="#2563eb" />
-              <NeighboringCountryMap country="pakistan" color="#7c3aed" />
+              <NeighboringCountryMap country="emirates" color="#2563eb" />
+              <NeighboringCountryMap country="armanistan" color="#7c3aed" />
             </div>
             
             {/* Info box about neighboring countries */}
@@ -950,6 +951,34 @@ const FlightMapPage: React.FC = () => {
                             {language === 'fa' ? 'ورود' : 'Arrival'}
                           </div>
                         </div>
+                      </div>
+
+                      {/* Booking Button */}
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <button
+                          onClick={() => {
+                            // Navigate to flight results page with search params - same as HomePage
+                            navigate('/flights/results', {
+                              state: {
+                                searchParams: {
+                                  origin: flight.origin,
+                                  destination: flight.destination,
+                                  departureDate: selectedDate.toISOString().split('T')[0],
+                                  returnDate: undefined,
+                                  passengers: { adults: 1, children: 0, infants: 0 },
+                                  class: flight.class,
+                                  tripType: 'oneway'
+                                },
+                                fromMap: true
+                              }
+                            });
+                          }}
+                          className="w-full bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                          style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                        >
+                          <TicketIcon className="w-5 h-5" />
+                          {language === 'fa' ? 'رزرو این پرواز' : 'Book This Flight'}
+                        </button>
                       </div>
                     </div>
                   ))}
