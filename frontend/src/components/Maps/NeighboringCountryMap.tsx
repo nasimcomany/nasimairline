@@ -16,6 +16,9 @@ const NeighboringCountryMap: React.FC<NeighboringCountryMapProps> = ({
     afghanistan: { fa: 'افغانستان', en: 'Afghanistan', ar: 'أفغانستان' },
     pakistan: { fa: 'پاکستان', en: 'Pakistan', ar: 'باكستان' },
     azerbaijan: { fa: 'آذربایجان', en: 'Azerbaijan', ar: 'أذربيجان' },
+    emirates: { fa: 'امارات', en: 'Emirates', ar: 'الإمارات' },
+    armenia: { fa: 'ارمنستان', en: 'Armenia', ar: 'أرمينيا' },
+    armanistan: { fa: 'ارمنستان', en: 'Armenia', ar: 'أرمينيا' },
   };
 
   // Country image paths
@@ -26,6 +29,9 @@ const NeighboringCountryMap: React.FC<NeighboringCountryMapProps> = ({
     afghanistan: '/images/Afghanistan.png',
     pakistan: '/images/pakistan.png',
     azerbaijan: '/images/azerbaijan.png',
+    emirates: '/images/emirates.png',
+    armenia: '/images/armenia.png',
+    armanistan: '/images/armenia.png',
   };
 
   const name = countryNames[country.toLowerCase()] || countryNames.turkey;

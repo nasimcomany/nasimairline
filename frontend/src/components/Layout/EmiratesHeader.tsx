@@ -137,7 +137,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       path: '/flights/search',
       dropdown: [
         { label: t('nav.bookFlights') || 'رزرو پرواز', path: '/flights/search' },
-        { label: t('nav.flightSchedules') || 'برنامه پروازها', path: '/flights/schedules' },
+        { label: t('nav.flightSchedules') || 'برنامه پرواز امروز', path: '/flights/map' },
         { label: t('nav.featuredFares') || 'پیشنهادات ویژه', path: '/offers' },
         { label: t('nav.specialOffers') || 'پیشنهادات خاص', path: '/offers' },
       ]
@@ -147,9 +147,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.whereWeFly') || 'مقاصد',
       path: '/destinations',
       dropdown: [
-        { label: t('nav.domesticDestinations') || 'مقاصد داخلی', path: '/destinations?type=domestic' },
-        { label: t('nav.internationalDestinations') || 'مقاصد خارجی', path: '/destinations?type=international' },
-        { label: t('nav.allDestinations') || 'همه مقاصد', path: '/destinations' },
+        { label: t('nav.domesticDestinations') || 'مقاصد داخلی', path: '/flights/map' },
+        { label: t('nav.internationalDestinations') || 'مقاصد خارجی', path: '/flights/map' },
+        { label: t('nav.allDestinations') || 'همه مقاصد', path: '/flights/map' },
       ]
     },
     {

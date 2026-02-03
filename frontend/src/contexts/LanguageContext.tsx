@@ -44,7 +44,7 @@ const translations = {
     'nav.loyalty': 'برنامه وفاداری',
     'nav.help': 'کمک',
     'nav.bookFlights': 'رزرو پرواز',
-    'nav.flightSchedules': 'برنامه پروازها',
+    'nav.flightSchedules': 'برنامه پرواز امروز',
     'nav.featuredFares': 'پیشنهادات ویژه',
     'nav.specialOffers': 'پیشنهادات خاص',
     'nav.manageBooking': 'مدیریت رزرو',

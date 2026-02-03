@@ -794,7 +794,7 @@ const FlightMapPage: React.FC = () => {
               <NeighboringCountryMap country="azerbaijan" color="#ca8a04" />
               <NeighboringCountryMap country="turkmenistan" color="#16a34a" />
               <NeighboringCountryMap country="emirates" color="#2563eb" />
-              <NeighboringCountryMap country="armanistan" color="#7c3aed" />
+              <NeighboringCountryMap country="armenia" color="#7c3aed" />
             </div>
             
             {/* Info box about neighboring countries */}
@@ -835,17 +835,17 @@ const FlightMapPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-2xl">🇦🇫</span>
+                  <span className="text-2xl">🇦🇪</span>
                   <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                    <strong>{language === 'fa' ? 'افغانستان' : 'Afghanistan'}:</strong>
-                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'شرق - ۹۳۶ کیلومتر مرز' : 'East - 936 km border'}</span>
+                    <strong>{language === 'fa' ? 'امارات' : 'Emirates'}:</strong>
+                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'جنوب - ۱,۳۰۰ کیلومتر مرز' : 'South - 1,300 km border'}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-2xl">🇵🇰</span>
+                  <span className="text-2xl">🇦🇲</span>
                   <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                    <strong>{language === 'fa' ? 'پاکستان' : 'Pakistan'}:</strong>
-                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'جنوب شرقی - ۹۰۹ کیلومتر مرز' : 'Southeast - 909 km border'}</span>
+                    <strong>{language === 'fa' ? 'ارمنستان' : 'Armenia'}:</strong>
+                    <span className="text-gray-600 mr-2">{language === 'fa' ? 'شمال غربی - ۴۴ کیلومتر مرز' : 'Northwest - 44 km border'}</span>
                   </div>
                 </div>
               </div>
