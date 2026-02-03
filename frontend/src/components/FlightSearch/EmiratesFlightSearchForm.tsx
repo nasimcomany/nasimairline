@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, forwardRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setSearchParams } from '../../store/slices/flightSlice';
+import DatePicker from 'react-datepicker';
+import { registerLocale } from 'react-datepicker';
+import { faIR } from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
+import { toJalaali, toGregorian } from 'jalaali-js';
 import { 
   PaperAirplaneIcon, 
   MapPinIcon, 
@@ -21,14 +26,143 @@ interface EmiratesFlightSearchFormProps {
   onTabChange?: (tab: 'search' | 'manage' | 'whatson' | 'status' | 'services') => void;
 }
 
+// Register Persian locale
+registerLocale('fa', faIR);
+
+// Helper functions for date conversion
+const toJalaliDate = (date: Date) => {
+  const jalaali = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  return {
+    year: jalaali.jy,
+    month: jalaali.jm,
+    day: jalaali.jd
+  };
+};
+
+const toGregorianDate = (jalaliDate: { year: number; month: number; day: number }) => {
+  const gregorian = toGregorian(jalaliDate.year, jalaliDate.month, jalaliDate.day);
+  return new Date(gregorian.gy, gregorian.gm - 1, gregorian.gd);
+};
+
+// Persian month names
+const persianMonths = [
+  'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+  'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+];
+
+// Format date in Jalali for display
+const formatJalaliDate = (date: Date): string => {
+  const jalaali = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  return `${jalaali.jy}/${jalaali.jm.toString().padStart(2, '0')}/${jalaali.jd.toString().padStart(2, '0')}`;
+};
+
+// Custom input component for Persian date display
+const JalaliDateInput = forwardRef<HTMLInputElement, { value?: string; onClick?: () => void; date: Date | null; size?: 'small' | 'large' }>(
+  ({ value: _value, onClick, date, size = 'small' }, ref) => {
+    // Always use Jalali date format, ignore the value from react-datepicker
+    const displayValue = date ? formatJalaliDate(date) : '';
+    
+    const isLarge = size === 'large';
+    
+    return (
+      <input
+        ref={ref}
+        type="text"
+        readOnly
+        value={displayValue}
+        onClick={onClick}
+        placeholder="انتخاب تاریخ"
+        className={`w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white cursor-pointer ${
+          isLarge ? 'px-3 py-3 text-base' : 'px-2 py-2 text-sm'
+        }`}
+        style={{ 
+          fontFamily: 'DigiHamisheBold, Arial, sans-serif', 
+          direction: 'rtl',
+          minHeight: isLarge ? '48px' : '42px',
+          height: isLarge ? '48px' : '42px'
+        }}
+      />
+    );
+  }
+);
+
+JalaliDateInput.displayName = 'JalaliDateInput';
+
+// Custom header renderer for Persian calendar
+const renderCustomHeader = (props: {
+  date: Date;
+  changeYear: (year: number) => void;
+  changeMonth: (month: number) => void;
+  decreaseMonth: () => void;
+  increaseMonth: () => void;
+  prevMonthButtonDisabled: boolean;
+  nextMonthButtonDisabled: boolean;
+  decreaseYear: () => void;
+  increaseYear: () => void;
+  prevYearButtonDisabled: boolean;
+  nextYearButtonDisabled: boolean;
+}, language: string): React.ReactElement => {
+  const { date, decreaseMonth, increaseMonth, prevMonthButtonDisabled, nextMonthButtonDisabled } = props;
+  
+  if (language === 'fa') {
+    const jalaali = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    const monthName = persianMonths[jalaali.jm - 1];
+    const year = jalaali.jy;
+
+    return (
+      <div className="react-datepicker__header" style={{ direction: 'rtl', fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+        <div className="react-datepicker__current-month">
+          {monthName} {year}
+        </div>
+        <div className="react-datepicker__navigation">
+          <button
+            type="button"
+            className="react-datepicker__navigation react-datepicker__navigation--next"
+            onClick={increaseMonth}
+            disabled={nextMonthButtonDisabled}
+            aria-label="ماه بعد"
+          >
+            <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--next">‹</span>
+          </button>
+          <button
+            type="button"
+            className="react-datepicker__navigation react-datepicker__navigation--previous"
+            onClick={decreaseMonth}
+            disabled={prevMonthButtonDisabled}
+            aria-label="ماه قبل"
+          >
+            <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--previous">›</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Default header for non-Persian
+  return (
+    <div className="react-datepicker__header">
+      <div className="react-datepicker__current-month">
+        {date.toLocaleDateString(language, { month: 'long', year: 'numeric' })}
+      </div>
+    </div>
+  );
+};
+
+// Custom day content renderer for Persian calendar
+const renderDayContents = (day: number, date: Date) => {
+  if (!date) return day;
+  const jalaali = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  return jalaali.jd;
+};
+
 const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onTabChange }) => {
   const [activeTab, setActiveTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
   const [tripType, setTripType] = useState<'roundtrip' | 'oneway'>('roundtrip');
+  const [departureDate, setDepartureDate] = useState<Date | null>(new Date());
+  const [returnDate, setReturnDate] = useState<Date | null>(null);
   const [formData, setFormData] = useState({
     origin: 'THR',
     destination: '',
-    departureDate: '',
-    returnDate: '',
     passengers: { adults: 1, children: 0, infants: 0 },
     class: 'economy' as 'economy' | 'business' | 'first'
   });
@@ -39,9 +173,13 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
     date: ''
   });
   
+  // Dates for whatson and status tabs
+  const [whatsonDate, setWhatsonDate] = useState<Date | null>(new Date());
+  const [statusDate, setStatusDate] = useState<Date | null>(new Date());
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { t, fontClass } = useLanguage();
+  const { t, fontClass, language } = useLanguage();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -54,12 +192,12 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.origin || !formData.destination || !formData.departureDate) {
+    if (!formData.origin || !formData.destination || !departureDate) {
       alert(t('home.flightSearch.pleaseFillFields'));
       return;
     }
 
-    if (tripType === 'roundtrip' && !formData.returnDate) {
+    if (tripType === 'roundtrip' && !returnDate) {
       alert(t('home.flightSearch.pleaseReturnDate'));
       return;
     }
@@ -67,8 +205,8 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
     const searchParams = {
       origin: formData.origin,
       destination: formData.destination,
-      departureDate: formData.departureDate,
-      returnDate: tripType === 'roundtrip' ? formData.returnDate : undefined,
+      departureDate: departureDate.toISOString().split('T')[0],
+      returnDate: tripType === 'roundtrip' && returnDate ? returnDate.toISOString().split('T')[0] : undefined,
       passengers: formData.passengers,
       class: formData.class,
       tripType
@@ -94,7 +232,36 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
   };
 
   return (
-    <div className="rounded-lg shadow-2xl overflow-hidden">
+    <>
+      <style>{`
+        ${language === 'fa' ? `
+          .react-datepicker {
+            font-family: 'DigiHamisheBold', Arial, sans-serif !important;
+            direction: rtl;
+            z-index: 9999 !important;
+          }
+          .react-datepicker__header {
+            direction: rtl;
+            font-family: 'DigiHamisheBold', Arial, sans-serif !important;
+          }
+          .react-datepicker__current-month {
+            font-family: 'DigiHamisheBold', Arial, sans-serif !important;
+          }
+          .react-datepicker__day-names {
+            direction: rtl;
+          }
+          .react-datepicker__week {
+            direction: rtl;
+          }
+          .react-datepicker__day {
+            font-family: 'DigiHamisheBold', Arial, sans-serif !important;
+          }
+        ` : ''}
+        .react-datepicker-popper {
+          z-index: 9999 !important;
+        }
+      `}</style>
+      <div className="rounded-lg shadow-2xl overflow-hidden">
       {/* Tabs */}
       <div className="flex border-b border-gray-300/30 overflow-x-auto bg-gray-400/30 backdrop-blur-xl">
         <button
@@ -102,11 +269,11 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'search'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
-              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-gray-300/15'
+              : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
           style={{ fontSize: '15px' }}
         >
-          <PaperAirplaneIcon className="w-4 h-4" />
+          <PaperAirplaneIcon className={`w-4 h-4 ${activeTab === 'search' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.bookFlight')}
         </button>
         <button
@@ -114,11 +281,11 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'manage'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
-              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-gray-300/15'
+              : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
           style={{ fontSize: '15px' }}
         >
-          <TagIcon className="w-4 h-4" />
+          <TagIcon className={`w-4 h-4 ${activeTab === 'manage' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.manageBooking')}
         </button>
         <button
@@ -126,11 +293,11 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'services'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
-              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-gray-300/15'
+              : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
           style={{ fontSize: '15px' }}
         >
-          <MapPinIcon className="w-4 h-4" />
+          <MapPinIcon className={`w-4 h-4 ${activeTab === 'services' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.specialServices')}
         </button>
         <button
@@ -138,11 +305,11 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'whatson'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
-              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-gray-300/15'
+              : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
           style={{ fontSize: '15px' }}
         >
-          <PaperAirplaneIcon className="w-4 h-4" />
+          <PaperAirplaneIcon className={`w-4 h-4 ${activeTab === 'whatson' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightFacilities')}
         </button>
         <button
@@ -150,11 +317,11 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'status'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
-              : 'text-gray-600 bg-transparent hover:text-gray-900 hover:bg-gray-300/15'
+              : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
           style={{ fontSize: '15px' }}
         >
-          <ClockIcon className="w-4 h-4" />
+          <ClockIcon className={`w-4 h-4 ${activeTab === 'status' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightStatus')}
         </button>
       </div>
@@ -192,9 +359,9 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           </div>
 
           {/* Main Row - All fields in one row */}
-          <div className="flex gap-2 items-end mb-4">
+          <div className="flex gap-2 items-end mb-4" style={{ flexWrap: 'nowrap' }}>
             {/* Origin */}
-            <div className="flex-1 relative" style={{ minWidth: '140px' }}>
+            <div className="relative" style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
               <CitySelect
                 value={formData.origin}
                 onChange={(value) => setFormData(prev => ({ ...prev, origin: value }))}
@@ -214,7 +381,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </div>
 
             {/* Destination */}
-            <div className="flex-1" style={{ minWidth: '140px' }}>
+            <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
               <CitySelect
                 value={formData.destination}
                 onChange={(value) => setFormData(prev => ({ ...prev, destination: value }))}
@@ -224,41 +391,51 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </div>
 
             {/* Departure Date */}
-            <div className="flex-1" style={{ minWidth: '140px' }}>
-              <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {t('home.flightSearch.departDate')}
+            <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                {language === 'fa' ? 'تاریخ رفت' : t('home.flightSearch.departDate')}
               </label>
-              <input
-                type="date"
-                value={formData.departureDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, departureDate: e.target.value }))}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              <DatePicker
+                selected={departureDate}
+                onChange={(date: Date | null) => setDepartureDate(date)}
+                minDate={new Date()}
+                dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
+                locale={language === 'fa' ? 'fa' : undefined}
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                wrapperClassName="w-full"
+                popperPlacement="top-start"
+                renderCustomHeader={(props) => renderCustomHeader(props, language)}
+                renderDayContents={language === 'fa' ? renderDayContents : undefined}
+                customInput={language === 'fa' ? <JalaliDateInput date={departureDate} /> : undefined}
                 required
               />
             </div>
 
             {/* Return Date */}
             {tripType === 'roundtrip' && (
-              <div className="flex-1" style={{ minWidth: '140px' }}>
-                <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  {t('home.flightSearch.returnDate')}
+              <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
+                <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  {language === 'fa' ? 'تاریخ برگشت' : t('home.flightSearch.returnDate')}
                 </label>
-                <input
-                  type="date"
-                  value={formData.returnDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, returnDate: e.target.value }))}
-                  min={formData.departureDate || new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                <DatePicker
+                  selected={returnDate}
+                  onChange={(date: Date | null) => setReturnDate(date)}
+                  minDate={departureDate || new Date()}
+                  dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
+                  locale={language === 'fa' ? 'fa' : undefined}
+                  className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                  wrapperClassName="w-full"
+                  popperPlacement="top-start"
+                  renderCustomHeader={(props) => renderCustomHeader(props, language)}
+                  renderDayContents={language === 'fa' ? renderDayContents : undefined}
+                  customInput={language === 'fa' ? <JalaliDateInput date={returnDate} /> : undefined}
                   required
                 />
               </div>
             )}
 
             {/* Passengers */}
-            <div className="flex-1" style={{ minWidth: '140px' }}>
+            <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
               <PassengerSelect
                 value={formData.passengers}
                 onChange={(value) => setFormData(prev => ({ ...prev, passengers: value }))}
@@ -267,8 +444,8 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </div>
 
             {/* Class */}
-            <div className="flex-1" style={{ minWidth: '140px' }}>
-              <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.class')}
               </label>
               <div style={{ height: '42px' }}>
@@ -289,8 +466,8 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             {/* Search Button */}
             <button
               type="submit"
-              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
+              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px', flexShrink: 0, marginLeft: '14px', fontSize: '14px' }}
             >
               <PaperAirplaneIcon className="w-4 h-4" />
               {t('home.flightSearch.search')}
@@ -407,10 +584,19 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.flightDate')}
               </label>
-              <input
-                type="date"
+              <DatePicker
+                selected={whatsonDate}
+                onChange={(date: Date | null) => setWhatsonDate(date)}
+                minDate={new Date()}
+                dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
+                locale={language === 'fa' ? 'fa' : undefined}
                 className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                wrapperClassName="w-full"
+                popperPlacement="top-start"
+                renderCustomHeader={(props) => renderCustomHeader(props, language)}
+                renderDayContents={language === 'fa' ? renderDayContents : undefined}
+                customInput={language === 'fa' ? <JalaliDateInput date={whatsonDate} size="large" /> : undefined}
+                required
               />
             </div>
             <button
@@ -447,12 +633,19 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.flightDate')}
               </label>
-              <input
-                type="date"
-                value={flightStatusForm.date}
-                onChange={(e) => setFlightStatusForm(prev => ({ ...prev, date: e.target.value }))}
+              <DatePicker
+                selected={statusDate}
+                onChange={(date: Date | null) => setStatusDate(date)}
+                minDate={new Date()}
+                dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
+                locale={language === 'fa' ? 'fa' : undefined}
                 className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                wrapperClassName="w-full"
+                popperPlacement="top-start"
+                renderCustomHeader={(props) => renderCustomHeader(props, language)}
+                renderDayContents={language === 'fa' ? renderDayContents : undefined}
+                customInput={language === 'fa' ? <JalaliDateInput date={statusDate} size="large" /> : undefined}
+                required
               />
             </div>
             <button
@@ -469,6 +662,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
       )}
       </div>
     </div>
+    </>
   );
 };
 

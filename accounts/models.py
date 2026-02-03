@@ -231,3 +231,115 @@ class User(AbstractUser):
         from .utils import get_membership_benefits
         benefits = get_membership_benefits(self.membership_level)
         return benefits.get('discount_percentage', 0)
+
+
+class Wallet(models.Model):
+    """
+    User wallet for storing balance
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='wallet',
+        verbose_name=_('کاربر')
+    )
+    balance = models.DecimalField(
+        _('موجودی'),
+        max_digits=15,
+        decimal_places=2,
+        default=0.00,
+        help_text=_('موجودی کیف پول به تومان')
+    )
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('کیف پول')
+        verbose_name_plural = _('کیف پول‌ها')
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"Wallet for {self.user.email} - {self.balance} Toman"
+
+
+class WalletTransaction(models.Model):
+    """
+    Wallet transaction history
+    """
+    TRANSACTION_TYPES = [
+        ('charge', _('شارژ')),
+        ('payment', _('پرداخت')),
+        ('refund', _('بازگشت وجه')),
+    ]
+    
+    TRANSACTION_STATUS = [
+        ('pending', _('در انتظار')),
+        ('success', _('موفق')),
+        ('failed', _('ناموفق')),
+        ('cancelled', _('لغو شده')),
+    ]
+    
+    PAYMENT_GATEWAYS = [
+        ('zarinpal', _('زرین‌پال')),
+        ('pep', _('پی‌پینگ')),
+        ('saman', _('سامان')),
+        ('mellat', _('ملت')),
+        ('parsian', _('پارسیان')),
+    ]
+
+    wallet = models.ForeignKey(
+        Wallet,
+        on_delete=models.CASCADE,
+        related_name='transactions',
+        verbose_name=_('کیف پول')
+    )
+    transaction_type = models.CharField(
+        _('نوع تراکنش'),
+        max_length=20,
+        choices=TRANSACTION_TYPES
+    )
+    amount = models.DecimalField(
+        _('مبلغ'),
+        max_digits=15,
+        decimal_places=2,
+        help_text=_('مبلغ به تومان')
+    )
+    status = models.CharField(
+        _('وضعیت'),
+        max_length=20,
+        choices=TRANSACTION_STATUS,
+        default='pending'
+    )
+    gateway = models.CharField(
+        _('درگاه پرداخت'),
+        max_length=50,
+        choices=PAYMENT_GATEWAYS,
+        null=True,
+        blank=True
+    )
+    gateway_transaction_id = models.CharField(
+        _('شناسه تراکنش درگاه'),
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    description = models.TextField(
+        _('توضیحات'),
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('تراکنش کیف پول')
+        verbose_name_plural = _('تراکنش‌های کیف پول')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['wallet', '-created_at']),
+            models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['gateway_transaction_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} - {self.amount} Toman - {self.get_status_display()}"

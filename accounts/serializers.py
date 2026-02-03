@@ -7,7 +7,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from .models import User
+from .models import User, Wallet, WalletTransaction
 
 User = get_user_model()
 
@@ -196,3 +196,34 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class WalletTransactionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for WalletTransaction model
+    """
+    transaction_type_display = serializers.CharField(source='get_transaction_type_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    gateway_display = serializers.CharField(source='get_gateway_display', read_only=True)
+    
+    class Meta:
+        model = WalletTransaction
+        fields = [
+            'id', 'transaction_type', 'transaction_type_display',
+            'amount', 'status', 'status_display',
+            'gateway', 'gateway_display', 'gateway_transaction_id',
+            'description', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class WalletSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Wallet model
+    """
+    transactions = WalletTransactionSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Wallet
+        fields = ['id', 'balance', 'transactions', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']

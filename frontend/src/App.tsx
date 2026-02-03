@@ -17,6 +17,7 @@ import BookingDetailsPage from './pages/BookingDetailsPage';
 import PaymentPage from './pages/PaymentPage';
 import PaymentVerifyPage from './pages/PaymentVerifyPage';
 import DashboardPage from './pages/DashboardPage';
+import WalletPage from './pages/WalletPage';
 import ServicesPage from './pages/ServicesPage';
 import GalleryPage from './pages/GalleryPage';
 import NewsPage from './pages/NewsPage';
@@ -57,6 +58,7 @@ function App() {
               <Route path="/payment" element={<PaymentPage />} />
               <Route path="/payment/verify" element={<PaymentVerifyPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/wallet" element={<WalletPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/gallery" element={<GalleryPage />} />
               <Route path="/news" element={<NewsPage />} />

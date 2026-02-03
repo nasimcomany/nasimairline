@@ -4,7 +4,7 @@ Admin configuration for accounts app
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User
+from .models import User, Wallet, WalletTransaction
 
 
 @admin.register(User)
@@ -93,3 +93,34 @@ class UserAdmin(BaseUserAdmin):
     readonly_fields = ['uuid', 'date_joined', 'last_login', 'created_at', 'updated_at']
     
     filter_horizontal = ['groups', 'user_permissions']
+
+
+@admin.register(Wallet)
+class WalletAdmin(admin.ModelAdmin):
+    """
+    Admin for Wallet model
+    """
+    list_display = ['user', 'balance', 'created_at', 'updated_at']
+    list_filter = ['created_at', 'updated_at']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-updated_at']
+
+
+@admin.register(WalletTransaction)
+class WalletTransactionAdmin(admin.ModelAdmin):
+    """
+    Admin for WalletTransaction model
+    """
+    list_display = [
+        'id', 'wallet', 'transaction_type', 'amount', 
+        'status', 'gateway', 'created_at'
+    ]
+    list_filter = ['transaction_type', 'status', 'gateway', 'created_at']
+    search_fields = [
+        'wallet__user__email', 'gateway_transaction_id', 
+        'description'
+    ]
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']
+    date_hierarchy = 'created_at'

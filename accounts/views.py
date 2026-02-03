@@ -7,12 +7,16 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .models import User
+from .models import User, Wallet, WalletTransaction
 from .serializers import (
     UserSerializer,
     UserDetailSerializer,
-    UserRegistrationSerializer
+    UserRegistrationSerializer,
+    WalletSerializer,
+    WalletTransactionSerializer
 )
+from django.db import transaction as db_transaction
+from decimal import Decimal
 
 User = get_user_model()
 
@@ -108,3 +112,152 @@ class UserViewSet(viewsets.ModelViewSet):
         user.loyalty_points += points
         user.save()
         return Response(UserDetailSerializer(user).data)
+
+
+class WalletViewSet(viewsets.ViewSet):
+    """
+    ViewSet for Wallet operations
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_wallet(self, user):
+        """Get or create wallet for user"""
+        wallet, created = Wallet.objects.get_or_create(user=user)
+        return wallet
+    
+    @action(detail=False, methods=['get'])
+    def balance(self, request):
+        """Get wallet balance"""
+        wallet = self.get_wallet(request.user)
+        return Response({
+            'balance': float(wallet.balance),
+            'user_id': request.user.id
+        })
+    
+    @action(detail=False, methods=['get'])
+    def transactions(self, request):
+        """Get wallet transactions"""
+        wallet = self.get_wallet(request.user)
+        transactions = wallet.transactions.all()[:50]  # Last 50 transactions
+        serializer = WalletTransactionSerializer(transactions, many=True)
+        return Response({
+            'results': serializer.data,
+            'count': transactions.count()
+        })
+    
+    @action(detail=False, methods=['post'])
+    def charge(self, request):
+        """
+        Create charge request and redirect to payment gateway
+        This is a placeholder - actual payment gateway integration should be implemented
+        """
+        amount = request.data.get('amount')
+        gateway = request.data.get('gateway')
+        
+        if not amount or not gateway:
+            return Response(
+                {'error': 'مبلغ و درگاه پرداخت الزامی است'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            amount = Decimal(str(amount))
+            if amount <= 0:
+                return Response(
+                    {'error': 'مبلغ باید بیشتر از صفر باشد'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'مبلغ نامعتبر است'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        wallet = self.get_wallet(request.user)
+        
+        # Create pending transaction
+        transaction = WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type='charge',
+            amount=amount,
+            status='pending',
+            gateway=gateway,
+            description=f'شارژ کیف پول از طریق {gateway}'
+        )
+        
+        # TODO: Integrate with actual payment gateway
+        # For now, return a placeholder response
+        # When ready, implement actual gateway integration:
+        # - Zarinpal: Use zarinpal library
+        # - PEP: Use PEP API
+        # - Saman: Use Saman gateway
+        # - Mellat: Use Mellat gateway
+        # - Parsian: Use Parsian gateway
+        
+        # Example structure for future implementation:
+        # payment_url = get_payment_gateway_url(gateway, amount, transaction.id)
+        # return Response({
+        #     'payment_url': payment_url,
+        #     'transaction_id': transaction.id
+        # })
+        
+        return Response({
+            'message': 'در حال حاضر امکان شارژ کیف پول وجود ندارد',
+            'transaction_id': transaction.id,
+            'status': 'pending'
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    
+    @action(detail=False, methods=['post'])
+    def verify_payment(self, request):
+        """
+        Verify payment after returning from gateway
+        This should be called by the payment gateway callback
+        """
+        transaction_id = request.data.get('transaction_id')
+        gateway_transaction_id = request.data.get('gateway_transaction_id')
+        status_code = request.data.get('status')
+        
+        if not transaction_id:
+            return Response(
+                {'error': 'شناسه تراکنش الزامی است'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            transaction = WalletTransaction.objects.get(
+                id=transaction_id,
+                wallet__user=request.user
+            )
+        except WalletTransaction.DoesNotExist:
+            return Response(
+                {'error': 'تراکنش یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # TODO: Verify with actual payment gateway
+        # For now, just update transaction status
+        
+        if status_code == 'success':
+            with db_transaction.atomic():
+                transaction.status = 'success'
+                transaction.gateway_transaction_id = gateway_transaction_id
+                transaction.save()
+                
+                # Update wallet balance
+                wallet = transaction.wallet
+                wallet.balance += transaction.amount
+                wallet.save()
+            
+            return Response({
+                'message': 'شارژ با موفقیت انجام شد',
+                'new_balance': float(wallet.balance)
+            })
+        else:
+            transaction.status = 'failed'
+            transaction.gateway_transaction_id = gateway_transaction_id
+            transaction.save()
+            
+            return Response({
+                'message': 'شارژ ناموفق بود',
+                'status': 'failed'
+            }, status=status.HTTP_400_BAD_REQUEST)

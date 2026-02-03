@@ -31,7 +31,8 @@ import {
   UserIcon,
   UserPlusIcon,
   NewspaperIcon,
-  PhotoIcon
+  PhotoIcon,
+  WalletIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import AuthModal from '../Auth/AuthModal';
@@ -50,8 +51,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const loginDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const userDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -593,23 +596,75 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
 
             {/* Login/Register/Logout */}
             {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className={`text-black text-sm font-medium hover:text-black transition-all ${fontClass}`}
-                style={{ 
-                  textTransform: 'uppercase',
-                  borderBottom: '2px solid transparent',
-                  paddingBottom: '2px'
+              <div 
+                className="relative"
+                onMouseEnter={() => {
+                  if (userDropdownTimeoutRef.current) {
+                    clearTimeout(userDropdownTimeoutRef.current);
+                  }
+                  setIsUserDropdownOpen(true);
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderBottomColor = '#000';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderBottomColor = 'transparent';
+                onMouseLeave={() => {
+                  userDropdownTimeoutRef.current = setTimeout(() => {
+                    setIsUserDropdownOpen(false);
+                  }, 200);
                 }}
               >
-                {t('nav.logout')}
-              </button>
+                <button
+                  className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
+                  style={{ 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  <UserIcon className="w-5 h-5 text-black" />
+                  {user?.first_name || user?.email || t('nav.user') || 'کاربر'}
+                  <ChevronDownIcon className="w-4 h-4" />
+                </button>
+                
+                {/* User Dropdown Menu */}
+                {isUserDropdownOpen && (
+                  <div 
+                    className={`absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-48 bg-gray-200 rounded-lg shadow-lg border border-gray-300/30 py-2 z-50`}
+                    onMouseEnter={() => {
+                      if (userDropdownTimeoutRef.current) {
+                        clearTimeout(userDropdownTimeoutRef.current);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      userDropdownTimeoutRef.current = setTimeout(() => {
+                        setIsUserDropdownOpen(false);
+                      }, 200);
+                    }}
+                  >
+                    <Link
+                      to="/wallet"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors flex items-center gap-2 ${fontClass}`}
+                    >
+                      <WalletIcon className="w-5 h-5" />
+                      {t('nav.wallet') || 'کیف پول'}
+                    </Link>
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors flex items-center gap-2 ${fontClass}`}
+                    >
+                      <UserIcon className="w-5 h-5" />
+                      {t('nav.profile') || 'پروفایل'}
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsUserDropdownOpen(false);
+                      }}
+                      className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass}`}
+                    >
+                      {t('nav.logout') || 'خروج'}
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 {/* Login Dropdown */}
