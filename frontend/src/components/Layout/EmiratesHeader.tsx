@@ -329,8 +329,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 to={subItem.path}
                                 className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${item.key === 'wherewefly' && selectedDestinationIndex === index ? 'bg-gray-300' : ''}`}
                                 onClick={(e) => {
-                                  // For wherewefly dropdown, keep it open and set selected index
-                                  if (item.key === 'wherewefly') {
+                                  // For wherewefly dropdown, if it's a real destination link (like /flights/map), allow navigation
+                                  if (item.key === 'wherewefly' && subItem.path !== '/flights/map') {
                                     e.preventDefault();
                                     setSelectedDestinationIndex(index);
                                     setActiveDropdown(item.key); // Keep dropdown open
