@@ -138,6 +138,40 @@ const FlightMapPage: React.FC = () => {
     fetchCities();
   }, []);
 
+  // Force override blue colors in header icons after component mount and map load
+  useEffect(() => {
+    const applyHeaderStyles = () => {
+      const header = document.querySelector('header');
+      if (header) {
+        const blueIcons = header.querySelectorAll('[class*="text-blue"]');
+        blueIcons.forEach((icon) => {
+          if (!icon.closest('.bg-blue-900')) {
+            (icon as HTMLElement).style.color = '#6b7280';
+            (icon as HTMLElement).style.stroke = '#6b7280';
+          }
+        });
+      }
+    };
+
+    // Apply immediately
+    applyHeaderStyles();
+
+    // Also apply after a short delay to catch any dynamic changes
+    const timer = setTimeout(applyHeaderStyles, 100);
+    
+    // Apply whenever loading state changes
+    const observer = new MutationObserver(applyHeaderStyles);
+    const header = document.querySelector('header');
+    if (header) {
+      observer.observe(header, { childList: true, subtree: true, attributes: true });
+    }
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [loadingCities]);
+
   const availableCityCodes = React.useMemo(() => 
     cities.map(c => c.CITY).filter(code => cityCoordinates[code]),
     [cities]
@@ -472,30 +506,31 @@ const FlightMapPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-white">
+      <style>{`
+        /* Override ALL blue colors in header icons and text - SUPER STRONG */
+        header svg.text-blue-400,
+        header svg.text-blue-500,
+        header svg.text-blue-600,
+        header svg.text-blue-700,
+        header svg.text-blue-800,
+        header svg.text-blue-900,
+        header .text-blue-400,
+        header .text-blue-500,
+        header .text-blue-600,
+        header .text-blue-700,
+        header .text-blue-800,
+        header .text-blue-900 {
+          color: #6b7280 !important;
+          stroke: #6b7280 !important;
+        }
+        
+        /* Keep main logo container blue */
+        header .bg-blue-900 {
+          background-color: #1e3a8a !important;
+        }
+      `}</style>
       <EmiratesHeader />
-      
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 py-8 sm:py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto text-center">
-            <h1 
-              className="text-white text-3xl sm:text-5xl font-bold mb-4"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-            >
-              {language === 'fa' ? 'نقشه پروازهای ایران' : 'Iran Flight Map'}
-            </h1>
-            <p 
-              className="text-white/90 text-lg sm:text-xl"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-            >
-              {language === 'fa' 
-                ? 'شهر مورد نظر خود را روی نقشه انتخاب کنید و پروازهای موجود را مشاهده کنید'
-                : 'Select your desired city on the map and view available flights'}
-            </p>
-          </div>
-        </div>
-      </div>
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
@@ -605,23 +640,23 @@ const FlightMapPage: React.FC = () => {
                     <div className="relative w-full h-full" style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #dbeafe 100%)' }}>
                       {/* Iran Map using react-iran-map library */}
                       <div className="w-full h-full flex items-center justify-center">
-                        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                        <div style={{ width: '100%', height: '100%', position: 'relative' }} className="iran-map-container">
                           <style>{`
-                            /* Force all provinces to have blue color */
-                            svg path[fill] {
+                            /* Force all provinces to have blue color - ONLY for map, not header */
+                            .iran-map-container svg path[fill] {
                               fill: #1e40af !important;
                             }
-                            svg path:not([fill]) {
+                            .iran-map-container svg path:not([fill]) {
                               fill: #1e40af !important;
                             }
                             /* Hide province names on the map - we only want city names */
-                            svg text {
+                            .iran-map-container svg text {
                               display: none !important;
                               visibility: hidden !important;
                               opacity: 0 !important;
                             }
                             /* But keep city names visible in our overlay */
-                            svg[viewBox="0 0 600 600"] text {
+                            .iran-map-container svg[viewBox="0 0 600 600"] text {
                               display: block !important;
                               visibility: visible !important;
                               opacity: 1 !important;
