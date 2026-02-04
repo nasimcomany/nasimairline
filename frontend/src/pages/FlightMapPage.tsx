@@ -116,7 +116,11 @@ const FlightMapPage: React.FC = () => {
   
   const [cities, setCities] = useState<OriginCity[]>([]);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingCities, setLoadingCities] = useState(true);
@@ -571,7 +575,7 @@ const FlightMapPage: React.FC = () => {
                       className="text-sm text-gray-600"
                       style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     >
-                      {language === 'fa' ? 'تاریخ امروز:' : 'Today\'s Date:'}
+                      {language === 'fa' ? 'تاریخ فردا:' : 'Tomorrow\'s Date:'}
                     </span>
                     <span 
                       className="text-base font-bold text-blue-900"

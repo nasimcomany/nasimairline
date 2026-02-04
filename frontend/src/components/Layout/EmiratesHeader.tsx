@@ -140,7 +140,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       path: '/flights/search',
       dropdown: [
         { label: t('nav.bookFlights') || 'رزرو پرواز', path: '/flights/search' },
-        { label: t('nav.flightSchedules') || 'برنامه پرواز امروز', path: '/flights/map' },
+        { label: t('nav.flightSchedules') || 'برنامه پرواز فردا', path: '/flights/map' },
         { label: t('nav.featuredFares') || 'پیشنهادات ویژه', path: '/offers' },
         { label: t('nav.specialOffers') || 'پیشنهادات خاص', path: '/offers' },
       ]
