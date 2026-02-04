@@ -225,8 +225,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 className="bg-blue-900 flex items-center justify-center"
                 style={{ 
                   height: '120px',
-                  paddingLeft: '20px',
-                  paddingRight: '10px',
+                  paddingLeft: '25px',
+                  paddingRight: '15px',
                   boxShadow: '2px 2px 8px rgba(0,0,0,0.2)',
                   zIndex: 60,
                   borderTopLeftRadius: '0',
