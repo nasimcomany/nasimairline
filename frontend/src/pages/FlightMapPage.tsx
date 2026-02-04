@@ -568,7 +568,7 @@ const FlightMapPage: React.FC = () => {
                     readOnly={true}
                   />
                 </div>
-                {/* Current Date Display */}
+                {/* Tomorrow's Date Display */}
                 <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-between">
                     <span 
@@ -579,23 +579,6 @@ const FlightMapPage: React.FC = () => {
                     </span>
                     <span 
                       className="text-base font-bold text-blue-900"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
-                    >
-                      {getCurrentDateFormatted(language)}
-                    </span>
-                  </div>
-                </div>
-                {/* Selected Date Display */}
-                <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                  <div className="flex items-center justify-between">
-                    <span 
-                      className="text-sm text-gray-600"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-                    >
-                      {language === 'fa' ? 'تاریخ انتخاب شده:' : 'Selected Date:'}
-                    </span>
-                    <span 
-                      className="text-base font-bold text-green-900"
                       style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                     >
                       {formatDateByLanguage(selectedDate, language)}
