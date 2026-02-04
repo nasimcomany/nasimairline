@@ -267,31 +267,10 @@ const FlightMapPage: React.FC = () => {
             const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
             const duration = `${hours}h ${minutes}m`;
 
-            // If ClassStatus is empty, create a single flight entry with default values
+            // If ClassStatus is empty, skip this flight (no price available from Nira API)
             if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
-              return [{
-                id: `${flight.FlightNo}-${index}-0`,
-                airline: flight.AirLineCode || 'NSN',
-                flightNumber: flight.FlightNo,
-                origin: flight.Origin,
-                destination: flight.Destination,
-                departureTime: departureDateTime.toLocaleTimeString('en-US', { 
-                  hour: '2-digit', 
-                  minute: '2-digit',
-                  hour12: false 
-                }),
-                arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
-                  hour: '2-digit', 
-                  minute: '2-digit',
-                  hour12: false 
-                }),
-                duration: duration,
-                price: 0,
-                availableSeats: 0,
-                class: 'economy' as const,
-                stops: 0,
-                originalData: flight,
-              }];
+              console.warn('⚠️ Flight without ClassStatus (no price):', flight.FlightNo);
+              return []; // Don't show flights without price information
             }
 
             // If ClassStatus has items, create entries for each class
@@ -302,6 +281,9 @@ const FlightMapPage: React.FC = () => {
               } else if (classStatus.CabinClass.toLowerCase().includes('first')) {
                 flightClass = 'first';
               }
+
+              // Show price exactly as Nira API provides (even if 0)
+              console.log('✅ Flight from Nira:', flight.FlightNo, 'TotalPrice:', classStatus.TotalPrice);
 
               return {
                 id: `${flight.FlightNo}-${index}-${classIndex}`,
@@ -320,7 +302,7 @@ const FlightMapPage: React.FC = () => {
                   hour12: false 
                 }),
                 duration: duration,
-                price: classStatus.TotalPrice || 0,
+                price: classStatus.TotalPrice, // Use real price from Nira API
                 availableSeats: classStatus.Status === 'C' ? 10 : 0,
                 class: flightClass,
                 stops: 0,

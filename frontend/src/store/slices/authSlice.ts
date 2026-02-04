@@ -7,9 +7,14 @@ interface User {
   first_name: string;
   last_name: string;
   phone_number?: string;
+  national_id?: string;
+  date_of_birth?: string;
+  gender?: string;
+  nationality?: string;
   membership_level: string;
   loyalty_points: number;
   uuid?: string;
+  date_joined?: string;
 }
 
 interface AuthState {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { loginUser, registerUser } from '../store/slices/authSlice';
@@ -32,14 +32,15 @@ interface PassengerInfo {
 
 const BookingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { flightId } = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const searchParams = useSelector((state: RootState) => state.flight.searchParams);
   const { t, language } = useLanguage();
 
-  // Timer state (5 minutes)
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
+  // Timer state (15 minutes)
+  const [timeLeft, setTimeLeft] = useState(900); // 15 minutes in seconds
   
   // Contact info
   const [contactInfo, setContactInfo] = useState({
@@ -61,8 +62,40 @@ const BookingDetailsPage: React.FC = () => {
   const [errors, setErrors] = useState<string[]>([]);
 
   // Get flight data - try from state first, fallback to mock
-  const locationState = window.history.state?.usr;
-  const flightFromState = locationState?.flight;
+  const flightFromState = (location.state as any)?.flight;
+  
+  // Debug: Log flight data
+  console.log('🔍 Location state:', location.state);
+  console.log('🔍 Flight from state:', flightFromState);
+  console.log('🔍 Flight price:', flightFromState?.price);
+  console.log('🔍 Flight basePrice:', flightFromState?.basePrice);
+  
+  // Determine base price from API - use exactly what Nira provides
+  const getBasePrice = () => {
+    // If basePrice exists in flight data (from Nira API), use it
+    if (flightFromState?.basePrice) {
+      console.log('✅ Using basePrice from Nira API:', flightFromState.basePrice);
+      return flightFromState.basePrice;
+    }
+    
+    // If price exists (from Nira API), calculate basePrice from it (even if 0)
+    if (flightFromState?.price !== undefined) {
+      console.log('✅ Using price from Nira API:', flightFromState.price);
+      return {
+        adult: flightFromState.price,
+        child: Math.round(flightFromState.price * 0.75),
+        infant: Math.round(flightFromState.price * 0.1)
+      };
+    }
+    
+    // No flight data - return 0 (no fallback price)
+    console.warn('⚠️ No flight data! Price will be 0.');
+    return {
+      adult: 0,
+      child: 0,
+      infant: 0
+    };
+  };
   
   // Ensure basePrice exists
   const flight = {
@@ -78,11 +111,7 @@ const BookingDetailsPage: React.FC = () => {
       duration: '2h 30m',
       class: searchParams?.class || 'Economy'
     }),
-    basePrice: flightFromState?.basePrice || {
-      adult: flightFromState?.price || 3500000,
-      child: (flightFromState?.price || 3500000) * 0.75,
-      infant: (flightFromState?.price || 3500000) * 0.1
-    }
+    basePrice: getBasePrice()
   };
 
   // Initialize passengers based on search params
@@ -128,10 +157,36 @@ const BookingDetailsPage: React.FC = () => {
       }
       
       setPassengers(passengerList);
-
-      // Don't auto-fill - let user enter manually
     }
   }, [searchParams]);
+
+  // Auto-fill first passenger national ID if logged in
+  // Note: first_name contains the national ID (as per registration flow)
+  useEffect(() => {
+    console.log('🔍 Full user object:', user);
+    console.log('🔍 Auto-fill check:', {
+      isAuthenticated,
+      hasUser: !!user,
+      firstName: user?.first_name,
+      nationalIdFromProfile: user?.national_id,
+      passengersCount: passengers.length,
+      firstPassengerNationalId: passengers[0]?.nationalId
+    });
+    
+    if (isAuthenticated && user && user.first_name && passengers.length > 0) {
+      const firstPassenger = passengers[0];
+      // Only fill if national ID is empty
+      // Use first_name as national ID (as per registration flow)
+      if (!firstPassenger.nationalId) {
+        console.log('✅ Auto-filling national ID from user first_name:', user.first_name);
+        setPassengers(prev => {
+          const updated = [...prev];
+          updated[0] = { ...updated[0], nationalId: user.first_name || '' };
+          return updated;
+        });
+      }
+    }
+  }, [isAuthenticated, user?.first_name, passengers]);
 
   // Timer countdown
   useEffect(() => {
@@ -167,9 +222,10 @@ const BookingDetailsPage: React.FC = () => {
   const calculateTotalPrice = () => {
     let total = 0;
     passengers.forEach(p => {
-      if (p.type === 'adult') total += flight.basePrice?.adult || 3500000;
-      if (p.type === 'child') total += flight.basePrice?.child || 2625000;
-      if (p.type === 'infant') total += flight.basePrice?.infant || 350000;
+      // Use exact price from Nira API (no fallback)
+      if (p.type === 'adult') total += flight.basePrice?.adult || 0;
+      if (p.type === 'child') total += flight.basePrice?.child || 0;
+      if (p.type === 'infant') total += flight.basePrice?.infant || 0;
     });
     return total;
   };
@@ -433,12 +489,18 @@ const BookingDetailsPage: React.FC = () => {
                           <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {t('booking.nationalId')} *
+                              {index === 0 && isAuthenticated && passenger.nationalId && (
+                                <span className="text-xs text-green-600 mr-2">({t('booking.fromYourProfile') || 'از پروفایل شما'})</span>
+                              )}
                             </label>
                             <input
                               type="text"
                               value={passenger.nationalId}
                               onChange={(e) => updatePassenger(index, 'nationalId', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                              disabled={index === 0 && isAuthenticated && !!passenger.nationalId}
+                              className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
+                                index === 0 && isAuthenticated && passenger.nationalId ? 'bg-gray-100 cursor-not-allowed' : ''
+                              }`}
                               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
                               placeholder={t('booking.nationalId10Digits')}
                               maxLength={10}
@@ -636,10 +698,10 @@ const BookingDetailsPage: React.FC = () => {
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
-                          ? ((flight.basePrice?.adult || 3500000) * passengers.filter(p => p.type === 'adult').length).toLocaleString('en-US')
+                          ? ((flight.basePrice?.adult || 0) * passengers.filter(p => p.type === 'adult').length).toLocaleString('en-US')
                           : language === 'ar'
-                          ? ((flight.basePrice?.adult || 3500000) * passengers.filter(p => p.type === 'adult').length).toLocaleString('ar-SA')
-                          : ((flight.basePrice?.adult || 3500000) * passengers.filter(p => p.type === 'adult').length).toLocaleString('fa-IR')} {t('flights.currency')}
+                          ? ((flight.basePrice?.adult || 0) * passengers.filter(p => p.type === 'adult').length).toLocaleString('ar-SA')
+                          : ((flight.basePrice?.adult || 0) * passengers.filter(p => p.type === 'adult').length).toLocaleString('fa-IR')} {t('flights.currency')}
                       </span>
                     </div>
                   )}
@@ -650,10 +712,10 @@ const BookingDetailsPage: React.FC = () => {
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
-                          ? ((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('en-US')
+                          ? ((flight.basePrice?.child || 0) * passengers.filter(p => p.type === 'child').length).toLocaleString('en-US')
                           : language === 'ar'
-                          ? ((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('ar-SA')
-                          : ((flight.basePrice?.child || 2625000) * passengers.filter(p => p.type === 'child').length).toLocaleString('fa-IR')} {t('flights.currency')}
+                          ? ((flight.basePrice?.child || 0) * passengers.filter(p => p.type === 'child').length).toLocaleString('ar-SA')
+                          : ((flight.basePrice?.child || 0) * passengers.filter(p => p.type === 'child').length).toLocaleString('fa-IR')} {t('flights.currency')}
                       </span>
                     </div>
                   )}
@@ -664,10 +726,10 @@ const BookingDetailsPage: React.FC = () => {
                       </span>
                       <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
-                          ? ((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('en-US')
+                          ? ((flight.basePrice?.infant || 0) * passengers.filter(p => p.type === 'infant').length).toLocaleString('en-US')
                           : language === 'ar'
-                          ? ((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('ar-SA')
-                          : ((flight.basePrice?.infant || 350000) * passengers.filter(p => p.type === 'infant').length).toLocaleString('fa-IR')} {t('flights.currency')}
+                          ? ((flight.basePrice?.infant || 0) * passengers.filter(p => p.type === 'infant').length).toLocaleString('ar-SA')
+                          : ((flight.basePrice?.infant || 0) * passengers.filter(p => p.type === 'infant').length).toLocaleString('fa-IR')} {t('flights.currency')}
                       </span>
                     </div>
                   )}
