@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { RootState } from '../store';
+import { setSearchParams } from '../store/slices/flightSlice';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { 
   PaperAirplaneIcon,
@@ -41,13 +42,25 @@ interface Flight {
 
 const FlightResultsPage: React.FC = () => {
   const navigate = useNavigate();
-  const searchParams = useSelector((state: RootState) => state.flight.searchParams);
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const searchParamsFromStore = useSelector((state: RootState) => state.flight.searchParams);
   const { t, language } = useLanguage();
+  
+  // Get searchParams from location state (if coming from map) or Redux store (if coming from homepage)
+  const searchParams = (location.state as any)?.searchParams || searchParamsFromStore;
   
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'price' | 'duration' | 'departure'>('price');
   const [filterStops, setFilterStops] = useState<'all' | 'direct' | 'one'>('all');
+
+  // Save searchParams to Redux if coming from location state
+  useEffect(() => {
+    if ((location.state as any)?.searchParams) {
+      dispatch(setSearchParams((location.state as any).searchParams));
+    }
+  }, [location.state, dispatch]);
 
   useEffect(() => {
     const fetchFlights = async () => {
