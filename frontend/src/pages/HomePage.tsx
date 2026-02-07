@@ -931,6 +931,8 @@ const HomePage: React.FC = () => {
           {/* Slider - Dynamic images from API */}
           {heroImages.map((imageUrl, index) => {
             const slider = heroSliders[index]; // Get corresponding slider data if available
+            console.log(`🖼️ Slider ${index}:`, slider);
+            console.log(`🔗 Link URL:`, slider?.link_url);
             return (
               <div
                 key={index}
@@ -940,23 +942,48 @@ const HomePage: React.FC = () => {
                   left: '0%'
                 }}
               >
-                <img
-                  src={imageUrl}
-                  alt={slider?.alt_text || `Hero image ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'center center',
-                    display: 'block'
-                  }}
-                  onClick={() => {
-                    if (slider?.link_url) {
-                      window.open(slider.link_url, '_blank');
-                    }
-                  }}
-                />
+                {slider?.link_url ? (
+                  <a
+                    href={slider.link_url}
+                    target={slider.link_url.startsWith('/') || slider.link_url.includes(window.location.hostname) ? '_self' : '_blank'}
+                    rel={slider.link_url.startsWith('/') ? undefined : 'noopener noreferrer'}
+                    className="block w-full h-full cursor-pointer"
+                    onClick={(e) => {
+                      console.log('🖱️ Link clicked! Index:', index);
+                      console.log('🔗 Slider data:', slider);
+                      console.log('🔗 Link URL:', slider.link_url);
+                      console.log('✅ Navigating to:', slider.link_url);
+                    }}
+                    title={`کلیک کنید برای مشاهده: ${slider.title}`}
+                  >
+                    <img
+                      src={imageUrl}
+                      alt={slider?.alt_text || `Hero image ${index + 1}`}
+                      className="w-full h-full object-cover hover:opacity-95 transition-opacity"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        objectPosition: 'center center',
+                        display: 'block',
+                        pointerEvents: 'none'
+                      }}
+                    />
+                  </a>
+                ) : (
+                  <img
+                    src={imageUrl}
+                    alt={slider?.alt_text || `Hero image ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: 'center center',
+                      display: 'block'
+                    }}
+                  />
+                )}
                 <div className="absolute inset-0 bg-black/10"></div>
               </div>
             );
