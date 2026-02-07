@@ -933,59 +933,47 @@ const HomePage: React.FC = () => {
             const slider = heroSliders[index]; // Get corresponding slider data if available
             console.log(`🖼️ Slider ${index}:`, slider);
             console.log(`🔗 Link URL:`, slider?.link_url);
+            
+            const SliderWrapper = slider?.link_url ? 'a' : 'div';
+            const wrapperProps = slider?.link_url ? {
+              href: slider.link_url,
+              target: slider.link_url.startsWith('/') || slider.link_url.includes(window.location.hostname) ? '_self' : '_blank',
+              rel: slider.link_url.startsWith('/') ? undefined : 'noopener noreferrer',
+              onClick: (e: React.MouseEvent) => {
+                console.log('🖱️ Image clicked! Index:', index);
+                console.log('🔗 Slider data:', slider);
+                console.log('🔗 Link URL:', slider.link_url);
+                console.log('✅ Navigating to:', slider.link_url);
+              },
+              title: `کلیک کنید برای مشاهده: ${slider.title}`
+            } : {};
+            
             return (
-              <div
+              <SliderWrapper
                 key={index}
-                className="absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out"
+                {...wrapperProps}
+                className={`absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out block ${slider?.link_url ? 'cursor-pointer' : ''}`}
                 style={{
                   transform: `translateX(${index * 100 - currentHeroImageIndex * 100}%)`,
                   left: '0%'
                 }}
               >
-                {slider?.link_url ? (
-                  <a
-                    href={slider.link_url}
-                    target={slider.link_url.startsWith('/') || slider.link_url.includes(window.location.hostname) ? '_self' : '_blank'}
-                    rel={slider.link_url.startsWith('/') ? undefined : 'noopener noreferrer'}
-                    className="block w-full h-full cursor-pointer"
-                    onClick={(e) => {
-                      console.log('🖱️ Link clicked! Index:', index);
-                      console.log('🔗 Slider data:', slider);
-                      console.log('🔗 Link URL:', slider.link_url);
-                      console.log('✅ Navigating to:', slider.link_url);
-                    }}
-                    title={`کلیک کنید برای مشاهده: ${slider.title}`}
-                  >
-                    <img
-                      src={imageUrl}
-                      alt={slider?.alt_text || `Hero image ${index + 1}`}
-                      className="w-full h-full object-cover hover:opacity-95 transition-opacity"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        objectPosition: 'center center',
-                        display: 'block',
-                        pointerEvents: 'none'
-                      }}
-                    />
-                  </a>
-                ) : (
-                  <img
-                    src={imageUrl}
-                    alt={slider?.alt_text || `Hero image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      objectPosition: 'center center',
-                      display: 'block'
-                    }}
-                  />
-                )}
-                <div className="absolute inset-0 bg-black/10"></div>
-              </div>
+                <img
+                  src={imageUrl}
+                  alt={slider?.alt_text || `Hero image ${index + 1}`}
+                  className={`w-full h-full object-cover ${slider?.link_url ? 'hover:opacity-95' : ''} transition-opacity`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center center',
+                    display: 'block',
+                    pointerEvents: 'none'
+                  }}
+                />
+                {/* Overlay - must not block clicks */}
+                <div className="absolute inset-0 bg-black/10" style={{ pointerEvents: 'none' }}></div>
+              </SliderWrapper>
             );
           })}
             </div>
@@ -1015,15 +1003,15 @@ const HomePage: React.FC = () => {
         </button>
 
         {/* Hero Content */}
-        <div className="relative z-10 flex-1 flex flex-col">
+        <div className="relative z-10 flex-1 flex flex-col" style={{ pointerEvents: 'none' }}>
           {/* Promotional Text - Centered */}
-          <div className="flex-1 flex items-start justify-center" style={{ paddingTop: '120px' }}>
-            <div className="text-center max-w-4xl px-4 sm:px-6">
+          <div className="flex-1 flex items-start justify-center" style={{ paddingTop: '35px', pointerEvents: 'auto' }}>
+            <div className="text-center max-w-3xl px-4 sm:px-6">
               <h1 
-                className="text-white mb-6"
+                className="text-white mb-3"
                 style={{ 
                   fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                  fontSize: 'clamp(2.5rem, 8vw, 5rem)',
+                  fontSize: 'clamp(1.8rem, 5vw, 3rem)',
                   fontWeight: 'bold',
                   lineHeight: '1.2',
                   textShadow: '2px 2px 8px rgba(0,0,0,0.5)',
@@ -1033,11 +1021,11 @@ const HomePage: React.FC = () => {
                 {t('home.hero.flyWithNasim')}
               </h1>
               <p 
-                className="text-white mb-8"
+                className="text-white mb-4"
                 style={{ 
                   fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                  fontSize: 'clamp(1.2rem, 3vw, 2rem)',
-                  fontWeight: 'bold',
+                  fontSize: 'clamp(0.9rem, 2vw, 1.2rem)',
+                  fontWeight: '500',
                   lineHeight: '1.5',
                   textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
                   direction: language === 'en' ? 'ltr' : 'rtl'
@@ -1049,7 +1037,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Flight Search Form at Bottom */}
-          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8" style={{ marginTop: '60px', padding: '30px' }}>
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8" style={{ marginTop: '60px', padding: '30px', pointerEvents: 'auto' }}>
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
               </div>
             </div>
