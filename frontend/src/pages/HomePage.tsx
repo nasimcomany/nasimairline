@@ -925,7 +925,7 @@ const HomePage: React.FC = () => {
           className="absolute inset-x-0 top-0 overflow-hidden"
           style={{
             backgroundPosition: 'center center',
-            bottom: '238px' // Shorter from bottom
+            bottom: '220px' // Extended from bottom for bigger slider area
           }}
         >
           {/* Slider - Dynamic images from API */}
@@ -1806,7 +1806,7 @@ const HomePage: React.FC = () => {
                     </div>
                   </div>
 
-              {/* Image 3 - four.png - Left page of book */}
+              {/* Image 3 - 4reza.jpeg - Left page of book */}
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
@@ -1843,7 +1843,7 @@ const HomePage: React.FC = () => {
                   overflow: 'hidden'
                 }}>
                   <img 
-                    src="/images/four.png" 
+                    src="/images/4reza.jpeg" 
                     alt="Image 3"
                     className="w-full h-full object-contain transition-opacity duration-300"
                     style={{ 
@@ -1858,7 +1858,7 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Image 4 - five.png - Right page of book */}
+              {/* Image 4 - 5reza.jpeg - Right page of book */}
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
@@ -1894,7 +1894,7 @@ const HomePage: React.FC = () => {
                   overflow: 'hidden'
                 }}>
                   <img 
-                    src="/images/five.png" 
+                    src="/images/5reza.jpeg" 
                     alt="Image 4"
                     className="w-full h-full object-contain transition-opacity duration-300"
                     style={{ 
@@ -1936,14 +1936,14 @@ const HomePage: React.FC = () => {
                 e.currentTarget.style.transform = 'translateY(0) translateX(70px) scale(1)';
               }}
             >
-              {/* Large Image - Using one.png */}
+              {/* Large Image - Using 6reza.jpeg */}
               <div className="relative w-full" style={{ 
                 height: '500px',
                 borderRadius: '16px',
                 overflow: 'hidden'
               }}>
                 <img 
-                  src="/images/one.png" 
+                  src="/images/6reza.jpeg" 
                   alt="Featured destination"
                   className="w-full h-full object-contain transition-opacity duration-300"
                   style={{ 
