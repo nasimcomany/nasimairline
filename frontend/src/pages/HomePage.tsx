@@ -1667,8 +1667,8 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Destinations Section - Images Only (No Text) */}
-      <section className="relative py-6 sm:py-12 bg-white" style={{ paddingBottom: '60px', overflow: 'visible', zIndex: 20 }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-6 sm:py-12 bg-white" style={{ paddingBottom: '60px', overflow: 'visible', zIndex: 20, direction: 'rtl' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ direction: 'rtl' }}>
           {/* Title Section - Same style as Section 2 */}
           <div className="text-center mb-4 sm:mb-8">
             <div style={{ 
@@ -1727,9 +1727,9 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-6 justify-center items-center" style={{ perspective: '1000px', overflow: 'visible' }}>
-            {/* 4 Small Images - Left Side (2/3 width, 2x2 grid) - First in order */}
-            <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-2 gap-1 sm:gap-2 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-0 justify-center items-center" style={{ perspective: '1000px', overflow: 'visible', direction: 'rtl' }}>
+            {/* 4 Small Images - Left Side (60% width, 2x2 grid) - First in order */}
+            <div className="grid grid-cols-2 gap-1 sm:gap-2 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible', direction: 'rtl' }}>
               {/* Image 1 - two.png - Left page of book */}
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
@@ -1937,30 +1937,33 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Large Image - Right Side (2/5 width) - Second in order */}
+            {/* Large Image - Right Side (40% width) - Second in order */}
             <div 
-              className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
+              className="bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
               style={{ 
                 borderRadius: '16px',
                 border: '0.5px solid #d1d5db',
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                 opacity: 0.95,
-                transform: 'translateY(0) translateX(40px)',
+                transform: 'translateY(0)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 position: 'relative',
-                zIndex: 25
+                zIndex: 75,
+                marginRight: '-50px'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = '#d1d5db';
                 e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
                 e.currentTarget.style.opacity = '1';
-                e.currentTarget.style.transform = 'translateY(-4px) translateX(60px) scale(1.01)';
+                e.currentTarget.style.transform = 'translateY(-14px)';
+                e.currentTarget.style.marginRight = '-50px';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = '#d1d5db';
                 e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
                 e.currentTarget.style.opacity = '0.95';
-                e.currentTarget.style.transform = 'translateY(0) translateX(70px) scale(1)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.marginRight = '-50px';
               }}
             >
               {/* Large Image - Using 6reza.jpeg */}
@@ -1972,12 +1975,11 @@ const HomePage: React.FC = () => {
                 <img 
                   src="/images/6reza.jpeg" 
                   alt="Featured destination"
-                  className="w-full h-full object-contain transition-opacity duration-300"
+                  className="w-full h-full object-cover transition-opacity duration-300"
                   style={{ 
                     objectPosition: 'center center',
                     transition: 'opacity 0.3s ease',
                     imageRendering: '-webkit-optimize-contrast',
-                    transform: 'translateY(15px)',
                     borderRadius: '16px'
                   }}
                 />
