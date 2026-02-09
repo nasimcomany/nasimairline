@@ -156,117 +156,101 @@ const WalletPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600">
       <EmiratesHeader />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Page Header */}
-          <div className="mb-8 mt-12">
-            <h1 className={`text-3xl font-bold text-gray-900 mb-2 ${fontClass}`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              {language === 'fa' ? 'کیف پول' : 'Wallet'}
-            </h1>
-            <p className="text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              {language === 'fa' ? 'مدیریت موجودی و تراکنش‌های کیف پول' : 'Manage wallet balance and transactions'}
-            </p>
-          </div>
-
-          {/* Wallet Balance Card */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div className="container mx-auto px-4 pt-28 pb-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Wallet Balance Card - Compact */}
+          <div className="bg-white rounded-xl shadow-xl p-5 mb-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  {language === 'fa' ? 'موجودی کیف پول' : 'Wallet Balance'}
+                <p className="text-gray-600 mb-1 text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  {language === 'fa' ? 'موجودی' : 'Balance'}
                 </p>
-                <p className="text-4xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <p className="text-3xl font-bold text-blue-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                   {formatCurrency(walletBalance)}
                 </p>
               </div>
-              <div className="bg-blue-900 rounded-full p-4">
-                <WalletIcon className="w-12 h-12 text-white" />
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full p-3">
+                <WalletIcon className="w-10 h-10 text-white" />
               </div>
             </div>
           </div>
 
-          {/* Charge Wallet Section */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 className={`text-xl font-bold text-gray-900 mb-4 ${fontClass}`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              {language === 'fa' ? 'شارژ کیف پول' : 'Charge Wallet'}
+          {/* Charge Wallet Section - Compact */}
+          <div className="bg-white rounded-xl shadow-xl p-5 mb-5">
+            <h2 className={`text-lg font-bold text-blue-600 mb-3 ${fontClass}`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              {language === 'fa' ? 'شارژ' : 'Charge'}
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Amount Input */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  {language === 'fa' ? 'مبلغ (تومان)' : 'Amount (Toman)'}
-                </label>
-                <input
-                  type="number"
-                  value={chargeAmount}
-                  onChange={(e) => setChargeAmount(e.target.value)}
-                  placeholder={language === 'fa' ? 'مبلغ را وارد کنید' : 'Enter amount'}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
-                  min="10000"
-                  step="10000"
-                />
-              </div>
+            {/* Amount Input */}
+            <div className="mb-3">
+              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                {language === 'fa' ? 'مبلغ (تومان)' : 'Amount'}
+              </label>
+              <input
+                type="number"
+                value={chargeAmount}
+                onChange={(e) => setChargeAmount(e.target.value)}
+                placeholder={language === 'fa' ? 'مبلغ' : 'Amount'}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+                min="10000"
+                step="10000"
+              />
+            </div>
 
-              {/* Quick Amount Buttons */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  {language === 'fa' ? 'مبالغ پیشنهادی' : 'Suggested Amounts'}
-                </label>
-                <div className="flex gap-2 flex-wrap">
-                  {[1000000, 2000000, 3000000, 5000000, 10000000].map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => setChargeAmount(amount.toString())}
-                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                        chargeAmount === amount.toString()
-                          ? 'border-blue-900 bg-blue-50 text-blue-900'
-                          : 'border-gray-300 bg-white text-gray-700 hover:border-blue-900'
-                      }`}
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
-                    >
-                      {formatCurrency(amount)}
-                    </button>
-                  ))}
-                </div>
+            {/* Quick Amount Buttons - Compact */}
+            <div className="mb-3">
+              <div className="flex gap-2 flex-wrap">
+                {[1000000, 2000000, 3000000, 5000000, 10000000].map((amount) => (
+                  <button
+                    key={amount}
+                    onClick={() => setChargeAmount(amount.toString())}
+                    className={`px-3 py-1 text-xs rounded-lg border-2 transition-all ${
+                      chargeAmount === amount.toString()
+                        ? 'border-blue-600 bg-blue-50 text-blue-600'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-blue-600'
+                    }`}
+                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  >
+                    {formatCurrency(amount)}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Payment Gateways */}
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {language === 'fa' ? 'انتخاب درگاه پرداخت' : 'Select Payment Gateway'}
+            {/* Payment Gateways - Compact */}
+            <div className="mb-3">
+              <label className="block text-xs font-medium text-gray-600 mb-2 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                {language === 'fa' ? 'درگاه' : 'Gateway'}
               </label>
-              <div className="flex justify-center items-center gap-3 flex-wrap">
+              <div className="flex justify-center items-center gap-2 flex-wrap">
                 {paymentGateways.map((gateway) => (
                   <button
                     key={gateway.id}
                     onClick={() => setSelectedGateway(gateway.id)}
-                    className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center justify-center min-w-[120px] ${
+                    className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center justify-center min-w-[100px] ${
                       selectedGateway === gateway.id
-                        ? 'border-blue-900 bg-blue-50'
-                        : 'border-gray-300 bg-white hover:border-blue-900'
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-300 bg-white hover:border-blue-600'
                     }`}
                   >
                     <img 
                       src={gateway.logo} 
                       alt={gateway.name}
-                      className="w-16 h-16 object-contain mb-2"
+                      className="w-12 h-12 object-contain mb-1"
                       onError={(e) => {
-                        // Fallback to icon if image doesn't exist
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
                         const fallback = document.createElement('div');
-                        fallback.className = 'text-3xl mb-2';
+                        fallback.className = 'text-2xl mb-1';
                         fallback.textContent = '💳';
                         target.parentElement?.insertBefore(fallback, target);
                       }}
                     />
-                    <div className="text-sm font-bold text-gray-900 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <div className="text-xs font-bold text-gray-900 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                       {gateway.name}
                     </div>
                   </button>
@@ -274,71 +258,71 @@ const WalletPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Charge Button */}
+            {/* Charge Button - Compact */}
             <button
               onClick={handleCharge}
               disabled={loading || !chargeAmount || !selectedGateway}
-              className="mt-6 w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
             >
-              <PlusIcon className="w-5 h-5" />
+              <PlusIcon className="w-4 h-4" />
               {loading 
                 ? (language === 'fa' ? 'در حال پردازش...' : 'Processing...')
-                : (language === 'fa' ? 'شارژ کیف پول' : 'Charge Wallet')
+                : (language === 'fa' ? 'شارژ' : 'Charge')
               }
             </button>
 
-            {/* Message */}
+            {/* Message - Compact */}
             {showMessage && (
-              <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-yellow-800 text-center font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  {language === 'fa' ? 'کاربر گرامی در حال حاضر امکان شارژ کیف پول وجود ندارد' : 'Dear user, wallet charging is currently unavailable'}
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-yellow-800 text-center text-xs font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  {language === 'fa' ? 'فعلاً امکان شارژ وجود ندارد' : 'Charging unavailable'}
                 </p>
               </div>
             )}
           </div>
 
-          {/* Transactions History */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className={`text-xl font-bold text-gray-900 mb-4 ${fontClass}`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              {language === 'fa' ? 'تاریخچه تراکنش‌ها' : 'Transaction History'}
+          {/* Transactions History - Compact */}
+          <div className="bg-white rounded-xl shadow-xl p-5">
+            <h2 className={`text-lg font-bold text-blue-600 mb-3 ${fontClass}`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              {language === 'fa' ? 'تراکنش‌ها' : 'Transactions'}
             </h2>
             
             {transactions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {language === 'fa' ? 'تراکنشی یافت نشد' : 'No transactions found'}
+              <div className="text-center py-6 text-gray-500 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                {language === 'fa' ? 'تراکنشی یافت نشد' : 'No transactions'}
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {transactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       {getTransactionStatusIcon(transaction.status)}
                       <div>
-                        <p className="font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                        <p className="font-bold text-gray-900 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                           {getTransactionTypeText(transaction.type)} - {formatCurrency(transaction.amount)}
                         </p>
-                        <p className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                        <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                           {transaction.gateway && `${transaction.gateway} - `}
                           {formatDate(transaction.created_at)}
                         </p>
                         {transaction.description && (
-                          <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <p className="text-xs text-gray-400 mt-0.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                             {transaction.description}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    <div className={`px-2 py-1 rounded-full text-xs font-bold ${
                       transaction.status === 'success' ? 'bg-green-100 text-green-800' :
                       transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-red-100 text-red-800'
                     }`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                       {transaction.status === 'success' ? (language === 'fa' ? 'موفق' : 'Success') :
-                       transaction.status === 'pending' ? (language === 'fa' ? 'در انتظار' : 'Pending') :
+                       transaction.status === 'pending' ? (language === 'fa' ? 'انتظار' : 'Pending') :
                        (language === 'fa' ? 'ناموفق' : 'Failed')}
                     </div>
                   </div>
