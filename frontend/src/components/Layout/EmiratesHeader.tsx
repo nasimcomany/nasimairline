@@ -226,7 +226,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
 
           {/* Logo with Blue Flag - Smaller copy in center */}
           <div 
-            className="hidden lg:flex items-center absolute right-[290px]" 
+            className={`hidden lg:flex items-center absolute ${language === 'fa' ? 'right-[290px]' : 'right-[215px]'}`}
             style={{ 
               bottom: '-60px',
               transform: isScrolled ? 'translateY(-40px)' : 'translateY(0)',
