@@ -580,7 +580,7 @@ const FlightMapPage: React.FC = () => {
                         className="text-sm leading-relaxed text-gray-700"
                         style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl', textAlign: 'right' }}
                       >
-                        کاربر گرامی، لطفا پس از انتخاب شهر مبدا چند ثانیه صبر کنید تا لیست مقاصد به شما نشان داده شود و سپس به انتهای سایت مراجعه کنید
+                        کاربر گرامی، لطفا پس از پیدا کردن مبدا و مقصد مورد نظر چند لحظه صبر کنید تا بلیط های موجود به شما نمایش داده شود و سپس به انتهای صفحه مراجعه فرمایید.
                       </p>
                     </div>
                   </div>
@@ -739,8 +739,8 @@ const FlightMapPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Neighboring Countries Maps Section */}
-          <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
+          {/* Neighboring Countries Maps Section - Temporarily Commented Out */}
+          {/* <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
             <h2 
               className="text-2xl font-bold text-gray-900 mb-6 text-center"
               style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
@@ -767,7 +767,7 @@ const FlightMapPage: React.FC = () => {
             </div>
             
             {/* Info box about neighboring countries */}
-            <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
+            {/* <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
               <h3 
                 className="text-lg font-bold text-gray-900 mb-3"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
@@ -818,8 +818,8 @@ const FlightMapPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
 
           {/* Flights Results */}
           {showFlights && (

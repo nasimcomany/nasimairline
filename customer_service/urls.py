@@ -8,6 +8,7 @@ from .views import (
     ChatSessionViewSet,
     ChatMessageViewSet,
     CustomerTierViewSet,
+    FlightMealFeedbackViewSet,
 )
 
 router = DefaultRouter()
@@ -15,6 +16,7 @@ router.register(r'tier-settings', CustomerTierSettingsViewSet, basename='tier-se
 router.register(r'chat/sessions', ChatSessionViewSet, basename='chat-sessions')
 router.register(r'chat/messages', ChatMessageViewSet, basename='chat-messages')
 router.register(r'tier', CustomerTierViewSet, basename='customer-tier')
+router.register(r'meal-feedback', FlightMealFeedbackViewSet, basename='meal-feedback')
 
 app_name = 'customer_service'
 

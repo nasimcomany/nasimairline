@@ -32,6 +32,7 @@ import ArticleDetailPage from './pages/ArticleDetailPage';
 import IranologyPage from './pages/IranologyPage';
 import CityArticlesPage from './pages/CityArticlesPage';
 import IranologyArticleDetailPage from './pages/IranologyArticleDetailPage';
+import MealFeedbackPage from './pages/MealFeedbackPage';
 import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
 
@@ -73,6 +74,7 @@ function App() {
               <Route path="/iranology" element={<IranologyPage />} />
               <Route path="/iranology/:slug" element={<CityArticlesPage />} />
               <Route path="/iranology/:city_slug/:slug" element={<IranologyArticleDetailPage />} />
+              <Route path="/meal-feedback" element={<MealFeedbackPage />} />
             </Routes>
             {/* Chat Widget - Available on all pages */}
             <ChatWidget />

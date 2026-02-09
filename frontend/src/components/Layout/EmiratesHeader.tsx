@@ -55,6 +55,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const loginDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const userDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const menuDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -139,10 +140,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.book') || 'رزرو',
       path: '/flights/search',
       dropdown: [
-        { label: t('nav.bookFlights') || 'رزرو پرواز', path: '/flights/search' },
-        { label: t('nav.flightSchedules') || 'برنامه پرواز فردا', path: '/flights/map' },
-        { label: t('nav.featuredFares') || 'پیشنهادات ویژه', path: '/offers' },
-        { label: t('nav.specialOffers') || 'پیشنهادات خاص', path: '/offers' },
+        { label: t('nav.bookFlights') || 'رزرو پرواز', path: '/#search-form' },
+        { label: t('nav.flightSchedules') || 'برنامه پرواز', path: '/flights/map' },
+        { label: t('nav.featuredFares') || 'پیشنهادات ویژه', path: '#' },
+        { label: t('nav.specialOffers') || 'پیشنهادات خاص', path: '#' },
       ]
     },
     {
@@ -151,7 +152,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       path: '/destinations',
       dropdown: [
         { label: t('nav.domesticDestinations') || 'مقاصد داخلی', path: '/flights/map' },
-        { label: t('nav.internationalDestinations') || 'مقاصد خارجی', path: '/flights/map' },
+        { label: t('nav.internationalDestinations') || 'مقاصد خارجی', path: '#' },
         { label: t('nav.allDestinations') || 'همه مقاصد', path: '/flights/map' },
       ]
     },
@@ -171,14 +172,23 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   ];
 
   const handleMouseEnter = (key: string, hasDropdown: boolean) => {
+    // Clear any pending timeout
+    if (menuDropdownTimeoutRef.current) {
+      clearTimeout(menuDropdownTimeoutRef.current);
+      menuDropdownTimeoutRef.current = null;
+    }
+    
     if (hasDropdown) {
       setActiveDropdown(key);
     }
   };
 
   const handleMouseLeave = () => {
-    setActiveDropdown(null);
-    setSelectedDestinationIndex(null); // Reset selected destination when dropdown closes
+    // Add delay before closing dropdown
+    menuDropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+      setSelectedDestinationIndex(null);
+    }, 200); // 200ms delay
   };
 
   // Cleanup timeout on unmount
@@ -189,6 +199,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       }
       if (loginDropdownTimeoutRef.current) {
         clearTimeout(loginDropdownTimeoutRef.current);
+      }
+      if (menuDropdownTimeoutRef.current) {
+        clearTimeout(menuDropdownTimeoutRef.current);
       }
     };
   }, []);
@@ -290,6 +303,13 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && (
                   <div 
                     className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 ${item.key === 'wherewefly' ? 'w-[1400px]' : 'w-[900px]'} bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
+                    onMouseEnter={() => {
+                      // Clear timeout when mouse enters dropdown
+                      if (menuDropdownTimeoutRef.current) {
+                        clearTimeout(menuDropdownTimeoutRef.current);
+                        menuDropdownTimeoutRef.current = null;
+                      }
+                    }}
                     onMouseLeave={() => {
                       handleMouseLeave();
                       setHoveredSubItem(null);
@@ -303,25 +323,25 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                             // Get icon for each submenu item based on path and key (language-independent)
                             const getSubItemIcon = (label: string, key: string, itemIndex: number, path: string) => {
                               if (key === 'book') {
-                                if (itemIndex === 0) return <TicketIcon className="w-7 h-7 text-blue-600" />;
-                                if (itemIndex === 1) return <CalendarDaysIcon className="w-7 h-7 text-green-600" />;
-                                if (itemIndex === 2) return <GiftIcon className="w-7 h-7 text-purple-600" />;
-                                if (itemIndex === 3) return <SparklesIcon className="w-7 h-7 text-pink-600" />;
+                                if (itemIndex === 0) return <TicketIcon className="w-7 h-7" style={{ color: '#2563eb' }} />; // رزرو پرواز - آبی
+                                if (itemIndex === 1) return <CalendarDaysIcon className="w-7 h-7" style={{ color: '#16a34a' }} />;
+                                if (itemIndex === 2) return <GiftIcon className="w-7 h-7" style={{ color: '#9333ea' }} />; // پیشنهادات ویژه
+                                if (itemIndex === 3) return <SparklesIcon className="w-7 h-7" style={{ color: '#db2777' }} />; // پیشنهادات خاص
                               }
                               if (key === 'wherewefly') {
-                                return <MapPinIcon className="w-7 h-7 text-orange-600" />;
+                                return <MapPinIcon className="w-7 h-7" style={{ color: '#ea580c' }} />;
                               }
                               if (key === 'about') {
-                                return <BuildingOfficeIcon className="w-7 h-7 text-gray-700" />;
+                                return <BuildingOfficeIcon className="w-7 h-7" style={{ color: '#374151' }} />;
                               }
                               if (key === 'help') {
                                 // Use path and index to determine icon
-                                if (path === '/#faq' && itemIndex === 0) return <MapPinIcon className="w-7 h-7 text-green-500" />; // تماس با ما
-                                if (path === '/#weather') return <CloudIcon className="w-7 h-7 text-blue-500" />; // وضعیت آب و هوا
-                                if (path === '/tickets') return <TicketIcon className="w-7 h-7 text-purple-500" />; // ثبت شکایت
-                                if (path === '/magazine') return <NewspaperIcon className="w-7 h-7 text-indigo-500" />; // مجله
-                                if (path === '/gallery') return <PhotoIcon className="w-7 h-7 text-cyan-500" />; // گالری عکس
-                                return <QuestionMarkCircleIcon className="w-7 h-7 text-blue-500" />;
+                                if (path === '/#faq' && itemIndex === 0) return <MapPinIcon className="w-7 h-7" style={{ color: '#22c55e' }} />; // تماس با ما
+                                if (path === '/#weather') return <CloudIcon className="w-7 h-7" style={{ color: '#2563eb' }} />; // وضعیت آب و هوا - آبی
+                                if (path === '/tickets') return <TicketIcon className="w-7 h-7" style={{ color: '#a855f7' }} />; // ثبت شکایت
+                                if (path === '/magazine') return <NewspaperIcon className="w-7 h-7" style={{ color: '#6366f1' }} />; // مجله
+                                if (path === '/gallery') return <PhotoIcon className="w-7 h-7" style={{ color: '#06b6d4' }} />; // گالری عکس
+                                return <QuestionMarkCircleIcon className="w-7 h-7" style={{ color: '#3b82f6' }} />;
                               }
                               return null;
                             };
@@ -332,6 +352,13 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 to={subItem.path}
                                 className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${item.key === 'wherewefly' && selectedDestinationIndex === index ? 'bg-gray-300' : ''}`}
                                 onClick={(e) => {
+                                  // Disable navigation for inactive menu items
+                                  if (subItem.path === '#') {
+                                    e.preventDefault();
+                                    setActiveDropdown(null);
+                                    return;
+                                  }
+                                  
                                   // For wherewefly dropdown, if it's a real destination link (like /flights/map), allow navigation
                                   if (item.key === 'wherewefly' && subItem.path !== '/flights/map') {
                                     e.preventDefault();
@@ -342,29 +369,41 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                   
                                   setActiveDropdown(null);
                                   // Handle weather modal
-                                  if (subItem.path === '/#weather' && onWeatherClick) {
+                                  if (subItem.path === '/#weather') {
                                     e.preventDefault();
-                                    onWeatherClick();
+                                    // If not on homepage, navigate first then open modal
+                                    if (window.location.pathname !== '/') {
+                                      navigate('/', { state: { openWeather: true } });
+                                    } else {
+                                      // Already on homepage, just open modal
+                                      if (onWeatherClick) {
+                                        onWeatherClick();
+                                      }
+                                    }
                                     return;
                                   }
                                   // Handle scroll to sections on homepage
                                   if (subItem.path.startsWith('/#')) {
                                     e.preventDefault();
                                     const sectionId = subItem.path.substring(2); // Remove '/#'
-                                    const section = document.getElementById(sectionId);
-                                    if (section) {
-                                      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                      // If not on homepage, navigate first
-                                      if (window.location.pathname !== '/') {
-                                        navigate('/');
-                                        setTimeout(() => {
-                                          const targetSection = document.getElementById(sectionId);
-                                          if (targetSection) {
-                                            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                          }
-                                        }, 100);
+                                    
+                                    // If not on homepage, navigate first then scroll
+                                    if (window.location.pathname !== '/') {
+                                      navigate('/', { state: { scrollTo: sectionId } });
+                                      setTimeout(() => {
+                                        const targetSection = document.getElementById(sectionId);
+                                        if (targetSection) {
+                                          targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }
+                                      }, 300);
+                                    } else {
+                                      // Already on homepage, just scroll
+                                      const section = document.getElementById(sectionId);
+                                      if (section) {
+                                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                       }
                                     }
+                                    return;
                                   }
                                 }}
                                 onMouseEnter={() => setHoveredSubItem({key: item.key, index})}

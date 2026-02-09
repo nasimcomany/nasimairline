@@ -7,6 +7,7 @@ from .models import (
     CustomerTierSettings,
     ChatSession,
     ChatMessage,
+    FlightMealFeedback,
 )
 
 
@@ -167,3 +168,216 @@ class ChatMessageAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         """Optimize queryset"""
         return super().get_queryset(request).select_related('session', 'user')
+
+
+@admin.register(FlightMealFeedback)
+class FlightMealFeedbackAdmin(admin.ModelAdmin):
+    """Admin for flight meal feedback"""
+    list_display = [
+        'uuid',
+        'flight_number',
+        'get_passenger_display',
+        'get_route_display',
+        'get_average_rating_display',
+        'is_reviewed',
+        'submitted_at'
+    ]
+    list_filter = [
+        'is_reviewed',
+        'submitted_at',
+        'food_quality',
+        'service_quality',
+    ]
+    search_fields = [
+        'flight_number',
+        'first_name',
+        'last_name',
+        'origin_city',
+        'destination_city',
+        'comments',
+    ]
+    readonly_fields = [
+        'uuid',
+        'submitted_at',
+        'updated_at',
+        'ip_address',
+        'user_agent',
+        'get_average_rating_display',
+        # User-submitted data - should not be editable by admin
+        'flight_number',
+        'origin_city',
+        'destination_city',
+        'first_name',
+        'last_name',
+        'food_quality',
+        'food_temperature',
+        'food_taste',
+        'food_presentation',
+        'portion_size',
+        'variety',
+        'packaging',
+        'service_quality',
+        'comments',
+    ]
+    ordering = ['-submitted_at']
+    date_hierarchy = 'submitted_at'
+    
+    fieldsets = (
+        ('اطلاعات پرواز', {
+            'fields': ('uuid', 'flight_number', 'origin_city', 'destination_city')
+        }),
+        ('اطلاعات مسافر', {
+            'fields': ('first_name', 'last_name')
+        }),
+        ('ارزیابی کیفیت غذا', {
+            'fields': (
+                'food_quality',
+                'food_temperature',
+                'food_taste',
+                'food_presentation',
+                'portion_size',
+                'variety',
+                'packaging',
+                'service_quality',
+                'get_average_rating_display',
+            )
+        }),
+        ('نظرات و پیشنهادات', {
+            'fields': ('comments',)
+        }),
+        ('بررسی ادمین', {
+            'fields': (
+                'is_reviewed',
+                'reviewed_by',
+                'reviewed_at',
+                'admin_notes',
+            )
+        }),
+        ('اطلاعات فنی', {
+            'fields': ('ip_address', 'user_agent'),
+            'classes': ('collapse',)
+        }),
+        ('زمان‌ها', {
+            'fields': ('submitted_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    actions = ['mark_as_reviewed', 'export_to_csv']
+    
+    def get_passenger_display(self, obj):
+        """Display passenger name"""
+        name = obj.get_passenger_name()
+        if name == 'ناشناس':
+            return format_html('<em style="color: gray;">{}</em>', name)
+        return format_html('<strong>{}</strong>', name)
+    get_passenger_display.short_description = 'نام مسافر'
+    
+    def get_route_display(self, obj):
+        """Display flight route"""
+        if obj.origin_city and obj.destination_city:
+            return format_html(
+                '{} <span style="color: #3b82f6;">→</span> {}',
+                obj.origin_city,
+                obj.destination_city
+            )
+        elif obj.origin_city:
+            return obj.origin_city
+        elif obj.destination_city:
+            return f'→ {obj.destination_city}'
+        return '-'
+    get_route_display.short_description = 'مسیر'
+    
+    def get_average_rating_display(self, obj):
+        """Display average rating with stars"""
+        avg = obj.get_average_rating()
+        if avg is None:
+            return '-'
+        
+        # Color based on rating
+        if avg >= 4:
+            color = '#22c55e'  # green
+        elif avg >= 3:
+            color = '#eab308'  # yellow
+        else:
+            color = '#ef4444'  # red
+        
+        stars = '⭐' * int(round(avg))
+        avg_formatted = f'{avg:.2f}'
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span> {}',
+            color,
+            avg_formatted,
+            stars
+        )
+    get_average_rating_display.short_description = 'میانگین امتیاز'
+    
+    def mark_as_reviewed(self, request, queryset):
+        """Mark selected feedbacks as reviewed"""
+        from django.utils import timezone
+        updated = queryset.update(
+            is_reviewed=True,
+            reviewed_by=request.user,
+            reviewed_at=timezone.now()
+        )
+        self.message_user(
+            request,
+            f'{updated} بازخورد به عنوان بررسی شده علامت‌گذاری شد.'
+        )
+    mark_as_reviewed.short_description = 'علامت‌گذاری به عنوان بررسی شده'
+    
+    def export_to_csv(self, request, queryset):
+        """Export selected feedbacks to CSV"""
+        import csv
+        from django.http import HttpResponse
+        from django.utils import timezone
+        
+        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+        response['Content-Disposition'] = f'attachment; filename="meal-feedback-{timezone.now().strftime("%Y%m%d")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'UUID',
+            'تاریخ ثبت',
+            'شماره پرواز',
+            'مبدا',
+            'مقصد',
+            'نام',
+            'نام خانوادگی',
+            'کیفیت غذا',
+            'دمای غذا',
+            'طعم',
+            'ارائه',
+            'اندازه',
+            'تنوع',
+            'بسته‌بندی',
+            'سرویس',
+            'میانگین',
+            'نظرات',
+            'بررسی شده',
+        ])
+        
+        for obj in queryset:
+            writer.writerow([
+                str(obj.uuid),
+                obj.submitted_at.strftime('%Y-%m-%d %H:%M'),
+                obj.flight_number or '',
+                obj.origin_city or '',
+                obj.destination_city or '',
+                obj.first_name or '',
+                obj.last_name or '',
+                obj.food_quality or '',
+                obj.food_temperature or '',
+                obj.food_taste or '',
+                obj.food_presentation or '',
+                obj.portion_size or '',
+                obj.variety or '',
+                obj.packaging or '',
+                obj.service_quality or '',
+                obj.get_average_rating() or '',
+                obj.comments or '',
+                'بله' if obj.is_reviewed else 'خیر',
+            ])
+        
+        return response
+    export_to_csv.short_description = 'خروجی CSV'

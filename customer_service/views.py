@@ -7,10 +7,12 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from .models import (
     CustomerTierSettings,
     ChatSession,
     ChatMessage,
+    FlightMealFeedback,
 )
 from .serializers import (
     CustomerTierSettingsSerializer,
@@ -18,6 +20,8 @@ from .serializers import (
     ChatSessionListSerializer,
     ChatMessageSerializer,
     CustomerTierInfoSerializer,
+    FlightMealFeedbackSerializer,
+    FlightMealFeedbackListSerializer,
 )
 from .utils import (
     calculate_customer_tier,
@@ -307,4 +311,103 @@ class CustomerTierViewSet(viewsets.ViewSet):
         return Response({
             'message': f'{updated_count} کاربر به‌روزرسانی شدند',
             'updated_count': updated_count
+        })
+
+
+class FlightMealFeedbackViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for flight meal feedback
+    - Allows anonymous users to submit feedback
+    - List/retrieve requires admin authentication
+    """
+    queryset = FlightMealFeedback.objects.all()
+    serializer_class = FlightMealFeedbackSerializer
+    permission_classes = [permissions.AllowAny]  # Allow anonymous for POST
+    lookup_field = 'uuid'
+    
+    def get_serializer_class(self):
+        """Use list serializer for list action"""
+        if self.action == 'list':
+            return FlightMealFeedbackListSerializer
+        return FlightMealFeedbackSerializer
+    
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        - POST (create): AllowAny
+        - GET, PUT, PATCH, DELETE: Admin only
+        """
+        if self.action == 'create':
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAdminUser]
+        return [permission() for permission in permission_classes]
+    
+    def create(self, request, *args, **kwargs):
+        """Create new feedback submission"""
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            {
+                'message': 'بازخورد شما با موفقیت ثبت شد. از اینکه وقت گذاشتید متشکریم!',
+                'data': serializer.data
+            },
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def mark_reviewed(self, request, uuid=None):
+        """Mark feedback as reviewed (admin only)"""
+        feedback = self.get_object()
+        feedback.is_reviewed = True
+        feedback.reviewed_by = request.user
+        feedback.reviewed_at = timezone.now()
+        
+        # Optional admin notes
+        admin_notes = request.data.get('admin_notes', '')
+        if admin_notes:
+            feedback.admin_notes = admin_notes
+        
+        feedback.save()
+        
+        serializer = self.get_serializer(feedback)
+        return Response({
+            'message': 'بازخورد به عنوان بررسی شده علامت‌گذاری شد',
+            'data': serializer.data
+        })
+    
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAdminUser])
+    def statistics(self, request):
+        """Get statistics about meal feedback (admin only)"""
+        from django.db.models import Avg, Count
+        
+        total_feedbacks = FlightMealFeedback.objects.count()
+        reviewed_count = FlightMealFeedback.objects.filter(is_reviewed=True).count()
+        
+        # Average ratings
+        avg_ratings = FlightMealFeedback.objects.aggregate(
+            avg_food_quality=Avg('food_quality'),
+            avg_food_temperature=Avg('food_temperature'),
+            avg_food_taste=Avg('food_taste'),
+            avg_food_presentation=Avg('food_presentation'),
+            avg_portion_size=Avg('portion_size'),
+            avg_variety=Avg('variety'),
+            avg_packaging=Avg('packaging'),
+            avg_service_quality=Avg('service_quality'),
+        )
+        
+        # Feedback count by flight number
+        by_flight = FlightMealFeedback.objects.values('flight_number').annotate(
+            count=Count('id')
+        ).order_by('-count')[:10]
+        
+        return Response({
+            'total_feedbacks': total_feedbacks,
+            'reviewed_count': reviewed_count,
+            'pending_review': total_feedbacks - reviewed_count,
+            'average_ratings': avg_ratings,
+            'top_flights_by_feedback': list(by_flight),
         })

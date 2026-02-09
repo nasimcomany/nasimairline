@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import EmiratesFlightSearchForm from '../components/FlightSearch/EmiratesFlightSearchForm';
 import WeatherWidget from '../components/Weather/WeatherWidget';
@@ -46,6 +46,7 @@ import {
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, fontClass, language } = useLanguage();
   const [isLoaded, setIsLoaded] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -289,6 +290,32 @@ const HomePage: React.FC = () => {
 
     fetchHeroSliders();
   }, []);
+
+  // Handle smooth scroll to search form when hash is present or from navigation state
+  useEffect(() => {
+    const hash = window.location.hash;
+    const scrollToSection = (location.state as any)?.scrollTo;
+    
+    if (hash === '#search-form' || scrollToSection === 'search-form') {
+      setTimeout(() => {
+        const element = document.getElementById('search-form');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+    }
+  }, [location]);
+
+  // Handle opening weather modal from navigation state
+  useEffect(() => {
+    const openWeather = (location.state as any)?.openWeather;
+    
+    if (openWeather) {
+      setTimeout(() => {
+        setShowWeatherModal(true);
+      }, 500);
+    }
+  }, [location]);
 
   // Hero Slider auto-play
   useEffect(() => {
@@ -919,7 +946,7 @@ const HomePage: React.FC = () => {
       <EmiratesHeader onWeatherClick={() => setShowWeatherModal(true)} />
 
       {/* Hero Section with Flight Search - Emirates Style */}
-      <section className="relative z-10 min-h-[70vh] sm:min-h-[90vh] flex flex-col">
+      <section id="search-form" className="relative z-10 min-h-[70vh] sm:min-h-[90vh] flex flex-col">
         {/* Hero Image Background - Slider Container */}
         <div 
           className="absolute inset-x-0 top-0 overflow-hidden"

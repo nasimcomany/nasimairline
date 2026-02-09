@@ -7,6 +7,7 @@ from .models import (
     CustomerTierSettings,
     ChatSession,
     ChatMessage,
+    FlightMealFeedback,
 )
 from .utils import (
     calculate_customer_tier,
@@ -150,4 +151,81 @@ class ChatSessionListSerializer(serializers.ModelSerializer):
                 'created_at': last_msg.created_at,
             }
         return None
+
+
+class FlightMealFeedbackSerializer(serializers.ModelSerializer):
+    """Serializer for flight meal feedback submission"""
+    
+    average_rating = serializers.SerializerMethodField(read_only=True)
+    passenger_name = serializers.CharField(source='get_passenger_name', read_only=True)
+    
+    class Meta:
+        model = FlightMealFeedback
+        fields = [
+            'uuid',
+            'flight_number',
+            'origin_city',
+            'destination_city',
+            'first_name',
+            'last_name',
+            'passenger_name',
+            'food_quality',
+            'food_temperature',
+            'food_taste',
+            'food_presentation',
+            'portion_size',
+            'variety',
+            'packaging',
+            'service_quality',
+            'comments',
+            'average_rating',
+            'submitted_at',
+        ]
+        read_only_fields = ['uuid', 'submitted_at', 'average_rating', 'passenger_name']
+    
+    def get_average_rating(self, obj):
+        """Get average rating"""
+        return obj.get_average_rating()
+    
+    def create(self, validated_data):
+        """Create feedback with IP and user agent from request"""
+        request = self.context.get('request')
+        if request:
+            # Get IP address
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip = x_forwarded_for.split(',')[0]
+            else:
+                ip = request.META.get('REMOTE_ADDR')
+            validated_data['ip_address'] = ip
+            
+            # Get user agent
+            validated_data['user_agent'] = request.META.get('HTTP_USER_AGENT', '')
+        
+        return super().create(validated_data)
+
+
+class FlightMealFeedbackListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for feedback list in admin"""
+    
+    passenger_name = serializers.CharField(source='get_passenger_name', read_only=True)
+    average_rating = serializers.SerializerMethodField(read_only=True)
+    
+    class Meta:
+        model = FlightMealFeedback
+        fields = [
+            'uuid',
+            'flight_number',
+            'passenger_name',
+            'origin_city',
+            'destination_city',
+            'average_rating',
+            'is_reviewed',
+            'submitted_at',
+        ]
+    
+    def get_average_rating(self, obj):
+        """Get average rating"""
+        avg = obj.get_average_rating()
+        return round(avg, 2) if avg else None
 

@@ -390,3 +390,232 @@ class ChatMessage(models.Model):
         elif self.session.user:
             return self.session.user.get_full_name() or self.session.user.email
         return self.session.guest_name or 'مهمان'
+
+
+class FlightMealFeedback(models.Model):
+    """
+    Model for collecting feedback about in-flight meal quality via QR code
+    """
+    QUALITY_CHOICES = [
+        (5, _('عالی')),
+        (4, _('خوب')),
+        (3, _('متوسط')),
+        (2, _('ضعیف')),
+        (1, _('بسیار ضعیف')),
+    ]
+    
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    # Flight Information (all optional)
+    flight_number = models.CharField(
+        _('شماره پرواز'),
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text=_('شماره پرواز (مثال: NSN6650)'),
+    )
+    
+    origin_city = models.CharField(
+        _('شهر مبدا'),
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+    
+    destination_city = models.CharField(
+        _('شهر مقصد'),
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+    
+    # Passenger Information (all optional)
+    first_name = models.CharField(
+        _('نام'),
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+    
+    last_name = models.CharField(
+        _('نام خانوادگی'),
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+    
+    # Meal Quality Ratings (all optional)
+    food_quality = models.IntegerField(
+        _('کیفیت غذا'),
+        choices=QUALITY_CHOICES,
+        blank=True,
+        null=True,
+        help_text=_('رتبه‌بندی کلی کیفیت غذا'),
+    )
+    
+    food_temperature = models.IntegerField(
+        _('دمای غذا'),
+        choices=QUALITY_CHOICES,
+        blank=True,
+        null=True,
+        help_text=_('آیا غذا در دمای مناسب سرو شد؟'),
+    )
+    
+    food_taste = models.IntegerField(
+        _('طعم غذا'),
+        choices=QUALITY_CHOICES,
+        blank=True,
+        null=True,
+        help_text=_('طعم و مزه غذا'),
+    )
+    
+    food_presentation = models.IntegerField(
+        _('نحوه ارائه غذا'),
+        choices=QUALITY_CHOICES,
+        blank=True,
+        null=True,
+        help_text=_('ظاهر و نحوه چیدمان غذا'),
+    )
+    
+    portion_size = models.IntegerField(
+        _('اندازه پرس'),
+        choices=QUALITY_CHOICES,
+        blank=True,
+        null=True,
+        help_text=_('آیا مقدار غذا کافی بود؟'),
+    )
+    
+    variety = models.IntegerField(
+        _('تنوع غذا'),
+        choices=QUALITY_CHOICES,
+        blank=True,
+        null=True,
+        help_text=_('تنوع و گزینه‌های غذایی'),
+    )
+    
+    packaging = models.IntegerField(
+        _('بسته‌بندی'),
+        choices=QUALITY_CHOICES,
+        blank=True,
+        null=True,
+        help_text=_('کیفیت بسته‌بندی و ظروف'),
+    )
+    
+    service_quality = models.IntegerField(
+        _('کیفیت سرویس'),
+        choices=QUALITY_CHOICES,
+        blank=True,
+        null=True,
+        help_text=_('نحوه سرو و برخورد پرسنل'),
+    )
+    
+    # Additional Comments
+    comments = models.TextField(
+        _('نظرات و پیشنهادات'),
+        blank=True,
+        null=True,
+        help_text=_('نظرات، پیشنهادات یا انتقادات شما'),
+    )
+    
+    # Metadata
+    ip_address = models.GenericIPAddressField(
+        _('آدرس IP'),
+        null=True,
+        blank=True,
+        help_text=_('آدرس IP کاربر در زمان ارسال'),
+    )
+    
+    user_agent = models.TextField(
+        _('User Agent'),
+        blank=True,
+        null=True,
+    )
+    
+    # Timestamps
+    submitted_at = models.DateTimeField(
+        _('تاریخ ثبت'),
+        auto_now_add=True,
+        db_index=True,
+    )
+    
+    updated_at = models.DateTimeField(
+        _('تاریخ به‌روزرسانی'),
+        auto_now=True,
+    )
+    
+    # Admin review
+    is_reviewed = models.BooleanField(
+        _('بررسی شده'),
+        default=False,
+        db_index=True,
+    )
+    
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_meal_feedbacks',
+        verbose_name=_('بررسی شده توسط'),
+    )
+    
+    reviewed_at = models.DateTimeField(
+        _('تاریخ بررسی'),
+        null=True,
+        blank=True,
+    )
+    
+    admin_notes = models.TextField(
+        _('یادداشت ادمین'),
+        blank=True,
+        null=True,
+        help_text=_('یادداشت‌های داخلی برای ادمین'),
+    )
+    
+    class Meta:
+        verbose_name = _('بازخورد غذای پرواز')
+        verbose_name_plural = _('بازخوردهای غذای پرواز')
+        ordering = ['-submitted_at']
+        indexes = [
+            models.Index(fields=['flight_number', 'submitted_at']),
+            models.Index(fields=['submitted_at']),
+            models.Index(fields=['is_reviewed', 'submitted_at']),
+        ]
+    
+    def __str__(self):
+        if self.flight_number:
+            return f"Feedback for {self.flight_number} - {self.submitted_at.strftime('%Y-%m-%d')}"
+        return f"Feedback - {self.submitted_at.strftime('%Y-%m-%d %H:%M')}"
+    
+    def get_average_rating(self):
+        """Calculate average rating from all quality fields"""
+        ratings = [
+            self.food_quality,
+            self.food_temperature,
+            self.food_taste,
+            self.food_presentation,
+            self.portion_size,
+            self.variety,
+            self.packaging,
+            self.service_quality,
+        ]
+        valid_ratings = [r for r in ratings if r is not None]
+        if valid_ratings:
+            return sum(valid_ratings) / len(valid_ratings)
+        return None
+    
+    def get_passenger_name(self):
+        """Get full passenger name"""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        elif self.first_name:
+            return self.first_name
+        elif self.last_name:
+            return self.last_name
+        return _('ناشناس')
