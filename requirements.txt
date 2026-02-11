@@ -23,6 +23,7 @@ django-allauth==0.57.0
 # Redis & Cache
 django-redis==5.4.0
 redis==5.0.1
+cachetools==5.3.2  # TTL Cache for Nira API optimization
 
 # Celery (برای کارهای پس‌زمینه)
 celery==5.3.4

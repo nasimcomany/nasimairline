@@ -10,6 +10,8 @@ from typing import Dict, List, Optional, Any
 from django.conf import settings
 from datetime import datetime
 from persiantools.jdatetime import JalaliDate
+from cachetools import TTLCache
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ class NiraClient:
     
     def __init__(self):
         """
-        Initialize Nira client with settings
+        Initialize Nira client with settings and cache
         """
         self.base_url = getattr(settings, 'NIRA_BASE_URL', '')
         self.api_url = f"{self.base_url}/api/Res" if self.base_url else None
@@ -29,6 +31,10 @@ class NiraClient:
         self.office_user = getattr(settings, 'NIRA_OFFICE_USER', '')
         self.office_pass = getattr(settings, 'NIRA_OFFICE_PASS', '')
         self.timeout = getattr(settings, 'NIRA_API_TIMEOUT', 60)  # Default 60 seconds for slow APIs
+        
+        # TTL Cache: maxsize=100 items, ttl=180 seconds (3 minutes)
+        # فقط برای لیست شهرها و مقاصد، نه برای availability
+        self._routes_cache = TTLCache(maxsize=100, ttl=180)  # 3 minutes cache
         
         if not self.base_url:
             logger.warning("NIRA_BASE_URL is not set in settings")
@@ -345,15 +351,36 @@ class NiraClient:
                 'error': f'Unexpected error: {str(e)}'
             }
     
+    def _generate_cache_key(self, method: str, **kwargs) -> str:
+        """
+        Generate a unique cache key based on method name and parameters
+        """
+        key_parts = [method]
+        for k, v in sorted(kwargs.items()):
+            key_parts.append(f"{k}={v}")
+        key_string = "|".join(key_parts)
+        return hashlib.md5(key_string.encode()).hexdigest()
+    
     def get_origin_cities(self) -> Dict[str, Any]:
         """
         Get list of origin cities from Nira Routes API
+        با استفاده از TTL Cache برای بهبود سرعت (3 دقیقه)
         
         Note: origin parameter should be empty to get all origin cities
         
         Returns:
             Dictionary containing list of origin cities or error information
         """
+        # Generate cache key
+        cache_key = self._generate_cache_key('get_origin_cities')
+        
+        # Check cache first
+        if cache_key in self._routes_cache:
+            logger.info(f"🚀 Cache HIT: Returning origin cities from cache")
+            return self._routes_cache[cache_key]
+        
+        logger.info(f"🔄 Cache MISS: Fetching origin cities from Nira API")
+        
         if not self.ws_url:
             return {
                 'success': False,
@@ -402,11 +429,15 @@ class NiraClient:
                             'office_user': self.office_user,
                             'debug': 'Response was "SIGN" which indicates authentication failure'
                         }
-                    return {
+                    # Cache successful response
+                    result = {
                         'success': True,
                         'data': data,
                         'status_code': response.status_code
                     }
+                    self._routes_cache[cache_key] = result
+                    logger.info(f"✅ Cached origin cities for 3 minutes")
+                    return result
                 except ValueError:
                     # If not JSON, check if it's "SIGN" string
                     if response.text.strip() == "SIGN":
@@ -419,12 +450,15 @@ class NiraClient:
                             'debug': 'Response was "SIGN" which indicates authentication failure'
                         }
                     # If not JSON, might be XML or HTML
-                    return {
+                    result = {
                         'success': True,
                         'data': response.text,
                         'status_code': response.status_code,
                         'content_type': response.headers.get('Content-Type', '')
                     }
+                    self._routes_cache[cache_key] = result
+                    logger.info(f"✅ Cached origin cities (text format) for 3 minutes")
+                    return result
             else:
                 return {
                     'success': False,
@@ -455,6 +489,7 @@ class NiraClient:
     def get_destinations(self, origin: str) -> Dict[str, Any]:
         """
         Get list of flight destinations from a specific origin
+        با استفاده از TTL Cache برای بهبود سرعت (3 دقیقه)
         
         Args:
             origin: Origin airport IATA code (e.g., 'THR')
@@ -462,6 +497,16 @@ class NiraClient:
         Returns:
             Dictionary containing list of destinations or error information
         """
+        # Generate cache key based on origin
+        cache_key = self._generate_cache_key('get_destinations', origin=origin.upper())
+        
+        # Check cache first
+        if cache_key in self._routes_cache:
+            logger.info(f"🚀 Cache HIT: Returning destinations for {origin} from cache")
+            return self._routes_cache[cache_key]
+        
+        logger.info(f"🔄 Cache MISS: Fetching destinations for {origin} from Nira API")
+        
         if not self.ws_url:
             return {
                 'success': False,
@@ -500,19 +545,26 @@ class NiraClient:
             if response.status_code == 200:
                 try:
                     data = response.json()
-                    return {
+                    # Cache successful response
+                    result = {
                         'success': True,
                         'data': data,
                         'status_code': response.status_code
                     }
+                    self._routes_cache[cache_key] = result
+                    logger.info(f"✅ Cached destinations for {origin} for 3 minutes")
+                    return result
                 except ValueError:
                     # If not JSON, might be XML or HTML
-                    return {
+                    result = {
                         'success': True,
                         'data': response.text,
                         'status_code': response.status_code,
                         'content_type': response.headers.get('Content-Type', '')
                     }
+                    self._routes_cache[cache_key] = result
+                    logger.info(f"✅ Cached destinations for {origin} (text format) for 3 minutes")
+                    return result
             else:
                 return {
                     'success': False,
