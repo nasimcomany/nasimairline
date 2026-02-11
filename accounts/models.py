@@ -343,3 +343,11 @@ class WalletTransaction(models.Model):
 
     def __str__(self):
         return f"{self.get_transaction_type_display()} - {self.amount} Toman - {self.get_status_display()}"
+
+
+# Import Membership Models
+from .membership_models import (
+    MembershipTierConfig,
+    UserMembershipActivity,
+    MembershipUpgradeLog
+)

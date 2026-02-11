@@ -82,3 +82,40 @@ def update_booking_on_passenger_change(sender, instance, created, **kwargs):
         booking = instance.booking
         booking.save()  # This will trigger pre_save signal to recalculate total
 
+
+@receiver(post_save, sender=Booking)
+def update_membership_on_booking_completion(sender, instance, created, **kwargs):
+    """
+    Update user membership activity when booking is completed
+    and check for tier upgrade
+    """
+    # فقط وقتی که booking به COMPLETED تغییر پیدا می‌کنه
+    if instance.status == 'COMPLETED' and instance.user:
+        from accounts.membership_models import UserMembershipActivity
+        from accounts.membership_service import MembershipTierService
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # بروزرسانی آمار کاربر
+            activity, created_activity = UserMembershipActivity.objects.get_or_create(
+                user=instance.user
+            )
+            activity.update_statistics()
+            
+            # چک کردن و ارتقا tier
+            upgraded, new_tier, old_tier = MembershipTierService.check_and_upgrade_user_tier(
+                instance.user
+            )
+            
+            if upgraded:
+                logger.info(
+                    f"✨ User {instance.user.email} upgraded from {old_tier} to {new_tier} "
+                    f"after booking {instance.booking_reference}"
+                )
+        except Exception as e:
+            logger.error(
+                f"Error updating membership for booking {instance.booking_reference}: {str(e)}"
+            )
+

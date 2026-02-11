@@ -8,6 +8,11 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from .models import User, Wallet, WalletTransaction
+from .membership_models import (
+    MembershipTierConfig,
+    UserMembershipActivity,
+    MembershipUpgradeLog
+)
 
 User = get_user_model()
 
@@ -227,3 +232,129 @@ class WalletSerializer(serializers.ModelSerializer):
         model = Wallet
         fields = ['id', 'balance', 'transactions', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class MembershipTierConfigSerializer(serializers.ModelSerializer):
+    """
+    Serializer for MembershipTierConfig
+    """
+    tier_display = serializers.CharField(source='get_tier_display', read_only=True)
+    
+    class Meta:
+        model = MembershipTierConfig
+        fields = [
+            'uuid', 'tier', 'tier_display', 'name_fa', 'name_en',
+            'min_bookings_total', 'min_bookings_per_month', 'min_bookings_per_week',
+            'min_membership_days', 'min_active_months', 'min_completed_flights',
+            'criteria_priority_1', 'criteria_priority_2', 'criteria_priority_3',
+            'is_active', 'auto_upgrade', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['uuid', 'created_at', 'updated_at']
+
+
+class UserMembershipActivitySerializer(serializers.ModelSerializer):
+    """
+    Serializer for UserMembershipActivity
+    """
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    user_name = serializers.SerializerMethodField()
+    membership_duration_days = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = UserMembershipActivity
+        fields = [
+            'uuid', 'user_email', 'user_name',
+            'total_bookings', 'total_completed_flights',
+            'first_booking_date', 'last_booking_date',
+            'bookings_last_7_days', 'bookings_last_30_days', 'bookings_last_90_days',
+            'active_months_count', 'average_bookings_per_month',
+            'membership_duration_days',
+            'last_calculated_at', 'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'uuid', 'user_email', 'user_name',
+            'total_bookings', 'total_completed_flights',
+            'first_booking_date', 'last_booking_date',
+            'bookings_last_7_days', 'bookings_last_30_days', 'bookings_last_90_days',
+            'active_months_count', 'average_bookings_per_month',
+            'membership_duration_days',
+            'last_calculated_at', 'created_at', 'updated_at'
+        ]
+    
+    def get_user_name(self, obj):
+        """Get user's full name"""
+        return obj.user.get_full_name()
+    
+    def get_membership_duration_days(self, obj):
+        """Get membership duration in days"""
+        return obj.calculate_membership_duration_days()
+
+
+class MembershipUpgradeLogSerializer(serializers.ModelSerializer):
+    """
+    Serializer for MembershipUpgradeLog
+    """
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    user_name = serializers.SerializerMethodField()
+    old_tier_display = serializers.CharField(source='get_old_tier_display', read_only=True)
+    new_tier_display = serializers.CharField(source='get_new_tier_display', read_only=True)
+    upgraded_by_email = serializers.EmailField(source='upgraded_by.email', read_only=True, allow_null=True)
+    
+    class Meta:
+        model = MembershipUpgradeLog
+        fields = [
+            'uuid', 'user_email', 'user_name',
+            'old_tier', 'old_tier_display',
+            'new_tier', 'new_tier_display',
+            'reason',
+            'total_bookings_at_upgrade', 'membership_days_at_upgrade',
+            'is_automatic', 'upgraded_by_email',
+            'created_at'
+        ]
+        read_only_fields = [
+            'uuid', 'user_email', 'user_name',
+            'old_tier', 'old_tier_display',
+            'new_tier', 'new_tier_display',
+            'reason',
+            'total_bookings_at_upgrade', 'membership_days_at_upgrade',
+            'is_automatic', 'upgraded_by_email',
+            'created_at'
+        ]
+    
+    def get_user_name(self, obj):
+        """Get user's full name"""
+        return obj.user.get_full_name()
+
+
+class UserMembershipStatusSerializer(serializers.Serializer):
+    """
+    Serializer for user's complete membership status
+    برای نمایش وضعیت کامل عضویت کاربر در فرانت
+    """
+    # اطلاعات کاربر
+    user_uuid = serializers.UUIDField()
+    user_email = serializers.EmailField()
+    user_name = serializers.CharField()
+    
+    # tier فعلی
+    current_tier = serializers.CharField()
+    current_tier_display = serializers.CharField()
+    
+    # آمار فعالیت
+    total_bookings = serializers.IntegerField()
+    total_completed_flights = serializers.IntegerField()
+    bookings_last_7_days = serializers.IntegerField()
+    bookings_last_30_days = serializers.IntegerField()
+    active_months_count = serializers.IntegerField()
+    membership_duration_days = serializers.IntegerField()
+    
+    # tier بعدی و پیشرفت
+    next_tier = serializers.CharField(allow_null=True)
+    next_tier_display = serializers.CharField(allow_null=True)
+    progress_to_next_tier = serializers.DictField(allow_null=True)
+    
+    # تنظیمات tier فعلی
+    current_tier_config = MembershipTierConfigSerializer(allow_null=True)
+    
+    # لاگ آخرین ارتقا
+    last_upgrade = MembershipUpgradeLogSerializer(allow_null=True)

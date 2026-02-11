@@ -8,13 +8,23 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import User, Wallet, WalletTransaction
+from .membership_models import (
+    MembershipTierConfig,
+    UserMembershipActivity,
+    MembershipUpgradeLog
+)
 from .serializers import (
     UserSerializer,
     UserDetailSerializer,
     UserRegistrationSerializer,
     WalletSerializer,
-    WalletTransactionSerializer
+    WalletTransactionSerializer,
+    MembershipTierConfigSerializer,
+    UserMembershipActivitySerializer,
+    MembershipUpgradeLogSerializer,
+    UserMembershipStatusSerializer
 )
+from .membership_service import MembershipTierService
 from django.db import transaction as db_transaction
 from decimal import Decimal
 
@@ -261,3 +271,181 @@ class WalletViewSet(viewsets.ViewSet):
                 'message': 'شارژ ناموفق بود',
                 'status': 'failed'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MembershipViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for Membership System
+    نمایش وضعیت باشگاه مشتریان و tier های کاربر
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserMembershipStatusSerializer
+    
+    def get_queryset(self):
+        """فقط کاربر لاگین شده می‌تونه اطلاعات خودش رو ببینه"""
+        return User.objects.filter(id=self.request.user.id)
+    
+    @action(detail=False, methods=['get'], url_path='my-status')
+    def my_status(self, request):
+        """
+        دریافت وضعیت کامل عضویت کاربر
+        GET /api/accounts/membership/my-status/
+        """
+        user = request.user
+        
+        # دریافت یا ایجاد activity کاربر
+        activity, _ = UserMembershipActivity.objects.get_or_create(user=user)
+        activity.update_statistics()
+        
+        # گرفتن تنظیمات tier فعلی
+        current_tier_config = MembershipTierConfig.objects.filter(
+            tier=user.membership_level,
+            is_active=True
+        ).first()
+        
+        # محاسبه tier بعدی و پیشرفت
+        next_tier_data = self._calculate_next_tier_progress(user, activity)
+        
+        # گرفتن آخرین لاگ ارتقا
+        last_upgrade = MembershipUpgradeLog.objects.filter(
+            user=user
+        ).order_by('-created_at').first()
+        
+        # ساخت response
+        data = {
+            'user_uuid': str(user.uuid),
+            'user_email': user.email,
+            'user_name': user.get_full_name(),
+            'current_tier': user.membership_level,
+            'current_tier_display': user.get_membership_level_display(),
+            'total_bookings': activity.total_bookings,
+            'total_completed_flights': activity.total_completed_flights,
+            'bookings_last_7_days': activity.bookings_last_7_days,
+            'bookings_last_30_days': activity.bookings_last_30_days,
+            'active_months_count': activity.active_months_count,
+            'membership_duration_days': activity.calculate_membership_duration_days(),
+            'next_tier': next_tier_data['tier'],
+            'next_tier_display': next_tier_data['tier_display'],
+            'progress_to_next_tier': next_tier_data['progress'],
+            'current_tier_config': MembershipTierConfigSerializer(current_tier_config).data if current_tier_config else None,
+            'last_upgrade': MembershipUpgradeLogSerializer(last_upgrade).data if last_upgrade else None
+        }
+        
+        serializer = UserMembershipStatusSerializer(data)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'], url_path='check-upgrade')
+    def check_upgrade(self, request):
+        """
+        بررسی امکان ارتقا tier کاربر
+        POST /api/accounts/membership/check-upgrade/
+        """
+        user = request.user
+        
+        # بروزرسانی آمار و بررسی ارتقا
+        upgraded, new_tier, old_tier = MembershipTierService.check_and_upgrade_user_tier(user)
+        
+        if upgraded:
+            return Response({
+                'upgraded': True,
+                'message': f'تبریک! شما به سطح {user.get_membership_level_display()} ارتقا یافتید',
+                'old_tier': old_tier,
+                'new_tier': new_tier,
+                'new_tier_display': user.get_membership_level_display()
+            })
+        else:
+            return Response({
+                'upgraded': False,
+                'message': 'شما در حال حاضر واجد شرایط ارتقا نیستید',
+                'current_tier': user.membership_level,
+                'current_tier_display': user.get_membership_level_display()
+            })
+    
+    @action(detail=False, methods=['get'], url_path='tiers')
+    def tiers(self, request):
+        """
+        دریافت لیست تمام tier ها و تنظیماتشون
+        GET /api/accounts/membership/tiers/
+        """
+        tier_configs = MembershipTierConfig.objects.filter(is_active=True).order_by('tier')
+        serializer = MembershipTierConfigSerializer(tier_configs, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], url_path='upgrade-history')
+    def upgrade_history(self, request):
+        """
+        دریافت تاریخچه ارتقا tier کاربر
+        GET /api/accounts/membership/upgrade-history/
+        """
+        user = request.user
+        logs = MembershipUpgradeLog.objects.filter(user=user).order_by('-created_at')
+        serializer = MembershipUpgradeLogSerializer(logs, many=True)
+        return Response(serializer.data)
+    
+    def _calculate_next_tier_progress(self, user, activity):
+        """
+        محاسبه tier بعدی و پیشرفت به سمت اون
+        """
+        # ترتیب tier ها
+        tier_order = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM']
+        current_index = tier_order.index(user.membership_level) if user.membership_level in tier_order else 0
+        
+        # اگر پلاتینیوم هست، tier بعدی نداریم
+        if current_index >= len(tier_order) - 1:
+            return {
+                'tier': None,
+                'tier_display': None,
+                'progress': None
+            }
+        
+        # گرفتن tier بعدی
+        next_tier = tier_order[current_index + 1]
+        next_config = MembershipTierConfig.objects.filter(
+            tier=next_tier,
+            is_active=True
+        ).first()
+        
+        if not next_config:
+            return {
+                'tier': None,
+                'tier_display': None,
+                'progress': None
+            }
+        
+        # محاسبه پیشرفت
+        progress = {}
+        
+        if next_config.min_bookings_total > 0:
+            progress['total_bookings'] = {
+                'current': activity.total_bookings,
+                'required': next_config.min_bookings_total,
+                'percentage': min(100, int((activity.total_bookings / next_config.min_bookings_total) * 100))
+            }
+        
+        if next_config.min_bookings_per_month > 0:
+            progress['monthly_bookings'] = {
+                'current': activity.bookings_last_30_days,
+                'required': next_config.min_bookings_per_month,
+                'percentage': min(100, int((activity.bookings_last_30_days / next_config.min_bookings_per_month) * 100))
+            }
+        
+        if next_config.min_membership_days > 0:
+            membership_days = activity.calculate_membership_duration_days()
+            progress['membership_days'] = {
+                'current': membership_days,
+                'required': next_config.min_membership_days,
+                'percentage': min(100, int((membership_days / next_config.min_membership_days) * 100))
+            }
+        
+        if next_config.min_active_months > 0:
+            progress['active_months'] = {
+                'current': activity.active_months_count,
+                'required': next_config.min_active_months,
+                'percentage': min(100, int((activity.active_months_count / next_config.min_active_months) * 100))
+            }
+        
+        return {
+            'tier': next_tier,
+            'tier_display': next_config.get_tier_display(),
+            'progress': progress
+        }
