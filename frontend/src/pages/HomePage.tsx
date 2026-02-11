@@ -1103,7 +1103,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Services Section */}
-      <section className="relative z-10 py-8 sm:py-16 bg-white" style={{ marginTop: '-70px' }}>
+      <section className="relative z-10 py-8 sm:py-16 bg-white" style={{ marginTop: '-40px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Section Title */}
           <div className="text-center mb-6 sm:mb-12">
