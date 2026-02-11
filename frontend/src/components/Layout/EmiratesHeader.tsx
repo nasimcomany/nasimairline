@@ -138,7 +138,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     {
       key: 'book',
       label: t('nav.book') || 'رزرو',
-      path: '/flights/search',
+      path: '#', // Disabled for security
       dropdown: [
         { label: t('nav.bookFlights') || 'رزرو پرواز', path: '/#search-form' },
         { label: t('nav.flightSchedules') || 'برنامه پرواز', path: '/flights/map' },
@@ -149,7 +149,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     {
       key: 'wherewefly',
       label: t('nav.whereWeFly') || 'مقاصد',
-      path: '/destinations',
+      path: '#', // Disabled for security
       dropdown: [
         { label: t('nav.domesticDestinations') || 'مقاصد داخلی', path: '/flights/map' },
         { label: t('nav.internationalDestinations') || 'مقاصد خارجی', path: '#' },
@@ -159,7 +159,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     {
       key: 'help',
       label: t('nav.help') || 'کمک',
-      path: '/support',
+      path: '#', // Disabled for security
       dropdown: [
         { label: t('nav.contactUs') || 'تماس با ما', path: '/#faq' },
         { label: t('nav.weather') || 'وضعیت آب و هوا', path: '/#weather' },

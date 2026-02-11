@@ -35,6 +35,7 @@ import IranologyArticleDetailPage from './pages/IranologyArticleDetailPage';
 import MealFeedbackPage from './pages/MealFeedbackPage';
 import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
+import DisabledRoute from './components/DisabledRoute';
 
 function App() {
   return (
@@ -43,30 +44,20 @@ function App() {
         <Router>
           <div className="App">
             <Routes>
+              {/* Active Routes */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/splash" element={<SplashPage />} />
               <Route path="/home" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/flights/search" element={<FlightSearchPage />} />
               <Route path="/flights/results" element={<FlightResultsPage />} />
               <Route path="/flights/map" element={<FlightMapPage />} />
-              <Route path="/booking" element={<BookingPage />} />
               <Route path="/booking/details/:flightId" element={<BookingDetailsPage />} />
-              <Route path="/booking/:flightId" element={<BookingPage />} />
               <Route path="/booking/manage" element={<BookingManagePage />} />
               <Route path="/flight/status/:flightId?" element={<FlightStatusPage />} />
               <Route path="/payment" element={<PaymentPage />} />
               <Route path="/payment/verify" element={<PaymentVerifyPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/wallet" element={<WalletPage />} />
-              <Route path="/services" element={<ServicesPage />} />
               <Route path="/gallery" element={<GalleryPage />} />
-              <Route path="/news" element={<NewsPage />} />
-              <Route path="/destinations" element={<DestinationsPage />} />
-              <Route path="/offers" element={<OffersPage />} />
               <Route path="/membership" element={<MembershipPage />} />
-              <Route path="/support" element={<SupportPage />} />
               <Route path="/tickets" element={<TicketPage />} />
               <Route path="/complaint" element={<ComplaintPage />} />
               <Route path="/magazine" element={<MagazinePage />} />
@@ -75,6 +66,19 @@ function App() {
               <Route path="/iranology/:slug" element={<CityArticlesPage />} />
               <Route path="/iranology/:city_slug/:slug" element={<IranologyArticleDetailPage />} />
               <Route path="/meal-feedback" element={<MealFeedbackPage />} />
+
+              {/* Disabled Routes - Redirect to Home for Security */}
+              <Route path="/splash" element={<DisabledRoute />} />
+              <Route path="/login" element={<DisabledRoute />} />
+              <Route path="/register" element={<DisabledRoute />} />
+              <Route path="/flights/search" element={<DisabledRoute />} />
+              <Route path="/booking" element={<DisabledRoute />} />
+              <Route path="/booking/:flightId" element={<DisabledRoute />} />
+              <Route path="/services" element={<DisabledRoute />} />
+              <Route path="/news" element={<DisabledRoute />} />
+              <Route path="/destinations" element={<DisabledRoute />} />
+              <Route path="/offers" element={<DisabledRoute />} />
+              <Route path="/support" element={<DisabledRoute />} />
             </Routes>
             {/* Chat Widget - Available on all pages */}
             <ChatWidget />
