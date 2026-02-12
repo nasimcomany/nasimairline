@@ -86,11 +86,11 @@ def update_booking_on_passenger_change(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Booking)
 def update_membership_on_booking_completion(sender, instance, created, **kwargs):
     """
-    Update user membership activity when booking is completed
+    Update user membership activity when booking is completed/confirmed
     and check for tier upgrade
     """
-    # فقط وقتی که booking به COMPLETED تغییر پیدا می‌کنه
-    if instance.status == 'COMPLETED' and instance.user:
+    # وقتی که booking به CONFIRMED یا COMPLETED تغییر پیدا می‌کنه
+    if instance.status in ['CONFIRMED', 'COMPLETED'] and instance.user:
         from accounts.membership_models import UserMembershipActivity
         from accounts.membership_service import MembershipTierService
         import logging

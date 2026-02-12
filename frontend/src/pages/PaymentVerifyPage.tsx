@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { paymentService } from '../services/paymentService';
+import bookingService from '../services/bookingService';
 import { generateTicketPDF } from '../utils/pdfGenerator';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cities } from '../data/cities';
@@ -65,23 +66,46 @@ const PaymentVerifyPage: React.FC = () => {
       });
 
       if (result.status === 'success') {
-        setStatus('success');
-        setRefId(result.refId);
-        sessionStorage.removeItem('pendingBooking');
-        
-        // Save booking to localStorage
-        const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
-        bookings.push({
-          ...booking,
-          refId: result.refId,
-          bookingDate: new Date().toISOString(),
-          pnr: generatePNR()
-        });
-        localStorage.setItem('userBookings', JSON.stringify(bookings));
+        // ساخت Booking و Payment در دیتابیس بک‌اند
+        try {
+          const bookingResponse = await bookingService.createBookingAfterPayment({
+            flight_data: booking.flight,
+            passengers: booking.passengers,
+            contact_info: booking.contactInfo,
+            total_amount: booking.totalPrice,
+            cabin_class: 'ECONOMY',
+            payment_ref_id: result.refId
+          });
+          
+          console.log('✅ Booking و Payment با موفقیت ساخته شد!', bookingResponse);
+          
+          setStatus('success');
+          setRefId(result.refId);
+          sessionStorage.removeItem('pendingBooking');
+          
+          // همچنان در localStorage هم ذخیره کن (برای سازگاری با کد قبلی)
+          const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+          bookings.push({
+            ...booking,
+            refId: result.refId,
+            bookingDate: new Date().toISOString(),
+            pnr: bookingResponse.booking.booking_reference,
+            bookingId: bookingResponse.booking.id
+          });
+          localStorage.setItem('userBookings', JSON.stringify(bookings));
+          
+        } catch (bookingError) {
+          console.error('❌ خطا در ساخت Booking:', bookingError);
+          // حتی اگه ساخت Booking خطا داد، پرداخت موفق بوده
+          setStatus('success');
+          setRefId(result.refId);
+          sessionStorage.removeItem('pendingBooking');
+        }
       } else {
         setStatus('failed');
       }
     } catch (error) {
+      console.error('❌ خطا در verify پرداخت:', error);
       setStatus('failed');
     }
   };

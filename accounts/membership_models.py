@@ -259,10 +259,10 @@ class UserMembershipActivity(models.Model):
         
         now = timezone.now()
         
-        # تعداد کل رزروهای تکمیل شده
+        # تعداد کل رزروهای تکمیل شده یا تایید شده
         completed_bookings = Booking.objects.filter(
             user=self.user,
-            status='COMPLETED'
+            status__in=['CONFIRMED', 'COMPLETED']
         )
         self.total_bookings = completed_bookings.count()
         
