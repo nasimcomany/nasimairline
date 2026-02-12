@@ -13,6 +13,8 @@ class MembershipTierService:
     """
     سرویس مدیریت tier های باشگاه مشتریان
     """
+    TIER_ORDER = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM']
+    TIER_RANK = {tier: idx for idx, tier in enumerate(TIER_ORDER)}
     
     @staticmethod
     def check_and_upgrade_user_tier(user, force=False):
@@ -39,12 +41,14 @@ class MembershipTierService:
         current_tier = user.membership_level
         old_tier = current_tier
         
-        # گرفتن تمام tier های فعال به ترتیب از بالا به پایین
-        tier_configs = MembershipTierConfig.objects.filter(
-            is_active=True
-        ).order_by('-tier')  # PLATINUM, GOLD, SILVER, BRONZE
+        # گرفتن تمام tier های فعال به ترتیب واقعی از بالا به پایین
+        tier_configs = list(MembershipTierConfig.objects.filter(is_active=True))
+        tier_configs.sort(
+            key=lambda cfg: MembershipTierService.TIER_RANK.get(cfg.tier, -1),
+            reverse=True
+        )
         
-        if not tier_configs.exists():
+        if not tier_configs:
             logger.warning("No active membership tier configs found")
             return False, current_tier, old_tier
         
@@ -67,8 +71,12 @@ class MembershipTierService:
             # اگر کاربر tier بالاتری داشته، پایین نمی‌یاریم
             return False, current_tier, old_tier
         
-        # اگر tier جدید همون tier فعلی هست، ارتقایی نداریم
-        if eligible_tier == current_tier:
+        current_rank = MembershipTierService.TIER_RANK.get(current_tier, 0)
+        eligible_rank = MembershipTierService.TIER_RANK.get(eligible_tier, 0)
+
+        # اگر tier جدید همون tier فعلی یا پایین‌تر باشه، ارتقایی نداریم
+        # (هیچوقت auto-downgrade نکن)
+        if eligible_rank <= current_rank:
             return False, current_tier, old_tier
         
         # اگر auto_upgrade غیرفعال باشه و force نباشه، ارتقا نمی‌دیم

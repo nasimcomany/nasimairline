@@ -296,6 +296,9 @@ class MembershipViewSet(viewsets.ReadOnlyModelViewSet):
         # دریافت یا ایجاد activity کاربر
         activity, _ = UserMembershipActivity.objects.get_or_create(user=user)
         activity.update_statistics()
+        # اطمینان از ارتقای لحظه‌ای کاربر در صورت واجد شرایط بودن
+        MembershipTierService.check_and_upgrade_user_tier(user)
+        user.refresh_from_db()
         
         # گرفتن تنظیمات tier فعلی
         current_tier_config = MembershipTierConfig.objects.filter(
@@ -330,9 +333,11 @@ class MembershipViewSet(viewsets.ReadOnlyModelViewSet):
             'current_tier_config': MembershipTierConfigSerializer(current_tier_config).data if current_tier_config else None,
             'last_upgrade': MembershipUpgradeLogSerializer(last_upgrade).data if last_upgrade else None
         }
-        
-        serializer = UserMembershipStatusSerializer(data)
-        return Response(serializer.data)
+
+        # `data` already contains serialized primitives/nested dicts.
+        # Returning it directly avoids nested serializer trying to treat
+        # pre-serialized ReturnDict as model instances.
+        return Response(data)
     
     @action(detail=False, methods=['post'], url_path='check-upgrade')
     def check_upgrade(self, request):

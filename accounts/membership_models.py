@@ -266,6 +266,9 @@ class UserMembershipActivity(models.Model):
             status__in=['CONFIRMED', 'COMPLETED']
         )
         self.total_bookings = completed_bookings.count()
+        # در این سرویس فعلاً معیار "پروازهای انجام‌شده" را معادل رزروهای معتبر می‌گیریم
+        # تا قوانین ارتقا که ادمین تعریف کرده قابل محاسبه و قابل نمایش باشند.
+        self.total_completed_flights = self.total_bookings
         
         # تاریخ اولین و آخرین رزرو
         if self.total_bookings > 0:

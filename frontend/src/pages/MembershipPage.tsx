@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import AuthModal from '../components/Auth/AuthModal';
@@ -8,7 +7,6 @@ import {
   StarIcon, 
   GiftIcon,
   TrophyIcon,
-  CheckCircleIcon,
   SparklesIcon,
   HeartIcon,
   UserGroupIcon,
@@ -38,8 +36,7 @@ interface RootState {
 }
 
 const MembershipPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +112,14 @@ const MembershipPage: React.FC = () => {
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('fa-IR').format(num);
+  };
+
+  const getMetricDisplay = (metricKey: string, fallbackCurrent: number) => {
+    const progress = membershipStatus?.progress_to_next_tier?.[metricKey as keyof typeof membershipStatus.progress_to_next_tier];
+    if (progress && typeof progress.current === 'number' && typeof progress.required === 'number') {
+      return `${formatNumber(progress.current)}/${formatNumber(progress.required)}`;
+    }
+    return formatNumber(fallbackCurrent);
   };
 
   const getProgressLabel = (key: string) => {
@@ -256,21 +261,21 @@ const MembershipPage: React.FC = () => {
                 </span>
               </div>
               <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {formatNumber(membershipStatus.total_bookings)}
+                {getMetricDisplay('total_bookings', membershipStatus.total_bookings)}
               </div>
             </div>
             
             <div className="bg-white rounded-xl p-5 shadow-lg">
               <div className="flex items-center gap-3 mb-2">
-                <div className="bg-green-100 rounded-lg p-2">
-                  <CheckCircleIcon className="h-6 w-6 text-green-600" />
+                <div className="bg-indigo-100 rounded-lg p-2">
+                  <ClockIcon className="h-6 w-6 text-indigo-600" />
                 </div>
                 <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  پروازهای انجام شده
+                  روزهای عضویت
                 </span>
               </div>
               <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {formatNumber(membershipStatus.total_completed_flights)}
+                {getMetricDisplay('membership_days', membershipStatus.membership_duration_days)}
               </div>
             </div>
             
@@ -280,11 +285,11 @@ const MembershipPage: React.FC = () => {
                   <CalendarIcon className="h-6 w-6 text-purple-600" />
                 </div>
                 <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  رزرو این ماه
+                  رزرو در ماه
                 </span>
               </div>
               <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {formatNumber(membershipStatus.bookings_last_30_days)}
+                {getMetricDisplay('monthly_bookings', membershipStatus.bookings_last_30_days)}
               </div>
             </div>
             
@@ -298,7 +303,7 @@ const MembershipPage: React.FC = () => {
                 </span>
               </div>
               <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {formatNumber(membershipStatus.active_months_count)}
+                {getMetricDisplay('active_months', membershipStatus.active_months_count)}
               </div>
             </div>
           </div>
