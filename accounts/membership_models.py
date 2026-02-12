@@ -291,6 +291,7 @@ class UserMembershipActivity(models.Model):
         
         # محاسبه ماه‌های فعال
         # ماه‌هایی که کاربر حداقل 1 رزرو داشته
+        bookings_by_month = 0
         if completed_bookings.exists():
             bookings_by_month = (
                 completed_bookings
@@ -299,10 +300,14 @@ class UserMembershipActivity(models.Model):
                 .distinct()
                 .count()
             )
-            self.active_months_count = bookings_by_month
+
+        # برای همخوانی با روزهای عضویت:
+        # اگر کاربر مثلا 71 روز عضو بوده، حداقل 2 ماه فعال در نظر گرفته شود.
+        membership_days = self.calculate_membership_duration_days()
+        membership_months = max(0, membership_days // 30)
+        self.active_months_count = max(bookings_by_month, membership_months)
         
         # میانگین رزرو ماهانه
-        membership_days = self.calculate_membership_duration_days()
         if membership_days > 30:
             self.average_bookings_per_month = (self.total_bookings / (membership_days / 30.0))
         
