@@ -31,93 +31,63 @@ const PaymentVerifyPage: React.FC = () => {
   const [bookingData, setBookingData] = useState<any>(null);
 
   useEffect(() => {
-    verifyPayment();
-  }, []);
+    const verifyPayment = async () => {
+      const authority = searchParams.get('Authority');
+      const statusParam = searchParams.get('Status');
 
-  const verifyPayment = async () => {
-    const authority = searchParams.get('Authority');
-    const statusParam = searchParams.get('Status');
+      const pendingBooking = sessionStorage.getItem('pendingBooking');
+      if (!pendingBooking) {
+        setStatus('failed');
+        return;
+      }
 
-    // Get booking data from session
-    const pendingBooking = sessionStorage.getItem('pendingBooking');
-    if (!pendingBooking) {
-      setStatus('failed');
-      return;
-    }
+      const booking = JSON.parse(pendingBooking);
+      setBookingData(booking);
 
-    const booking = JSON.parse(pendingBooking);
-    setBookingData(booking);
+      if (statusParam === 'NOK' || !authority) {
+        setStatus('failed');
+        sessionStorage.removeItem('pendingBooking');
+        return;
+      }
 
-    if (statusParam === 'NOK') {
-      setStatus('failed');
-      sessionStorage.removeItem('pendingBooking');
-      return;
-    }
+      try {
+        const result = await paymentService.verifyPayment({
+          authority,
+          amount: booking.totalPrice
+        });
 
-    if (!authority) {
-      setStatus('failed');
-      return;
-    }
-
-    try {
-      const result = await paymentService.verifyPayment({
-        authority,
-        amount: booking.totalPrice
-      });
-
-      if (result.status === 'success') {
-        // ساخت Booking و Payment در دیتابیس بک‌اند
-        try {
-          const bookingResponse = await bookingService.createBookingAfterPayment({
-            flight_data: booking.flight,
-            passengers: booking.passengers,
-            contact_info: booking.contactInfo,
-            total_amount: booking.totalPrice,
-            cabin_class: 'ECONOMY',
-            payment_ref_id: result.refId
-          });
-          
-          console.log('✅ Booking و Payment با موفقیت ساخته شد!', bookingResponse);
-          
-          setStatus('success');
-          setRefId(result.refId);
-          sessionStorage.removeItem('pendingBooking');
-          
-          // همچنان در localStorage هم ذخیره کن (برای سازگاری با کد قبلی)
-          const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
-          bookings.push({
-            ...booking,
-            refId: result.refId,
-            bookingDate: new Date().toISOString(),
-            pnr: bookingResponse.booking.booking_reference,
-            bookingId: bookingResponse.booking.id
-          });
-          localStorage.setItem('userBookings', JSON.stringify(bookings));
-          
-        } catch (bookingError) {
-          console.error('❌ خطا در ساخت Booking:', bookingError);
-          // حتی اگه ساخت Booking خطا داد، پرداخت موفق بوده
-          setStatus('success');
-          setRefId(result.refId);
-          sessionStorage.removeItem('pendingBooking');
+        if (result.status !== 'success') {
+          setStatus('failed');
+          return;
         }
-      } else {
+
+        const paymentId = booking?.bookingDraft?.payment?.id;
+        if (paymentId) {
+          await bookingService.confirmPayment(paymentId, result.refId);
+        }
+
+        setStatus('success');
+        setRefId(result.refId);
+        sessionStorage.removeItem('pendingBooking');
+
+        // Keep local cache for ticket rendering/history UI
+        const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+        bookings.push({
+          ...booking,
+          refId: result.refId,
+          bookingDate: new Date().toISOString(),
+          pnr: booking?.bookingDraft?.booking?.booking_reference || '',
+          bookingId: booking?.bookingDraft?.booking?.id || null,
+        });
+        localStorage.setItem('userBookings', JSON.stringify(bookings));
+      } catch (error) {
+        console.error('Payment verification/confirmation failed:', error);
         setStatus('failed');
       }
-    } catch (error) {
-      console.error('❌ خطا در verify پرداخت:', error);
-      setStatus('failed');
-    }
-  };
+    };
 
-  const generatePNR = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let pnr = '';
-    for (let i = 0; i < 6; i++) {
-      pnr += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return pnr;
-  };
+    verifyPayment();
+  }, [searchParams]);
 
   const handleDownloadPDF = () => {
     if (bookingData && refId) {

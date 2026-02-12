@@ -1,6 +1,6 @@
 import api from './api';
 
-export interface CreateBookingRequest {
+export interface InitiatePaymentRequest {
   flight_data: any;
   passengers: any[];
   contact_info: {
@@ -9,10 +9,10 @@ export interface CreateBookingRequest {
   };
   total_amount: number;
   cabin_class?: string;
-  payment_ref_id?: string;
 }
 
-export interface CreateBookingResponse {
+export interface InitiatePaymentResponse {
+  success: boolean;
   booking: {
     id: number;
     uuid: string;
@@ -29,10 +29,20 @@ export interface CreateBookingResponse {
 
 class BookingService {
   /**
-   * Create booking and payment after successful payment
+   * Create booking/payment intent immediately on pay click
    */
-  async createBookingAfterPayment(data: CreateBookingRequest): Promise<CreateBookingResponse> {
-    const response = await api.post('/bookings/bookings/create_after_payment/', data);
+  async initiatePayment(data: InitiatePaymentRequest): Promise<InitiatePaymentResponse> {
+    const response = await api.post('/bookings/bookings/initiate-payment/', data);
+    return response.data;
+  }
+
+  /**
+   * Mark pending payment as completed after gateway verification
+   */
+  async confirmPayment(paymentId: number, gatewayTransactionId?: string) {
+    const response = await api.post(`/payments/payments/${paymentId}/process_payment/`, {
+      gateway_transaction_id: gatewayTransactionId,
+    });
     return response.data;
   }
 }

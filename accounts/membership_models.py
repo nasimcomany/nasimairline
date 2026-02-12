@@ -255,6 +255,7 @@ class UserMembershipActivity(models.Model):
         """بروزرسانی آمارها"""
         from bookings.models import Booking
         from django.db.models import Count, Q
+        from django.db.models.functions import TruncMonth
         from datetime import timedelta
         
         now = timezone.now()
@@ -291,9 +292,13 @@ class UserMembershipActivity(models.Model):
         # محاسبه ماه‌های فعال
         # ماه‌هایی که کاربر حداقل 1 رزرو داشته
         if completed_bookings.exists():
-            bookings_by_month = completed_bookings.extra(
-                select={'month': "strftime('%%Y-%%m', created_at)"}
-            ).values('month').distinct().count()
+            bookings_by_month = (
+                completed_bookings
+                .annotate(month=TruncMonth('created_at'))
+                .values('month')
+                .distinct()
+                .count()
+            )
             self.active_months_count = bookings_by_month
         
         # میانگین رزرو ماهانه

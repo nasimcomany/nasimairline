@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../store';
-import { loginUser, registerUser } from '../store/slices/authSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cities } from '../data/cities';
+import bookingService from '../services/bookingService';
 import {
   PaperAirplaneIcon,
   ClockIcon,
@@ -34,7 +34,6 @@ const BookingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { flightId } = useParams();
-  const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const searchParams = useSelector((state: RootState) => state.flight.searchParams);
   const { t, language } = useLanguage();
@@ -290,65 +289,39 @@ const BookingDetailsPage: React.FC = () => {
       return;
     }
 
-    // Try to register/login if not authenticated (but don't block if it fails)
     if (!isAuthenticated) {
-      const firstPassenger = passengers[0];
-      
-      // Background registration attempt - don't await or block on errors
-      dispatch(registerUser({
-        email: contactInfo.email,
-        password: firstPassenger.nationalId,
-        password_confirm: firstPassenger.nationalId,
-        first_name: firstPassenger.firstName,
-        last_name: firstPassenger.lastName,
-        phone_number: contactInfo.phone,
-        date_of_birth: firstPassenger.birthDate,
-        nationality: 'iranian'
-      }))
-      .unwrap()
-      .then(() => {
-        // Try to login after registration
-        return dispatch(loginUser({
-          email: contactInfo.email,
-          password: firstPassenger.nationalId
-        })).unwrap();
-      })
-      .then(() => {
-        console.log('User registered and logged in successfully');
-      })
-      .catch((error) => {
-        // Try login if registration failed (user might exist)
-        dispatch(loginUser({
-          email: contactInfo.email,
-          password: firstPassenger.nationalId
-        }))
-        .unwrap()
-        .then(() => {
-          console.log('Existing user logged in successfully');
-        })
-        .catch(() => {
-          console.log('Proceeding as guest checkout');
-        });
-      });
+      setErrors(['برای ادامه پرداخت ابتدا وارد حساب کاربری خود شوید.']);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
 
-    // Proceed to payment - always allow
-    console.log('Proceeding to payment with data:', {
-      flight,
-      passengers: passengers.length,
-      contactInfo,
-      totalPrice: calculateTotalPrice(),
-      isAuthenticated
-    });
-    
-    navigate('/payment', {
-      state: {
-        flight,
+    try {
+      // Persist booking/payment intent immediately when user clicks pay
+      const initiated = await bookingService.initiatePayment({
+        flight_data: flight,
         passengers,
-        contactInfo,
-        totalPrice: calculateTotalPrice()
-      }
-    });
+        contact_info: contactInfo,
+        total_amount: calculateTotalPrice(),
+        cabin_class: String(flight.class || 'economy').toUpperCase(),
+      });
+
+      navigate('/payment', {
+        state: {
+          flight,
+          passengers,
+          contactInfo,
+          totalPrice: calculateTotalPrice(),
+          bookingDraft: initiated,
+        },
+      });
+    } catch (err: any) {
+      const apiMessage =
+        err?.response?.data?.error ||
+        err?.response?.data?.detail ||
+        'خطا در ثبت رزرو اولیه. لطفا دوباره تلاش کنید.';
+      setErrors([apiMessage]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const totalPrice = calculateTotalPrice();

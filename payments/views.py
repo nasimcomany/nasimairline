@@ -59,7 +59,13 @@ class PaymentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def process_payment(self, request, pk=None):
         """Process a payment"""
-        payment = self.get_object()
+        try:
+            payment = Payment.objects.get(pk=pk)
+        except Payment.DoesNotExist:
+            return Response(
+                {'error': 'Payment not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         
         # Check if user owns the payment or is staff
         if payment.user != request.user and not request.user.is_staff:
@@ -77,12 +83,19 @@ class PaymentViewSet(viewsets.ModelViewSet):
         # Process payment (this should call payment gateway)
         # For now, just update status
         payment.status = 'COMPLETED'
+        gateway_transaction_id = request.data.get('gateway_transaction_id')
+        if gateway_transaction_id:
+            payment.gateway_transaction_id = gateway_transaction_id
         from django.utils import timezone
         payment.completed_at = timezone.now()
         payment.save()
         
-        serializer = PaymentDetailSerializer(payment)
-        return Response(serializer.data)
+        return Response({
+            'id': payment.id,
+            'status': payment.status,
+            'gateway_transaction_id': payment.gateway_transaction_id,
+            'completed_at': payment.completed_at,
+        })
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def refund(self, request, pk=None):

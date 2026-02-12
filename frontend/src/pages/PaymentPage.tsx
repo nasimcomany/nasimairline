@@ -15,7 +15,7 @@ import {
 const PaymentPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { flight, passengers, contactInfo, totalPrice } = location.state || {};
+  const { flight, passengers, contactInfo, totalPrice, bookingDraft } = location.state || {};
   const { t, language } = useLanguage();
   
   const getCityName = (cityCode: string) => {
@@ -56,7 +56,8 @@ const PaymentPage: React.FC = () => {
         passengers,
         contactInfo,
         totalPrice,
-        gateway
+        gateway,
+        bookingDraft
       }));
 
       const response = await paymentService.requestPayment(paymentData);

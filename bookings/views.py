@@ -6,6 +6,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from django.utils import timezone
+from django.db import transaction
+from datetime import timedelta, date
+from decimal import Decimal
 from .models import Booking, Passenger, BookingExtra
 from .serializers import (
     BookingSerializer,
@@ -55,6 +59,100 @@ class BookingViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Set user to current user when creating booking"""
         serializer.save(user=self.request.user)
+
+    def _normalize_airport_code(self, raw_value, fallback):
+        """Extract 3-letter IATA code from mixed inputs."""
+        if not raw_value:
+            return fallback
+        letters = ''.join(ch for ch in str(raw_value).upper() if ch.isalpha())
+        if len(letters) >= 3:
+            return letters[:3]
+        return fallback
+
+    def _sanitize_flight_number(self, raw_value):
+        """Generate a validator-safe flight number (3-6 chars)."""
+        cleaned = ''.join(ch for ch in str(raw_value or '').upper() if ch.isalnum())
+        if len(cleaned) < 3:
+            cleaned = f"NS{timezone.now().strftime('%f')[-4:]}"
+        if len(cleaned) > 6:
+            cleaned = cleaned[-6:]
+        return cleaned
+
+    def _resolve_or_create_shadow_flight(self, flight_data, total_amount):
+        """
+        Create/find a lightweight DB flight to link booking rows created
+        from Nira response data.
+        """
+        from flights.models import Flight, Aircraft, Airport
+
+        original_data = (flight_data or {}).get('originalData', {}) if isinstance(flight_data, dict) else {}
+        origin_raw = (flight_data or {}).get('originCode') or (flight_data or {}).get('origin_code') or original_data.get('Origin') or (flight_data or {}).get('origin')
+        destination_raw = (flight_data or {}).get('destinationCode') or (flight_data or {}).get('destination_code') or original_data.get('Destination') or (flight_data or {}).get('destination')
+        flight_no_raw = (flight_data or {}).get('flightNumber') or original_data.get('FlightNo') or 'NS100'
+
+        origin_code = self._normalize_airport_code(origin_raw, 'THR')
+        destination_code = self._normalize_airport_code(destination_raw, 'MHD')
+        flight_number = self._sanitize_flight_number(flight_no_raw)
+
+        origin_airport, _ = Airport.objects.get_or_create(
+            code=origin_code,
+            defaults={
+                'name': f'{origin_code} Airport',
+                'city': origin_code,
+                'country': 'Iran',
+                'is_active': True,
+            },
+        )
+        destination_airport, _ = Airport.objects.get_or_create(
+            code=destination_code,
+            defaults={
+                'name': f'{destination_code} Airport',
+                'city': destination_code,
+                'country': 'Iran',
+                'is_active': True,
+            },
+        )
+
+        aircraft, _ = Aircraft.objects.get_or_create(
+            registration_number='TMP001',
+            defaults={
+                'model': 'B737',
+                'manufacturer': 'Boeing',
+                'total_seats': 180,
+                'economy_seats': 150,
+                'business_seats': 20,
+                'first_class_seats': 10,
+                'is_active': True,
+            },
+        )
+
+        try:
+            amount = Decimal(str(total_amount or 0))
+        except Exception:
+            amount = Decimal('0')
+
+        departure_time = timezone.now() + timedelta(hours=2)
+        arrival_time = departure_time + timedelta(hours=2)
+
+        flight = Flight.objects.filter(flight_number=flight_number).first()
+        if flight:
+            return flight
+
+        return Flight.objects.create(
+            flight_number=flight_number,
+            origin=origin_airport,
+            destination=destination_airport,
+            aircraft=aircraft,
+            departure_time=departure_time,
+            arrival_time=arrival_time,
+            economy_price=amount,
+            business_price=amount,
+            first_class_price=amount,
+            economy_available=max(0, aircraft.economy_seats),
+            business_available=max(0, aircraft.business_seats),
+            first_class_available=max(0, aircraft.first_class_seats),
+            status='SCHEDULED',
+        )
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def cancel(self, request, pk=None):
@@ -94,116 +192,86 @@ class BookingViewSet(viewsets.ModelViewSet):
             'total_amount': booking.total_amount
         })
     
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
-    def create_after_payment(self, request):
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[permissions.IsAuthenticated],
+        url_path='initiate-payment',
+    )
+    def initiate_payment(self, request):
         """
-        Create booking and payment after successful payment verification
-        این endpoint برای ساخت Booking و Payment بعد از موفقیت پرداخت هست
+        Save booking/payment intent immediately on pay-click.
+        This guarantees records are visible in admin right away.
         """
-        from payments.models import Payment
-        from django.utils import timezone
         from .utils import generate_booking_reference
-        
-        # داده‌های دریافتی
+        from payments.models import Payment
+
         flight_data = request.data.get('flight_data')
         passengers_data = request.data.get('passengers', [])
         contact_info = request.data.get('contact_info', {})
         total_amount = request.data.get('total_amount', 0)
         cabin_class = request.data.get('cabin_class', 'ECONOMY')
-        payment_ref_id = request.data.get('payment_ref_id')
-        
-        # بررسی کاربر
-        user = request.user if request.user.is_authenticated else None
-        
+
+        if not isinstance(flight_data, dict):
+            return Response({'error': 'flight_data is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(passengers_data, list) or len(passengers_data) == 0:
+            return Response({'error': 'At least one passenger is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        passenger_type_map = {'adult': 'ADULT', 'child': 'CHILD', 'infant': 'INFANT'}
+
         try:
-            # پیدا کردن flight بر اساس flight_data یا ساخت یک flight dummy
-            from flights.models import Flight, Aircraft
-            
-            flight_number = flight_data.get('flightNumber', 'UNKNOWN') if flight_data else 'UNKNOWN'
-            
-            # سعی کن flight رو پیدا کنی
-            try:
-                temp_flight = Flight.objects.filter(flight_number=flight_number).first()
-                
-                if not temp_flight:
-                    # اگه پیدا نشد، اولین flight رو بگیر
-                    temp_flight = Flight.objects.first()
-                    
-                    if not temp_flight:
-                        # اگه هیچ flight ای نبود، یک flight dummy بساز
-                        # اول یک aircraft لازمه
-                        aircraft = Aircraft.objects.first()
-                        if not aircraft:
-                            # اگه aircraft هم نبود، یکی بساز
-                            aircraft = Aircraft.objects.create(
-                                registration_number='TEMP-001',
-                                model='Boeing 737',
-                                manufacturer='Boeing',
-                                total_seats=180,
-                                economy_seats=150,
-                                business_seats=20,
-                                first_class_seats=10
-                            )
-                        
-                        temp_flight = Flight.objects.create(
-                            flight_number='TEMP-001',
-                            aircraft=aircraft,
-                            origin='THR',
-                            destination='MHD',
-                            departure_time='2024-01-01 10:00:00',
-                            arrival_time='2024-01-01 12:00:00',
-                            status='SCHEDULED'
-                        )
-            except Exception as e:
-                return Response({
-                    'success': False,
-                    'error': f'Flight error: {str(e)}'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # 1. ساخت Booking
-            booking = Booking.objects.create(
-                user=user,
-                flight=temp_flight,
-                booking_reference=generate_booking_reference(),
-                status='CONFIRMED',  # از اول confirmed چون پرداخت شده
-                booking_type='ONE_WAY',
-                cabin_class=cabin_class.upper(),
-                total_amount=total_amount,
-                booking_source='WEB',
-                metadata={
-                    'contact_phone': contact_info.get('phone', ''),
-                    'contact_email': contact_info.get('email', ''),
-                    'flight_data': flight_data
-                }
-            )
-            
-            # 2. ساخت Passengers
-            for passenger_data in passengers_data:
-                Passenger.objects.create(
-                    booking=booking,
-                    passenger_type=passenger_data.get('type', 'ADULT').upper(),
-                    first_name=passenger_data.get('firstName', ''),
-                    last_name=passenger_data.get('lastName', ''),
-                    gender=passenger_data.get('gender', 'male').upper()[0],  # M or F
-                    national_id=passenger_data.get('nationalId', ''),
-                    passport_number=passenger_data.get('passportNumber', ''),
-                    date_of_birth=passenger_data.get('birthDate'),
-                    nationality='IRANIAN' if not passenger_data.get('isForeign') else 'FOREIGN'
+            with transaction.atomic():
+                shadow_flight = self._resolve_or_create_shadow_flight(flight_data, total_amount)
+
+                booking = Booking.objects.create(
+                    user=request.user,
+                    flight=shadow_flight,
+                    booking_reference=generate_booking_reference(),
+                    status='CONFIRMED',  # requested: update membership right after pay click
+                    booking_type='ONE_WAY',
+                    cabin_class=(cabin_class or 'ECONOMY').upper(),
+                    base_price=Decimal(str(total_amount or 0)),
+                    extras_price=Decimal('0'),
+                    taxes=Decimal('0'),
+                    total_amount=Decimal(str(total_amount or 0)),
+                    booking_source='WEB',
+                    metadata={
+                        'contact_phone': contact_info.get('phone', ''),
+                        'contact_email': contact_info.get('email', ''),
+                        'flight_data': flight_data,
+                        'created_from': 'booking_details_pay_click',
+                    },
                 )
-            
-            # 3. ساخت Payment
-            payment = Payment.objects.create(
-                user=user,
-                booking=booking,
-                amount=total_amount,
-                method='ONLINE',
-                gateway='ZARINPAL',
-                status='COMPLETED',
-                gateway_transaction_id=payment_ref_id,
-                completed_at=timezone.now()
-            )
-            
-            # 4. بازگشت پاسخ
+
+                for passenger_data in passengers_data:
+                    birth_date_raw = passenger_data.get('birthDate')
+                    birth_date = None
+                    if birth_date_raw:
+                        try:
+                            birth_date = date.fromisoformat(str(birth_date_raw))
+                        except Exception:
+                            birth_date = None
+                    Passenger.objects.create(
+                        booking=booking,
+                        passenger_type=passenger_type_map.get(str(passenger_data.get('type', 'adult')).lower(), 'ADULT'),
+                        first_name=passenger_data.get('firstName', '') or '',
+                        last_name=passenger_data.get('lastName', '') or '',
+                        gender='F' if str(passenger_data.get('gender', 'male')).lower() == 'female' else 'M',
+                        national_id=passenger_data.get('nationalId', '') or '',
+                        passport_number=passenger_data.get('passportNumber', '') or '',
+                        date_of_birth=birth_date or date(1990, 1, 1),
+                        nationality='FOREIGN' if passenger_data.get('isForeign') else 'IRANIAN',
+                    )
+
+                payment = Payment.objects.create(
+                    user=request.user,
+                    booking=booking,
+                    amount=Decimal(str(total_amount or 0)),
+                    method='ONLINE',
+                    gateway='ZARINPAL',
+                    status='PENDING',
+                )
+
             return Response({
                 'success': True,
                 'booking': {
@@ -219,7 +287,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                     'status': payment.status
                 }
             }, status=status.HTTP_201_CREATED)
-            
+
         except Exception as e:
             return Response({
                 'success': False,
