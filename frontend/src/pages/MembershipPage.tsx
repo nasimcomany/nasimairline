@@ -10,12 +10,10 @@ import {
   SparklesIcon,
   HeartIcon,
   UserGroupIcon,
-  CurrencyDollarIcon,
   ClockIcon,
   ShieldCheckIcon,
   TruckIcon,
   WifiIcon,
-  ChartBarIcon,
   ArrowTrendingUpIcon,
   FireIcon,
   CalendarIcon,
@@ -140,6 +138,36 @@ const MembershipPage: React.FC = () => {
         return key;
     }
   };
+
+  const tierBenefits: Record<string, Array<{ icon: any; title: string; desc: string }>> = {
+    BRONZE: [
+      { icon: ClockIcon, title: 'اطلاع‌رسانی سریع', desc: 'اعلان سریع تغییرات پرواز و گیت' },
+      { icon: TicketIcon, title: 'انتخاب صندلی استاندارد', desc: 'انتخاب زودتر صندلی معمولی' },
+      { icon: UserGroupIcon, title: 'پشتیبانی بهتر', desc: 'صف پاسخ‌گویی سریع‌تر از مهمان' },
+      { icon: FireIcon, title: 'کمپین‌های مناسبتی', desc: 'دسترسی به کمپین‌های ویژه اعضا' },
+    ],
+    SILVER: [
+      { icon: TicketIcon, title: 'اولویت لیست انتظار', desc: 'اولویت در standby پروازها' },
+      { icon: TruckIcon, title: 'اولویت خدمات فرودگاهی', desc: 'رسیدگی سریع‌تر در فرودگاه' },
+      { icon: ClockIcon, title: 'پشتیبانی سریع‌تر', desc: 'اولویت در پاسخ پشتیبانی' },
+      { icon: WifiIcon, title: 'انتخاب صندلی بهتر', desc: 'انتخاب زودتر صندلی‌های بهتر' },
+    ],
+    GOLD: [
+      { icon: ShieldCheckIcon, title: 'اولویت سوار شدن', desc: 'Priority Boarding قبل از عموم' },
+      { icon: TruckIcon, title: 'اولویت تحویل بار', desc: 'تحویل بار سریع‌تر در مقصد' },
+      { icon: HeartIcon, title: 'پشتیبانی VIP', desc: 'پشتیبانی اختصاصی اعضای طلایی' },
+      { icon: FireIcon, title: 'اولویت تغییر پرواز', desc: 'در شرایط اضطراری با اولویت' },
+    ],
+    PLATINUM: [
+      { icon: SparklesIcon, title: 'خدمات ممتاز', desc: 'بالاترین سطح تجربه سفر نسیم ایر' },
+      { icon: ShieldCheckIcon, title: 'اولویت کامل سفر', desc: 'اولویت در اغلب خدمات فرودگاهی' },
+      { icon: HeartIcon, title: 'پشتیبانی ویژه 24/7', desc: 'پاسخ‌گویی ویژه در تمام ساعات' },
+      { icon: TicketIcon, title: 'بیشترین انعطاف سفر', desc: 'دسترسی بهتر به خدمات ویژه' },
+    ],
+  };
+
+  const currentTierBenefits = membershipStatus ? (tierBenefits[membershipStatus.current_tier] || []) : [];
+  const nextTierBenefits = membershipStatus?.next_tier ? (tierBenefits[membershipStatus.next_tier] || []) : [];
 
   if (!isAuthenticated) {
     return (
@@ -386,7 +414,7 @@ const MembershipPage: React.FC = () => {
         </section>
       )}
 
-      {/* Benefits Section */}
+      {/* Tier Benefits Section */}
       <section className="relative z-10 px-4 pb-8">
         <div className="max-w-5xl mx-auto">
           <div className="bg-white rounded-2xl p-6 shadow-xl">
@@ -396,34 +424,71 @@ const MembershipPage: React.FC = () => {
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               }}
             >
-              مزایای عضویت در باشگاه مشتریان
+              مزایای عضویت شما
             </h2>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {[
-                { icon: CurrencyDollarIcon, title: 'تخفیف‌های ویژه', desc: 'تخفیف انحصاری اعضا' },
-                { icon: ClockIcon, title: 'اولویت رزرو', desc: 'رزرو سریع‌تر' },
-                { icon: ShieldCheckIcon, title: 'بیمه رایگان', desc: 'پوشش کامل' },
-                { icon: TruckIcon, title: 'بار اضافی', desc: 'بار رایگان بیشتر' },
-                { icon: WifiIcon, title: 'اینترنت', desc: 'WiFi رایگان' },
-                { icon: HeartIcon, title: 'خدمات VIP', desc: 'پشتیبانی اختصاصی' }
-              ].map((benefit, index) => (
-                <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-100 hover:shadow-lg transition-all">
-                  <div className="flex flex-col items-center text-center gap-3">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full p-3">
-                      <benefit.icon className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-gray-900 font-bold text-sm mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {benefit.title}
-                      </h3>
-                      <p className="text-gray-600 text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                        {benefit.desc}
-                      </p>
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-blue-900 mb-3 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                مزایای سطح فعلی شما ({membershipStatus.current_tier_display})
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {currentTierBenefits.map((benefit, index) => (
+                  <div key={`current-${index}`} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-100">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full p-2.5">
+                        <benefit.icon className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-gray-900 font-bold text-sm mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          {benefit.title}
+                        </h4>
+                        <p className="text-gray-600 text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          {benefit.desc}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
+
+            {membershipStatus.next_tier && membershipStatus.next_tier_display && nextTierBenefits.length > 0 ? (
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-bold text-emerald-700 mb-3 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  اگر {membershipStatus.next_tier_display} شوید، این مزایا را می‌گیرید
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {nextTierBenefits.map((benefit, index) => (
+                    <div key={`next-${index}`} className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border-2 border-emerald-100">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full p-2.5">
+                          <benefit.icon className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-gray-900 font-bold text-sm mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            {benefit.title}
+                          </h4>
+                          <p className="text-gray-600 text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            {benefit.desc}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            ) : (
+              <div className="border-t border-gray-200 pt-6 text-center">
+                <p className="text-emerald-700 font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  شما در بالاترین سطح عضویت هستید.
+                </p>
+              </div>
+            )}
+            
+            <div className="mt-5 text-center">
+              <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                مزایا ممکن است طبق سیاست باشگاه مشتریان به‌روزرسانی شوند.
+              </p>
             </div>
           </div>
         </div>
