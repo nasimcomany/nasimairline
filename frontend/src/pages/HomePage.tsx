@@ -1635,9 +1635,9 @@ const HomePage: React.FC = () => {
         </div>
         <div 
           className="relative z-10 max-w-7xl mx-auto flex"
-          style={{ direction: 'ltr', justifyContent: 'flex-start', paddingLeft: '2cm', paddingRight: '1rem' }}
+          style={{ direction: 'ltr', justifyContent: 'flex-start', paddingLeft: '12cm', paddingRight: '0rem' }}
         >
-          <div className="max-w-2xl w-full" style={{ textAlign: 'right' }}>
+          <div className="max-w-2xl w-full" style={{ textAlign: 'right' , alignItems: '12px' }}>
             <p className={`text-white text-xs sm:text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
