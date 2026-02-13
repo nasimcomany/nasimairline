@@ -1635,9 +1635,9 @@ const HomePage: React.FC = () => {
         </div>
         <div 
           className="relative z-10 max-w-7xl mx-auto flex"
-          style={{ direction: 'ltr', justifyContent: 'flex-start', paddingLeft: '12cm', paddingRight: '0rem' }}
+          style={{ direction: 'ltr', justifyContent: 'flex-end', paddingLeft: '12rem', paddingRight: '0cm' }}
         >
-          <div className="max-w-2xl w-full" style={{ textAlign: 'right' , alignItems: '12px' }}>
+          <div className="max-w-2xl w-full" style={{ textAlign: language === 'fa' || language === 'ar' ? 'right' : 'left' }}>
             <p className={`text-white text-xs sm:text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
@@ -3129,22 +3129,18 @@ const HomePage: React.FC = () => {
     {[
       { 
         id: 'booking', 
-        icon: '/images/1fq.jpeg',
         description: language === 'fa' ? 'راهنمای رزرو و خرید بلیط' : language === 'ar' ? 'دليل الحجز وشراء التذاكر' : 'Booking guide'
       },
       { 
         id: 'services', 
-        icon: '/images/2fq.jpeg',
         description: language === 'fa' ? 'امکانات و خدمات در پرواز' : language === 'ar' ? 'المرافق والخدمات' : 'Flight amenities'
       },
       { 
         id: 'flight-info', 
-        icon: '/images/3fq.jpeg',
         description: language === 'fa' ? 'وضعیت پرواز و جزئیات' : language === 'ar' ? 'حالة الرحلة والتفاصيل' : 'Flight status'
       },
       { 
         id: 'support', 
-        icon: '/images/4fq.jpeg',
         description: language === 'fa' ? 'راه‌های ارتباط با پشتیبانی' : language === 'ar' ? 'طرق الاتصال بالدعم' : 'Contact support'
       }
     ].map((faq) => {
@@ -3163,14 +3159,11 @@ const HomePage: React.FC = () => {
               width: '195px',
               height: '195px',
               borderRadius: '9999px',
-              border:'3px solid #1e40af',
+              border: '3px solid #1e40af',
               boxShadow: '0 18px 35px rgba(0,0,0,0.4)',
               transform: 'translateY(0)',
               transition: 'all 0.25s ease',
-              backgroundImage: `url(${faq.icon})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
+              backgroundColor: '#93c5fd',
               position: 'relative'
             }}
             onMouseEnter={(e) => {
@@ -3182,19 +3175,6 @@ const HomePage: React.FC = () => {
               e.currentTarget.style.boxShadow = '0 18px 35px rgba(0,0,0,0.4)';
             }}
           >
-            {/* لایه تاریک برای خوانایی بهتر متن */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              borderRadius: '9999px',
-              zIndex: 1
-            }}></div>
-            
-            {/* نام دایره (فقط نام، بدون توضیح) */}
             <span
               className={`text-sm sm:text-base font-medium text-center ${fontClass}`}
               style={{ 
