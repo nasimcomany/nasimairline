@@ -952,8 +952,8 @@ const HomePage: React.FC = () => {
           className="absolute inset-x-0 top-0 overflow-hidden"
           style={{
             width: '100%',
-            height: 'min(75vw, 85vh)',
-            maxHeight: '85vh',
+            height: 'calc(min(75vw, 85vh) - 0.25cm)',
+            maxHeight: 'calc(85vh - 0.25cm)',
             backgroundColor: 'rgba(15, 23, 42, 0.3)'
           }}
         >
