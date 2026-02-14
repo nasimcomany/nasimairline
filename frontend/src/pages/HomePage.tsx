@@ -945,14 +945,16 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-white">
       <EmiratesHeader onWeatherClick={() => setShowWeatherModal(true)} />
 
-      {/* Hero Section with Flight Search - Emirates Style */}
-      <section id="search-form" className="relative z-10 min-h-[70vh] sm:min-h-[90vh] flex flex-col">
-        {/* Hero Image Background - Slider Container */}
+      {/* Hero Section with Flight Search - Emirates Style - اسلایدر با نسبت ۴:۳ برای کاهش فضای خالی کناره‌ها */}
+      <section id="search-form" className="relative z-10 flex flex-col" style={{ minHeight: 'max(75vh, min(75vw, 85vh) + 280px)' }}>
+        {/* Hero Image Background - Slider Container - نسبت ۴:۳ برای پر کردن عرض و کاهش فضای خالی */}
         <div 
           className="absolute inset-x-0 top-0 overflow-hidden"
           style={{
-            backgroundPosition: 'center center',
-            bottom: '220px' // Extended from bottom for bigger slider area
+            width: '100%',
+            height: 'min(75vw, 85vh)',
+            maxHeight: '85vh',
+            backgroundColor: 'rgba(15, 23, 42, 0.3)'
           }}
         >
           {/* Slider - Dynamic images from API */}
@@ -1030,9 +1032,9 @@ const HomePage: React.FC = () => {
         </button>
 
         {/* Hero Content */}
-        <div className="relative z-10 flex-1 flex flex-col" style={{ pointerEvents: 'none' }}>
+        <div className="relative z-10 flex-1 flex flex-col" style={{ pointerEvents: 'none', minHeight: 'min(75vw, 85vh)' }}>
           {/* Promotional Text - Centered */}
-          <div className="flex-1 flex items-start justify-center" style={{ paddingTop: '35px', pointerEvents: 'auto' }}>
+          <div className="flex-1 flex items-start justify-center" style={{ paddingTop: 'clamp(24px, 4vw, 48px)', pointerEvents: 'auto' }}>
             <div className="text-center max-w-3xl px-4 sm:px-6">
               <h1 
                 className="text-white mb-3"
@@ -1063,15 +1065,15 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Flight Search Form at Bottom */}
-          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-4 sm:pb-8" style={{ marginTop: '60px', padding: '30px', pointerEvents: 'auto' }}>
+          {/* Flight Search Form at Bottom - سایز بزرگتر */}
+          <div className="max-w-7xl mx-auto w-full px-6 sm:px-8 pb-6 sm:pb-10 overflow-visible" style={{ marginTop: 'clamp(48px, 7vw, 88px)', padding: 'clamp(28px, 4vw, 48px)', pointerEvents: 'auto' }}>
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
               </div>
             </div>
       </section>
 
       {/* Elegant Quote Section */}
-      <section className="relative z-10 py-8 sm:py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '1.5rem', marginTop: '-35px' }}>
+      <section className="relative z-10 py-6 sm:py-12 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '1.25rem', marginTop: '-28px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 
@@ -1103,10 +1105,10 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Services Section */}
-      <section className="relative z-10 py-8 sm:py-16 bg-white" style={{ marginTop: '-40px' }}>
+      <section className="relative z-10 py-6 sm:py-12 bg-white" style={{ marginTop: '-32px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Section Title */}
-          <div className="text-center mb-6 sm:mb-12">
+          <div className="text-center mb-5 sm:mb-10">
             <h2 
               className="text-gray-900"
               style={{ 
@@ -1136,7 +1138,7 @@ const HomePage: React.FC = () => {
               onMouseEnter={() => setHoveredService(1)}
               onMouseLeave={() => setHoveredService(null)}
             >
-              <div className="relative w-full" style={{ height: '500px' }}>
+              <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                 <img 
                   src="/images/chair.jpeg" 
                   alt="انتخاب صندلی"
@@ -1178,7 +1180,7 @@ const HomePage: React.FC = () => {
               onMouseEnter={() => setHoveredService(2)}
               onMouseLeave={() => setHoveredService(null)}
             >
-              <div className="relative w-full" style={{ height: '500px' }}>
+              <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                 <img 
                   src="/images/overload.jpeg" 
                   alt="خرید اضافه بار"
@@ -1220,7 +1222,7 @@ const HomePage: React.FC = () => {
               onMouseEnter={() => setHoveredService(3)}
               onMouseLeave={() => setHoveredService(null)}
             >
-              <div className="relative w-full" style={{ height: '500px' }}>
+              <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                 <img 
                   src="/images/TravelingWithPets.jpg" 
                   alt="سفر با حیوان خانگی"
@@ -1262,7 +1264,7 @@ const HomePage: React.FC = () => {
               onMouseEnter={() => setHoveredService(4)}
               onMouseLeave={() => setHoveredService(null)}
             >
-              <div className="relative w-full" style={{ height: '500px' }}>
+              <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                 <img 
                   src="/images/travelwheelchair.jpeg" 
                   alt="درخواست ویلچر"
@@ -1296,7 +1298,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Elegant Quote Section - Repeated with Airline Logo */}
-      <section className="relative z-10 py-8 sm:py-16 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '1.5rem', marginTop: '-35px' }}>
+      <section className="relative z-10 py-6 sm:py-12 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '1.25rem', marginTop: '-28px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <p 
@@ -1333,7 +1335,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* عضویت در برنامه وفاداری نسیم ایر banner section */}
-      <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-25px' }}>
+      <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-20px' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
             className="bg-blue-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
@@ -1460,7 +1462,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Offers Section */}
-      <section className="relative z-10 py-6 sm:py-8 bg-gray-100" style={{ marginTop: '20px' }}>
+      <section className="relative z-10 py-6 sm:py-8 bg-gray-100" style={{ marginTop: '24px' }}>
         <style>{`
           @keyframes slideInFromRight {
             from {
@@ -1624,7 +1626,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Skywards+ Section - Emirates Style */}
-      <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '55px' }}>
+      <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '48px' }}>
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -1671,7 +1673,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Destinations Section - Images Only (No Text) */}
-      <section className="relative py-6 sm:py-12 bg-white" style={{ paddingBottom: '60px', overflow: 'visible', zIndex: 20, direction: 'rtl' }}>
+      <section className="relative py-6 sm:py-12 bg-white" style={{ paddingBottom: 'clamp(48px, 5vw, 64px)', overflow: 'visible', zIndex: 20, direction: 'rtl' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ direction: 'rtl' }}>
           {/* Title Section - Same style as Section 2 */}
           <div className="text-center mb-4 sm:mb-8">
@@ -1972,7 +1974,7 @@ const HomePage: React.FC = () => {
             >
               {/* Large Image - Using 6reza.jpeg */}
               <div className="relative w-full" style={{ 
-                height: '500px',
+                height: 'clamp(320px, 40vw, 480px)',
                 borderRadius: '16px',
                 overflow: 'hidden'
               }}>
@@ -3083,8 +3085,8 @@ const HomePage: React.FC = () => {
   id="faq"
   className="relative flex flex-col justify-center items-center"
   style={{
-    marginTop: '-10px',
-    marginBottom: '80px',
+    marginTop: '0',
+    marginBottom: '72px',
     padding: '0 20px',
     zIndex: 10,
     gap: '24px'
@@ -3389,7 +3391,7 @@ const HomePage: React.FC = () => {
   </div>
 )}
       {/* Footer - Emirates Style */}
-      <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '-65px', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
+      <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '-56px', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* درباره نسیم ایر Column */}

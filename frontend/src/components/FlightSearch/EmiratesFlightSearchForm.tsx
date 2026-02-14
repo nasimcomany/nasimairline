@@ -73,13 +73,13 @@ const JalaliDateInput = forwardRef<HTMLInputElement, { value?: string; onClick?:
         onClick={onClick}
         placeholder="انتخاب تاریخ"
         className={`w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white cursor-pointer ${
-          isLarge ? 'px-3 py-3 text-base' : 'px-2 py-2 text-sm'
+          isLarge ? 'px-3 py-2.5 text-base' : 'px-3 py-2.5 text-sm'
         }`}
         style={{ 
           fontFamily: 'DigiHamisheBold, Arial, sans-serif', 
           direction: 'rtl',
-          minHeight: isLarge ? '48px' : '42px',
-          height: isLarge ? '48px' : '42px'
+          minHeight: '48px',
+          height: '48px'
         }}
       />
     );
@@ -261,81 +261,81 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           z-index: 9999 !important;
         }
       `}</style>
-      <div className="rounded-lg shadow-2xl overflow-hidden">
+      <div className="rounded-3xl shadow-2xl overflow-visible">
       {/* Tabs */}
-      <div className="flex border-b border-gray-300/30 overflow-x-auto bg-gray-400/30 backdrop-blur-xl">
+      <div className="flex border-b border-gray-300/30 overflow-x-auto bg-gray-400/30 backdrop-blur-xl rounded-t-3xl">
         <button
           onClick={() => handleTabChange('search')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2.5 px-8 py-5 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'search'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '15px' }}
+          style={{ fontSize: '17px' }}
         >
-          <PaperAirplaneIcon className={`w-4 h-4 ${activeTab === 'search' ? 'text-blue-900' : 'text-white'}`} />
+          <PaperAirplaneIcon className={`w-5 h-5 ${activeTab === 'search' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.bookFlight')}
         </button>
         <button
           onClick={() => handleTabChange('manage')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2.5 px-8 py-5 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'manage'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '15px' }}
+          style={{ fontSize: '17px' }}
         >
-          <TagIcon className={`w-4 h-4 ${activeTab === 'manage' ? 'text-blue-900' : 'text-white'}`} />
+          <TagIcon className={`w-5 h-5 ${activeTab === 'manage' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.manageBooking')}
         </button>
         <button
           onClick={() => handleTabChange('services')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2.5 px-8 py-5 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'services'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '15px' }}
+          style={{ fontSize: '17px' }}
         >
-          <MapPinIcon className={`w-4 h-4 ${activeTab === 'services' ? 'text-blue-900' : 'text-white'}`} />
+          <MapPinIcon className={`w-5 h-5 ${activeTab === 'services' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.specialServices')}
         </button>
         <button
           onClick={() => handleTabChange('whatson')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2.5 px-8 py-5 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'whatson'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '15px' }}
+          style={{ fontSize: '17px' }}
         >
-          <PaperAirplaneIcon className={`w-4 h-4 ${activeTab === 'whatson' ? 'text-blue-900' : 'text-white'}`} />
+          <PaperAirplaneIcon className={`w-5 h-5 ${activeTab === 'whatson' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightFacilities')}
         </button>
         <button
           onClick={() => handleTabChange('status')}
-          className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
+          className={`flex items-center gap-2.5 px-8 py-5 font-medium transition-colors whitespace-nowrap ${
             activeTab === 'status'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '15px' }}
+          style={{ fontSize: '17px' }}
         >
-          <ClockIcon className={`w-4 h-4 ${activeTab === 'status' ? 'text-blue-900' : 'text-white'}`} />
+          <ClockIcon className={`w-5 h-5 ${activeTab === 'status' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightStatus')}
         </button>
       </div>
 
       {/* Tab Content */}
-      <div className="bg-gray-200" style={{ minHeight: '180px' }}>
+      <div className="bg-gray-200 overflow-visible rounded-b-3xl" style={{ minHeight: '220px' }}>
       {activeTab === 'search' && (
-        <form onSubmit={handleSearch} className="p-6">
+        <form onSubmit={handleSearch} className="p-8">
           {/* Trip Type Selector - Compact */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-3 mb-5">
             <button
               type="button"
               onClick={() => setTripType('roundtrip')}
-              className={`px-6 py-3 rounded-lg text-base font-bold transition-all ${
+              className={`px-8 py-4 rounded-lg text-lg font-bold transition-all ${
                 tripType === 'roundtrip'
                   ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -347,7 +347,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             <button
               type="button"
               onClick={() => setTripType('oneway')}
-              className={`px-6 py-3 rounded-lg text-base font-bold transition-all ${
+              className={`px-8 py-4 rounded-lg text-lg font-bold transition-all ${
                 tripType === 'oneway'
                   ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -359,9 +359,9 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
           </div>
 
           {/* Main Row - All fields in one row */}
-          <div className="flex gap-2 items-end mb-4" style={{ flexWrap: 'nowrap' }}>
+          <div className="flex gap-2.5 items-end mb-5 flex-nowrap overflow-visible pb-1">
             {/* Origin */}
-            <div className="relative" style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
+            <div className="relative flex-shrink-0" style={{ flexBasis: '148px', minWidth: '148px', width: '148px' }}>
               <CitySelect
                 value={formData.origin}
                 onChange={(value) => setFormData(prev => ({ ...prev, origin: value }))}
@@ -373,15 +373,15 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               <button
                 type="button"
                 onClick={swapCities}
-                className="absolute left-0 top-6 transform translate-x-1/2 z-10 w-6 h-6 bg-blue-900 hover:bg-blue-800 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+                className="absolute left-0 top-7 transform translate-x-1/2 z-10 w-8 h-8 bg-blue-900 hover:bg-blue-800 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
                 title={t('home.flightSearch.swap')}
               >
-                <ArrowsRightLeftIcon className="w-3 h-3" />
+                <ArrowsRightLeftIcon className="w-4 h-4" />
               </button>
             </div>
 
             {/* Destination */}
-            <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
+            <div className="flex-shrink-0" style={{ flexBasis: '148px', minWidth: '148px', width: '148px' }}>
               <CitySelect
                 value={formData.destination}
                 onChange={(value) => setFormData(prev => ({ ...prev, destination: value }))}
@@ -391,8 +391,8 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </div>
 
             {/* Departure Date */}
-            <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
-              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <div className="flex-shrink-0" style={{ flexBasis: '148px', minWidth: '148px', width: '148px' }}>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {language === 'fa' ? 'تاریخ رفت' : t('home.flightSearch.departDate')}
               </label>
               <DatePicker
@@ -406,15 +406,15 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                 popperPlacement="top-start"
                 renderCustomHeader={(props) => renderCustomHeader(props, language)}
                 renderDayContents={language === 'fa' ? renderDayContents : undefined}
-                customInput={language === 'fa' ? <JalaliDateInput date={departureDate} /> : undefined}
+                customInput={language === 'fa' ? <JalaliDateInput date={departureDate} size="large" /> : undefined}
                 required
               />
             </div>
 
             {/* Return Date */}
             {tripType === 'roundtrip' && (
-              <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
-                <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="flex-shrink-0" style={{ flexBasis: '148px', minWidth: '148px', width: '148px' }}>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                   {language === 'fa' ? 'تاریخ برگشت' : t('home.flightSearch.returnDate')}
                 </label>
                 <DatePicker
@@ -428,14 +428,14 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                   popperPlacement="top-start"
                   renderCustomHeader={(props) => renderCustomHeader(props, language)}
                   renderDayContents={language === 'fa' ? renderDayContents : undefined}
-                  customInput={language === 'fa' ? <JalaliDateInput date={returnDate} /> : undefined}
+                  customInput={language === 'fa' ? <JalaliDateInput date={returnDate} size="large" /> : undefined}
                   required
                 />
               </div>
             )}
 
             {/* Passengers */}
-            <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
+            <div className="flex-shrink-0" style={{ flexBasis: '148px', minWidth: '148px', width: '148px' }}>
               <PassengerSelect
                 value={formData.passengers}
                 onChange={(value) => setFormData(prev => ({ ...prev, passengers: value }))}
@@ -443,41 +443,41 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               />
             </div>
 
-            {/* Class */}
-            <div style={{ flexBasis: '150px', flexShrink: 0, flexGrow: 0 }}>
-              <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {t('home.flightSearch.class')}
-              </label>
-              <div style={{ height: '42px' }}>
-                <CustomSelect
-                  value={formData.class}
-                  onChange={(value) => setFormData(prev => ({ ...prev, class: value as any }))}
-                  options={[
-                    { value: 'economy', label: t('class.economy') },
-                    { value: 'business', label: t('class.business') },
-                    { value: 'first', label: t('class.first') }
-                  ]}
-                  placeholder={t('class.economy')}
-                  dropdownPosition="top"
-                />
+            {/* Class + Search Button - همیشه کنار هم */}
+            <div className="flex flex-shrink-0 items-end gap-2.5">
+              <div style={{ flexBasis: '148px', minWidth: '148px', width: '148px' }}>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  {t('home.flightSearch.class')}
+                </label>
+                <div className="h-12">
+                  <CustomSelect
+                    value={formData.class}
+                    onChange={(value) => setFormData(prev => ({ ...prev, class: value as any }))}
+                    options={[
+                      { value: 'economy', label: t('class.economy') },
+                      { value: 'business', label: t('class.business') },
+                      { value: 'first', label: t('class.first') }
+                    ]}
+                    placeholder={t('class.economy')}
+                    dropdownPosition="top"
+                  />
+                </div>
               </div>
+              <button
+                type="submit"
+                className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-5 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap shrink-0"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '48px', minHeight: '48px', minWidth: 'max-content', fontSize: '15px' }}
+              >
+                <PaperAirplaneIcon className="w-5 h-5" />
+                {t('home.flightSearch.search')}
+              </button>
             </div>
-
-            {/* Search Button */}
-            <button
-              type="submit"
-              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px', flexShrink: 0, marginLeft: '14px', fontSize: '14px' }}
-            >
-              <PaperAirplaneIcon className="w-4 h-4" />
-              {t('home.flightSearch.search')}
-            </button>
           </div>
         </form>
       )}
 
       {activeTab === 'manage' && (
-        <div className="p-6">
+        <div className="p-8">
           <div className="flex gap-2 items-end">
             {/* National ID / Passport */}
             <div className="flex-1">
@@ -487,7 +487,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               <input
                 type="text"
                 placeholder={t('home.flightSearch.nationalIdPlaceholder')}
-                className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                 required
               />
@@ -501,7 +501,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               <input
                 type="text"
                 placeholder={t('home.flightSearch.pnrPlaceholder')}
-                className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
                 required
               />
@@ -511,10 +511,10 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             <button
               type="button"
               onClick={() => navigate('/booking/manage')}
-              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
+              className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2.5 whitespace-nowrap"
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '48px', fontSize: '16px' }}
             >
-              <PaperAirplaneIcon className="w-4 h-4" />
+              <PaperAirplaneIcon className="w-5 h-5" />
               {t('home.flightSearch.track')}
             </button>
           </div>
@@ -523,41 +523,41 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
 
       {/* Services Tab */}
       {activeTab === 'services' && (
-        <div className="p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <button
               onClick={() => navigate('/services/seat-selection')}
-              className="p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
+              className="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
             >
-              <TicketIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-base font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <TicketIcon className="w-10 h-10 text-blue-900 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.seatSelection')}
               </p>
             </button>
             <button
               onClick={() => navigate('/services/extra-baggage')}
-              className="p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
+              className="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
             >
-              <TagIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-base font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <TagIcon className="w-10 h-10 text-blue-900 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.extraBaggage')}
               </p>
             </button>
             <button
               onClick={() => navigate('/services/pet-travel')}
-              className="p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
+              className="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
             >
-              <MapPinIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-base font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <MapPinIcon className="w-10 h-10 text-blue-900 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.petTravel')}
               </p>
             </button>
             <button
               onClick={() => navigate('/services/wheelchair')}
-              className="p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
+              className="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
             >
-              <ClockIcon className="w-8 h-8 text-blue-900 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-base font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <ClockIcon className="w-10 h-10 text-blue-900 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.wheelchair')}
               </p>
             </button>
@@ -567,45 +567,47 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
 
       {/* What's On Flight Tab */}
       {activeTab === 'whatson' && (
-        <div className="p-6">
+        <div className="p-8">
           <div className="flex gap-2 items-end">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.flightNumber')}
               </label>
               <input
                 type="text"
                 placeholder={t('home.flightSearch.flightNumberPlaceholder')}
-                className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+                className="w-full px-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl', minHeight: '48px', height: '48px' }}
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.flightDate')}
               </label>
-              <DatePicker
-                selected={whatsonDate}
-                onChange={(date: Date | null) => setWhatsonDate(date)}
-                minDate={new Date()}
-                dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
-                locale={language === 'fa' ? 'fa' : undefined}
-                className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                wrapperClassName="w-full"
-                popperPlacement="top-start"
-                renderCustomHeader={(props) => renderCustomHeader(props, language)}
-                renderDayContents={language === 'fa' ? renderDayContents : undefined}
-                customInput={language === 'fa' ? <JalaliDateInput date={whatsonDate} size="large" /> : undefined}
-                required
-              />
+              <div className="h-12">
+                <DatePicker
+                  selected={whatsonDate}
+                  onChange={(date: Date | null) => setWhatsonDate(date)}
+                  minDate={new Date()}
+                  dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
+                  locale={language === 'fa' ? 'fa' : undefined}
+                  className="w-full text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                  wrapperClassName="w-full h-full"
+                  popperPlacement="top-start"
+                  renderCustomHeader={(props) => renderCustomHeader(props, language)}
+                  renderDayContents={language === 'fa' ? renderDayContents : undefined}
+                  customInput={language === 'fa' ? <JalaliDateInput date={whatsonDate} size="large" /> : undefined}
+                  required
+                />
+              </div>
             </div>
             <button
               type="button"
               onClick={() => navigate('/flight/amenities')}
               className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '48px', fontSize: '16px' }}
             >
-              <PaperAirplaneIcon className="w-4 h-4" />
+              <PaperAirplaneIcon className="w-5 h-5" />
               {t('home.flightSearch.viewAmenities')}
             </button>
           </div>
@@ -614,9 +616,9 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
 
       {/* Flight Status Tab */}
       {activeTab === 'status' && (
-        <div className="p-6">
+        <div className="p-8">
           <div className="flex gap-2 items-end">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.flightNumber')}
               </label>
@@ -625,36 +627,38 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                 value={flightStatusForm.flightNumber}
                 onChange={(e) => setFlightStatusForm(prev => ({ ...prev, flightNumber: e.target.value }))}
                 placeholder={t('home.flightSearch.flightNumberPlaceholder')}
-                className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl' }}
+                className="w-full px-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl', minHeight: '48px', height: '48px' }}
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-sm font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                 {t('home.flightSearch.flightDate')}
               </label>
-              <DatePicker
-                selected={statusDate}
-                onChange={(date: Date | null) => setStatusDate(date)}
-                minDate={new Date()}
-                dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
-                locale={language === 'fa' ? 'fa' : undefined}
-                className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                wrapperClassName="w-full"
-                popperPlacement="top-start"
-                renderCustomHeader={(props) => renderCustomHeader(props, language)}
-                renderDayContents={language === 'fa' ? renderDayContents : undefined}
-                customInput={language === 'fa' ? <JalaliDateInput date={statusDate} size="large" /> : undefined}
-                required
-              />
+              <div className="h-12">
+                <DatePicker
+                  selected={statusDate}
+                  onChange={(date: Date | null) => setStatusDate(date)}
+                  minDate={new Date()}
+                  dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
+                  locale={language === 'fa' ? 'fa' : undefined}
+                  className="w-full text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                  wrapperClassName="w-full h-full"
+                  popperPlacement="top-start"
+                  renderCustomHeader={(props) => renderCustomHeader(props, language)}
+                  renderDayContents={language === 'fa' ? renderDayContents : undefined}
+                  customInput={language === 'fa' ? <JalaliDateInput date={statusDate} size="large" /> : undefined}
+                  required
+                />
+              </div>
             </div>
             <button
               type="button"
               onClick={() => navigate('/flight/status')}
               className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 whitespace-nowrap"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '42px' }}
+              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', height: '48px', fontSize: '16px' }}
             >
-              <ClockIcon className="w-4 h-4" />
+              <ClockIcon className="w-5 h-5" />
               {t('home.flightSearch.checkStatus')}
             </button>
           </div>

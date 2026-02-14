@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { UserGroupIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -20,12 +21,19 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
   label
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<{ top?: number; bottom?: number; left: number; width: number } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const portalRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(target) &&
+        (!portalRef.current || !portalRef.current.contains(target))
+      ) {
         setIsOpen(false);
       }
     };
@@ -53,6 +61,45 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
     onChange(newValue);
   };
 
+  const updateDropdownPosition = () => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const dropdownHeight = 220;
+      const gap = 6;
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceAbove >= dropdownHeight + gap || spaceAbove >= spaceBelow) {
+        setDropdownStyle({
+          bottom: window.innerHeight - rect.top + gap,
+          left: rect.left,
+          width: Math.max(rect.width, 220)
+        });
+      } else {
+        setDropdownStyle({
+          top: rect.bottom + gap,
+          left: rect.left,
+          width: Math.max(rect.width, 220)
+        });
+      }
+    } else {
+      setDropdownStyle(null);
+    }
+  };
+
+  useEffect(() => {
+    updateDropdownPosition();
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    window.addEventListener('scroll', updateDropdownPosition, true);
+    window.addEventListener('resize', updateDropdownPosition);
+    return () => {
+      window.removeEventListener('scroll', updateDropdownPosition, true);
+      window.removeEventListener('resize', updateDropdownPosition);
+    };
+  }, [isOpen]);
+
   const getPassengerText = () => {
     const parts = [];
     if (value.adults > 0) parts.push(`${value.adults} ${t('passengers.adult')}`);
@@ -63,35 +110,47 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
 
   return (
     <div ref={dropdownRef} className="relative">
-      <label className="block text-xs font-medium text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+      <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
         {label}
       </label>
       
       {/* Display Button */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right flex items-center justify-between hover:border-gray-400"
+        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right flex items-center justify-between hover:border-gray-400"
         style={{
           fontFamily: 'DigiHamisheBold, Arial, sans-serif',
           direction: 'rtl',
-          minHeight: '42px',
-          height: '42px'
+          minHeight: '48px',
+          height: '48px'
         }}
       >
-        <div className="flex items-center gap-1">
-          <UserGroupIcon className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-900 font-bold">{getPassengerText()}</span>
+        <div className="flex items-center gap-1.5">
+          <UserGroupIcon className="w-5 h-5 text-gray-400" />
+          <span className="text-base text-gray-900 font-bold">{getPassengerText()}</span>
         </div>
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute z-[9999] w-full bottom-full mb-1 bg-white border border-gray-300 rounded-lg shadow-xl p-1.5">
+      {/* Dropdown - Portal برای نمایش کامل و بدون clipping - عین کلاس */}
+      {isOpen && dropdownStyle && createPortal(
+        <div
+          ref={portalRef}
+          className="fixed z-[99999] bg-white border border-gray-300 rounded-xl shadow-2xl overflow-hidden"
+          style={{
+            left: dropdownStyle.left,
+            width: dropdownStyle.width,
+            ...(dropdownStyle.bottom !== undefined 
+              ? { bottom: dropdownStyle.bottom } 
+              : { top: dropdownStyle.top })
+          }}
+        >
+          <div className="p-3">
           {/* Adults */}
-          <div className="flex items-center justify-between py-1 px-1 border-b border-gray-200">
+          <div className="flex items-center justify-between py-3 px-2 border-b border-gray-100 last:border-b-0">
             <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              <div className="text-xs font-bold text-gray-900">{t('passengers.adult')}</div>
+              <div className="text-sm font-bold text-gray-900">{t('passengers.adult')}</div>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -117,9 +176,9 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
           </div>
 
           {/* Children */}
-          <div className="flex items-center justify-between py-1 px-1 border-b border-gray-200">
+          <div className="flex items-center justify-between py-3 px-2 border-b border-gray-100">
             <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              <div className="text-xs font-bold text-gray-900">{t('passengers.child')}</div>
+              <div className="text-sm font-bold text-gray-900">{t('passengers.child')}</div>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -145,9 +204,9 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
           </div>
 
           {/* Infants */}
-          <div className="flex items-center justify-between py-1 px-1">
+          <div className="flex items-center justify-between py-3 px-2">
             <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              <div className="text-xs font-bold text-gray-900">{t('passengers.infant')}</div>
+              <div className="text-sm font-bold text-gray-900">{t('passengers.infant')}</div>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -176,12 +235,14 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="w-full mt-1 bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold py-1 rounded transition-colors"
+            className="w-full mt-3 bg-blue-900 hover:bg-blue-800 text-white text-sm font-bold py-3 rounded-lg transition-colors"
             style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
           >
             تایید
           </button>
-        </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

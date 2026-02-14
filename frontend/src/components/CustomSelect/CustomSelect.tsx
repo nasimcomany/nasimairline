@@ -86,15 +86,15 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
 
   return (
-    <div ref={dropdownRef} className={`relative ${className}`} style={{ ...style }}>
+    <div ref={dropdownRef} className={`relative w-full ${className}`} style={{ height: '100%', minHeight: '48px', ...style }}>
       {/* Selected Value Display */}
-      <div className="relative">
+      <div className="relative h-full">
         <button
           ref={buttonRef}
           type="button"
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
-          className={`w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white ${
+          className={`w-full h-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-base ${
             disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:border-gray-400'
           }`}
           style={{ 
@@ -106,8 +106,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             paddingLeft: '3rem',
             fontWeight: 'bold',
             textAlign: 'right',
-            fontSize: '0.875rem',
-            height: '100%',
+            minHeight: '48px',
             ...style
           }}
         >
@@ -128,13 +127,14 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       {isOpen && !disabled && (
         <div 
           ref={dropdownContentRef}
-          className={`absolute z-[9999] w-full bg-white border border-gray-300 rounded-lg shadow-xl max-h-44 overflow-y-auto ${
-            dropdownPosition === 'top' ? 'mb-1' : 'mt-1'
+          className={`absolute z-[9999] w-full bg-white border border-gray-300 rounded-xl shadow-2xl max-h-52 overflow-y-auto ${
+            dropdownPosition === 'top' ? 'mb-1.5' : 'mt-1.5'
           }`}
           style={{
             fontFamily: 'DigiHamisheBold, Arial, sans-serif',
             direction: 'rtl',
             fontSize: '13px',
+            minWidth: '180px',
             ...(dropdownPosition === 'top' 
               ? { bottom: '100%', left: 0, right: 0 }
               : { top: '100%', left: 0, right: 0 }
@@ -146,7 +146,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               key={option.value}
               data-selected={option.value === value}
               onClick={() => handleSelect(option.value)}
-              className={`px-4 py-3 cursor-pointer transition-colors text-right ${
+              className={`px-4 py-3.5 cursor-pointer transition-colors text-right border-b border-gray-50 last:border-b-0 ${
                 option.value === value
                   ? 'bg-blue-100 text-blue-900'
                   : 'text-gray-900 hover:bg-gray-100'
