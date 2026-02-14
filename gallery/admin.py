@@ -283,7 +283,18 @@ class HeroSliderAdmin(admin.ModelAdmin):
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
     
-    actions = ['activate_sliders', 'deactivate_sliders']
+    actions = ['activate_sliders', 'deactivate_sliders', 'delete_sliders']
+    
+    def has_delete_permission(self, request, obj=None):
+        """Allow staff users to delete hero sliders"""
+        return request.user.is_staff
+    
+    def delete_sliders(self, request, queryset):
+        """Delete selected hero slider images"""
+        count = queryset.count()
+        queryset.delete()
+        self.message_user(request, f'{count} اسلایدر حذف شد.')
+    delete_sliders.short_description = 'حذف اسلایدرهای انتخاب‌شده'
     
     def activate_sliders(self, request, queryset):
         """Activate selected sliders"""

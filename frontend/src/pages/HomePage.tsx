@@ -1077,10 +1077,10 @@ const HomePage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 
-              className="text-gray-500 flex items-center justify-center gap-2 sm:gap-3 flex-wrap"
+              className="text-gray-500 flex items-center justify-center gap-2 sm:gap-3 flex-nowrap whitespace-nowrap"
               style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                fontSize: 'clamp(1rem, 2.5vw, 1.8rem)',
+                fontSize: 'clamp(1.25rem, 3.2vw, 2.2rem)',
                 fontWeight: 'bold',
                 lineHeight: '1.4',
                 letterSpacing: '0.3px'
@@ -1095,7 +1095,7 @@ const HomePage: React.FC = () => {
                   <>A safe, <span className="text-gray-900" style={{ fontWeight: 900 }}>comfortable</span> and memorable journey</>
                 )}
               </span>
-              <span className="text-gray-400 mx-2" style={{ fontSize: 'clamp(1rem, 2.5vw, 1.8rem)' }}>|</span>
+              <span className="text-gray-400 mx-2 shrink-0">|</span>
               <span style={{ direction: 'ltr' }}>
                 A safe, <span className="text-gray-900" style={{ fontWeight: 900 }}>comfortable</span> and memorable trip
               </span>
@@ -1305,7 +1305,7 @@ const HomePage: React.FC = () => {
               className="text-gray-700 flex items-center justify-center gap-2 sm:gap-3 flex-wrap"
               style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                fontSize: 'clamp(1rem, 2.5vw, 1.8rem)',
+                fontSize: 'clamp(1.55rem, 3.5vw, 2.35rem)',
                 fontWeight: 'normal',
                 lineHeight: '1.4',
                 letterSpacing: '0.5px',
@@ -1335,10 +1335,10 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* عضویت در برنامه وفاداری نسیم ایر banner section */}
-      <section className="relative z-10 py-4" style={{ overflow: 'visible', marginTop: '-20px' }}>
+      <section className="relative z-10 py-5" style={{ overflow: 'visible', marginTop: '1.5rem' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
-            className="bg-blue-900 flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 relative"
+            className="bg-blue-900 flex flex-col md:flex-row items-center justify-between gap-5 px-8 py-6 relative"
             style={{
               borderRadius: '12px',
               overflow: 'visible'
