@@ -116,17 +116,17 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         { image: '/images/isfahan.jpg', name: language === 'fa' ? 'اصفهان' : language === 'ar' ? 'أصفهان' : 'Isfahan' }
       ],
       1: [ // مقاصد خارجی
-        { image: '/images/airplane-clouds-night_864588-19786.jpg', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
+        { image: '/images/360_F_600352190_78zb8hHbSeQdHtfGQliVRtHXEEXcvtHf.jpg', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
         { image: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg', name: language === 'fa' ? 'استانبول' : language === 'ar' ? 'إسطنبول' : 'Istanbul' },
         { image: '/images/airport-crew.jpg', name: language === 'fa' ? 'پاریس' : language === 'ar' ? 'باريس' : 'Paris' },
-        { image: '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg', name: language === 'fa' ? 'لندن' : language === 'ar' ? 'لندن' : 'London' },
-        { image: '/images/airport-plane-photo_991869-62.jpg', name: language === 'fa' ? 'نیویورک' : language === 'ar' ? 'نيويورك' : 'New York' },
-        { image: '/images/airplane-clouds-night_864588-19786.jpg', name: language === 'fa' ? 'توکیو' : language === 'ar' ? 'طوكيو' : 'Tokyo' }
+        { image: '/images/360_F_600352190_78zb8hHbSeQdHtfGQliVRtHXEEXcvtHf.jpg', name: language === 'fa' ? 'لندن' : language === 'ar' ? 'لندن' : 'London' },
+        { image: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg', name: language === 'fa' ? 'نیویورک' : language === 'ar' ? 'نيويورك' : 'New York' },
+        { image: '/images/airport-crew.jpg', name: language === 'fa' ? 'توکیو' : language === 'ar' ? 'طوكيو' : 'Tokyo' }
       ],
       2: [ // همه مقاصد
         { image: '/images/tehran.jpg', name: language === 'fa' ? 'تهران' : language === 'ar' ? 'طهران' : 'Tehran' },
         { image: '/images/mashhad.jpeg', name: language === 'fa' ? 'مشهد' : language === 'ar' ? 'مشهد' : 'Mashhad' },
-        { image: '/images/airplane-clouds-night_864588-19786.jpg', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
+        { image: '/images/360_F_600352190_78zb8hHbSeQdHtfGQliVRtHXEEXcvtHf.jpg', name: language === 'fa' ? 'دبی' : language === 'ar' ? 'دبي' : 'Dubai' },
         { image: '/images/kish.jpg', name: language === 'fa' ? 'کیش' : language === 'ar' ? 'كيش' : 'Kish' },
         { image: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg', name: language === 'fa' ? 'استانبول' : language === 'ar' ? 'إسطنبول' : 'Istanbul' },
         { image: '/images/isfahan.jpg', name: language === 'fa' ? 'اصفهان' : language === 'ar' ? 'أصفهان' : 'Isfahan' }
@@ -607,15 +607,14 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                         ))}
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0 h-[600px] bg-gray-100 flex-shrink relative overflow-hidden m-4 rounded-2xl p-4">
-                      <div className="grid grid-cols-3 gap-4 h-full">
-                        {getDestinationImages(
-                          selectedDestinationIndex !== null ? selectedDestinationIndex : (hoveredSubItem?.key === 'wherewefly' ? hoveredSubItem.index : 0)
-                        ).map((destination, imgIndex) => (
+                        <div className="flex-1 min-w-0 h-[600px] bg-gray-100 flex-shrink relative overflow-hidden m-4 rounded-2xl p-4">
+                          <div className="grid grid-cols-3 grid-rows-2 gap-4 h-full w-full">
+                            {getDestinationImages(
+                              selectedDestinationIndex !== null ? selectedDestinationIndex : (hoveredSubItem?.key === 'wherewefly' ? hoveredSubItem.index : 0)
+                            ).map((destination, imgIndex) => (
                           <div
                             key={imgIndex}
-                            className="relative overflow-hidden rounded-lg group cursor-pointer"
-                            style={{ minHeight: '180px' }}
+                            className="relative overflow-hidden rounded-lg group cursor-pointer min-h-0"
                             onMouseEnter={(e) => {
                               const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
                               const textWrapper = e.currentTarget.querySelector('.city-text-wrapper') as HTMLElement;
