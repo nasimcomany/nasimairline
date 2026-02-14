@@ -1340,7 +1340,7 @@ const HomePage: React.FC = () => {
           <div 
             className="bg-blue-900 flex flex-col md:flex-row items-center justify-between gap-5 px-8 py-6 relative"
             style={{
-              borderRadius: '12px',
+              borderRadius: '14px',
               overflow: 'visible'
             }}
           >
@@ -1348,7 +1348,7 @@ const HomePage: React.FC = () => {
               className="flex items-center" 
               style={{ 
                 position: 'absolute',
-                right: '-20px',
+                right: '-22px',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 zIndex: 10,
@@ -1358,8 +1358,8 @@ const HomePage: React.FC = () => {
               <div 
                 className="square-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '100px',
-                  height: '100px',
+                  width: '115px',
+                  height: '115px',
                   background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -1370,7 +1370,7 @@ const HomePage: React.FC = () => {
                 <div 
                   className="text-gray-700 font-bold"
                   style={{
-                    fontSize: '11px',
+                    fontSize: '13px',
                     letterSpacing: '2px',
                     transform: 'rotate(40deg)', // خنثی‌کردن چرخش والد
                     transformOrigin: 'center',
@@ -1383,8 +1383,8 @@ const HomePage: React.FC = () => {
               <div 
                 className="square-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '100px',
-                  height: '100px',
+                  width: '115px',
+                  height: '115px',
                   background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -1397,7 +1397,7 @@ const HomePage: React.FC = () => {
                 <div 
                   className="text-gray-700 font-bold"
                   style={{
-                    fontSize: '11px',
+                    fontSize: '13px',
                     letterSpacing: '2px',
                     transform: 'rotate(40deg)', // خنثی‌کردن چرخش والد
                     transformOrigin: 'center',
@@ -1410,8 +1410,8 @@ const HomePage: React.FC = () => {
               <div 
                 className="square-full flex flex-col items-center justify-center"
                 style={{ 
-                  width: '100px',
-                  height: '100px',
+                  width: '115px',
+                  height: '115px',
                   background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -1421,7 +1421,7 @@ const HomePage: React.FC = () => {
                <div 
                   className="text-gray-700 font-bold"
                   style={{
-                    fontSize: '11px',
+                    fontSize: '13px',
                     letterSpacing: '2px',
                     transform: 'rotate(40deg)', // خنثی‌کردن چرخش والد
                     transformOrigin: 'center',
@@ -1434,15 +1434,16 @@ const HomePage: React.FC = () => {
             </div>
 
             <div className="flex-1 text-center md:text-left" style={{ paddingRight: language === 'en' ? '0' : '0' }}>
-              <h3 className={`text-base sm:text-lg md:text-xl font-semibold text-white mb-1 ${fontClass}`} style={{ 
+              <h3 className={`text-lg sm:text-xl md:text-2xl font-semibold text-white mb-2 ${fontClass}`} style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}>
                 {t('home.loyalty.joinTitle')}
               </h3>
-              <p className={`text-gray-400 text-xs md:text-sm ${fontClass}`} style={{ 
+              <p className={`text-gray-400 text-sm md:text-base ${fontClass}`} style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                direction: language === 'en' ? 'ltr' : 'rtl'
+                direction: language === 'en' ? 'ltr' : 'rtl',
+                lineHeight: '1.5'
               }}>
                 {t('home.loyalty.joinDescription')}
               </p>
@@ -1450,7 +1451,7 @@ const HomePage: React.FC = () => {
 
             <button 
               onClick={() => navigate('/membership')}
-              className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 rounded-lg transition-colors whitespace-nowrap text-xs sm:text-sm" style={{ 
+              className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-5 sm:px-7 py-2.5 rounded-lg transition-colors whitespace-nowrap text-sm sm:text-base" style={{ 
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
