@@ -1065,8 +1065,8 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Flight Search Form at Bottom - سایز بزرگتر */}
-          <div className="max-w-7xl mx-auto w-full px-6 sm:px-8 pb-6 sm:pb-10 overflow-visible" style={{ marginTop: 'clamp(48px, 7vw, 88px)', padding: 'clamp(28px, 4vw, 48px)', pointerEvents: 'auto' }}>
+          {/* Flight Search Form at Bottom - سایز بزرگتر؛ 1cm پایین‌تر */}
+          <div className="max-w-7xl mx-auto w-full px-6 sm:px-8 pb-6 sm:pb-10 overflow-visible" style={{ marginTop: 'clamp(48px, 7vw, 88px)', padding: 'clamp(28px, 4vw, 48px)', paddingTop: 'calc(clamp(28px, 4vw, 48px) + 1cm)', pointerEvents: 'auto' }}>
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
               </div>
             </div>

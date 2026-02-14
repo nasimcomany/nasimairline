@@ -226,8 +226,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
 
           {/* Logo with Blue Flag - Smaller copy in center */}
           <div 
-            className={`hidden lg:flex items-center absolute ${language === 'fa' ? 'right-[290px]' : 'right-[215px]'}`}
+            className={`hidden lg:flex items-center absolute ${language === 'fa' ? '' : 'right-[145px]'}`}
             style={{ 
+              ...(language === 'fa' ? { right: 'calc(290px - 2cm)' } : {}),
               bottom: '-60px',
               transform: isScrolled ? 'translateY(-40px)' : 'translateY(0)',
               transition: 'transform 2.0s ease-in-out'
@@ -275,7 +276,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               >
                 <Link
                   to={item.path}
-                  className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
+                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`}
                   style={{ 
                     borderBottom: activeDropdown === item.key ? '2px solid #000' : '2px solid transparent',
                     textTransform: 'uppercase',
@@ -564,7 +565,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <button 
-                  className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`} 
+                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`} 
                   style={{ 
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
@@ -650,7 +651,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <button
-                  className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
+                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`}
                   style={{ 
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -722,7 +723,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   }}
                 >
                   <button
-                    className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
+                    className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`}
                     style={{ 
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
@@ -785,7 +786,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     setAuthModalMode('register');
                     setIsAuthModalOpen(true);
                   }}
-                  className={`px-4 py-2 text-base font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass}`}
+                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`}
                   style={{ 
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
