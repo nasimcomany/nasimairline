@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../store/hooks';
@@ -56,6 +57,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const loginDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const userDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const menuDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const whereweflyTriggerRef = useRef<HTMLDivElement | null>(null);
+  const [whereweflyDropdownStyle, setWhereweflyDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -217,18 +220,30 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Compute wherewefly dropdown position for Portal (fixed, centered, never clipped)
+  useEffect(() => {
+    if (activeDropdown === 'wherewefly' && whereweflyTriggerRef.current) {
+      const rect = whereweflyTriggerRef.current.getBoundingClientRect();
+      const dropdownWidth = Math.min(1400, window.innerWidth - 48);
+      const left = Math.max(24, Math.min(window.innerWidth - dropdownWidth - 24, rect.left + rect.width / 2 - dropdownWidth / 2));
+      setWhereweflyDropdownStyle({ top: rect.bottom + 8, left, width: dropdownWidth });
+    } else {
+      setWhereweflyDropdownStyle(null);
+    }
+  }, [activeDropdown]);
+
   return (
     <header className="sticky top-0 z-50 relative" style={{ overflow: 'visible' }}>
       <div className="flex h-20 relative" style={{ overflow: 'visible' }}>
         {/* Dark Navigation Section - Glassmorphism */}
         <div className="flex-1 bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center justify-between">
-        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative" style={{ overflow: 'visible' }}>
 
-          {/* Logo with Blue Flag - Smaller copy in center */}
+          {/* Logo with Blue Flag - در فارسی موازی با شروع رزرو پرواز (max-w-7xl + px-8) */}
           <div 
-            className={`hidden lg:flex items-center absolute ${language === 'fa' ? '' : 'right-[175px]'}`}
+            className={`hidden lg:flex items-center absolute ${language === 'fa' ? '' : 'right-[215px]'}`}
             style={{ 
-              ...(language === 'fa' ? { right: 'calc(290px + 0cm)' } : {}),
+              ...(language === 'fa' ? { right: 'max(1.5rem, calc((100vw - 80rem) / 2 + 2rem))' } : {}),
               bottom: '-60px',
               transform: isScrolled ? 'translateY(-40px)' : 'translateY(0)',
               transition: 'transform 2.0s ease-in-out'
@@ -266,10 +281,11 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
           </div>
 
           {/* Desktop Navigation - All items together and centered */}
-          <nav className="hidden lg:flex items-center justify-center space-x-3 space-x-reverse h-full">
+          <nav className="hidden lg:flex items-center justify-center space-x-3 space-x-reverse h-full" style={{ overflow: 'visible' }}>
             {menuItems.map((item) => (
               <div
                 key={item.key}
+                ref={item.key === 'wherewefly' ? whereweflyTriggerRef : undefined}
                 className="relative h-full flex items-center"
                 onMouseEnter={() => handleMouseEnter(item.key, item.dropdown && item.dropdown.length > 0)}
                 onMouseLeave={handleMouseLeave}
@@ -300,10 +316,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   {item.label}
                 </Link>
                 
-                {/* Dropdown Menu with Image */}
-                {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && (
+                {/* Dropdown Menu with Image - wherewefly uses Portal to avoid clipping; others inline */}
+                {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && item.key !== 'wherewefly' && (
                   <div 
-                    className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 ${item.key === 'wherewefly' ? 'w-[1400px]' : 'w-[900px]'} bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-50 overflow-hidden`}
+                    className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[9999] overflow-hidden w-[900px] max-w-[calc(100vw-48px)]`}
                     onMouseEnter={() => {
                       // Clear timeout when mouse enters dropdown
                       if (menuDropdownTimeoutRef.current) {
@@ -420,8 +436,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                       
                       {/* Image Section */}
                       {item.key === 'wherewefly' ? (
-                        // Multiple images grid for destinations - Larger size
-                        <div className="flex-1 h-[600px] bg-gray-100 flex-shrink-0 relative overflow-hidden m-4 rounded-2xl p-4">
+                        // Multiple images grid for destinations
+                        <div className="flex-1 min-w-0 h-[600px] bg-gray-100 flex-shrink relative overflow-hidden m-4 rounded-2xl p-4">
                           <div className="grid grid-cols-3 gap-4 h-full">
                             {getDestinationImages(
                               selectedDestinationIndex !== null 
@@ -548,6 +564,115 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 )}
               </div>
             ))}
+
+            {/* Wherewefly Dropdown via Portal - prevents icon/menu clipping */}
+            {activeDropdown === 'wherewefly' && whereweflyDropdownStyle && (() => {
+              const item = menuItems.find(m => m.key === 'wherewefly');
+              if (!item?.dropdown) return null;
+              const getSubItemIcon = (label: string, key: string, itemIndex: number, path: string) => {
+                if (key === 'wherewefly') return <MapPinIcon className="w-7 h-7 flex-shrink-0" style={{ color: '#ea580c' }} />;
+                return null;
+              };
+              return createPortal(
+                <div
+                  className="fixed bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[9999] overflow-visible"
+                  style={{ top: whereweflyDropdownStyle.top, left: whereweflyDropdownStyle.left, width: whereweflyDropdownStyle.width }}
+                  onMouseEnter={() => {
+                    if (menuDropdownTimeoutRef.current) {
+                      clearTimeout(menuDropdownTimeoutRef.current);
+                      menuDropdownTimeoutRef.current = null;
+                    }
+                  }}
+                  onMouseLeave={() => { handleMouseLeave(); setHoveredSubItem(null); }}
+                >
+                  <div className="flex overflow-hidden rounded-xl">
+                    <div className="w-80 flex-shrink-0 py-6 px-6">
+                      <div className="space-y-2">
+                        {item.dropdown.map((subItem, index) => (
+                          <Link
+                            key={index}
+                            to={subItem.path}
+                            className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${selectedDestinationIndex === index ? 'bg-gray-300' : ''}`}
+                            onClick={(e) => {
+                              if (subItem.path === '#') { e.preventDefault(); setActiveDropdown(null); return; }
+                              if (subItem.path !== '/flights/map') { e.preventDefault(); setSelectedDestinationIndex(index); return; }
+                              setActiveDropdown(null);
+                            }}
+                            onMouseEnter={() => setHoveredSubItem({ key: 'wherewefly', index })}
+                            onMouseLeave={() => setHoveredSubItem(null)}
+                          >
+                            {getSubItemIcon(subItem.label, 'wherewefly', index, subItem.path)}
+                            <span className="font-medium truncate">{subItem.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 h-[600px] bg-gray-100 flex-shrink relative overflow-hidden m-4 rounded-2xl p-4">
+                      <div className="grid grid-cols-3 gap-4 h-full">
+                        {getDestinationImages(
+                          selectedDestinationIndex !== null ? selectedDestinationIndex : (hoveredSubItem?.key === 'wherewefly' ? hoveredSubItem.index : 0)
+                        ).map((destination, imgIndex) => (
+                          <div
+                            key={imgIndex}
+                            className="relative overflow-hidden rounded-lg group cursor-pointer"
+                            style={{ minHeight: '180px' }}
+                            onMouseEnter={(e) => {
+                              const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
+                              const textWrapper = e.currentTarget.querySelector('.city-text-wrapper') as HTMLElement;
+                              if (labelDiv) {
+                                const parent = e.currentTarget;
+                                const scaleX = (parent.clientWidth + 30) / labelDiv.getBoundingClientRect().width;
+                                const scaleY = (parent.clientHeight + 40) / labelDiv.getBoundingClientRect().height;
+                                labelDiv.style.transform = `scale(${scaleX}, ${scaleY})`;
+                                labelDiv.style.borderRadius = '0';
+                                labelDiv.style.display = 'flex';
+                                labelDiv.style.alignItems = 'center';
+                                labelDiv.style.justifyContent = 'center';
+                                labelDiv.style.backgroundColor = 'rgba(75, 85, 99, 0.85)';
+                                labelDiv.style.bottom = '0';
+                                labelDiv.style.left = '0';
+                                if (textWrapper) {
+                                  textWrapper.style.transform = `scale(${1/scaleX}, ${1/scaleY})`;
+                                }
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              const labelDiv = e.currentTarget.querySelector('.city-label') as HTMLElement;
+                              const textWrapper = e.currentTarget.querySelector('.city-text-wrapper') as HTMLElement;
+                              if (labelDiv) {
+                                labelDiv.style.transform = 'scale(1)';
+                                labelDiv.style.borderRadius = '0.375rem';
+                                labelDiv.style.display = 'block';
+                                labelDiv.style.alignItems = 'auto';
+                                labelDiv.style.justifyContent = 'auto';
+                                labelDiv.style.backgroundColor = 'rgba(55, 65, 81, 0.9)';
+                                labelDiv.style.bottom = '0.5rem';
+                                labelDiv.style.left = '0.5rem';
+                                labelDiv.style.width = 'auto';
+                                labelDiv.style.height = 'auto';
+                                if (textWrapper) textWrapper.style.transform = 'scale(1)';
+                              }
+                            }}
+                          >
+                            <img src={destination.image} alt={destination.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                              onError={(e) => { (e.target as HTMLImageElement).src = '/images/airplane-clouds-night_864588-19786.jpg'; }} loading="eager" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
+                            <div className="city-label absolute bottom-2 left-2 bg-gray-700/90 text-white px-4 py-2 rounded-md transition-all duration-300 ease-out" style={{ transformOrigin: 'bottom left' }}>
+                              <div className="city-text-wrapper flex items-center justify-center w-full h-full" style={{ minWidth: '100%', minHeight: '100%' }}>
+                                <span className={`city-text text-sm font-medium ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif", whiteSpace: 'nowrap' }}>
+                                  {destination.name}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>,
+                document.body
+              );
+            })()}
 
             {/* Language Dropdown */}
               <div 
