@@ -1500,7 +1500,7 @@ const HomePage: React.FC = () => {
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              {language === 'fa' ? 'مسیرهای پرتقاضا' : language === 'ar' ? 'المسارات ذات الطلب' : 'Popular Routes'}
+              {t('home.popularRoutes')}
             </h2>
           </div>
 

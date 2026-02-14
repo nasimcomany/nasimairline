@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import { useLanguage } from '../contexts/LanguageContext';
 import AuthModal from '../components/Auth/AuthModal';
 import customerService, { MembershipStatus } from '../services/customerService';
 import { 
@@ -34,6 +35,7 @@ interface RootState {
 }
 
 const MembershipPage: React.FC = () => {
+  const { t, language, direction, fontClass } = useLanguage();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [membershipStatus, setMembershipStatus] = useState<MembershipStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +56,7 @@ const MembershipPage: React.FC = () => {
         setMembershipStatus(data);
       } catch (err: any) {
         console.error('Error fetching membership status:', err);
-        setError(err.response?.data?.error || 'خطا در دریافت اطلاعات عضویت');
+        setError(err.response?.data?.error || t('membershipPage.fetchError'));
       } finally {
         setLoading(false);
       }
@@ -93,23 +95,30 @@ const MembershipPage: React.FC = () => {
     }
   };
 
+  const getTierDisplayName = (tier: string) => {
+    const key = `membershipPage.tierName.${tier?.toLowerCase() || 'bronze'}`;
+    const translated = t(key);
+    return translated !== key ? translated : (tier || '');
+  };
+
   const getTierDescription = (tier: string) => {
     switch (tier) {
       case 'BRONZE':
-        return 'شروع سفر با نسیم ایر';
+        return t('membershipPage.tierDesc.bronze');
       case 'SILVER':
-        return 'مسافر منظم';
+        return t('membershipPage.tierDesc.silver');
       case 'GOLD':
-        return 'مسافر VIP';
+        return t('membershipPage.tierDesc.gold');
       case 'PLATINUM':
-        return 'مسافر ممتاز';
+        return t('membershipPage.tierDesc.platinum');
       default:
         return '';
     }
   };
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('fa-IR').format(num);
+    const locale = language === 'en' ? 'en-US' : language === 'ar' ? 'ar-EG' : 'fa-IR';
+    return new Intl.NumberFormat(locale).format(num);
   };
 
   const getMetricDisplay = (metricKey: string, fallbackCurrent: number) => {
@@ -123,55 +132,56 @@ const MembershipPage: React.FC = () => {
   const getProgressLabel = (key: string) => {
     switch (key) {
       case 'total_bookings':
-        return 'تعداد کل رزرو';
+        return t('membershipPage.progressTotalBookings');
       case 'monthly_bookings':
-        return 'رزرو در ماه';
+        return t('membershipPage.progressMonthlyBookings');
       case 'weekly_bookings':
-        return 'رزرو در هفته';
+        return t('membershipPage.progressWeeklyBookings');
       case 'membership_days':
-        return 'روزهای عضویت';
+        return t('membershipPage.progressMembershipDays');
       case 'active_months':
-        return 'ماه‌های فعال';
+        return t('membershipPage.progressActiveMonths');
       case 'completed_flights':
-        return 'پروازهای انجام شده';
+        return t('membershipPage.progressCompletedFlights');
       default:
         return key;
     }
   };
 
-  const tierBenefits: Record<string, Array<{ icon: any; title: string; desc: string }>> = {
+  const getTierBenefits = (tFunc: (k: string) => string): Record<string, Array<{ icon: any; title: string; desc: string }>> => ({
     BRONZE: [
-      { icon: ClockIcon, title: 'اطلاع‌رسانی سریع', desc: 'اعلان سریع تغییرات پرواز و گیت' },
-      { icon: TicketIcon, title: 'انتخاب صندلی استاندارد', desc: 'انتخاب زودتر صندلی معمولی' },
-      { icon: UserGroupIcon, title: 'پشتیبانی بهتر', desc: 'صف پاسخ‌گویی سریع‌تر از مهمان' },
-      { icon: FireIcon, title: 'کمپین‌های مناسبتی', desc: 'دسترسی به کمپین‌های ویژه اعضا' },
+      { icon: ClockIcon, title: tFunc('membershipPage.benefit.fastNotification'), desc: tFunc('membershipPage.benefit.fastNotificationDesc') },
+      { icon: TicketIcon, title: tFunc('membershipPage.benefit.standardSeat'), desc: tFunc('membershipPage.benefit.standardSeatDesc') },
+      { icon: UserGroupIcon, title: tFunc('membershipPage.benefit.betterSupport'), desc: tFunc('membershipPage.benefit.betterSupportDesc') },
+      { icon: FireIcon, title: tFunc('membershipPage.benefit.campaigns'), desc: tFunc('membershipPage.benefit.campaignsDesc') },
     ],
     SILVER: [
-      { icon: TicketIcon, title: 'اولویت لیست انتظار', desc: 'اولویت در standby پروازها' },
-      { icon: TruckIcon, title: 'اولویت خدمات فرودگاهی', desc: 'رسیدگی سریع‌تر در فرودگاه' },
-      { icon: ClockIcon, title: 'پشتیبانی سریع‌تر', desc: 'اولویت در پاسخ پشتیبانی' },
-      { icon: WifiIcon, title: 'انتخاب صندلی بهتر', desc: 'انتخاب زودتر صندلی‌های بهتر' },
+      { icon: TicketIcon, title: tFunc('membershipPage.benefit.waitlistPriority'), desc: tFunc('membershipPage.benefit.waitlistPriorityDesc') },
+      { icon: TruckIcon, title: tFunc('membershipPage.benefit.airportPriority'), desc: tFunc('membershipPage.benefit.airportPriorityDesc') },
+      { icon: ClockIcon, title: tFunc('membershipPage.benefit.fasterSupport'), desc: tFunc('membershipPage.benefit.fasterSupportDesc') },
+      { icon: WifiIcon, title: tFunc('membershipPage.benefit.betterSeat'), desc: tFunc('membershipPage.benefit.betterSeatDesc') },
     ],
     GOLD: [
-      { icon: ShieldCheckIcon, title: 'اولویت سوار شدن', desc: 'Priority Boarding قبل از عموم' },
-      { icon: TruckIcon, title: 'اولویت تحویل بار', desc: 'تحویل بار سریع‌تر در مقصد' },
-      { icon: HeartIcon, title: 'پشتیبانی VIP', desc: 'پشتیبانی اختصاصی اعضای طلایی' },
-      { icon: FireIcon, title: 'اولویت تغییر پرواز', desc: 'در شرایط اضطراری با اولویت' },
+      { icon: ShieldCheckIcon, title: tFunc('membershipPage.benefit.priorityBoarding'), desc: tFunc('membershipPage.benefit.priorityBoardingDesc') },
+      { icon: TruckIcon, title: tFunc('membershipPage.benefit.baggagePriority'), desc: tFunc('membershipPage.benefit.baggagePriorityDesc') },
+      { icon: HeartIcon, title: tFunc('membershipPage.benefit.vipSupport'), desc: tFunc('membershipPage.benefit.vipSupportDesc') },
+      { icon: FireIcon, title: tFunc('membershipPage.benefit.flightChangePriority'), desc: tFunc('membershipPage.benefit.flightChangePriorityDesc') },
     ],
     PLATINUM: [
-      { icon: SparklesIcon, title: 'خدمات ممتاز', desc: 'بالاترین سطح تجربه سفر نسیم ایر' },
-      { icon: ShieldCheckIcon, title: 'اولویت کامل سفر', desc: 'اولویت در اغلب خدمات فرودگاهی' },
-      { icon: HeartIcon, title: 'پشتیبانی ویژه 24/7', desc: 'پاسخ‌گویی ویژه در تمام ساعات' },
-      { icon: TicketIcon, title: 'بیشترین انعطاف سفر', desc: 'دسترسی بهتر به خدمات ویژه' },
+      { icon: SparklesIcon, title: tFunc('membershipPage.benefit.premiumService'), desc: tFunc('membershipPage.benefit.premiumServiceDesc') },
+      { icon: ShieldCheckIcon, title: tFunc('membershipPage.benefit.fullTravelPriority'), desc: tFunc('membershipPage.benefit.fullTravelPriorityDesc') },
+      { icon: HeartIcon, title: tFunc('membershipPage.benefit.support24_7'), desc: tFunc('membershipPage.benefit.support24_7Desc') },
+      { icon: TicketIcon, title: tFunc('membershipPage.benefit.maxFlexibility'), desc: tFunc('membershipPage.benefit.maxFlexibilityDesc') },
     ],
-  };
+  });
 
+  const tierBenefits = getTierBenefits(t);
   const currentTierBenefits = membershipStatus ? (tierBenefits[membershipStatus.current_tier] || []) : [];
   const nextTierBenefits = membershipStatus?.next_tier ? (tierBenefits[membershipStatus.next_tier] || []) : [];
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600" dir={direction}>
         <EmiratesHeader />
         <section className="relative z-10 min-h-[70vh] flex items-center justify-center px-4 py-12">
           <div className="max-w-md mx-auto text-center">
@@ -182,12 +192,12 @@ const MembershipPage: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-900 mb-2" style={{
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif'
               }}>
-                باشگاه مشتریان نسیم ایر
+                {t('membershipPage.clubTitle')}
               </h2>
               <p className="text-gray-600 mb-4 text-sm" style={{
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif'
               }}>
-                برای مشاهده وضعیت عضویت وارد شوید
+                {t('membershipPage.loginToView')}
               </p>
               <button
                 onClick={() => {
@@ -199,7 +209,7 @@ const MembershipPage: React.FC = () => {
                   fontFamily: 'DigiHamisheBold, Arial, sans-serif'
                 }}
               >
-                ورود به حساب کاربری
+                {t('membershipPage.loginButton')}
               </button>
             </div>
           </div>
@@ -216,13 +226,13 @@ const MembershipPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600" dir={direction}>
         <EmiratesHeader />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
             <p className="text-lg" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              در حال بارگذاری...
+              {t('common.loading')}
             </p>
           </div>
         </div>
@@ -232,12 +242,12 @@ const MembershipPage: React.FC = () => {
 
   if (error || !membershipStatus) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600" dir={direction}>
         <EmiratesHeader />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="bg-white rounded-xl p-6 max-w-md mx-4">
             <p className="text-red-600 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-              {error || 'خطا در دریافت اطلاعات'}
+              {error || t('membershipPage.genericError')}
             </p>
           </div>
         </div>
@@ -248,7 +258,7 @@ const MembershipPage: React.FC = () => {
   const TierIcon = getTierIcon(membershipStatus.current_tier);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600" dir={direction}>
       <EmiratesHeader />
 
       {/* Hero Section with Current Tier */}
@@ -263,7 +273,7 @@ const MembershipPage: React.FC = () => {
               <h2 className="text-3xl font-bold text-white mb-2" style={{
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               }}>
-                عضو {membershipStatus.current_tier_display}
+                {language === 'en' ? `${getTierDisplayName(membershipStatus.current_tier)} ${t('membershipPage.member')}` : `${t('membershipPage.member')} ${getTierDisplayName(membershipStatus.current_tier)}`}
               </h2>
               <p className="text-white/90 text-base mb-4">
                 {getTierDescription(membershipStatus.current_tier)}
@@ -271,7 +281,7 @@ const MembershipPage: React.FC = () => {
               <div className="flex items-center gap-2 text-white/80 text-sm">
                 <CalendarIcon className="h-5 w-5" />
                 <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  عضویت از {formatNumber(membershipStatus.membership_duration_days)} روز پیش
+                  {t('membershipPage.membershipSince')} {formatNumber(membershipStatus.membership_duration_days)} {t('membershipPage.daysAgo')}
                 </span>
               </div>
             </div>
@@ -285,7 +295,7 @@ const MembershipPage: React.FC = () => {
                   <TicketIcon className="h-6 w-6 text-blue-600" />
                 </div>
                 <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  کل رزروها
+                  {t('membershipPage.totalBookings')}
                 </span>
               </div>
               <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
@@ -299,7 +309,7 @@ const MembershipPage: React.FC = () => {
                   <ClockIcon className="h-6 w-6 text-indigo-600" />
                 </div>
                 <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  روزهای عضویت
+                  {t('membershipPage.membershipDays')}
                 </span>
               </div>
               <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
@@ -313,7 +323,7 @@ const MembershipPage: React.FC = () => {
                   <CalendarIcon className="h-6 w-6 text-purple-600" />
                 </div>
                 <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  رزرو در ماه
+                  {t('membershipPage.bookingsPerMonth')}
                 </span>
               </div>
               <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
@@ -327,7 +337,7 @@ const MembershipPage: React.FC = () => {
                   <FireIcon className="h-6 w-6 text-orange-600" />
                 </div>
                 <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  ماه‌های فعال
+                  {t('membershipPage.activeMonths')}
                 </span>
               </div>
               <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
@@ -349,10 +359,10 @@ const MembershipPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    پیشرفت به سطح {membershipStatus.next_tier_display}
+                    {t('membershipPage.progressToTier')} {getTierDisplayName(membershipStatus.next_tier || '')}
                   </h3>
                   <p className="text-gray-600 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                    شما در مسیر ارتقا به سطح بعدی هستید
+                    {t('membershipPage.onPathToUpgrade')}
                   </p>
                 </div>
               </div>
@@ -424,12 +434,12 @@ const MembershipPage: React.FC = () => {
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               }}
             >
-              مزایای عضویت شما
+              {t('membershipPage.yourBenefits')}
             </h2>
 
             <div className="mb-6">
               <h3 className="text-lg font-bold text-blue-900 mb-3 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                مزایای سطح فعلی شما ({membershipStatus.current_tier_display})
+                {t('membershipPage.currentTierBenefits')} ({getTierDisplayName(membershipStatus.current_tier)})
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {currentTierBenefits.map((benefit, index) => (
@@ -455,7 +465,7 @@ const MembershipPage: React.FC = () => {
             {membershipStatus.next_tier && membershipStatus.next_tier_display && nextTierBenefits.length > 0 ? (
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-bold text-emerald-700 mb-3 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  اگر {membershipStatus.next_tier_display} شوید، این مزایا را می‌گیرید
+                  {t('membershipPage.ifYouBecome')} {getTierDisplayName(membershipStatus.next_tier || '')} {t('membershipPage.becomeGetBenefits')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {nextTierBenefits.map((benefit, index) => (
@@ -480,14 +490,14 @@ const MembershipPage: React.FC = () => {
             ) : (
               <div className="border-t border-gray-200 pt-6 text-center">
                 <p className="text-emerald-700 font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  شما در بالاترین سطح عضویت هستید.
+                  {t('membershipPage.highestTier')}
                 </p>
               </div>
             )}
             
             <div className="mt-5 text-center">
               <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                مزایا ممکن است طبق سیاست باشگاه مشتریان به‌روزرسانی شوند.
+                {t('membershipPage.benefitsDisclaimer')}
               </p>
             </div>
           </div>
