@@ -369,11 +369,12 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                 placeholder={t('home.flightSearch.origin')}
               />
               
-              {/* Swap Button */}
+              {/* Swap Button - 0.5cm below center */}
               <button
                 type="button"
                 onClick={swapCities}
-                className="absolute left-0 top-7 transform translate-x-1/2 z-10 w-8 h-8 bg-blue-900 hover:bg-blue-800 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+                className="absolute left-0 -translate-y-1/2 translate-x-1/2 z-10 w-8 h-8 bg-blue-900 hover:bg-blue-800 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+                style={{ top: 'calc(40% + 0.5cm)' }}
                 title={t('home.flightSearch.swap')}
               >
                 <ArrowsRightLeftIcon className="w-4 h-4" />
