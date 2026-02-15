@@ -13,9 +13,9 @@ class LimitedAdminSite(AdminSite):
     """
     Custom Admin Site that limits access to only blog and gallery apps
     """
-    site_header = 'پنل مدیریت محدود - مقالات، ایران‌شناسی و گالری'
+    site_header = 'پنل مدیریت محدود - مقالات، چت بات، ایران‌شناسی و گالری'
     site_title = 'پنل محدود'
-    index_title = 'مدیریت مقالات، ایران‌شناسی و گالری'
+    index_title = 'مدیریت مقالات، چت بات، ایران‌شناسی و گالری'
     
     def has_permission(self, request):
         """
@@ -38,8 +38,8 @@ class LimitedAdminSite(AdminSite):
         """
         app_list = super().get_app_list(request)
         
-        # Filter to only show blog and gallery apps
-        allowed_apps = ['blog', 'gallery']
+        # Filter to only show blog, support (chat) and gallery apps
+        allowed_apps = ['blog', 'support', 'gallery']
         filtered_app_list = []
         
         for app in app_list:
@@ -92,4 +92,10 @@ limited_admin_site.register(GalleryCategory, GalleryCategoryAdmin)
 limited_admin_site.register(GalleryAlbum, GalleryAlbumAdmin)
 limited_admin_site.register(GalleryImage, GalleryImageAdmin)
 limited_admin_site.register(HeroSlider, HeroSliderAdmin)
+
+# Register support (chat) models to limited admin site
+from support.models import ChatMessage
+from support.admin import ChatMessageAdmin
+
+limited_admin_site.register(ChatMessage, ChatMessageAdmin)
 

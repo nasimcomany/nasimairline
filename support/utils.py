@@ -202,7 +202,9 @@ def send_chat_notification_telegram(chat_message):
     sender_name = chat_message.get_sender_name()
     message_preview = chat_message.message[:100] + '...' if len(chat_message.message) > 100 else chat_message.message
     admin_base_url = getattr(settings, 'ADMIN_BASE_URL', 'http://127.0.0.1:8000')
-    admin_url = f"{admin_base_url}/admin/support/chatmessage/{chat_message.id}/change/"
+    # limited-admin برای دسترسی هم ادمین و هم limited admin
+    chat_admin_path = getattr(settings, 'CHAT_ADMIN_PATH', 'limited-admin')
+    admin_url = f"{admin_base_url}/{chat_admin_path.rstrip('/')}/support/chatmessage/{chat_message.id}/change/"
     
     # تشخیص نوع درخواست (پیگیری چمدان یا چت عادی)
     metadata = getattr(chat_message, 'metadata', None) or {}
