@@ -416,6 +416,9 @@ const translations = {
     'chat.vpnTip': 'کاربر گرامی، برای پاسخگویی سریع‌تر لطفاً VPN خود را روشن کنید.',
     'chat.luggageTrackingTitle': 'درخواست پیگیری چمدان',
     'chat.luggageTrackingPlaceholder': 'توضیحات درخواست خود را بنویسید...',
+    'chat.luggageTrackingOption': 'درخواست پیگیری چمدان دارید؟',
+    'chat.luggageTrackingClickHere': 'کلیک کنید',
+    'chat.luggageTrackingClose': 'بستن',
     
     // Stats
     'home.stats.destinations': 'مقصد',
@@ -1586,6 +1589,9 @@ const translations = {
     'chat.vpnTip': 'عزيزي المستخدم، للرد بشكل أسرع يرجى تشغيل VPN.',
     'chat.luggageTrackingTitle': 'طلب تتبع الأمتعة',
     'chat.luggageTrackingPlaceholder': 'اكتب تفاصيل طلبك...',
+    'chat.luggageTrackingOption': 'هل تحتاج طلب تتبع الأمتعة؟',
+    'chat.luggageTrackingClickHere': 'اضغط هنا',
+    'chat.luggageTrackingClose': 'إغلاق',
   },
   en: {
     // Navigation
@@ -2368,6 +2374,9 @@ const translations = {
     'chat.vpnTip': 'Dear guest, for faster response please turn on your VPN.',
     'chat.luggageTrackingTitle': 'Luggage tracking request',
     'chat.luggageTrackingPlaceholder': 'Describe your request...',
+    'chat.luggageTrackingOption': 'Need luggage tracking?',
+    'chat.luggageTrackingClickHere': 'Click here',
+    'chat.luggageTrackingClose': 'Close',
   },
 };
 

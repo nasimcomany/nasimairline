@@ -34,7 +34,7 @@ interface ChatWidgetProps {
 
 const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => {
   const { t, language, fontClass } = useLanguage();
-  const { isOpen, openChat, closeChat, chatMode } = useChat();
+  const { isOpen, openChat, closeChat, chatMode, setChatMode } = useChat();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -74,21 +74,26 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     }
   }, [isOpen]);
   
-  // Generate or get session ID
+  // Session ID: استفاده از sessionStorage برای مهمانان (با بستن تب پاک می‌شود) تا چت یک نفر به دیگری نمایش داده نشود
+  const storageKey = 'chat_session_id';
   useEffect(() => {
-    if (!sessionId) {
-      // Try to get from localStorage first (for both authenticated and guest users)
-      const storedSessionId = localStorage.getItem('chat_session_id');
-      if (storedSessionId) {
-        setSessionId(storedSessionId);
-      } else if (!isAuthenticated) {
-        // Generate session ID for guest users only if not in localStorage
+    if (isAuthenticated) {
+      sessionStorage.removeItem(storageKey);
+      localStorage.removeItem(storageKey);
+      setSessionId('');
+      setMessages([]);
+      setLastMessageTime('');
+    } else if (!propSessionId) {
+      const stored = sessionStorage.getItem(storageKey);
+      if (stored) {
+        setSessionId(stored);
+      } else {
         const newSessionId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         setSessionId(newSessionId);
-        localStorage.setItem('chat_session_id', newSessionId);
+        sessionStorage.setItem(storageKey, newSessionId);
       }
     }
-  }, [isAuthenticated, sessionId]);
+  }, [isAuthenticated, propSessionId]);
   
   // Load initial messages when chat opens
   useEffect(() => {
@@ -97,9 +102,9 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     }
   }, [isOpen]);
   
-  // Polling for new messages
+  // Polling for new messages (برای مهمان sessionId لازم است؛ برای کاربر لاگین‌شده backend بر اساس user فیلتر می‌کند)
   useEffect(() => {
-    if (isOpen && sessionId) {
+    if (isOpen && (sessionId || isAuthenticated)) {
       // Start polling every 2 seconds (کاهش فاصله برای دریافت سریع‌تر)
       pollingIntervalRef.current = setInterval(() => {
         loadNewMessages();
@@ -115,7 +120,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
         clearInterval(pollingIntervalRef.current);
       }
     }
-  }, [isOpen, sessionId]);
+  }, [isOpen, sessionId, isAuthenticated]);
   
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -130,9 +135,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     try {
       setIsLoading(true);
       const params: any = {};
-      
-      // استفاده از sessionId از localStorage یا state
-      let currentSessionId = sessionId || localStorage.getItem('chat_session_id') || '';
+      let currentSessionId = sessionId || (isAuthenticated ? '' : sessionStorage.getItem(storageKey) || '');
       if (currentSessionId) {
         params.session_id = currentSessionId;
       }
@@ -158,7 +161,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
             newSessionId = msgAny.session_id;
             if (newSessionId !== currentSessionId) {
               setSessionId(newSessionId);
-              localStorage.setItem('chat_session_id', newSessionId);
+              if (!isAuthenticated) sessionStorage.setItem(storageKey, newSessionId);
             }
             break;
           }
@@ -199,8 +202,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   const loadNewMessages = async () => {
     try {
       const params: any = {};
-      // استفاده از sessionId از localStorage یا state
-      const currentSessionId = sessionId || localStorage.getItem('chat_session_id') || '';
+      const currentSessionId = sessionId || (isAuthenticated ? '' : sessionStorage.getItem(storageKey) || '');
       if (currentSessionId) {
         params.session_id = currentSessionId;
       }
@@ -293,8 +295,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       if (responseData && responseData.session_id) {
         if (responseData.session_id !== sessionId) {
           setSessionId(responseData.session_id);
-          // ذخیره در localStorage
-          localStorage.setItem('chat_session_id', responseData.session_id);
+          if (!isAuthenticated) sessionStorage.setItem(storageKey, responseData.session_id);
         }
       }
       
@@ -377,23 +378,44 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
             </p>
           </div>
           
-          {/* Luggage Tracking - Minimal block when in luggage mode */}
-          {chatMode === 'luggage_tracking' && (
+          {/* Luggage Tracking - Optional: clickable card when normal, expanded block when selected */}
+          {chatMode === 'normal' ? (
+            <button
+              type="button"
+              onClick={() => setChatMode('luggage_tracking')}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 bg-gradient-to-r from-amber-50/90 to-orange-50/90 hover:from-amber-100 hover:to-orange-100 border-b border-amber-200/50 transition-colors text-left"
+              style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <BriefcaseIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <span className={`text-xs text-amber-900 ${fontClass}`}>
+                  {t('chat.luggageTrackingOption')} — {t('chat.luggageTrackingClickHere')}
+                </span>
+              </div>
+              <span className="text-[10px] text-amber-600 font-medium whitespace-nowrap">→</span>
+            </button>
+          ) : (
             <div 
               className="px-3 py-3 bg-gradient-to-r from-amber-50/80 to-orange-50/80 border-b border-amber-200/60"
               style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <BriefcaseIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                <span className={`text-sm font-medium text-amber-900 ${fontClass}`}>
-                  {t('chat.luggageTrackingTitle')}
-                </span>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <BriefcaseIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                  <span className={`text-sm font-medium text-amber-900 ${fontClass}`}>
+                    {t('chat.luggageTrackingTitle')}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setChatMode('normal')}
+                  className="text-[11px] text-amber-700 hover:text-amber-900 font-medium underline flex-shrink-0"
+                >
+                  {t('chat.luggageTrackingClose')}
+                </button>
               </div>
-              <p className={`text-xs text-amber-700/80 mb-2 ${fontClass}`}>
+              <p className={`text-xs text-amber-700/80 mb-0 ${fontClass}`}>
                 {t('chat.luggageTrackingPlaceholder')}
-              </p>
-              <p className="text-[11px] text-amber-600/70 mb-0" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                {language === 'fa' ? 'در کادر پایین درخواست خود را بنویسید و ارسال کنید' : language === 'ar' ? 'اكتب طلبك في المربع أدناه وأرسله' : 'Type your request in the box below and send'}
               </p>
             </div>
           )}
