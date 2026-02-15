@@ -15,7 +15,7 @@ from .constants import (
     MESSAGE_TYPE_CUSTOMER,
     TICKET_CATEGORY_SECURITY,  # حراست - فقط شماره تماس
 )
-from .utils import send_chat_notification_whatsapp
+from .utils import send_chat_notification_whatsapp, send_chat_notification_telegram
 
 
 @receiver(pre_save, sender=Ticket)
@@ -170,7 +170,7 @@ def sync_ticket_with_nira(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ChatMessage)
 def send_whatsapp_notification_on_chat_message(sender, instance, created, **kwargs):
     """
-    Send WhatsApp notification to admin when a new chat message is received from user/guest
+    Send WhatsApp and Telegram notifications to admin when a new chat message is received from user/guest
     Uses threading for async notification to improve response time
     """
     if created and not instance.is_staff:
@@ -181,6 +181,14 @@ def send_whatsapp_notification_on_chat_message(sender, instance, created, **kwar
             daemon=True
         )
         whatsapp_thread.start()
+        
+        # ارسال تلگرام به صورت async
+        telegram_thread = threading.Thread(
+            target=send_chat_notification_telegram,
+            args=(instance,),
+            daemon=True
+        )
+        telegram_thread.start()
 
 
 def cleanup_expired_chat_messages():

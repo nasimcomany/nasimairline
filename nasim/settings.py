@@ -351,6 +351,13 @@ WHATSAPP_API_KEY = os.environ.get('WHATSAPP_API_KEY', '')  # API Key
 WHATSAPP_PHONE_ID = os.environ.get('WHATSAPP_PHONE_ID', '')  # Phone ID (برای Twilio)
 ADMIN_WHATSAPP_NUMBER = os.environ.get('ADMIN_WHATSAPP_NUMBER', '+989379146130')  # شماره واتساپ ادمین (مثال: +989123456789)
 
+# Telegram Bot Configuration (برای اعلان پیام‌های جدید چت)
+# برای دریافت chat_id: به ربات خود در تلگرام /start بفرستید، سپس به آدرس زیر بروید:
+# https://api.telegram.org/bot<TOKEN>/getUpdates و chat.id را از پاسخ کپی کنید
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
+ADMIN_BASE_URL = os.environ.get('ADMIN_BASE_URL', 'http://127.0.0.1:8000')  # آدرس پایه پنل ادمین (در production تغییر دهید)
+
 # تنظیمات API نیرا (Nira) برای سیستم فروش اینترنتی
 # این مقادیر را در فایل .env تنظیم کنید
 NIRA_BASE_URL = os.environ.get('NIRA_BASE_URL', '')  # URL پایه سیستم نیرا (مثال: https://airline.example.com)

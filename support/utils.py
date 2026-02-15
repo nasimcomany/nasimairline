@@ -178,6 +178,64 @@ def send_whatsapp_message(phone_number, message):
         return False
 
 
+def send_chat_notification_telegram(chat_message):
+    """
+    Send Telegram notification to admin when a new chat message is received from user/guest
+    
+    Args:
+        chat_message: ChatMessage instance
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    telegram_bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
+    telegram_chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', None)
+    
+    if not telegram_bot_token or not telegram_chat_id:
+        logger.warning("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured. Skipping Telegram notification.")
+        return False
+    
+    if chat_message.is_staff:
+        return False
+    
+    sender_name = chat_message.get_sender_name()
+    message_preview = chat_message.message[:100] + '...' if len(chat_message.message) > 100 else chat_message.message
+    admin_base_url = getattr(settings, 'ADMIN_BASE_URL', 'http://127.0.0.1:8000')
+    admin_url = f"{admin_base_url}/admin/support/chatmessage/{chat_message.id}/change/"
+    
+    telegram_message = f"""🔔 پیام جدید در چت آنلاین
+
+شما یک پیام جدید دریافت کردید
+
+فرستنده: {sender_name}
+پیام: {message_preview}
+
+برای مشاهده و پاسخ به پیام به پنل ادمین مراجعه کنید:
+{admin_url}"""
+    
+    try:
+        url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
+        payload = {
+            'chat_id': telegram_chat_id,
+            'text': telegram_message,
+            'disable_web_page_preview': True,
+        }
+        response = requests.post(url, json=payload, timeout=10)
+        
+        if response.status_code == 200:
+            logger.info("Telegram notification sent successfully")
+            return True
+        else:
+            logger.error(f"Failed to send Telegram notification. Status: {response.status_code}, Response: {response.text}")
+            return False
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error sending Telegram notification: {e}", exc_info=True)
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error sending Telegram notification: {e}", exc_info=True)
+        return False
+
+
 def send_chat_notification_whatsapp(chat_message):
     """
     Send WhatsApp notification to admin when a new chat message is received from user/guest
