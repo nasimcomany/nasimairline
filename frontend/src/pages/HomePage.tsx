@@ -1126,7 +1126,7 @@ const HomePage: React.FC = () => {
 
           {/* Services Grid - Simple Horizontal Cards with Text Overlay */}
           <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6" style={{ justifyContent: 'center' }}>
-            {/* Service 1: Seat Selection - Wider by default */}
+            {/* Service 1: Seat Selection - Scroll to search form */}
             <div 
               className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
@@ -1137,6 +1137,11 @@ const HomePage: React.FC = () => {
               }}
               onMouseEnter={() => setHoveredService(1)}
               onMouseLeave={() => setHoveredService(null)}
+              onClick={() => {
+                const el = document.getElementById('search-form');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else navigate('/#search-form');
+              }}
             >
               <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                 <img 
@@ -1210,7 +1215,7 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Service 3: Pet Travel */}
+            {/* Service 3: Passenger Meal */}
             <div 
               className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
@@ -1221,11 +1226,12 @@ const HomePage: React.FC = () => {
               }}
               onMouseEnter={() => setHoveredService(3)}
               onMouseLeave={() => setHoveredService(null)}
+              onClick={() => navigate('/meal-feedback')}
             >
               <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                 <img 
                   src="/images/TravelingWithPets.jpg" 
-                  alt="سفر با حیوان خانگی"
+                  alt={t('home.services.passengerMeal')}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
@@ -1240,7 +1246,7 @@ const HomePage: React.FC = () => {
                       fontSize: '1.1rem'
                     }}
                   >
-                    {t('home.services.petTravelFull')}
+                    {t('home.services.passengerMeal')}
                   </p>
                   <div 
                     className="h-0.5 transition-colors duration-300"
@@ -1252,7 +1258,7 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Service 4: Wheelchair Request */}
+            {/* Service 4: Choose flight from map */}
             <div 
               className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
@@ -1263,11 +1269,12 @@ const HomePage: React.FC = () => {
               }}
               onMouseEnter={() => setHoveredService(4)}
               onMouseLeave={() => setHoveredService(null)}
+              onClick={() => navigate('/flights/map')}
             >
               <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                 <img 
                   src="/images/travelwheelchair.jpeg" 
-                  alt="درخواست ویلچر"
+                  alt={t('home.services.flightMapSelect')}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
@@ -1282,7 +1289,7 @@ const HomePage: React.FC = () => {
                       fontSize: '1.1rem'
                     }}
                   >
-                    {t('home.flightSearch.wheelchair')}
+                    {t('home.services.flightMapSelect')}
                   </p>
                   <div 
                     className="h-0.5 transition-colors duration-300"

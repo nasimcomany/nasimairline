@@ -527,7 +527,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
         <div className="p-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <button
-              onClick={() => navigate('/services/seat-selection')}
+              onClick={() => handleTabChange('search')}
               className="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
             >
               <TicketIcon className="w-10 h-10 text-blue-900 mx-auto mb-3 group-hover:scale-110 transition-transform" />
@@ -545,21 +545,21 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               </p>
             </button>
             <button
-              onClick={() => navigate('/services/pet-travel')}
+              onClick={() => navigate('/meal-feedback')}
               className="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
             >
               <MapPinIcon className="w-10 h-10 text-blue-900 mx-auto mb-3 group-hover:scale-110 transition-transform" />
               <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {t('home.flightSearch.petTravel')}
+                {t('home.services.passengerMeal')}
               </p>
             </button>
             <button
-              onClick={() => navigate('/services/wheelchair')}
+              onClick={() => navigate('/flights/map')}
               className="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
             >
               <ClockIcon className="w-10 h-10 text-blue-900 mx-auto mb-3 group-hover:scale-110 transition-transform" />
               <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {t('home.flightSearch.wheelchair')}
+                {t('home.services.flightMapSelect')}
               </p>
             </button>
           </div>
