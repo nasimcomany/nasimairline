@@ -18,6 +18,7 @@ import {
   TicketIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useChat } from '../../contexts/ChatContext';
 import CitySelect from './CitySelect';
 import PassengerSelect from './PassengerSelect';
 import CustomSelect from '../CustomSelect/CustomSelect';
@@ -156,6 +157,7 @@ const renderDayContents = (day: number, date: Date) => {
 };
 
 const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onTabChange }) => {
+  const { openChat } = useChat();
   const [activeTab, setActiveTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
   const [tripType, setTripType] = useState<'roundtrip' | 'oneway'>('roundtrip');
   const [departureDate, setDepartureDate] = useState<Date | null>(new Date());
@@ -536,12 +538,12 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               </p>
             </button>
             <button
-              onClick={() => navigate('/services/extra-baggage')}
+              onClick={() => openChat('luggage_tracking')}
               className="p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg hover:shadow-lg transition-all group"
             >
               <TagIcon className="w-10 h-10 text-blue-900 mx-auto mb-3 group-hover:scale-110 transition-transform" />
               <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                {t('home.flightSearch.extraBaggage')}
+                {t('home.services.luggageTracking')}
               </p>
             </button>
             <button

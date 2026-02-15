@@ -4,6 +4,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useChat } from '../../contexts/ChatContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import api from '../../services/api';
@@ -12,6 +13,7 @@ import {
   XMarkIcon,
   PaperAirplaneIcon,
   SignalIcon,
+  BriefcaseIcon,
 } from '@heroicons/react/24/outline';
 
 interface ChatMessage {
@@ -32,9 +34,8 @@ interface ChatWidgetProps {
 
 const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => {
   const { t, language, fontClass } = useLanguage();
+  const { isOpen, openChat, closeChat, chatMode } = useChat();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [guestName, setGuestName] = useState('');
@@ -281,6 +282,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
         if (guestEmail) payload.guest_email = guestEmail;
       }
       
+      if (chatMode === 'luggage_tracking') {
+        payload.metadata = { request_type: 'luggage_tracking' };
+      }
+      
       const response = await api.post('/support/chat/', payload);
       
       // استخراج session_id از response (اگر backend برگرداند)
@@ -308,10 +313,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   };
   
   const handleToggleChat = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      // Load messages when opening
-      loadMessages();
+    if (isOpen) {
+      closeChat();
+    } else {
+      openChat();
     }
   };
 
@@ -371,6 +376,27 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
               {t('chat.vpnTip')}
             </p>
           </div>
+          
+          {/* Luggage Tracking - Minimal block when in luggage mode */}
+          {chatMode === 'luggage_tracking' && (
+            <div 
+              className="px-3 py-3 bg-gradient-to-r from-amber-50/80 to-orange-50/80 border-b border-amber-200/60"
+              style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <BriefcaseIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <span className={`text-sm font-medium text-amber-900 ${fontClass}`}>
+                  {t('chat.luggageTrackingTitle')}
+                </span>
+              </div>
+              <p className={`text-xs text-amber-700/80 mb-2 ${fontClass}`}>
+                {t('chat.luggageTrackingPlaceholder')}
+              </p>
+              <p className="text-[11px] text-amber-600/70 mb-0" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                {language === 'fa' ? 'در کادر پایین درخواست خود را بنویسید و ارسال کنید' : language === 'ar' ? 'اكتب طلبك في المربع أدناه وأرسله' : 'Type your request in the box below and send'}
+              </p>
+            </div>
+          )}
           
           {/* Messages Container */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 min-h-0">

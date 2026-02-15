@@ -4,6 +4,7 @@ import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import EmiratesFlightSearchForm from '../components/FlightSearch/EmiratesFlightSearchForm';
 import WeatherWidget from '../components/Weather/WeatherWidget';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useChat } from '../contexts/ChatContext';
 import galleryService, { HeroSlider } from '../services/galleryService';
 import { 
   PaperAirplaneIcon, 
@@ -48,6 +49,7 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, fontClass, language } = useLanguage();
+  const { openChat } = useChat();
   const [isLoaded, setIsLoaded] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -1173,7 +1175,7 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Service 2: Extra Baggage */}
+            {/* Service 2: Luggage Tracking (پیگیری چمدان) */}
             <div 
               className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
               style={{ 
@@ -1184,11 +1186,12 @@ const HomePage: React.FC = () => {
               }}
               onMouseEnter={() => setHoveredService(2)}
               onMouseLeave={() => setHoveredService(null)}
+              onClick={() => openChat('luggage_tracking')}
             >
               <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                 <img 
                   src="/images/overload.jpeg" 
-                  alt="خرید اضافه بار"
+                  alt={t('home.services.luggageTracking')}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
                     e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
@@ -1203,7 +1206,7 @@ const HomePage: React.FC = () => {
                       fontSize: '1.1rem'
                     }}
                   >
-                    {t('home.flightSearch.extraBaggage')}
+                    {t('home.services.luggageTracking')}
                   </p>
                   <div 
                     className="h-0.5 transition-colors duration-300"

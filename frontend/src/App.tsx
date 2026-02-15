@@ -36,11 +36,13 @@ import MealFeedbackPage from './pages/MealFeedbackPage';
 import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
 import DisabledRoute from './components/DisabledRoute';
+import { ChatProvider } from './contexts/ChatContext';
 
 function App() {
   return (
     <Provider store={store}>
       <LanguageProvider>
+        <ChatProvider>
         <Router>
           <div className="App">
             <Routes>
@@ -86,6 +88,7 @@ function App() {
             <ScrollToTopButton />
           </div>
         </Router>
+        </ChatProvider>
       </LanguageProvider>
     </Provider>
   );

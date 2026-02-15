@@ -261,6 +261,7 @@ const translations = {
     'home.flightSearch.nationalIdPlaceholder': 'کد ملی یا شماره پاسپورت',
     'home.flightSearch.seatSelection': 'انتخاب صندلی',
     'home.flightSearch.extraBaggage': 'خرید اضافه بار',
+    'home.services.luggageTracking': 'پیگیری چمدان',
     'home.flightSearch.petTravel': 'سفر با حیوان',
     'home.services.petTravelFull': 'سفر با حیوان خانگی',
     'home.flightSearch.wheelchair': 'درخواست ویلچر',
@@ -413,6 +414,8 @@ const translations = {
     'chat.guestEmail': 'ایمیل شما',
     'chat.placeholder': 'پیام خود را بنویسید...',
     'chat.vpnTip': 'کاربر گرامی، برای پاسخگویی سریع‌تر لطفاً VPN خود را روشن کنید.',
+    'chat.luggageTrackingTitle': 'درخواست پیگیری چمدان',
+    'chat.luggageTrackingPlaceholder': 'توضیحات درخواست خود را بنویسید...',
     
     // Stats
     'home.stats.destinations': 'مقصد',
@@ -1045,6 +1048,7 @@ const translations = {
     'home.flightSearch.nationalIdPlaceholder': 'رقم الهوية أو رقم جواز السفر',
     'home.flightSearch.seatSelection': 'اختيار المقعد',
     'home.flightSearch.extraBaggage': 'شراء أمتعة إضافية',
+    'home.services.luggageTracking': 'تتبع الأمتعة',
     'home.flightSearch.petTravel': 'السفر مع حيوان أليف',
     'home.services.petTravelFull': 'السفر مع حيوان أليف',
     'home.flightSearch.wheelchair': 'طلب كرسي متحرك',
@@ -1580,6 +1584,8 @@ const translations = {
     'chat.guestEmail': 'بريدك الإلكتروني',
     'chat.placeholder': 'اكتب رسالتك...',
     'chat.vpnTip': 'عزيزي المستخدم، للرد بشكل أسرع يرجى تشغيل VPN.',
+    'chat.luggageTrackingTitle': 'طلب تتبع الأمتعة',
+    'chat.luggageTrackingPlaceholder': 'اكتب تفاصيل طلبك...',
   },
   en: {
     // Navigation
@@ -1925,6 +1931,7 @@ const translations = {
     'home.flightSearch.nationalIdPlaceholder': 'National ID or Passport Number',
     'home.flightSearch.seatSelection': 'Seat Selection',
     'home.flightSearch.extraBaggage': 'Extra Baggage',
+    'home.services.luggageTracking': 'Luggage tracking',
     'home.flightSearch.petTravel': 'Pet Travel',
     'home.services.petTravelFull': 'Pet Travel',
     'home.flightSearch.wheelchair': 'Wheelchair Request',
@@ -2359,6 +2366,8 @@ const translations = {
     'chat.guestEmail': 'Your Email',
     'chat.placeholder': 'Type your message...',
     'chat.vpnTip': 'Dear guest, for faster response please turn on your VPN.',
+    'chat.luggageTrackingTitle': 'Luggage tracking request',
+    'chat.luggageTrackingPlaceholder': 'Describe your request...',
   },
 };
 

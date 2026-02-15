@@ -247,6 +247,7 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
     Serializer for creating chat messages
     """
     session_id = serializers.CharField(required=False, allow_blank=True)
+    metadata = serializers.JSONField(required=False, default=dict)
     
     class Meta:
         model = ChatMessage
@@ -255,6 +256,7 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
             'guest_name',
             'guest_email',
             'session_id',
+            'metadata',
         ]
     
     def validate(self, attrs):

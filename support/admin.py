@@ -205,7 +205,7 @@ class ChatMessageAdmin(admin.ModelAdmin):
     """
     Admin for ChatMessage - Simple and secure
     """
-    list_display = ['uuid', 'sender_display', 'message_preview', 'is_staff', 'is_read', 'session_id', 'created_at']
+    list_display = ['uuid', 'sender_display', 'request_type_display', 'message_preview', 'is_staff', 'is_read', 'session_id', 'created_at']
     list_filter = ['is_staff', 'is_read', 'created_at']
     search_fields = ['message', 'guest_name', 'guest_email', 'session_id']
     list_editable = ['is_read']
@@ -217,7 +217,7 @@ class ChatMessageAdmin(admin.ModelAdmin):
             'fields': ('uuid', 'user', 'guest_name', 'guest_email', 'message', 'is_staff', 'is_read', 'session_id')
         }),
         (_('اطلاعات فنی'), {
-            'fields': ('message_ip', 'expires_at'),
+            'fields': ('message_ip', 'metadata', 'expires_at'),
             'classes': ('collapse',)
         }),
         (_('تاریخ‌ها'), {
@@ -231,6 +231,14 @@ class ChatMessageAdmin(admin.ModelAdmin):
             return f"{obj.user.get_full_name() or obj.user.email} (کاربر)"
         return f"{obj.guest_name or 'مهمان'} (مهمان)"
     sender_display.short_description = _('فرستنده')
+    
+    def request_type_display(self, obj):
+        """Display request type (پیگیری چمدان or normal chat)"""
+        metadata = getattr(obj, 'metadata', None) or {}
+        if isinstance(metadata, dict) and metadata.get('request_type') == 'luggage_tracking':
+            return _('پیگیری چمدان')
+        return '-'
+    request_type_display.short_description = _('نوع درخواست')
     
     def message_preview(self, obj):
         """Display message preview"""

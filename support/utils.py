@@ -204,7 +204,12 @@ def send_chat_notification_telegram(chat_message):
     admin_base_url = getattr(settings, 'ADMIN_BASE_URL', 'http://127.0.0.1:8000')
     admin_url = f"{admin_base_url}/admin/support/chatmessage/{chat_message.id}/change/"
     
-    telegram_message = f"""🔔 پیام جدید در چت آنلاین
+    # تشخیص نوع درخواست (پیگیری چمدان یا چت عادی)
+    metadata = getattr(chat_message, 'metadata', None) or {}
+    request_type = metadata.get('request_type') if isinstance(metadata, dict) else None
+    request_label = 'پیگیری چمدان' if request_type == 'luggage_tracking' else 'چت آنلاین'
+    
+    telegram_message = f"""🔔 پیام جدید ({request_label})
 
 شما یک پیام جدید دریافت کردید
 

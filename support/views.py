@@ -426,13 +426,16 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             # Expiry: 72 ساعت برای کاربران عضو
             expires_at = timezone.now() + timedelta(hours=72)
             
-            serializer.save(
-                user=request.user,
-                message_ip=self._get_client_ip(request),
-                is_staff=is_staff_value,  # همیشه False برای کاربران عادی
-                session_id=session_id,
-                expires_at=expires_at,
-            )
+            save_kwargs = {
+                'user': request.user,
+                'message_ip': self._get_client_ip(request),
+                'is_staff': is_staff_value,
+                'session_id': session_id,
+                'expires_at': expires_at,
+            }
+            if serializer.validated_data.get('metadata'):
+                save_kwargs['metadata'] = serializer.validated_data['metadata']
+            serializer.save(**save_kwargs)
         else:
             # برای کاربران مهمان
             session_id = request.data.get('session_id') or self._generate_session_id(request)
@@ -441,12 +444,15 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             # Expiry: تا زمانی که از سایت خارج نشده (24 ساعت - می‌توان بعداً با session tracking بهبود داد)
             expires_at = timezone.now() + timedelta(hours=24)
             
-            serializer.save(
-                message_ip=self._get_client_ip(request),
-                session_id=session_id,
-                is_staff=False,  # مهمانان همیشه False هستند
-                expires_at=expires_at,
-            )
+            save_kwargs = {
+                'message_ip': self._get_client_ip(request),
+                'session_id': session_id,
+                'is_staff': False,
+                'expires_at': expires_at,
+            }
+            if serializer.validated_data.get('metadata'):
+                save_kwargs['metadata'] = serializer.validated_data['metadata']
+            serializer.save(**save_kwargs)
     
     def _get_client_ip(self, request):
         """Get client IP address"""
