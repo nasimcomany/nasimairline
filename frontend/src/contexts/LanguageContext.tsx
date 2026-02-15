@@ -410,6 +410,7 @@ const translations = {
     'chat.guestName': 'نام شما',
     'chat.guestEmail': 'ایمیل شما',
     'chat.placeholder': 'پیام خود را بنویسید...',
+    'chat.vpnTip': 'کاربر گرامی، برای پاسخگویی سریع‌تر لطفاً VPN خود را روشن کنید.',
     
     // Stats
     'home.stats.destinations': 'مقصد',
@@ -1574,6 +1575,7 @@ const translations = {
     'chat.guestName': 'اسمك',
     'chat.guestEmail': 'بريدك الإلكتروني',
     'chat.placeholder': 'اكتب رسالتك...',
+    'chat.vpnTip': 'عزيزي المستخدم، للرد بشكل أسرع يرجى تشغيل VPN.',
   },
   en: {
     // Navigation
@@ -2350,6 +2352,7 @@ const translations = {
     'chat.guestName': 'Your Name',
     'chat.guestEmail': 'Your Email',
     'chat.placeholder': 'Type your message...',
+    'chat.vpnTip': 'Dear guest, for faster response please turn on your VPN.',
   },
 };
 

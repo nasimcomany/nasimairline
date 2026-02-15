@@ -11,6 +11,7 @@ import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
   PaperAirplaneIcon,
+  SignalIcon,
 } from '@heroicons/react/24/outline';
 
 interface ChatMessage {
@@ -30,7 +31,7 @@ interface ChatWidgetProps {
 }
 
 const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => {
-  const { t, language } = useLanguage();
+  const { t, language, fontClass } = useLanguage();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   
   const [isOpen, setIsOpen] = useState(false);
@@ -358,6 +359,17 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
+          </div>
+          
+          {/* VPN Tip - Minimal & Chic */}
+          <div 
+            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100/50"
+            style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+          >
+            <SignalIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+            <p className={`text-xs text-blue-800/90 leading-snug ${fontClass}`}>
+              {t('chat.vpnTip')}
+            </p>
           </div>
           
           {/* Messages Container */}
