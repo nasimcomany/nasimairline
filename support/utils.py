@@ -188,8 +188,9 @@ def send_chat_notification_telegram(chat_message):
     Returns:
         bool: True if successful, False otherwise
     """
-    telegram_bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
-    telegram_chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', None)
+    logger.info("send_chat_notification_telegram called for message id=%s", chat_message.id)
+    telegram_bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None) or ''
+    telegram_chat_id = str(getattr(settings, 'TELEGRAM_CHAT_ID', None) or '').strip()
     
     if not telegram_bot_token or not telegram_chat_id:
         logger.warning("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured. Skipping Telegram notification.")
@@ -216,11 +217,15 @@ def send_chat_notification_telegram(chat_message):
     try:
         url = f"https://api.telegram.org/bot{telegram_bot_token}/sendMessage"
         payload = {
-            'chat_id': telegram_chat_id,
+            'chat_id': str(telegram_chat_id),
             'text': telegram_message,
             'disable_web_page_preview': True,
         }
-        response = requests.post(url, json=payload, timeout=10)
+        proxies = None
+        telegram_proxy = getattr(settings, 'TELEGRAM_PROXY', None) or ''
+        if telegram_proxy:
+            proxies = {'http': telegram_proxy, 'https': telegram_proxy}
+        response = requests.post(url, json=payload, timeout=15, proxies=proxies)
         
         if response.status_code == 200:
             logger.info("Telegram notification sent successfully")

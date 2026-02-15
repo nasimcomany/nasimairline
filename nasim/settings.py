@@ -357,6 +357,8 @@ ADMIN_WHATSAPP_NUMBER = os.environ.get('ADMIN_WHATSAPP_NUMBER', '+989379146130')
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
 ADMIN_BASE_URL = os.environ.get('ADMIN_BASE_URL', 'http://127.0.0.1:8000')  # آدرس پایه پنل ادمین (در production تغییر دهید)
+# پروکسی برای تلگرام (اختیاری - اگر api.telegram.org در دسترس نیست، مثلاً: http://127.0.0.1:1080)
+TELEGRAM_PROXY = os.environ.get('TELEGRAM_PROXY', '')
 
 # تنظیمات API نیرا (Nira) برای سیستم فروش اینترنتی
 # این مقادیر را در فایل .env تنظیم کنید
