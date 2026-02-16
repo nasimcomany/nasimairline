@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'gallery',  # Gallery and media management
     'support',  # Support and ticket system
     'customer_service',  # Customer service and tier management
+    'sms',  # ارسال پیامک با ملی پیامک (باشگاه مشتریان و شماره‌های دلخواه)
     'main',  # اپ قبلی
 ]
 
@@ -359,6 +360,12 @@ TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
 ADMIN_BASE_URL = os.environ.get('ADMIN_BASE_URL', 'http://127.0.0.1:8000')  # آدرس پایه پنل ادمین (در production تغییر دهید)
 # پروکسی برای تلگرام (اختیاری - اگر api.telegram.org در دسترس نیست، مثلاً: http://127.0.0.1:1080)
 TELEGRAM_PROXY = os.environ.get('TELEGRAM_PROXY', '')
+
+# تنظیمات ملی پیامک (MelliPayamak / Payamak-Panel) برای ارسال پیامک
+# از پنل ادمین می‌توان به مشتریان برنزی/نقره‌ای/طلایی و شماره‌های دلخواه پیامک ارسال کرد
+MELLIPAYAMAK_USERNAME = os.environ.get('MELLIPAYAMAK_USERNAME', '')
+MELLIPAYAMAK_PASSWORD = os.environ.get('MELLIPAYAMAK_PASSWORD', '')
+MELLIPAYAMAK_FROM_NUMBER = os.environ.get('MELLIPAYAMAK_FROM_NUMBER', '')  # شماره خط فرستنده (مثال: 3000xxxx یا 5000xxxx)
 
 # تنظیمات API نیرا (Nira) برای سیستم فروش اینترنتی
 # این مقادیر را در فایل .env تنظیم کنید
