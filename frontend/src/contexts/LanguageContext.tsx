@@ -190,6 +190,22 @@ const translations = {
     'auth.emailPlaceholder': 'ایمیل خود را وارد کنید',
     'auth.firstNamePlaceholder': 'نام خود را وارد کنید',
     'auth.lastNamePlaceholder': 'نام خانوادگی خود را وارد کنید',
+    'auth.passwordPlaceholder': 'رمز عبور',
+    
+    // Profile & Verification
+    'profile.completeVerification': 'لطفاً احراز هویت خود را تکمیل کنید',
+    'profile.completeVerificationDesc': 'شماره تلفن خود را در پروفایل اضافه کنید تا از خدمات پیامکی و پشتیبانی بهره‌مند شوید.',
+    
+    // Forgot Password
+    'forgotPassword.title': 'بازیابی رمز عبور',
+    'forgotPassword.step1Desc': 'ایمیل خود را وارد کنید تا کد تأیید ارسال شود',
+    'forgotPassword.step2Desc': 'کد دریافتی و رمز عبور جدید را وارد کنید',
+    'forgotPassword.sendCode': 'ارسال کد تأیید',
+    'forgotPassword.verificationCode': 'کد تأیید (۶ رقم)',
+    'forgotPassword.newPassword': 'رمز عبور جدید',
+    'forgotPassword.confirmPassword': 'تکرار رمز عبور',
+    'forgotPassword.resetPassword': 'تغییر رمز',
+    'forgotPassword.backToLogin': 'بازگشت به ورود',
     
     // Homepage
     'home.hero.flyWithNasim': 'پرواز با نسیم ایر',
@@ -980,6 +996,22 @@ const translations = {
     'auth.firstNamePlaceholder': 'أدخل اسمك الأول',
     'auth.lastNamePlaceholder': 'أدخل اسم عائلتك',
     'auth.phonePlaceholder': 'أدخل رقم هاتفك',
+    'auth.passwordPlaceholder': 'كلمة المرور',
+    
+    // Profile & Verification
+    'profile.completeVerification': 'يرجى إكمال التحقق من هويتك',
+    'profile.completeVerificationDesc': 'أضف رقم هاتفك في الملف الشخصي للاستفادة من خدمات الرسائل والدعم.',
+    
+    // Forgot Password
+    'forgotPassword.title': 'استعادة كلمة المرور',
+    'forgotPassword.step1Desc': 'أدخل بريدك الإلكتروني لإرسال رمز التحقق',
+    'forgotPassword.step2Desc': 'أدخل الرمز المستلم وكلمة المرور الجديدة',
+    'forgotPassword.sendCode': 'إرسال رمز التحقق',
+    'forgotPassword.verificationCode': 'رمز التحقق (6 أرقام)',
+    'forgotPassword.newPassword': 'كلمة المرور الجديدة',
+    'forgotPassword.confirmPassword': 'تأكيد كلمة المرور',
+    'forgotPassword.resetPassword': 'تغيير كلمة المرور',
+    'forgotPassword.backToLogin': 'العودة لتسجيل الدخول',
     
     // Homepage
     'home.hero.flyWithNasim': 'الطيران مع نسيم إير',
@@ -1761,6 +1793,23 @@ const translations = {
     'auth.registerSuccess': 'Registration successful. Logging in...',
     'auth.loginError': 'Username or password is incorrect',
     'auth.registerError': 'Registration error. Please try again',
+    'auth.passwordPlaceholder': 'Password',
+    
+    // Profile & Verification
+    'profile.completeVerification': 'Please complete your verification',
+    'profile.completeVerificationDesc': 'Add your phone number in your profile to benefit from SMS and support services.',
+    
+    // Forgot Password
+    'forgotPassword.title': 'Forgot Password',
+    'forgotPassword.step1Desc': 'Enter your email to receive a verification code',
+    'forgotPassword.step2Desc': 'Enter the code and your new password',
+    'forgotPassword.sendCode': 'Send Verification Code',
+    'forgotPassword.verificationCode': 'Verification Code (6 digits)',
+    'forgotPassword.newPassword': 'New Password',
+    'forgotPassword.confirmPassword': 'Confirm Password',
+    'forgotPassword.resetPassword': 'Reset Password',
+    'forgotPassword.backToLogin': 'Back to Login',
+    
     'nationality.iranian': 'Iranian',
     'nationality.afghan': 'Afghan',
     'nationality.iraqi': 'Iraqi',

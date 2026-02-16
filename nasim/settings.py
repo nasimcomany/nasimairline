@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',  # Image upload for CKEditor
     
     # Local apps
+    'authenticate',  # Auth: login, register, forgot password
     'accounts',
     'flights',
     'bookings',

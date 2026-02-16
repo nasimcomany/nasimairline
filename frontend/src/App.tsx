@@ -7,6 +7,7 @@ import SplashPage from './pages/SplashPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import FlightSearchPage from './pages/FlightSearchPage';
 import FlightResultsPage from './pages/FlightResultsPage';
 import FlightMapPage from './pages/FlightMapPage';
@@ -68,6 +69,9 @@ function App() {
               <Route path="/iranology/:slug" element={<CityArticlesPage />} />
               <Route path="/iranology/:city_slug/:slug" element={<IranologyArticleDetailPage />} />
               <Route path="/meal-feedback" element={<MealFeedbackPage />} />
+
+              {/* Auth Routes */}
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
               {/* Disabled Routes - Redirect to Home for Security */}
               <Route path="/splash" element={<DisabledRoute />} />

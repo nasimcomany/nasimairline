@@ -13,9 +13,9 @@ class LimitedAdminSite(AdminSite):
     """
     Custom Admin Site that limits access to only blog and gallery apps
     """
-    site_header = 'پنل مدیریت محدود - مقالات، چت بات، ایران‌شناسی و گالری'
+    site_header = 'پنل مدیریت محدود - مقالات، چت، گالری، مشتریان و پیامک'
     site_title = 'پنل محدود'
-    index_title = 'مدیریت مقالات، چت بات، ایران‌شناسی و گالری'
+    index_title = 'مدیریت مقالات، چت، گالری، مشتریان و پیامک'
     
     def has_permission(self, request):
         """
@@ -38,8 +38,8 @@ class LimitedAdminSite(AdminSite):
         """
         app_list = super().get_app_list(request)
         
-        # Filter to only show blog, support (chat) and gallery apps
-        allowed_apps = ['blog', 'support', 'gallery']
+        # Filter to only show blog, support (chat), gallery, accounts (customers) and sms apps
+        allowed_apps = ['blog', 'support', 'gallery', 'accounts', 'sms']
         filtered_app_list = []
         
         for app in app_list:
@@ -98,4 +98,27 @@ from support.models import ChatMessage
 from support.admin import ChatMessageAdmin
 
 limited_admin_site.register(ChatMessage, ChatMessageAdmin)
+
+# Register SMS models to limited admin site (ارسال پیامک به باشگاه مشتریان)
+from sms.models import SmsLog
+from sms.admin import SmsLogAdmin
+
+limited_admin_site.register(SmsLog, SmsLogAdmin)
+
+# Register accounts membership models to limited admin (لیست مشتریان برنزی/نقره‌ای/طلایی)
+from accounts.models import Wallet, WalletTransaction
+from accounts.admin import (
+    WalletAdmin,
+    WalletTransactionAdmin,
+    MembershipTierConfigAdmin,
+    UserMembershipActivityAdmin,
+    MembershipUpgradeLogAdmin,
+)
+from accounts.membership_models import MembershipTierConfig, UserMembershipActivity, MembershipUpgradeLog
+
+limited_admin_site.register(Wallet, WalletAdmin)
+limited_admin_site.register(WalletTransaction, WalletTransactionAdmin)
+limited_admin_site.register(MembershipTierConfig, MembershipTierConfigAdmin)
+limited_admin_site.register(UserMembershipActivity, UserMembershipActivityAdmin)
+limited_admin_site.register(MembershipUpgradeLog, MembershipUpgradeLogAdmin)
 

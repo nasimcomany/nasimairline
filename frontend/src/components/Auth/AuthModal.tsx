@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { loginUser, registerUser } from '../../store/slices/authSlice';
 import { AppDispatch } from '../../store';
@@ -368,6 +369,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   placeholder={t('auth.captchaPlaceholder')}
                   required
                 />
+              </div>
+
+              {/* Forgot Password Link */}
+              <div className="text-center">
+                <Link
+                  to="/forgot-password"
+                  onClick={onClose}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                >
+                  {t('auth.forgotPassword')}
+                </Link>
               </div>
 
               {/* Submit Button */}

@@ -83,29 +83,51 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['put', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def update_profile(self, request):
-        """Update current user's profile - Only phone_number can be updated and only once"""
+        """Update current user's profile - phone_number and email can be updated"""
         user = request.user
+        allowed_fields = {'phone_number', 'email'}
+        provided_fields = set(request.data.keys())
+        invalid_fields = provided_fields - allowed_fields
+        if invalid_fields:
+            return Response(
+                {'error': 'فقط شماره تلفن و ایمیل قابل ویرایش است.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        # فقط شماره تلفن قابل ویرایش است
+        updated = []
         if 'phone_number' in request.data:
-            # اگر شماره تلفن قبلاً وجود داشته باشد، اجازه تغییر نمی‌دهیم
-            if user.phone_number and user.phone_number.strip():
-                return Response(
-                    {'error': 'شماره تلفن قبلاً ثبت شده و قابل تغییر نیست.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            # فقط شماره تلفن را به‌روزرسانی می‌کنیم
-            user.phone_number = request.data.get('phone_number')
-            user.save(update_fields=['phone_number'])
-        else:
-            # اگر فیلد دیگری غیر از phone_number ارسال شده باشد، خطا می‌دهیم
-            allowed_fields = {'phone_number'}
-            provided_fields = set(request.data.keys())
-            if provided_fields - allowed_fields:
-                return Response(
-                    {'error': 'فقط شماره تلفن قابل ویرایش است.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            new_phone = request.data.get('phone_number', '').strip()
+            if new_phone:
+                from .validators import validate_iranian_phone_number
+                from django.core.exceptions import ValidationError
+                try:
+                    validate_iranian_phone_number(new_phone)
+                except ValidationError as e:
+                    return Response(
+                        {'error': e.messages[0] if e.messages else 'شماره تلفن نامعتبر است'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                if User.objects.filter(phone_number=new_phone).exclude(pk=user.pk).exists():
+                    return Response(
+                        {'error': 'این شماره تلفن قبلاً ثبت شده است.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                user.phone_number = new_phone
+                user.save(update_fields=['phone_number'])
+                updated.append('phone_number')
+        
+        if 'email' in request.data:
+            new_email = request.data.get('email', '').strip().lower()
+            if new_email:
+                if User.objects.filter(email=new_email).exclude(pk=user.pk).exists():
+                    return Response(
+                        {'error': 'این ایمیل قبلاً ثبت شده است.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                user.email = new_email
+                user.username = new_email  # USERNAME_FIELD is email
+                user.save(update_fields=['email', 'username'])
+                updated.append('email')
         
         return Response(UserDetailSerializer(user).data)
     

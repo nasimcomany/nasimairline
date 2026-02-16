@@ -89,6 +89,32 @@ export const authService = {
   },
 
   /**
+   * Request password reset - sends 6-digit code to email
+   */
+  forgotPassword: async (email: string): Promise<{ message: string; email: string }> => {
+    const response = await api.post<{ message: string; email: string }>('/auth/forgot-password/', {
+      email: email.trim().toLowerCase(),
+    });
+    return response.data;
+  },
+
+  /**
+   * Verify reset code and set new password
+   */
+  verifyResetCode: async (
+    email: string,
+    code: string,
+    newPassword: string
+  ): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>('/auth/verify-reset/', {
+      email: email.trim().toLowerCase(),
+      code: code.trim(),
+      new_password: newPassword,
+    });
+    return response.data;
+  },
+
+  /**
    * Refresh access token
    */
   refreshToken: async (): Promise<{ access: string }> => {
