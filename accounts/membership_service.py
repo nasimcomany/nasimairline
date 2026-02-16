@@ -103,6 +103,14 @@ class MembershipTierService:
             logger.info(
                 f"User {user.email} upgraded from {old_tier} to {eligible_tier}"
             )
+            
+            # ارسال پیامک تبریک ارتقا اگر شماره تلفن دارد
+            if getattr(user, 'phone_number', None):
+                try:
+                    from sms.services import send_tier_upgrade_sms
+                    send_tier_upgrade_sms(user, old_tier, eligible_tier)
+                except Exception as sms_err:
+                    logger.warning(f"Tier upgrade SMS failed for {user.email}: {sms_err}")
         
         return True, eligible_tier, old_tier
     

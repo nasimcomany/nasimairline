@@ -185,3 +185,57 @@ def send_sms_mellipayamak(to_list, message, from_number=None):
     if success_count > 0:
         return True, success_count, f"تعداد {success_count} از {len(phones)} پیامک ارسال شد. آخرین خطا: {last_error}"
     return False, 0, last_error or "خطا در ارسال پیامک"
+
+
+# ترجمه tier برای پیامک
+TIER_NAMES_FA = {
+    'BRONZE': 'برنزی',
+    'SILVER': 'نقره‌ای',
+    'GOLD': 'طلایی',
+    'PLATINUM': 'پلاتینیوم',
+}
+
+
+def send_notification_sms(user, message):
+    """
+    ارسال پیامک اطلاع‌رسانی به کاربر (اگر شماره تلفن داشته باشد).
+    در صورت خطا، fail silently و لاگ می‌کند تا جریان اصلی قطع نشود.
+    """
+    phone = getattr(user, 'phone_number', None)
+    if not phone:
+        return
+    normalized = normalize_phone_for_sms(phone)
+    if not normalized:
+        return
+    try:
+        success, count, err = send_sms_mellipayamak([normalized], message)
+        if success:
+            logger.info(f"Notification SMS sent to {normalized} (user {user.pk})")
+        else:
+            logger.warning(f"Notification SMS failed for {normalized}: {err}")
+    except Exception as e:
+        logger.exception(f"Error sending notification SMS to user {user.pk}: {e}")
+
+
+def send_registration_welcome_sms(user):
+    """
+    پیامک خوش‌آمدگویی بعد از ثبت‌نام.
+    """
+    msg = (
+        f"{user.first_name or 'کاربر'} عزیز، به باشگاه مشتریان نسیم ایر خوش آمدید! "
+        f"پروفایل خود را تکمیل کنید تا از مزایای عضویت بهره‌مند شوید. نسیم ایر"
+    )
+    send_notification_sms(user, msg)
+
+
+def send_tier_upgrade_sms(user, old_tier, new_tier):
+    """
+    پیامک تبریک ارتقای سطح عضویت (برنزی→نقره‌ای، نقره‌ای→طلایی، ...)
+    """
+    old_name = TIER_NAMES_FA.get(old_tier, old_tier or 'برنزی')
+    new_name = TIER_NAMES_FA.get(new_tier, new_tier)
+    msg = (
+        f"{user.first_name or 'کاربر'} عزیز، تبریک! سطح عضویت شما از {old_name} به {new_name} ارتقا یافت. "
+        f"از مزایای جدید بهره‌مند شوید. نسیم ایر"
+    )
+    send_notification_sms(user, msg)

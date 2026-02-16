@@ -35,6 +35,15 @@ class UserRegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         
+        # ارسال پیامک خوش‌آمدگویی اگر شماره تلفن دارد
+        if getattr(user, 'phone_number', None):
+            try:
+                from sms.services import send_registration_welcome_sms
+                send_registration_welcome_sms(user)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Registration welcome SMS failed: {e}")
+        
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
         
