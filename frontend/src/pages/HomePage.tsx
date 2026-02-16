@@ -1765,6 +1765,7 @@ const HomePage: React.FC = () => {
                   position: 'relative',
                   zIndex: 25
                 }}
+                onClick={() => navigate('/tickets')}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#d1d5db';
                   e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
@@ -1816,6 +1817,7 @@ const HomePage: React.FC = () => {
                   position: 'relative',
                   zIndex: 25
                 }}
+                onClick={() => navigate('/tickets')}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#d1d5db';
                   e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
@@ -1850,7 +1852,7 @@ const HomePage: React.FC = () => {
                     </div>
                   </div>
 
-              {/* Image 3 - 4reza.jpeg - Left page of book */}
+              {/* Image 3 - 4reza.jpeg - فرودگاه مهرآباد */}
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
@@ -1868,6 +1870,7 @@ const HomePage: React.FC = () => {
                   position: 'relative',
                   zIndex: 25
                 }}
+                onClick={() => window.open('https://fids.airport.ir/', '_blank')}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#d1d5db';
                   e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
@@ -1902,7 +1905,7 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Image 4 - 5reza.jpeg - Right page of book */}
+              {/* Image 4 - 5reza.jpeg */}
               <div 
                 className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                 style={{ 
@@ -1919,6 +1922,7 @@ const HomePage: React.FC = () => {
                   position: 'relative',
                   zIndex: 25
                 }}
+                onClick={() => window.open('https://ikac.ir/', '_blank')}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#d1d5db';
                   e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
@@ -1968,6 +1972,7 @@ const HomePage: React.FC = () => {
                 zIndex: 75,
                 marginRight: '-50px'
               }}
+              onClick={() => navigate('/iranology')}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = '#d1d5db';
                 e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
