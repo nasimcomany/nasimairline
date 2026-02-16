@@ -1344,7 +1344,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* عضویت در برنامه وفاداری نسیم ایر banner section */}
+      {/* عضویت در برنامه وفاداری هواپیمایی نسیم banner section */}
       <section className="relative z-10 py-5" style={{ overflow: 'visible', marginTop: '1.5rem' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
@@ -1370,38 +1370,11 @@ const HomePage: React.FC = () => {
                 style={{ 
                   width: '115px',
                   height: '115px',
-                  background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   marginRight: '-12px',
                   transform: 'rotate(-40deg) translateZ(0)'
-                }}
-              >
-                <div 
-                  className="text-gray-700 font-bold"
-                  style={{
-                    fontSize: '13px',
-                    letterSpacing: '2px',
-                    transform: 'rotate(40deg)', // خنثی‌کردن چرخش والد
-                    transformOrigin: 'center',
-                    display: 'inline-block'   
-                  }}
-                >
-                  SILVER
-                </div>
-              </div>
-              <div 
-                className="square-full flex flex-col items-center justify-center"
-                style={{ 
-                  width: '115px',
-                  height: '115px',
-                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  transform: 'rotate(-40deg)',
-                  display: 'flex',
-                  alignItems:'center',
-                  justifyContent: 'center'
                 }}
               >
                 <div 
@@ -1422,7 +1395,34 @@ const HomePage: React.FC = () => {
                 style={{ 
                   width: '115px',
                   height: '115px',
-                  background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+                  background: 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)',
+                  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  transform: 'rotate(-40deg)',
+                  display: 'flex',
+                  alignItems:'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <div 
+                  className="text-gray-700 font-bold"
+                  style={{
+                    fontSize: '13px',
+                    letterSpacing: '2px',
+                    transform: 'rotate(40deg)', // خنثی‌کردن چرخش والد
+                    transformOrigin: 'center',
+                    display: 'inline-block'   
+                  }}
+                >
+                  SILVER
+                </div>
+              </div>
+              <div 
+                className="square-full flex flex-col items-center justify-center"
+                style={{ 
+                  width: '115px',
+                  height: '115px',
+                  background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
                   boxShadow: '0 10px 20px rgba(0, 0, 0, 0.45), 0 5px 10px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   transform: 'rotate(-40deg) translateZ(0)'
@@ -1438,7 +1438,7 @@ const HomePage: React.FC = () => {
                     display: 'inline-block'   
                   }}
                 >
-                  PLATINUM
+                  BRONZE
                 </div>
               </div>
             </div>
@@ -1530,6 +1530,10 @@ const HomePage: React.FC = () => {
               return (
               <div 
                 key={`${card.id}-${variant}-${index}`} 
+                onClick={() => navigate('/iranology')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && navigate('/iranology')}
                 className="group bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden cursor-pointer"
                 style={{
                   animation,
@@ -1546,63 +1550,26 @@ const HomePage: React.FC = () => {
                     e.currentTarget.src = card.fallbackImage;
                   }}
                 />
-                {/* Unified Overlay Design - No Gap */}
-                <div className="absolute top-0 left-0 right-0 transition-all duration-500 h-[100px] group-hover:h-[140px]">
-                  {/* Main Glass Overlay - Ultra Glassy */}
+                {/* Simplified Overlay - Only Route Names */}
+                <div className="absolute bottom-0 left-0 right-0 p-4">
                   <div 
-                    className="absolute inset-0 backdrop-blur-3xl transition-all duration-300 group-hover:backdrop-blur-[40px]"
+                    className="backdrop-blur-sm rounded-lg px-4 py-3"
                     style={{
-                      background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.12) 100%)',
-                      borderTopLeftRadius: '12px',
-                      borderTopRightRadius: '12px',
-                      boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.03)'
-                    }}
-                  ></div>
-                  
-                  {/* Buy Ticket Button - Appears on Hover */}
-                  <button
-                    className="absolute top-0 left-4 right-4 transform -translate-y-full group-hover:translate-y-3 transition-all duration-500 ease-out bg-blue-900 hover:bg-blue-800 text-white py-3 rounded-lg shadow-lg font-semibold text-sm z-10 w-[calc(100%-2rem)]"
-                    style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.3))'
                     }}
                   >
-                    {language === 'fa' ? 'خرید بلیط' : language === 'ar' ? 'شراء التذكرة' : 'Buy Ticket'}
-                  </button>
-                  
-                  {/* Content Container */}
-                    <div className="relative h-full flex items-center justify-between px-6 transition-all duration-500 group-hover:pt-10" style={{ direction: 'ltr' }}>
-                    {/* Left: Flight Info & Price */}
-                    <div className="flex flex-col items-start gap-2">
-                      {/* Flight Route */}
-                      <div className="flex items-center gap-2">
-                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                        }}>
-                            {card.from[language]}
-                        </span>
-                          <PaperAirplaneIcon className="w-4 h-4 text-blue-900" />
-                        <span className={`text-gray-900 font-semibold text-base ${fontClass}`} style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                        }}>
-                            {card.to[language]}
-                        </span>
-                      </div>
-                      {/* Price */}
-                      <div className={`text-xl font-bold text-gray-900 ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                          direction: 'ltr'
+                    <div className="flex items-center justify-center gap-2">
+                      <span className={`text-white font-semibold text-base ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                       }}>
-                          {card.price[language]}
-                      </div>
-                    </div>
-                    
-                    {/* Right: Date Section */}
-                    <div className="flex items-center">
-                      <div className="px-4 py-2 bg-white/30 rounded-lg backdrop-blur-sm border border-white/40">
-                          <div className="text-xs font-medium text-gray-800" style={{ direction: 'ltr' }}>
-                            {card.date[language]}
-                        </div>
-                      </div>
+                        {card.from[language]}
+                      </span>
+                      <PaperAirplaneIcon className="w-4 h-4 text-white" />
+                      <span className={`text-white font-semibold text-base ${fontClass}`} style={{
+                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      }}>
+                        {card.to[language]}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -3266,7 +3233,7 @@ const HomePage: React.FC = () => {
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
                   {language === 'fa' 
-                    ? 'شما می‌توانید به راحتی از طریق وب‌سایت نسیم ایر، اپلیکیشن موبایل یا تماس با مرکز رزرواسیون ما پرواز خود را رزرو کنید. ما با مجوز رسمی از سازمان هواپیمایی کشوری و دارای نماد اعتماد الکترونیکی هستیم و تمامی تراکنش‌های شما به صورت امن انجام می‌شود.'
+                    ? 'شما می‌توانید به راحتی از طریق وب‌سایت هواپیمایی نسیم، اپلیکیشن موبایل یا تماس با مرکز رزرواسیون ما پرواز خود را رزرو کنید. ما با مجوز رسمی از سازمان هواپیمایی کشوری و دارای نماد اعتماد الکترونیکی هستیم و تمامی تراکنش‌های شما به صورت امن انجام می‌شود.'
                     : language === 'ar'
                     ? 'يمكنك بسهولة حجز رحلتك من خلال موقع نسيم إير الإلكتروني أو تطبيق الهاتف المحمول أو الاتصال بمركز الحجز لدينا. نحن مرخصون رسمياً من منظمة الطيران المدني ونتحلى بشارة الثقة الإلكترونية، وجميع معاملاتك تتم بأمان.'
                     : 'You can easily book your flight through Nasim Air website, mobile app, or by contacting our reservation center. We are officially licensed by the Civil Aviation Organization and have an electronic trust badge, and all your transactions are secure.'}
@@ -3303,7 +3270,7 @@ const HomePage: React.FC = () => {
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
                   {language === 'fa'
-                    ? 'نسیم ایر با افتخار خدمات متنوعی از جمله پذیرایی، اینترنت وای‌فای، سرگرمی‌های پرواز و خدمات ویژه برای مسافران VIP ارائه می‌دهد. تمامی خدمت‌رسانان ما آموزش‌دیده و متعهد به ارائه بهترین تجربه سفر برای شما هستند.'
+                    ? 'هواپیمایی نسیم با افتخار خدمات متنوعی از جمله پذیرایی، اینترنت وای‌فای، سرگرمی‌های پرواز و خدمات ویژه برای مسافران VIP ارائه می‌دهد. تمامی خدمت‌رسانان ما آموزش‌دیده و متعهد به ارائه بهترین تجربه سفر برای شما هستند.'
                     : language === 'ar'
                     ? 'تقدم نسيم إير بفخر خدمات متنوعة تشمل الضيافة والإنترنت اللاسلكي ووسائل الترفيه وخدمات خاصة لركاب VIP. جميع موظفينا مدربون وملتزمون بتقديم أفضل تجربة سفر لك.'
                     : 'Nasim Air proudly provides various services including catering, WiFi internet, in-flight entertainment, and special services for VIP passengers. All our staff are trained and committed to providing you with the best travel experience.'}
@@ -3340,7 +3307,7 @@ const HomePage: React.FC = () => {
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
                   {language === 'fa'
-                    ? 'شما می‌توانید از طریق وب‌سایت نسیم ایر، اپلیکیشن موبایل یا با وارد کردن شماره پرواز در بخش "وضعیت پرواز" اطلاعات دقیق پرواز خود را مشاهده کنید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای اطلاع‌رسانی به موقع انجام می‌دهیم.'
+                    ? 'شما می‌توانید از طریق وب‌سایت هواپیمایی نسیم، اپلیکیشن موبایل یا با وارد کردن شماره پرواز در بخش "وضعیت پرواز" اطلاعات دقیق پرواز خود را مشاهده کنید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای اطلاع‌رسانی به موقع انجام می‌دهیم.'
                     : language === 'ar'
                     ? 'يمكنك الاطلاع على معلومات دقيقة لرحلتك من خلال موقع نسيم إير أو تطبيق الهاتف المحمول أو بإدخال رقم الرحلة في قسم "حالة الرحلة". كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإعلامك في الوقت المناسب.'
                     : 'You can view detailed information about your flight through the Nasim Air website, mobile app, or by entering the flight number in the "Flight Status" section. As a trusted Iranian airline, we do our best to inform you in a timely manner.'}
@@ -3356,7 +3323,7 @@ const HomePage: React.FC = () => {
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
                   {language === 'fa'
-                    ? 'برای پروازهای داخلی حداقل 90 دقیقه و برای پروازهای بین‌المللی حداقل 3 ساعت قبل از زمان پرواز در فرودگاه حاضر شوید. نسیم ایر با رعایت تمام استانداردهای امنیتی و ایمنی، تجربه سفر امنی را برای شما فراهم می‌کند.'
+                    ? 'برای پروازهای داخلی حداقل 90 دقیقه و برای پروازهای بین‌المللی حداقل 3 ساعت قبل از زمان پرواز در فرودگاه حاضر شوید. هواپیمایی نسیم با رعایت تمام استانداردهای امنیتی و ایمنی، تجربه سفر امنی را برای شما فراهم می‌کند.'
                     : language === 'ar'
                     ? 'للرحلات الداخلية، يجب أن تكون في المطار قبل 90 دقيقة على الأقل، وللرحلات الدولية قبل 3 ساعات على الأقل من وقت الرحلة. تلتزم نسيم إير بجميع معايير الأمن والسلامة لتوفير تجربة سفر آمنة لك.'
                     : 'For domestic flights, arrive at least 90 minutes before, and for international flights, at least 3 hours before the flight time. Nasim Air, complying with all security and safety standards, provides you with a safe travel experience.'}
@@ -3371,13 +3338,13 @@ const HomePage: React.FC = () => {
                 <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
-                  {language === 'fa' ? 'چگونه می‌توانم با پشتیبانی نسیم ایر تماس بگیرم؟' : language === 'ar' ? 'كيف يمكنني الاتصال بدعم نسيم إير؟' : 'How can I contact Nasim Air support?'}
+                  {language === 'fa' ? 'چگونه می‌توانم با پشتیبانی هواپیمایی نسیم تماس بگیرم؟' : language === 'ar' ? 'كيف يمكنني الاتصال بدعم نسيم إير؟' : 'How can I contact Nasim Air support?'}
                 </h4>
                 <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
                   {language === 'fa'
-                    ? 'شما می‌توانید از طریق شماره تلفن 021-91000000، ایمیل support@nasimair.ir یا چت آنلاین در وب‌سایت با تیم پشتیبانی ما در ارتباط باشید. تیم پشتیبانی نسیم ایر 24/7 آماده پاسخگویی به سوالات شماست. ما به عنوان یک ایرلاین معتبر ایرانی با نماد اعتماد الکترونیکی، متعهد به ارائه بهترین خدمات به شما هستیم.'
+                    ? 'شما می‌توانید از طریق شماره تلفن 021-91000000، ایمیل support@nasimair.ir یا چت آنلاین در وب‌سایت با تیم پشتیبانی ما در ارتباط باشید. تیم پشتیبانی هواپیمایی نسیم 24/7 آماده پاسخگویی به سوالات شماست. ما به عنوان یک ایرلاین معتبر ایرانی با نماد اعتماد الکترونیکی، متعهد به ارائه بهترین خدمات به شما هستیم.'
                     : language === 'ar'
                     ? 'يمكنك التواصل مع فريق الدعم لدينا عبر الهاتف 021-91000000 أو البريد الإلكتروني support@nasimair.ir أو الدردشة المباشرة على الموقع. فريق دعم نسيم إير جاهز للرد على استفساراتك على مدار الساعة. كشركة طيران إيرانية موثوقة بشارة الثقة الإلكترونية، ملتزمون بتقديم أفضل الخدمات لك.'
                     : 'You can contact our support team via phone 021-91000000, email support@nasimair.ir, or online chat on the website. Nasim Air support team is available 24/7 to answer your questions. As a trusted Iranian airline with an electronic trust badge, we are committed to providing you with the best services.'}
@@ -3387,13 +3354,13 @@ const HomePage: React.FC = () => {
                 <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
-                  {language === 'fa' ? 'آیا نسیم ایر دارای مجوز و اعتبار است؟' : language === 'ar' ? 'هل تمتلك نسيم إير ترخيصاً ومصداقية؟' : 'Is Nasim Air licensed and credible?'}
+                  {language === 'fa' ? 'آیا هواپیمایی نسیم دارای مجوز و اعتبار است؟' : language === 'ar' ? 'هل تمتلك نسيم إير ترخيصاً ومصداقية؟' : 'Is Nasim Air licensed and credible?'}
                 </h4>
                 <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
                   fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
                   {language === 'fa'
-                    ? 'بله، نسیم ایر با مجوز رسمی از سازمان هواپیمایی کشوری فعالیت می‌کند و دارای نماد اعتماد الکترونیکی (اینماد) است. ما تمام استانداردهای ایمنی و امنیتی بین‌المللی را رعایت می‌کنیم و به عنوان یک ایرلاین معتبر ایرانی، سال‌هاست که خدمات پروازی ایمن و با کیفیت ارائه می‌دهیم.'
+                    ? 'بله، هواپیمایی نسیم با مجوز رسمی از سازمان هواپیمایی کشوری فعالیت می‌کند و دارای نماد اعتماد الکترونیکی (اینماد) است. ما تمام استانداردهای ایمنی و امنیتی بین‌المللی را رعایت می‌کنیم و به عنوان یک ایرلاین معتبر ایرانی، سال‌هاست که خدمات پروازی ایمن و با کیفیت ارائه می‌دهیم.'
                     : language === 'ar'
                     ? 'نعم، تعمل نسيم إير بترخيص رسمي من منظمة الطيران المدني وتحمل شارة الثقة الإلكترونية. نلتزم بجميع معايير الأمن والسلامة الدولية وكشركة طيران إيرانية موثوقة، نقدم منذ سنوات خدمات طيران آمنة وعالية الجودة.'
                     : 'Yes, Nasim Air operates with an official license from the Civil Aviation Organization and has an electronic trust badge. We comply with all international safety and security standards, and as a trusted Iranian airline, we have been providing safe and quality flight services for years.'}
@@ -3410,13 +3377,13 @@ const HomePage: React.FC = () => {
       <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '-56px', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {/* درباره نسیم ایر Column */}
+            {/* درباره هواپیمایی نسیم Column */}
             <div>
               <h4 className={`text-sm font-medium mb-6 text-white ${fontClass}`} style={{
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-              }}>{language === 'fa' ? 'درباره نسیم ایر' : language === 'ar' ? 'حول نسيم إير' : 'About Nasim Air'}</h4>
+              }}>{language === 'fa' ? 'درباره هواپیمایی نسیم' : language === 'ar' ? 'حول نسيم إير' : 'About Nasim Air'}</h4>
               <ul className="space-y-3">
                 <li>
                   <a href="#" className={`group flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-all ${fontClass}`} style={{
@@ -3433,7 +3400,7 @@ const HomePage: React.FC = () => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}>
                     <DocumentTextIcon className="w-4 h-4 text-white" />
-                    {language === 'fa' ? 'تاریخچه نسیم ایر' : language === 'ar' ? 'تاريخ نسيم إير' : 'Nasim Air History'}
+                    {language === 'fa' ? 'تاریخچه هواپیمایی نسیم' : language === 'ar' ? 'تاريخ نسيم إير' : 'Nasim Air History'}
                   </a>
                 </li>
                 <li>

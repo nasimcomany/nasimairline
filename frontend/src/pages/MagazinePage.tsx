@@ -176,7 +176,7 @@ const MagazinePage: React.FC = () => {
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              {language === 'fa' ? 'مجله نسیم ایر' : language === 'ar' ? 'مجلة نسيم إير' : 'Nasim Air Magazine'}
+              {language === 'fa' ? 'مجله هواپیمایی نسیم' : language === 'ar' ? 'مجلة نسيم إير' : 'Nasim Air Magazine'}
             </h1>
             <p
               className={`text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto ${fontClass}`}

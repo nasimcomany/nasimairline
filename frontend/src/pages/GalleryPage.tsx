@@ -231,7 +231,7 @@ const GalleryPage: React.FC = () => {
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              {language === 'fa' ? 'گالری عکس نسیم ایر' : language === 'ar' ? 'معرض صور نسيم إير' : 'Nasim Air Photo Gallery'}
+              {language === 'fa' ? 'گالری عکس هواپیمایی نسیم' : language === 'ar' ? 'معرض صور نسيم إير' : 'Nasim Air Photo Gallery'}
             </h1>
             <p
               className={`text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto ${fontClass}`}

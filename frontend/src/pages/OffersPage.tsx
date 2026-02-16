@@ -126,7 +126,7 @@ const OffersPage: React.FC = () => {
               پیشنهادات ویژه
             </h1>
             <p className="text-blue-200 text-xs persian-font-vazir">
-              تخفیف‌ها و پیشنهادات جذاب نسیم ایر
+              تخفیف‌ها و پیشنهادات جذاب هواپیمایی نسیم
             </p>
           </div>
 

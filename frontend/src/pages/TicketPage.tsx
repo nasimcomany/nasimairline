@@ -314,7 +314,7 @@ const TicketPage: React.FC = () => {
           <div className="flex justify-center mb-4 sm:mb-6">
             <img 
               src="/images/nasim0.png" 
-              alt="نسیم ایر" 
+              alt="هواپیمایی نسیم" 
               className="h-40 sm:h-60 md:h-80 w-auto object-contain"
               style={{ 
                 filter: 'drop-shadow(2px 2px 8px rgba(0,0,0,0.5))'

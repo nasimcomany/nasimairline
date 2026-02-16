@@ -86,8 +86,8 @@ const translations = {
     'destinations.discoverDubai': 'کشف دبی',
     'loyalty.enhanceBenefits': 'مزایای خود را با Skywards+ افزایش دهید',
     'loyalty.choosePackages': 'از بین 3 بسته انتخاب کنید که شامل آنچه دوست دارید است، از دسترسی به لانژ فرودگاه و بار اضافی، تا نرخ‌های انحصاری Cash+Miles و تخفیف‌ها.',
-    'loyalty.joinSkywards': 'عضویت در برنامه وفاداری نسیم ایر',
-    'loyalty.skywardsDescription': 'عضو برنامه وفاداری نسیم ایر شوید و از پاداش‌های پرواز، امتیازات ویژه و مزایای بیشتر لذت ببرید',
+    'loyalty.joinSkywards': 'عضویت در برنامه وفاداری هواپیمایی نسیم',
+    'loyalty.skywardsDescription': 'عضو برنامه وفاداری هواپیمایی نسیم شوید و از پاداش‌های پرواز، امتیازات ویژه و مزایای بیشتر لذت ببرید',
     'loyalty.joinNow': 'همین حالا عضو شوید',
     'destinations.discoverForYourself': 'کشف کنید',
     'experience.makeIncredible': 'سفر خود را فوق‌العاده کنید',
@@ -134,7 +134,7 @@ const translations = {
     'common.view': 'مشاهده',
     'common.moreInfo': 'اطلاعات بیشتر',
     'common.readMore': 'مطالعه بیشتر',
-    'common.nasimAir': 'نسیم ایر',
+    'common.nasimAir': 'هواپیمایی نسیم',
     
     // Auth
     'auth.login': 'ورود به حساب کاربری',
@@ -208,16 +208,16 @@ const translations = {
     'forgotPassword.backToLogin': 'بازگشت به ورود',
     
     // Homepage
-    'home.hero.flyWithNasim': 'پرواز با نسیم ایر',
+    'home.hero.flyWithNasim': 'پرواز با هواپیمایی نسیم',
     'home.hero.safeTripDescription': 'سفری امن، راحت و به‌یادماندنی به مقاصد داخلی و بین‌المللی',
     'home.hero.safeComfortable': 'سفری امن، راحت و به یادماندنی',
     'home.hero.comfortable': 'راحت',
-    'home.services.specialTitle': 'خدمات ویژه نسیم ایر',
-    'home.loyalty.joinTitle': 'عضویت در برنامه وفاداری نسیم ایر',
+    'home.services.specialTitle': 'خدمات ویژه هواپیمایی نسیم',
+    'home.loyalty.joinTitle': 'عضویت در برنامه وفاداری هواپیمایی نسیم',
     'home.loyalty.joinDescription': 'عضو شوید و از پاداش پرواز، امتیازات ویژه و مزایای منحصربه‌فرد لذت ببرید',
-    'home.loyalty.programTitle': 'برنامه وفاداری نسیم ایر',
-    'home.loyalty.enhanceTitle': 'مزایای خود را با برنامه وفاداری نسیم ایر افزایش دهید',
-    'home.loyalty.fullDescription': 'هواپیمایی نسیم ایر با افتخار ارائه‌دهنده خدمات پروازی با کیفیت و ایمن در مسیرهای داخلی و بین‌المللی است. با عضویت در برنامه وفاداری ما، از امتیازات ویژه، پاداش‌های پروازی، دسترسی به لانژ فرودگاه، بار اضافی و نرخ‌های انحصاری بهره‌مند شوید. ما با تکیه بر سال‌ها تجربه و تعهد به رضایت مسافران، سفری راحت، امن و به‌یادماندنی را برای شما فراهم می‌کنیم.',
+    'home.loyalty.programTitle': 'برنامه وفاداری هواپیمایی نسیم',
+    'home.loyalty.enhanceTitle': 'مزایای خود را با برنامه وفاداری هواپیمایی نسیم افزایش دهید',
+    'home.loyalty.fullDescription': 'هواپیمایی نسیم با افتخار ارائه‌دهنده خدمات پروازی با کیفیت و ایمن در مسیرهای داخلی و بین‌المللی است. با عضویت در برنامه وفاداری ما، از امتیازات ویژه، پاداش‌های پروازی، دسترسی به لانژ فرودگاه، بار اضافی و نرخ‌های انحصاری بهره‌مند شوید. ما با تکیه بر سال‌ها تجربه و تعهد به رضایت مسافران، سفری راحت، امن و به‌یادماندنی را برای شما فراهم می‌کنیم.',
     'home.hero.flyBetter': 'پرواز بهتر',
     'home.hero.subtitle': 'It\'s arrived, the',
     'home.hero.title': 'PREMIUM ECONOMY',
@@ -284,8 +284,8 @@ const translations = {
     'home.services.flightMapSelect': 'انتخاب پرواز از روی نقشه',
     'home.services.passengerMeal': 'غذای مسافر',
     'home.loyalty.joinNow': 'همین حالا عضو شوید',
-    'home.experience.flyWithNasim': 'پرواز با هواپیمایی نسیم ایر',
-    'home.experience.exploreNasim': 'نسیم ایر را تجربه کنید',
+    'home.experience.flyWithNasim': 'پرواز با هواپیمایی نسیم',
+    'home.experience.exploreNasim': 'هواپیمایی نسیم را تجربه کنید',
     'home.experience.planUnforgettable': 'سفری فراموش‌نشدنی فراتر از پرواز خود برنامه‌ریزی کنید',
     'passengers.adult': 'بزرگسال',
     'passengers.child': 'کودک',
@@ -647,7 +647,7 @@ const translations = {
     
     // News
     'news.title': 'اخبار هواپیمایی',
-    'news.subtitle': 'آخرین اخبار و رویدادهای نسیم ایر',
+    'news.subtitle': 'آخرین اخبار و رویدادهای هواپیمایی نسیم',
     'news.newRoute.title': 'افتتاح مسیر جدید',
     'news.newRoute.description': 'راه‌اندازی پروازهای جدید به شهرهای مختلف با بهترین قیمت و کیفیت',
     'news.newServices.title': 'خدمات جدید',
@@ -690,7 +690,7 @@ const translations = {
     
     // Membership
     'home.membership.title': 'برنامه عضویت',
-    'home.membership.subtitle': 'مزایای عضویت در باشگاه نسیم ایر',
+    'home.membership.subtitle': 'مزایای عضویت در باشگاه هواپیمایی نسیم',
     'home.membership.popular': 'محبوب',
     'home.membership.freeMembership': 'عضویت رایگان',
     'home.membership.upgradeMembership': 'ارتقاء عضویت',
@@ -733,7 +733,7 @@ const translations = {
     
     // Membership Page (/membership)
     'membershipPage.member': 'عضو',
-    'membershipPage.clubTitle': 'باشگاه مشتریان نسیم ایر',
+    'membershipPage.clubTitle': 'باشگاه مشتریان هواپیمایی نسیم',
     'membershipPage.loginToView': 'برای مشاهده وضعیت عضویت وارد شوید',
     'membershipPage.loginButton': 'ورود به حساب کاربری',
     'membershipPage.fetchError': 'خطا در دریافت اطلاعات عضویت',
@@ -762,7 +762,7 @@ const translations = {
     'membershipPage.tierName.silver': 'نقره‌ای',
     'membershipPage.tierName.gold': 'طلایی',
     'membershipPage.tierName.platinum': 'پلاتین',
-    'membershipPage.tierDesc.bronze': 'شروع سفر با نسیم ایر',
+    'membershipPage.tierDesc.bronze': 'شروع سفر با هواپیمایی نسیم',
     'membershipPage.tierDesc.silver': 'مسافر منظم',
     'membershipPage.tierDesc.gold': 'مسافر VIP',
     'membershipPage.tierDesc.platinum': 'مسافر ممتاز',
@@ -791,7 +791,7 @@ const translations = {
     'membershipPage.benefit.flightChangePriority': 'اولویت تغییر پرواز',
     'membershipPage.benefit.flightChangePriorityDesc': 'در شرایط اضطراری با اولویت',
     'membershipPage.benefit.premiumService': 'خدمات ممتاز',
-    'membershipPage.benefit.premiumServiceDesc': 'بالاترین سطح تجربه سفر نسیم ایر',
+    'membershipPage.benefit.premiumServiceDesc': 'بالاترین سطح تجربه سفر هواپیمایی نسیم',
     'membershipPage.benefit.fullTravelPriority': 'اولویت کامل سفر',
     'membershipPage.benefit.fullTravelPriorityDesc': 'اولویت در اغلب خدمات فرودگاهی',
     'membershipPage.benefit.support24_7': 'پشتیبانی ویژه 24/7',

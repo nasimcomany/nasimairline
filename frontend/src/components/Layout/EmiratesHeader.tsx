@@ -267,7 +267,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               >
                 <img 
                   src="/images/nasim0.png" 
-                  alt="نسیم ایر" 
+                  alt="هواپیمایی نسیم" 
                   className="object-contain"
                   style={{ 
                     width: '130px',

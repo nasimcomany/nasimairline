@@ -128,7 +128,7 @@ const ServicesPage: React.FC = () => {
               خدمات ما
             </h1>
             <p className="text-blue-200 text-xs persian-font-vazir">
-              خدمات متنوع و باکیفیت هواپیمایی نسیم ایر
+              خدمات متنوع و باکیفیت هواپیمایی نسیم
             </p>
           </div>
 

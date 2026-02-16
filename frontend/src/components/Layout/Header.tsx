@@ -40,7 +40,7 @@ const Header: React.FC = () => {
           <Link to="/" className="flex items-center">
             <div className="flex-shrink-0">
               <h1 className="text-2xl font-bold text-primary-600">
-                نسیم ایر
+                هواپیمایی نسیم
               </h1>
               <p className="text-xs text-gray-500">ایرلاین</p>
             </div>

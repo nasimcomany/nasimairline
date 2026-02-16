@@ -611,18 +611,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   </svg>
                 </div>
                 <h2 className="text-xl font-bold text-gray-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  شرایط برنامه وفاداری نسیم ایر
+                  شرایط برنامه وفاداری هواپیمایی نسیم
                 </h2>
               </div>
               
               <div className="mb-6 max-h-60 overflow-y-auto pr-2">
                 <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                  با ثبت‌نام در برنامه وفاداری «نسیم ایر»، شما موافقت می‌کنید که:
+                  با ثبت‌نام در برنامه وفاداری «هواپیمایی نسیم»، شما موافقت می‌کنید که:
                 </p>
                 <ul className="mt-3 space-y-2 pr-3 text-sm text-gray-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
                   <li className="flex items-start">
                     <span className="text-blue-600 ml-2 mt-1">•</span>
-                    <span>اطلاعات پروازهای شما جهت محاسبه و اهدای امتیاز وفاداری توسط شرکت هواپیمایی نسیم ایر جمع‌آوری گردد.</span>
+                    <span>اطلاعات پروازهای شما جهت محاسبه و اهدای امتیاز وفاداری توسط شرکت هواپیمایی هواپیمایی نسیم جمع‌آوری گردد.</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-blue-600 ml-2 mt-1">•</span>
@@ -630,7 +630,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   </li>
                   <li className="flex items-start">
                     <span className="text-blue-600 ml-2 mt-1">•</span>
-                    <span>شرکت نسیم ایر متعهد به رعایت کامل حریم خصوصی شما و عدم اشتراک‌گذاری داده‌ها با سایر جهات بدون رضایت کتبی شماست.</span>
+                    <span>شرکت هواپیمایی نسیم متعهد به رعایت کامل حریم خصوصی شما و عدم اشتراک‌گذاری داده‌ها با سایر جهات بدون رضایت کتبی شماست.</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-blue-600 ml-2 mt-1">•</span>

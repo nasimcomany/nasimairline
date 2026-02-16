@@ -114,7 +114,7 @@ const SupportPage: React.FC = () => {
               پشتیبانی مشتریان
             </h1>
             <p className="text-blue-200 text-xs persian-font-vazir">
-              راه‌های ارتباط با تیم پشتیبانی نسیم ایر
+              راه‌های ارتباط با تیم پشتیبانی هواپیمایی نسیم
             </p>
           </div>
 
