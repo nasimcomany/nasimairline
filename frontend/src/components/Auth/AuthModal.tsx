@@ -91,29 +91,38 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       return;
     }
 
-    // Validate input: must be either national ID (10 digits) or passport number (6-20 alphanumeric)
     const input = loginForm.nationalId.trim();
     
-    // Check if it's a national ID (10 digits) or passport number (6-20 alphanumeric)
-    const isNationalId = /^\d{10}$/.test(input);
-    const isPassportNumber = /^[A-Z0-9]{6,20}$/.test(input);
+    // اگر حاوی @ باشد = ایمیل (کاربری که ایمیلش رو در پروفایل عوض کرده)
+    const isEmail = input.includes('@');
     
-    if (!isNationalId && !isPassportNumber) {
-      if (input.length === 10 && !isNationalId) {
-        setError(t('auth.invalidNationalId'));
-      } else {
-        setError(t('auth.nationalIdOrPassportInvalid'));
+    if (isEmail) {
+      // اعتبارسنجی ساده ایمیل
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(input)) {
+        setError(language === 'fa' ? 'فرمت ایمیل نامعتبر است' : language === 'ar' ? 'تنسيق البريد الإلكتروني غير صالح' : 'Invalid email format');
+        return;
       }
-      return;
-    }
-    
-    // If it's a national ID, validate checksum
-    if (isNationalId && !validateNationalId(input)) {
-      setError(t('auth.invalidNationalId'));
-      return;
+    } else {
+      // کد ملی یا شماره پاسپورت
+      const isNationalId = /^\d{10}$/.test(input);
+      const isPassportNumber = /^[A-Z0-9]{6,20}$/.test(input);
+      
+      if (!isNationalId && !isPassportNumber) {
+        if (input.length === 10 && !isNationalId) {
+          setError(t('auth.invalidNationalId'));
+        } else {
+          setError(t('auth.nationalIdOrPassportInvalid'));
+        }
+        return;
+      }
+      
+      if (isNationalId && !validateNationalId(input)) {
+        setError(t('auth.invalidNationalId'));
+        return;
+      }
     }
 
-    // ✨ نمایش مودال شرایط قبل از لاگین
     setShowTermsModal(true);
   };
 
@@ -123,11 +132,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     setError('');
 
     const input = loginForm.nationalId.trim();
-
+    // بک‌اند با کد ملی، پاسپورت، یا ایمیل جستجو می‌کند - همان مقدار خام را می‌فرستیم
     try {
-      // Construct email: nationalId@nasimair.com or passportNumber@nasimair.com
       await dispatch(loginUser({
-        email: `${input}@nasimair.com`,
+        email: input,
         password: loginForm.password
       })).unwrap();
       
@@ -289,28 +297,34 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
           {/* Login Form */}
           {mode === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
-              {/* National ID / Passport Number */}
+              {/* نام کاربری: کد ملی / پاسپورت / یا ایمیل (برای کسانی که ایمیلشون رو عوض کردن) */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.nationalId')}
                   <span className="block text-xs font-normal text-gray-500 mt-1" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('auth.foreignNationalMessage')}
+                    <br />
+                    {language === 'fa' ? 'یا ایمیل خود را وارد کنید (اگر در پروفایل تغییر داده‌اید)' : language === 'ar' ? 'أو أدخل بريدك الإلكتروني (إذا غيّرته في الملف الشخصي)' : 'Or enter your email (if you changed it in profile)'}
                   </span>
                 </label>
                 <input
                   type="text"
                   value={loginForm.nationalId}
                   onChange={(e) => {
-                    // Accept both numbers (for national ID) and alphanumeric (for passport)
-                    const value = e.target.value.toUpperCase();
-                    // Allow numbers, letters, and common passport characters
-                    const cleaned = value.replace(/[^A-Z0-9]/g, '');
-                    setLoginForm(prev => ({ ...prev, nationalId: cleaned.slice(0, 20) }));
+                    const value = e.target.value;
+                    // اگر حاوی @ است = ایمیل، همه کاراکترهای مجاز ایمیل رو بذار
+                    if (value.includes('@')) {
+                      setLoginForm(prev => ({ ...prev, nationalId: value.slice(0, 100) }));
+                    } else {
+                      // کد ملی یا پاسپورت: فقط حروف و اعداد
+                      const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 20);
+                      setLoginForm(prev => ({ ...prev, nationalId: cleaned }));
+                    }
                   }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                   style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
                   placeholder={t('auth.nationalIdOrPassportPlaceholder')}
-                  maxLength={20}
+                  maxLength={100}
                   required
                 />
               </div>

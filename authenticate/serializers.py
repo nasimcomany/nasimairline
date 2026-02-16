@@ -76,40 +76,72 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 class UserLoginSerializer(serializers.Serializer):
     """
-    Serializer for user login
+    ورود با کد ملی یا شماره پاسپورت - ایمیل اصلاً دخیل نیست.
     """
-    email = serializers.EmailField(required=True)
+    email = serializers.CharField(required=True)  # در API به‌خاطر سازگاری؛ مقدار واقعی = کد ملی یا پاسپورت
     password = serializers.CharField(
         write_only=True,
         required=True,
         style={'input_type': 'password'}
     )
     
-    def validate(self, attrs):
-        """Validate credentials"""
-        email = attrs.get('email')
-        password = attrs.get('password')
+    def _find_user_by_login_input(self, login_input, password_val):
+        """جستجوی کاربر با کد ملی، پاسپورت، یا ایمیل (اختیاری) - بدون وابستگی به ایمیل"""
+        from django.db.models import Q
         
-        if email and password:
-            user = authenticate(request=self.context.get('request'),
-                              username=email, password=password)
-            
-            if not user:
-                raise serializers.ValidationError(
-                    'ایمیل یا رمز عبور اشتباه است.'
-                )
-            
-            if not user.is_active:
-                raise serializers.ValidationError(
-                    'حساب کاربری شما غیرفعال است.'
-                )
-            
-            attrs['user'] = user
-        else:
-            raise serializers.ValidationError(
-                'ایمیل و رمز عبور الزامی است.'
+        login_input = str(login_input).strip()
+        if not login_input or not password_val:
+            return None
+        
+        candidates = []
+        
+        # کد ملی (۱۰ رقم)
+        if login_input.isdigit() and len(login_input) == 10:
+            candidates = list(User.objects.filter(
+                Q(national_id=login_input) |
+                Q(email=f'{login_input}@nasimair.com') |
+                Q(first_name=login_input) |
+                Q(username=login_input)
+            ).distinct())
+        # شماره پاسپورت (۶–۲۰ کاراکتر)
+        elif 6 <= len(login_input) <= 20 and login_input.replace(' ', '').replace('-', '').isalnum():
+            passport_clean = login_input.upper().replace(' ', '').replace('-', '')
+            candidates = list(User.objects.filter(
+                Q(passport_number=passport_clean) |
+                Q(passport_number=login_input) |
+                Q(email=f'{passport_clean}@nasimair.com') |
+                Q(first_name=passport_clean)
+            ).distinct())
+        # اگر @ دارد = ایمیل (اختیاری)
+        elif '@' in login_input:
+            user = authenticate(
+                request=self.context.get('request'),
+                username=login_input,
+                password=password_val
             )
+            return user
         
+        for user in candidates:
+            if user.check_password(password_val):
+                return user
+        return None
+    
+    def validate(self, attrs):
+        login_input = attrs.get('email', '').strip()
+        password_val = attrs.get('password')
+        
+        if not login_input or not password_val:
+            raise serializers.ValidationError('کد ملی/پاسپورت و رمز عبور الزامی است.')
+        
+        user = self._find_user_by_login_input(login_input, password_val)
+        
+        if not user:
+            raise serializers.ValidationError('کد ملی/پاسپورت یا رمز عبور اشتباه است.')
+        
+        if not user.is_active:
+            raise serializers.ValidationError('حساب کاربری شما غیرفعال است.')
+        
+        attrs['user'] = user
         return attrs
 
 

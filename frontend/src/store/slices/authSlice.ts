@@ -57,7 +57,14 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem('user', JSON.stringify(data.user));
       return data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'ورود ناموفق بود');
+      const data = error.response?.data;
+      const msg = (typeof data === 'string' ? data : null)
+        || (Array.isArray(data) ? data[0] : null)
+        || data?.detail?.[0] || data?.detail
+        || data?.non_field_errors?.[0]
+        || data?.email?.[0]
+        || 'ورود ناموفق بود';
+      return rejectWithValue(typeof msg === 'string' ? msg : 'ورود ناموفق بود');
     }
   }
 );
