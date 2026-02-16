@@ -4,12 +4,74 @@
 import re
 import logging
 import requests
+import xml.etree.ElementTree as ET
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 # آدرس API ملی پیامک
 MELLIPAYAMAK_SEND_URL = 'https://api.payamak-panel.com/post/Send.asmx/SendSimpleSMS'
+
+# نگاشت کدهای خطا طبق مستندات ملی پیامک
+MELLIPAYAMAK_ERROR_CODES = {
+    0: "نام کاربری یا رمز عبور اشتباه است، یا اتصال به وب‌سرویس ممکن نیست. MELLIPAYAMAK_USERNAME و MELLIPAYAMAK_PASSWORD در .env را بررسی کنید.",
+    -1: "خطای نامشخص؛ با پشتیبانی ملی پیامک (021-63404) تماس بگیرید.",
+    2: "اعتبار پنل پیامک کافی نیست؛ موجودی خود را افزایش دهید.",
+    3: "محدودیت در تعداد ارسال روزانه فعال است.",
+    4: "محدودیت در حجم یا تعداد پیامک‌های ارسالی وجود دارد.",
+    5: "شماره فرستنده یا سرشماره پیامکی معتبر نیست. MELLIPAYAMAK_FROM_NUMBER را در .env بررسی کنید.",
+    6: "سامانه در حال بروزرسانی است؛ بعداً تلاش کنید.",
+    7: "متن پیامک شامل کلمه یا عبارت فیلترشده است.",
+    8: "تعداد پیامک‌ها کمتر از حداقل مجاز برای ارسال است.",
+    9: "ارسال از خطوط عمومی از طریق وب‌سرویس مجاز نیست.",
+    10: "پنل پیامکی غیرفعال یا مسدود شده است.",
+    11: "شماره گیرنده در لیست سیاه مخابرات است.",
+    12: "مدارک احراز هویت کاربر کامل نیست.",
+    14: "سرشماره فرستنده امکان ارسال پیامک حاوی لینک را ندارد.",
+    16: "شماره گیرنده یافت نشد؛ پارامتر to را بررسی کنید.",
+    17: "متن پیامک خالی است یا متغیر text مقدار ندارد.",
+    18: "شماره موبایل گیرنده نامعتبر است.",
+    35: "شماره گیرنده در لیست سیاه مخابرات قرار دارد.",
+}
+
+
+def _parse_send_response(response_text):
+    """
+    پارس پاسخ XML و تشخیص موفقیت/خطا.
+    موفق: عدد مثبت (شناسه پیام)
+    ناموفق: عدد منفی یا رشته خطا
+    """
+    if not response_text or not response_text.strip():
+        return False, "پاسخ خالی از سرور"
+    text = response_text.strip()
+    # حذف namespaces برای پارس ساده‌تر
+    try:
+        root = ET.fromstring(text)
+        # یافتن مقدار داخل string
+        for elem in root.iter():
+            if elem.text and elem.text.strip():
+                val = elem.text.strip()
+                try:
+                    num = int(val)
+                    if num > 0:
+                        return True, val
+                    err_msg = MELLIPAYAMAK_ERROR_CODES.get(num, f"کد خطا از سرویس: {num}")
+                    return False, err_msg
+                except ValueError:
+                    if any(x in val.lower() for x in ['error', 'exception', 'خطا', 'ناموفق']):
+                        return False, val
+                    return False, val
+    except ET.ParseError:
+        pass
+    if 'Exception' in text or 'Error' in text or 'خطا' in text:
+        return False, text[:300]
+    if text.replace('.', '').replace('-', '').replace(' ', '').lstrip('-').isdigit():
+        num = int(float(text))
+        if num > 0:
+            return True, text
+        err_msg = MELLIPAYAMAK_ERROR_CODES.get(num, f"کد خطا از سرویس: {num}")
+        return False, err_msg
+    return False, text[:300]
 
 
 def normalize_phone_for_sms(phone):
@@ -100,17 +162,19 @@ def send_sms_mellipayamak(to_list, message, from_number=None):
                 headers={'Content-Type': 'application/x-www-form-urlencoded'},
                 timeout=15
             )
+            raw_text = response.text or ""
+            logger.info(f"SMS API raw response for {phone}: {raw_text[:500]}")
+            
             if response.status_code == 200:
-                # پاسخ SOAP/XML است؛ اگر موفق باشد معمولاً یک عدد (message id) برمی‌گرداند
-                text = response.text.strip()
-                if text and not ('Exception' in text or 'Error' in text):
+                ok, msg = _parse_send_response(raw_text)
+                if ok:
                     success_count += 1
                     logger.info(f"SMS sent successfully to {phone}")
                 else:
-                    last_error = text or "خطای نامشخص از سرویس"
+                    last_error = msg
                     logger.error(f"SMS failed for {phone}: {last_error}")
             else:
-                last_error = f"HTTP {response.status_code}: {response.text[:200]}"
+                last_error = f"HTTP {response.status_code}: {raw_text[:200]}"
                 logger.error(f"SMS failed for {phone}: {last_error}")
         except requests.exceptions.RequestException as e:
             last_error = str(e)
