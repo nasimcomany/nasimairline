@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider
+from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
 from .serializers import (
     GalleryCategorySerializer,
     GalleryCategoryDetailSerializer,
@@ -15,6 +15,8 @@ from .serializers import (
     GalleryImageSerializer,
     GalleryImageDetailSerializer,
     HeroSliderSerializer,
+    HomePageSectionItemSerializer,
+    HomePageSectionConfigSerializer,
 )
 
 
@@ -157,3 +159,46 @@ class HeroSliderViewSet(viewsets.ReadOnlyModelViewSet):
         sliders = self.get_queryset()
         serializer = self.get_serializer(sliders, many=True)
         return Response(serializer.data)
+
+
+class HomePageSectionItemViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for HomePageSectionItem - public read-only"""
+    queryset = HomePageSectionItem.objects.filter(is_active=True).order_by('section_type', 'order')
+    serializer_class = HomePageSectionItemSerializer
+    permission_classes = [permissions.AllowAny]
+    
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def by_section(self, request):
+        """Get items by section type: ?section=SPECIAL_SERVICE or ?section=EXPERIENCE"""
+        section = request.query_params.get('section')
+        items = self.get_queryset()
+        if section:
+            items = items.filter(section_type=section)
+        serializer = self.get_serializer(items, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def all(self, request):
+        """Get all active items grouped by section"""
+        items = self.get_queryset()
+        serializer = self.get_serializer(items, many=True)
+        data = {
+            'special_services': [i for i in serializer.data if i['section_type'] == 'SPECIAL_SERVICE'],
+            'experience': [i for i in serializer.data if i['section_type'] == 'EXPERIENCE'],
+        }
+        return Response(data)
+
+
+class HomePageSectionConfigViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for HomePageSectionConfig - public read-only"""
+    queryset = HomePageSectionConfig.objects.all()
+    serializer_class = HomePageSectionConfigSerializer
+    permission_classes = [permissions.AllowAny]
+    
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def all(self, request):
+        """Get all section configs as a dict keyed by section_type"""
+        configs = self.get_queryset()
+        serializer = self.get_serializer(configs, many=True)
+        data = {c['section_type']: c for c in serializer.data}
+        return Response(data)

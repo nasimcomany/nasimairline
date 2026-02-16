@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from django.core.exceptions import ValidationError
 from django.db import models
-from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider
+from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
 
 
 class BaseGallerySerializer(serializers.ModelSerializer):
@@ -337,4 +337,37 @@ class HeroSliderSerializer(serializers.ModelSerializer):
         if obj.created_by:
             return obj.created_by.get_full_name() or obj.created_by.email
         return None
+
+
+class HomePageSectionItemSerializer(serializers.ModelSerializer):
+    """Serializer for HomePageSectionItem - public API"""
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = HomePageSectionItem
+        fields = [
+            'id', 'uuid', 'section_type', 'title_fa', 'title_ar', 'title_en',
+            'image_url', 'link_url', 'order', 'is_active'
+        ]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+
+class HomePageSectionConfigSerializer(serializers.ModelSerializer):
+    """Serializer for HomePageSectionConfig - public API"""
+    
+    class Meta:
+        model = HomePageSectionConfig
+        fields = [
+            'id', 'uuid', 'section_type',
+            'title1_fa', 'title1_ar', 'title1_en',
+            'title2_fa', 'title2_ar', 'title2_en',
+            'title3_fa', 'title3_ar', 'title3_en',
+        ]
 

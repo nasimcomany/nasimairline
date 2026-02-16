@@ -534,6 +534,149 @@ class GalleryImage(models.Model):
         self.save(update_fields=['download_count'])
 
 
+SECTION_TYPE_CHOICES = [
+    ('SPECIAL_SERVICE', _('خدمات ویژه')),
+    ('EXPERIENCE', _('پرواز با هواپیمایی نسیم')),
+]
+
+
+class HomePageSectionItem(models.Model):
+    """
+    Model for homepage section items - Special Services and Experience sections.
+    Admin can edit: image, title (fa/ar/en), link_url.
+    Both main admin and limited admin can manage these.
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    section_type = models.CharField(
+        _('نوع بخش'),
+        max_length=20,
+        choices=SECTION_TYPE_CHOICES,
+        db_index=True,
+        help_text=_('SPECIAL_SERVICE: خدمات ویژه | EXPERIENCE: پرواز با هواپیمایی نسیم'),
+    )
+    
+    title_fa = models.CharField(
+        _('عنوان فارسی'),
+        max_length=200,
+    )
+    
+    title_ar = models.CharField(
+        _('عنوان عربی'),
+        max_length=200,
+        blank=True,
+    )
+    
+    title_en = models.CharField(
+        _('عنوان انگلیسی'),
+        max_length=200,
+        blank=True,
+    )
+    
+    image = models.ImageField(
+        _('تصویر'),
+        upload_to='homepage_sections/',
+        validators=[validate_image_size, validate_image_format],
+        help_text=_('تصویر المان'),
+        null=True,
+        blank=True,
+    )
+    
+    link_url = models.CharField(
+        _('لینک'),
+        max_length=500,
+        blank=True,
+        help_text=_(
+            'مسیر داخلی: /tickets | لینک خارجی: https://example.com | '
+            'اسکرول: #search-form | چت: chat:luggage_tracking'
+        ),
+    )
+    
+    order = models.PositiveIntegerField(
+        _('ترتیب نمایش'),
+        default=0,
+        db_index=True,
+    )
+    
+    is_active = models.BooleanField(
+        _('فعال'),
+        default=True,
+        db_index=True,
+    )
+    
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='homepage_section_items',
+        verbose_name=_('ایجاد شده توسط'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    
+    class Meta:
+        verbose_name = _('المان بخش صفحه اصلی')
+        verbose_name_plural = _('المان‌های بخش صفحه اصلی')
+        ordering = ['section_type', 'order', '-created_at']
+        indexes = [
+            models.Index(fields=['section_type', 'is_active']),
+            models.Index(fields=['order', 'section_type']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_section_type_display()} - {self.title_fa} (ترتیب: {self.order})"
+
+
+class HomePageSectionConfig(models.Model):
+    """
+    Section-level config: titles for Special Services and Experience sections.
+    Admin can edit section titles (multilingual).
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    section_type = models.CharField(
+        _('نوع بخش'),
+        max_length=20,
+        choices=SECTION_TYPE_CHOICES,
+        unique=True,
+        db_index=True,
+    )
+    
+    # Special Services: 1 title. Experience: 3 title lines
+    title1_fa = models.CharField(_('عنوان خط ۱ (فارسی)'), max_length=300, blank=True)
+    title1_ar = models.CharField(_('عنوان خط ۱ (عربی)'), max_length=300, blank=True)
+    title1_en = models.CharField(_('عنوان خط ۱ (انگلیسی)'), max_length=300, blank=True)
+    title2_fa = models.CharField(_('عنوان خط ۲ (فارسی)'), max_length=300, blank=True)
+    title2_ar = models.CharField(_('عنوان خط ۲ (عربی)'), max_length=300, blank=True)
+    title2_en = models.CharField(_('عنوان خط ۲ (انگلیسی)'), max_length=300, blank=True)
+    title3_fa = models.CharField(_('عنوان خط ۳ (فارسی)'), max_length=300, blank=True)
+    title3_ar = models.CharField(_('عنوان خط ۳ (عربی)'), max_length=300, blank=True)
+    title3_en = models.CharField(_('عنوان خط ۳ (انگلیسی)'), max_length=300, blank=True)
+    
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('تنظیمات عنوان بخش صفحه اصلی')
+        verbose_name_plural = _('تنظیمات عناوین بخش صفحه اصلی')
+    
+    def __str__(self):
+        return f"{self.get_section_type_display()}"
+
+
 class HeroSlider(models.Model):
     """
     Hero Slider model for homepage banner images

@@ -48,6 +48,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [hoveredSubItem, setHoveredSubItem] = useState<{key: string, index: number} | null>(null);
+  const [hoveredNestedPath, setHoveredNestedPath] = useState<number[]>([]); // e.g. [2] for مسافرین ویژه, [2,1] for درخواست ولیچر
   const [selectedDestinationIndex, setSelectedDestinationIndex] = useState<number | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
@@ -72,7 +73,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   // Get default image for each menu category
   const getDefaultImage = (key: string, subItemIndex?: number) => {
     const images: Record<string, string[]> = {
-      'book': [
+      'flyWithNasim': [
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-crew.jpg',
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
@@ -89,6 +90,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-plane-photo_991869-62.jpg',
         '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
+      ],
+      'safetyReport': [
+        '/images/airplane-clouds-night_864588-19786.jpg'
       ],
       'help': [
         '/images/airplane-clouds-night_864588-19786.jpg',
@@ -137,40 +141,64 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return destinationData[index] || destinationData[0];
   };
 
-  const menuItems = [
+  type DropdownSubItem = { label: string; path: string; children?: DropdownSubItem[] };
+  const menuItems: { key: string; label: string; path: string; dropdown: DropdownSubItem[] }[] = [
     {
-      key: 'book',
-      label: t('nav.book') || 'رزرو',
-      path: '#', // Disabled for security
+      key: 'flyWithNasim',
+      label: t('nav.flyWithNasim') || 'پرواز با نسیم',
+      path: '#',
       dropdown: [
-        { label: t('nav.bookFlights') || 'رزرو پرواز', path: '/#search-form' },
-        { label: t('nav.flightSchedules') || 'برنامه پرواز', path: '/flights/map' },
-        { label: t('nav.featuredFares') || 'پیشنهادات ویژه', path: '#' },
-        { label: t('nav.specialOffers') || 'پیشنهادات خاص', path: '#' },
+        { label: t('nav.checkInTime') || 'زمان مراجعه و پذیرش', path: '/#search-form' },
+        { label: t('nav.unacceptablePassengers') || 'مسافرین غیر قابل پذیرش', path: '#' },
+        {
+          label: t('nav.specialPassengers') || 'مسافرین ویژه',
+          path: '#',
+          children: [
+            { label: t('nav.seatSelection') || 'انتخاب صندلی', path: '#' },
+            {
+              label: t('nav.wheelchairRequest') || 'درخواست ولیچر',
+              path: '#',
+              children: [
+                { label: t('nav.passengerBaggage') || 'بار همراه مسافر', path: '#' },
+                { label: t('nav.carryOnAcceptance') || 'پذیرش بار همراه', path: '#' },
+                { label: t('nav.prohibitedItems') || 'اقلام ممنوعه', path: '#' },
+                { label: t('nav.excessBaggage') || 'اضافه بار', path: '#' },
+              ]
+            }
+          ]
+        },
+        { label: t('nav.refund') || 'استرداد', path: '#' },
+        { label: t('nav.baggage') || 'جامه دان', path: '#' },
       ]
     },
     {
       key: 'wherewefly',
-      label: t('nav.whereWeFly') || 'مقاصد',
-      path: '#', // Disabled for security
+      label: t('nav.flightDestinations') || 'مقاصد پروازی',
+      path: '#',
       dropdown: [
-        { label: t('nav.domesticDestinations') || 'مقاصد داخلی', path: '/flights/map' },
-        { label: t('nav.internationalDestinations') || 'مقاصد خارجی', path: '#' },
+        { label: t('nav.domestic') || 'داخلی', path: '/flights/map' },
+        { label: t('nav.international') || 'خارجی', path: '#' },
         { label: t('nav.allDestinations') || 'همه مقاصد', path: '/flights/map' },
       ]
     },
     {
-      key: 'help',
-      label: t('nav.help') || 'کمک',
-      path: '#', // Disabled for security
+      key: 'about',
+      label: t('nav.about') || 'درباره ما',
+      path: '#',
       dropdown: [
+        { label: t('nav.nasimHistory') || 'تاریخچه نسیم', path: '#' },
+        { label: t('nav.airlineFleet') || 'ناوگان هوایی', path: '/flights/map' },
         { label: t('nav.contactUs') || 'تماس با ما', path: '/#faq' },
-        { label: t('nav.weather') || 'وضعیت آب و هوا', path: '/#weather' },
-        { label: t('nav.complaint') || 'ثبت شکایت', path: '/tickets' },
-        { label: t('nav.magazine') || 'مجله', path: '/magazine' },
-        { label: t('nav.iranology') || 'ایران‌شناسی', path: '/iranology' },
-        { label: t('nav.photoGallery') || 'گالری عکس', path: '/gallery' },
+        { label: t('nav.cooperationRequest') || 'درخواست همکاری', path: '#' },
+        { label: t('nav.nasimTraining') || 'آموزش نسیم', path: '#' },
+        { label: t('nav.nasimMagazine') || 'مجله نسیم', path: '/magazine' },
       ]
+    },
+    {
+      key: 'safetyReport',
+      label: t('nav.safetyReport') || 'گزارش ایمنی',
+      path: '#',
+      dropdown: []
     }
   ];
 
@@ -191,6 +219,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     menuDropdownTimeoutRef.current = setTimeout(() => {
       setActiveDropdown(null);
       setSelectedDestinationIndex(null);
+      setHoveredNestedPath([]);
     }, 200); // 200ms delay
   };
 
@@ -309,10 +338,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     }
                   }}
                 >
-                  {item.key === 'book' && <TicketIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'flyWithNasim' && <PaperAirplaneIcon className="w-5 h-5 text-black" />}
                   {item.key === 'wherewefly' && <MapPinIcon className="w-5 h-5 text-black" />}
                   {item.key === 'about' && <BuildingOfficeIcon className="w-5 h-5 text-black" />}
-                  {item.key === 'help' && <QuestionMarkCircleIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'safetyReport' && <ExclamationTriangleIcon className="w-5 h-5 text-black" />}
                   {item.label}
                 </Link>
                 
@@ -330,44 +359,62 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     onMouseLeave={() => {
                       handleMouseLeave();
                       setHoveredSubItem(null);
+                      setHoveredNestedPath([]);
                     }}
                   >
                     <div className="flex">
                       {/* Menu Items Section */}
-                      <div className={`${item.key === 'wherewefly' ? 'w-80' : 'flex-1'} py-6 px-6`}>
-                        <div className="space-y-2">
+                      <div className={`${item.key === 'wherewefly' ? 'w-80' : 'flex-1'} py-6 px-6 flex gap-4 min-w-0`}>
+                        {/* Column 1 - Main items (or single column for non-flyWithNasim) */}
+                        <div className="space-y-2 flex-1 min-w-0">
                           {item.dropdown.map((subItem, index) => {
+                            const hasChildren = 'children' in subItem && subItem.children && subItem.children.length > 0;
+                            const isHovered = item.key === 'flyWithNasim' && hoveredNestedPath[0] === index;
                             // Get icon for each submenu item based on path and key (language-independent)
                             const getSubItemIcon = (label: string, key: string, itemIndex: number, path: string) => {
-                              if (key === 'book') {
-                                if (itemIndex === 0) return <TicketIcon className="w-7 h-7" style={{ color: '#2563eb' }} />; // رزرو پرواز - آبی
-                                if (itemIndex === 1) return <CalendarDaysIcon className="w-7 h-7" style={{ color: '#16a34a' }} />;
-                                if (itemIndex === 2) return <GiftIcon className="w-7 h-7" style={{ color: '#9333ea' }} />; // پیشنهادات ویژه
-                                if (itemIndex === 3) return <SparklesIcon className="w-7 h-7" style={{ color: '#db2777' }} />; // پیشنهادات خاص
+                              if (key === 'flyWithNasim') {
+                                if (itemIndex === 0) return <CalendarDaysIcon className="w-7 h-7" style={{ color: '#2563eb' }} />;
+                                if (itemIndex === 1) return <UserIcon className="w-7 h-7" style={{ color: '#16a34a' }} />;
+                                if (itemIndex === 2) return <UserGroupIcon className="w-7 h-7" style={{ color: '#9333ea' }} />;
+                                if (itemIndex === 3) return <ArrowPathIcon className="w-7 h-7" style={{ color: '#db2777' }} />;
+                                if (itemIndex === 4) return <TicketIcon className="w-7 h-7" style={{ color: '#ea580c' }} />;
+                                return <PaperAirplaneIcon className="w-7 h-7" style={{ color: '#3b82f6' }} />;
                               }
                               if (key === 'wherewefly') {
                                 return <MapPinIcon className="w-7 h-7" style={{ color: '#ea580c' }} />;
                               }
                               if (key === 'about') {
-                                return <BuildingOfficeIcon className="w-7 h-7" style={{ color: '#374151' }} />;
-                              }
-                              if (key === 'help') {
-                                // Use path and index to determine icon
-                                if (path === '/#faq' && itemIndex === 0) return <MapPinIcon className="w-7 h-7" style={{ color: '#22c55e' }} />; // تماس با ما
-                                if (path === '/#weather') return <CloudIcon className="w-7 h-7" style={{ color: '#2563eb' }} />; // وضعیت آب و هوا - آبی
-                                if (path === '/tickets') return <TicketIcon className="w-7 h-7" style={{ color: '#a855f7' }} />; // ثبت شکایت
-                                if (path === '/magazine') return <NewspaperIcon className="w-7 h-7" style={{ color: '#6366f1' }} />; // مجله
-                                if (path === '/gallery') return <PhotoIcon className="w-7 h-7" style={{ color: '#06b6d4' }} />; // گالری عکس
-                                return <QuestionMarkCircleIcon className="w-7 h-7" style={{ color: '#3b82f6' }} />;
+                                if (itemIndex === 0) return <BuildingOfficeIcon className="w-7 h-7" style={{ color: '#374151' }} />; // تاریخچه نسیم
+                                if (itemIndex === 1) return <PaperAirplaneIcon className="w-7 h-7" style={{ color: '#2563eb' }} />; // ناوگان هوایی
+                                if (itemIndex === 2) return <MapPinIcon className="w-7 h-7" style={{ color: '#22c55e' }} />; // تماس با ما
+                                if (itemIndex === 3) return <UserGroupIcon className="w-7 h-7" style={{ color: '#a855f7' }} />; // درخواست همکاری
+                                if (itemIndex === 4) return <TrophyIcon className="w-7 h-7" style={{ color: '#ea580c' }} />; // آموزش نسیم
+                                if (itemIndex === 5) return <NewspaperIcon className="w-7 h-7" style={{ color: '#6366f1' }} />; // مجله نسیم
+                                return <BuildingOfficeIcon className="w-7 h-7" style={{ color: '#3b82f6' }} />;
                               }
                               return null;
                             };
                             
+                            const linkClassName = `flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${item.key === 'wherewefly' && selectedDestinationIndex === index ? 'bg-gray-300' : ''} ${isHovered ? 'bg-gray-300' : ''}`;
                             return (
+                              hasChildren ? (
+                                <div
+                                  key={index}
+                                  className={linkClassName}
+                                  onMouseEnter={() => {
+                                    setHoveredSubItem({ key: item.key, index });
+                                    setHoveredNestedPath([index]);
+                                  }}
+                                >
+                                  {getSubItemIcon(subItem.label, item.key, index, subItem.path)}
+                                  <span className="font-medium">{subItem.label}</span>
+                                  <ChevronDownIcon className={`w-4 h-4 flex-shrink-0 ${language === 'fa' ? 'rotate-[-90deg]' : ''}`} />
+                                </div>
+                              ) : (
                               <Link
                                 key={index}
                                 to={subItem.path}
-                                className={`flex items-center gap-3 px-4 py-4 text-base text-black hover:bg-gray-300 rounded-lg transition-all duration-200 ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${item.key === 'wherewefly' && selectedDestinationIndex === index ? 'bg-gray-300' : ''}`}
+                                className={linkClassName}
                                 onClick={(e) => {
                                   // Disable navigation for inactive menu items
                                   if (subItem.path === '#') {
@@ -429,9 +476,66 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 {getSubItemIcon(subItem.label, item.key, index, subItem.path)}
                                 <span className="font-medium">{subItem.label}</span>
                               </Link>
+                              )
                             );
                           })}
                         </div>
+                        {/* Nested columns for flyWithNasim - single container so hover between cols doesn't clear */}
+                        {item.key === 'flyWithNasim' && hoveredNestedPath.length > 0 && (
+                          <div className="flex gap-4 flex-shrink-0" onMouseLeave={() => setHoveredNestedPath([hoveredNestedPath[0]])}>
+                            {(() => {
+                              const parentItem = item.dropdown[hoveredNestedPath[0]] as DropdownSubItem;
+                              if (!parentItem?.children) return null;
+                              return (
+                                <div className="space-y-2 w-56 border-r border-gray-300 pr-4">
+                                  {parentItem.children.map((child, childIdx) => {
+                                    const childHasChildren = child.children && child.children.length > 0;
+                                    const childHovered = hoveredNestedPath[1] === childIdx;
+                                    return childHasChildren ? (
+                                      <div
+                                        key={childIdx}
+                                        className={`flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-gray-300 rounded-lg transition-all ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${childHovered ? 'bg-gray-300' : ''}`}
+                                        onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
+                                      >
+                                        <span className="font-medium">{child.label}</span>
+                                        <ChevronDownIcon className={`w-4 h-4 flex-shrink-0 ${language === 'fa' ? 'rotate-[-90deg]' : ''}`} />
+                                      </div>
+                                    ) : (
+                                      <Link
+                                        key={childIdx}
+                                        to={child.path}
+                                        className={`flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-gray-300 rounded-lg transition-all ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
+                                        onClick={(e) => { if (child.path === '#') { e.preventDefault(); setActiveDropdown(null); } }}
+                                        onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
+                                      >
+                                        <span className="font-medium">{child.label}</span>
+                                      </Link>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            })()}
+                            {hoveredNestedPath.length > 1 && (() => {
+                              const parentItem = item.dropdown[hoveredNestedPath[0]] as DropdownSubItem;
+                              const childItem = parentItem?.children?.[hoveredNestedPath[1]];
+                              if (!childItem?.children) return null;
+                              return (
+                                <div className="space-y-2 w-56">
+                                  {childItem.children.map((grandChild, gIdx) => (
+                                    <Link
+                                      key={gIdx}
+                                      to={grandChild.path}
+                                      className={`flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-gray-300 rounded-lg transition-all ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
+                                      onClick={(e) => { if (grandChild.path === '#') { e.preventDefault(); setActiveDropdown(null); } }}
+                                    >
+                                      <span className="font-medium">{grandChild.label}</span>
+                                    </Link>
+                                  ))}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
                       </div>
                       
                       {/* Image Section */}
@@ -960,16 +1064,23 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     </Link>
                     {item.dropdown && (
                       <div className="pr-4 mt-1 space-y-1">
-                        {item.dropdown.map((subItem, index) => (
-                          <Link
-                            key={index}
-                            to={subItem.path}
-                            className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors ${fontClass}`}
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            {subItem.label}
-                          </Link>
-                        ))}
+                        {(function flattenItems(items: DropdownSubItem[], depth = 0, path = ''): React.ReactNode[] {
+                          return items.flatMap((subItem, index) => {
+                            const p = path ? `${path}-${index}` : `${index}`;
+                            return [
+                            <Link
+                              key={p}
+                              to={subItem.path}
+                              className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors ${fontClass}`}
+                              style={{ paddingLeft: `${16 + depth * 12}px` }}
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              {subItem.label}
+                            </Link>,
+                            ...(subItem.children ? flattenItems(subItem.children, depth + 1, p) : [])
+                          ];
+                          });
+                        })(item.dropdown, 0, '')}
                       </div>
                     )}
                   </div>

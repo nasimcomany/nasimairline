@@ -5,7 +5,7 @@ import EmiratesFlightSearchForm from '../components/FlightSearch/EmiratesFlightS
 import WeatherWidget from '../components/Weather/WeatherWidget';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useChat } from '../contexts/ChatContext';
-import galleryService, { HeroSlider } from '../services/galleryService';
+import galleryService, { HeroSlider, HomePageSectionItem, HomePageSectionConfig } from '../services/galleryService';
 import { 
   PaperAirplaneIcon, 
   BuildingOfficeIcon, 
@@ -108,6 +108,9 @@ const HomePage: React.FC = () => {
   const [showWeatherModal, setShowWeatherModal] = useState(false);
   const [hoveredService, setHoveredService] = useState<number | null>(null);
   const [activeFlightTab, setActiveFlightTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
+  const [specialServicesItems, setSpecialServicesItems] = useState<HomePageSectionItem[]>([]);
+  const [experienceItems, setExperienceItems] = useState<HomePageSectionItem[]>([]);
+  const [sectionConfigs, setSectionConfigs] = useState<Record<string, HomePageSectionConfig>>({});
 
   const reservedSeats = ['A1', 'B2', 'C3', 'D4', 'A5', 'B6'];
   
@@ -292,6 +295,41 @@ const HomePage: React.FC = () => {
 
     fetchHeroSliders();
   }, []);
+
+  // Fetch Homepage section items (Special Services + Experience)
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const [items, configs] = await Promise.all([
+          galleryService.getHomePageSectionItems(),
+          galleryService.getHomePageSectionConfigs(),
+        ]);
+        setSpecialServicesItems(items.special_services);
+        setExperienceItems(items.experience);
+        setSectionConfigs(configs);
+      } catch (error) {
+        console.error('Error loading homepage sections:', error);
+      }
+    };
+    fetchSections();
+  }, []);
+
+  // Helper: handle section item click (link_url)
+  const handleSectionItemClick = (linkUrl: string) => {
+    if (!linkUrl) return;
+    if (linkUrl.startsWith('chat:')) {
+      const topic = linkUrl.replace('chat:', '');
+      openChat(topic === 'luggage_tracking' ? 'luggage_tracking' : 'normal');
+    } else if (linkUrl.startsWith('#')) {
+      const el = document.getElementById(linkUrl.slice(1));
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      else navigate(`/${linkUrl}`);
+    } else if (linkUrl.startsWith('http://') || linkUrl.startsWith('https://')) {
+      window.open(linkUrl, '_blank');
+    } else {
+      navigate(linkUrl);
+    }
+  };
 
   // Handle smooth scroll to search form when hash is present or from navigation state
   useEffect(() => {
@@ -1122,187 +1160,62 @@ const HomePage: React.FC = () => {
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              {t('home.services.specialTitle')}
+              {(() => {
+              const config = sectionConfigs['SPECIAL_SERVICE'];
+              return config?.title1_fa || config?.title1_ar || config?.title1_en
+                ? (language === 'fa' ? config.title1_fa : language === 'ar' ? config.title1_ar : config.title1_en)
+                : t('home.services.specialTitle');
+            })()}
             </h2>
           </div>
 
-          {/* Services Grid - Simple Horizontal Cards with Text Overlay */}
+          {/* Services Grid - Dynamic from API with fallback */}
           <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6" style={{ justifyContent: 'center' }}>
-            {/* Service 1: Seat Selection - Scroll to search form */}
-            <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
-              style={{ 
-                flexBasis: hoveredService === null || hoveredService === 1 ? '32.5%' : '25%',
-                flexGrow: 0,
-                flexShrink: 0,
-                transition: 'flex-basis 0.3s ease-out'
-              }}
-              onMouseEnter={() => setHoveredService(1)}
-              onMouseLeave={() => setHoveredService(null)}
-              onClick={() => {
-                const el = document.getElementById('search-form');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                else navigate('/#search-form');
-              }}
-            >
-              <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
-                <img 
-                  src="/images/chair.jpeg" 
-                  alt="انتخاب صندلی"
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+            {(
+              specialServicesItems.length > 0 ? specialServicesItems : [
+                { id: 1, title_fa: 'انتخاب صندلی', title_ar: 'اختيار المقعد', title_en: 'Seat Selection', image_url: '/images/chair.jpeg', link_url: '#search-form', order: 1 },
+                { id: 2, title_fa: 'پیگیری چمدان', title_ar: 'تتبع الأمتعة', title_en: 'Luggage tracking', image_url: '/images/overload.jpeg', link_url: 'chat:luggage_tracking', order: 2 },
+                { id: 3, title_fa: 'غذای مسافر', title_ar: 'وجبة المسافر', title_en: 'Passenger meal', image_url: '/images/TravelingWithPets.jpg', link_url: '/meal-feedback', order: 3 },
+                { id: 4, title_fa: 'انتخاب پرواز از روی نقشه', title_ar: 'اختيار الرحلة من على الخريطة', title_en: 'Choose flight from map', image_url: '/images/travelwheelchair.jpeg', link_url: '/flights/map', order: 4 },
+              ] as HomePageSectionItem[]
+            ).map((item, idx) => {
+              const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
+              const imgSrc = item.image_url || (idx === 0 ? '/images/chair.jpeg' : idx === 1 ? '/images/overload.jpeg' : idx === 2 ? '/images/TravelingWithPets.jpg' : '/images/travelwheelchair.jpeg');
+              const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
+              return (
+                <div 
+                  key={item.id || idx}
+                  className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full"
+                  style={{ 
+                    flexBasis: isExpanded ? '32.5%' : '25%',
+                    flexGrow: 0,
+                    flexShrink: 0,
+                    minWidth: 0,
+                    transition: 'flex-basis 0.3s ease-out'
                   }}
-                />
-                {/* Text and Line - Right side of element */}
-                <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                  <p 
-                    className="text-black text-right font-semibold mb-2"
-                    style={{ 
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      fontSize: '1.1rem'
-                    }}
-                  >
-                    {t('home.flightSearch.seatSelection')}
-                  </p>
-                  <div 
-                    className="h-0.5 transition-colors duration-300"
-                    style={{
-                      backgroundColor: hoveredService === 1 ? '#1e3a8a' : '#9ca3af'
-                    }}
-                  ></div>
+                  onMouseEnter={() => setHoveredService(idx + 1)}
+                  onMouseLeave={() => setHoveredService(null)}
+                  onClick={() => handleSectionItemClick(item.link_url || '')}
+                >
+                  <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
+                    <img 
+                      src={imgSrc}
+                      alt={title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                      }}
+                    />
+                    <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <p className="text-black text-right font-semibold mb-2" style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif", fontSize: '1.1rem' }}>
+                        {title}
+                      </p>
+                      <div className="h-0.5 transition-colors duration-300" style={{ backgroundColor: hoveredService === idx + 1 ? '#1e3a8a' : '#9ca3af' }}></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Service 2: Luggage Tracking (پیگیری چمدان) */}
-            <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
-              style={{ 
-                flexBasis: hoveredService === 2 ? '32.5%' : '25%',
-                flexGrow: 0,
-                flexShrink: 0,
-                transition: 'flex-basis 0.3s ease-out'
-              }}
-              onMouseEnter={() => setHoveredService(2)}
-              onMouseLeave={() => setHoveredService(null)}
-              onClick={() => openChat('luggage_tracking')}
-            >
-              <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
-                <img 
-                  src="/images/overload.jpeg" 
-                  alt={t('home.services.luggageTracking')}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
-                  }}
-                />
-                {/* Text and Line - Right side of element */}
-                <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                  <p 
-                    className="text-black text-right font-semibold mb-2"
-                    style={{ 
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      fontSize: '1.1rem'
-                    }}
-                  >
-                    {t('home.services.luggageTracking')}
-                  </p>
-                  <div 
-                    className="h-0.5 transition-colors duration-300"
-                    style={{
-                      backgroundColor: hoveredService === 2 ? '#1e3a8a' : '#9ca3af'
-                    }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Service 3: Passenger Meal */}
-            <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
-              style={{ 
-                flexBasis: hoveredService === 3 ? '32.5%' : '25%',
-                flexGrow: 0,
-                flexShrink: 0,
-                transition: 'flex-basis 0.3s ease-out'
-              }}
-              onMouseEnter={() => setHoveredService(3)}
-              onMouseLeave={() => setHoveredService(null)}
-              onClick={() => navigate('/meal-feedback')}
-            >
-              <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
-                <img 
-                  src="/images/TravelingWithPets.jpg" 
-                  alt={t('home.services.passengerMeal')}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
-                  }}
-                />
-                {/* Text and Line - Right side of element */}
-                <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                  <p 
-                    className="text-black text-right font-semibold mb-2"
-                    style={{ 
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      fontSize: '1.1rem'
-                    }}
-                  >
-                    {t('home.services.passengerMeal')}
-                  </p>
-                  <div 
-                    className="h-0.5 transition-colors duration-300"
-                    style={{
-                      backgroundColor: hoveredService === 3 ? '#1e3a8a' : '#9ca3af'
-                    }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Service 4: Choose flight from map */}
-            <div 
-              className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
-              style={{ 
-                flexBasis: hoveredService === 4 ? '32.5%' : '25%',
-                flexGrow: 0,
-                flexShrink: 0,
-                transition: 'flex-basis 0.3s ease-out'
-              }}
-              onMouseEnter={() => setHoveredService(4)}
-              onMouseLeave={() => setHoveredService(null)}
-              onClick={() => navigate('/flights/map')}
-            >
-              <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
-                <img 
-                  src="/images/travelwheelchair.jpeg" 
-                  alt={t('home.services.flightMapSelect')}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
-                  }}
-                />
-                {/* Text and Line - Right side of element */}
-                <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                  <p 
-                    className="text-black text-right font-semibold mb-2"
-                    style={{ 
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                      fontSize: '1.1rem'
-                    }}
-                  >
-                    {t('home.services.flightMapSelect')}
-                  </p>
-                  <div 
-                    className="h-0.5 transition-colors duration-300"
-                    style={{
-                      backgroundColor: hoveredService === 4 ? '#1e3a8a' : '#9ca3af'
-                    }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1551,11 +1464,11 @@ const HomePage: React.FC = () => {
                   }}
                 />
                 {/* Simplified Overlay - Only Route Names */}
-                <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="absolute top-0 left-0 right-0 p-4">
                   <div 
                     className="backdrop-blur-sm rounded-lg px-4 py-3"
                     style={{
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.3))'
+                      background: 'linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.3))'
                     }}
                   >
                     <div className="flex items-center justify-center gap-2">
@@ -1606,9 +1519,10 @@ const HomePage: React.FC = () => {
       {/* Skywards+ Section - Emirates Style */}
       <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '48px' }}>
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover"
           style={{
-            backgroundImage: 'url(/images/airport-crew.jpg)'
+            backgroundImage: 'url(/images/airport-crew.jpg)',
+            backgroundPosition: 'center -38px'
           }}
         >
           <div className="absolute inset-0 bg-black/40"></div>
@@ -1618,33 +1532,33 @@ const HomePage: React.FC = () => {
           style={{ direction: 'ltr', justifyContent: 'flex-end', paddingLeft: '12rem', paddingRight: '0cm' }}
         >
           <div className="max-w-2xl w-full" style={{ textAlign: language === 'fa' || language === 'ar' ? 'right' : 'left' }}>
-            <p className={`text-white text-xs sm:text-sm uppercase tracking-wider mb-2 ${fontClass}`} style={{ 
+            <p className={`text-white text-xs sm:text-sm uppercase tracking-widest mb-2 opacity-95 ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
               textTransform: 'none'
             }}>
               {t('home.loyalty.programTitle')}
             </p>
-            <h2 className={`text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4 ${fontClass}`} style={{ 
+            <h2 className={`text-xl sm:text-3xl md:text-4xl font-semibold text-white mb-2 sm:mb-3 tracking-tight ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
-              fontWeight: 700,
-              lineHeight: 1.2
+              fontWeight: 600,
+              lineHeight: 1.25
             }}>
               {t('home.loyalty.enhanceTitle')}
             </h2>
-            <p className={`text-white text-sm sm:text-lg mb-4 sm:mb-6 ${fontClass}`} style={{ 
+            <p className={`text-white/95 text-sm sm:text-base mb-4 sm:mb-5 leading-snug ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
-              lineHeight: '1.8'
+              lineHeight: '1.65'
             }}>
               {t('home.loyalty.fullDescription')}
             </p>
-            <button className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-8 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base" style={{ 
+            <button onClick={() => navigate('/membership')} className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg transition-colors text-sm" style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl'
             }}>
-              {t('common.learnMore') || 'بیشتر بدانید'}
+              {language === 'fa' ? 'درباره هواپیمایی نسیم' : language === 'ar' ? 'حول نسيم إير' : 'About Nasim Air'}
             </button>
           </div>
         </div>
@@ -1673,7 +1587,10 @@ const HomePage: React.FC = () => {
                 fontVariant: 'normal',
                 textDecoration: 'none'
               }}>
-                {t('home.experience.flyWithNasim')}
+                {(() => {
+                  const c = sectionConfigs['EXPERIENCE'];
+                  return c?.title1_fa || c?.title1_ar || c?.title1_en ? (language === 'fa' ? c.title1_fa : language === 'ar' ? c.title1_ar : c.title1_en) : t('home.experience.flyWithNasim');
+                })()}
               </p>
               
               {/* Second line - Large */}
@@ -1692,7 +1609,10 @@ const HomePage: React.FC = () => {
                 justifyContent: 'center',
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif'
               }}>
-                {t('home.experience.exploreNasim')}
+                {(() => {
+                  const c = sectionConfigs['EXPERIENCE'];
+                  return c?.title2_fa || c?.title2_ar || c?.title2_en ? (language === 'fa' ? c.title2_fa : language === 'ar' ? c.title2_ar : c.title2_en) : t('home.experience.exploreNasim');
+                })()}
               </h2>
               
               {/* Third line - Small */}
@@ -1705,275 +1625,75 @@ const HomePage: React.FC = () => {
                 opacity: 1,
                 fontFamily: 'DigiHamisheBold, Arial, sans-serif'
               }}>
-                {t('home.experience.planUnforgettable')}
+                {(() => {
+                  const c = sectionConfigs['EXPERIENCE'];
+                  return c?.title3_fa || c?.title3_ar || c?.title3_en ? (language === 'fa' ? c.title3_fa : language === 'ar' ? c.title3_ar : c.title3_en) : t('home.experience.planUnforgettable');
+                })()}
               </p>
             </div>
           </div>
 
-          {/* Layout: 4 Small Images Left (2x2), Large Image Right */}
+          {/* Layout: 4 Small Images Left (2x2), Large Image Right - Dynamic from API */}
           <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-0 justify-center items-center" style={{ perspective: '1000px', overflow: 'visible', direction: 'rtl' }}>
-            {/* 4 Small Images - Left Side (60% width, 2x2 grid) - First in order */}
-            <div className="grid grid-cols-2 gap-1 sm:gap-2 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible', direction: 'rtl' }}>
-              {/* Image 1 - two.png - Left page of book */}
-              <div 
-                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                style={{
-                  borderRadius: '16px',
-                  border: '0.5px solid #d1d5db',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                  opacity: 0.95,
-                  transform: 'translateY(0)',
-                  transformStyle: 'preserve-3d',
-                  transformOrigin: 'right center',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  width: '68%',
-                  maxWidth: '100%',
-                  marginRight: '170px',
-                  position: 'relative',
-                  zIndex: 25
-                }}
-                onClick={() => navigate('/tickets')}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(-15deg) translateZ(20px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                  e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
-                }}
-              >
-                <div className="relative w-full" style={{ 
-                  height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '16px',
-                  overflow: 'hidden'
-                }}>
-                  <img 
-                    src="/images/two.png" 
-                    alt="Image 1"
-                    className="w-full h-full object-contain transition-opacity duration-300"
-                    style={{ 
-                      objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease',
-                      height: '100%',
-                      width: '100%',
-                      imageRendering: '-webkit-optimize-contrast',
-                      borderRadius: '16px'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Image 2 - three.png - Right page of book */}
-              <div 
-                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                style={{ 
-                  borderRadius: '16px',
-                  border: '0.5px solid #d1d5db',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                  opacity: 0.95,
-                  transform: 'translateY(0)',
-                  transformStyle: 'preserve-3d',
-                  transformOrigin: 'left center',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  width: '68%',
-                  maxWidth: '100%',
-                  position: 'relative',
-                  zIndex: 25
-                }}
-                onClick={() => navigate('/tickets')}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(15deg) translateZ(20px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                  e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
-                }}
-              >
-                <div className="relative w-full" style={{ 
-                  height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '16px',
-                  overflow: 'hidden'
-                }}>
-                  <img 
-                    src="/images/three.png" 
-                    alt="Image 2"
-                    className="w-full h-full object-contain transition-opacity duration-300"
-                    style={{ 
-                      objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease',
-                      height: '100%',
-                      width: '100%',
-                      imageRendering: '-webkit-optimize-contrast',
-                      borderRadius: '16px'
-                    }}
-                  />
-                    </div>
+            {(() => {
+              const defaultExp: HomePageSectionItem[] = [
+                { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/tickets', order: 1, section_type: 'EXPERIENCE', is_active: true },
+                { id: 2, title_fa: 'تصویر ۲', title_ar: 'صورة ٢', title_en: 'Image 2', image_url: '/images/three.png', link_url: '/tickets', order: 2, section_type: 'EXPERIENCE', is_active: true },
+                { id: 3, title_fa: 'فرودگاه مهرآباد', title_ar: 'مطار مهرآباد', title_en: 'Mehrabad Airport', image_url: '/images/4reza.jpeg', link_url: 'https://fids.airport.ir/', order: 3, section_type: 'EXPERIENCE', is_active: true },
+                { id: 4, title_fa: 'تصویر ۴', title_ar: 'صورة ٤', title_en: 'Image 4', image_url: '/images/5reza.jpeg', link_url: 'https://ikac.ir/', order: 4, section_type: 'EXPERIENCE', is_active: true },
+                { id: 5, title_fa: 'ایرانولوژی', title_ar: 'إيرانولوجيا', title_en: 'Iranology', image_url: '/images/6reza.jpeg', link_url: '/iranology', order: 5, section_type: 'EXPERIENCE', is_active: true },
+              ];
+              const items = experienceItems.length >= 5 ? experienceItems : defaultExp;
+              const smallItems = items.slice(0, 4);
+              const largeItem = items[4];
+              const smallImgStyle = { height: 'calc((500px - 24px) / 2)', borderRadius: '16px', overflow: 'hidden' as const };
+              const imgCommon = { objectPosition: 'center center', transition: 'opacity 0.3s ease', height: '100%', width: '100%', imageRendering: '-webkit-optimize-contrast' as const, borderRadius: '16px' };
+              const cardBase: React.CSSProperties = { borderRadius: '16px', border: '0.5px solid #d1d5db', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)', opacity: 0.95, transform: 'translateY(0)', transformStyle: 'preserve-3d', transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)', width: '68%', maxWidth: '100%', position: 'relative', zIndex: 25 };
+              return (
+                <>
+                  <div className="grid grid-cols-2 gap-1 sm:gap-2 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible', direction: 'rtl' }}>
+                    {smallItems.map((item, idx) => {
+                      const isLeft = idx % 2 === 0;
+                      const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
+                      const imgSrc = item.image_url || (['/images/two.png', '/images/three.png', '/images/4reza.jpeg', '/images/5reza.jpeg'])[idx];
+                      return (
+                        <div key={item.id} className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
+                          style={{ ...cardBase, transformOrigin: isLeft ? 'right center' : 'left center', marginRight: isLeft ? '170px' : undefined }}
+                          onClick={() => handleSectionItemClick(item.link_url || '')}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = '#d1d5db';
+                            e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
+                            e.currentTarget.style.opacity = '1';
+                            e.currentTarget.style.transform = `translateY(-4px) rotateY(${isLeft ? -15 : 15}deg) translateZ(20px)`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = '#d1d5db';
+                            e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                            e.currentTarget.style.opacity = '0.95';
+                            e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                          }}
+                        >
+                          <div className="relative w-full" style={smallImgStyle}>
+                            <img src={imgSrc} alt={title} className="w-full h-full object-contain transition-opacity duration-300" style={imgCommon} />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-
-              {/* Image 3 - 4reza.jpeg - فرودگاه مهرآباد */}
-              <div 
-                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                style={{ 
-                  borderRadius: '16px',
-                  border: '0.5px solid #d1d5db',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                  opacity: 0.95,
-                  transform: 'translateY(0)',
-                  transformStyle: 'preserve-3d',
-                  transformOrigin: 'right center',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  width: '68%',
-                  maxWidth: '100%',
-                  marginRight: '170px',
-                  position: 'relative',
-                  zIndex: 25
-                }}
-                onClick={() => window.open('https://fids.airport.ir/', '_blank')}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(-15deg) translateZ(20px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                  e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
-                }}
-              >
-                <div className="relative w-full" style={{ 
-                  height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '16px',
-                  overflow: 'hidden'
-                }}>
-                  <img 
-                    src="/images/4reza.jpeg" 
-                    alt="Image 3"
-                    className="w-full h-full object-contain transition-opacity duration-300"
-                    style={{ 
-                      objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease',
-                      height: '100%',
-                      width: '100%',
-                      imageRendering: '-webkit-optimize-contrast',
-                      borderRadius: '16px'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Image 4 - 5reza.jpeg */}
-              <div 
-                className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                style={{ 
-                  borderRadius: '16px',
-                  border: '0.5px solid #d1d5db',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                  opacity: 0.95,
-                  transform: 'translateY(0)',
-                  transformStyle: 'preserve-3d',
-                  transformOrigin: 'left center',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                  width: '68%',
-                  maxWidth: '100%',
-                  position: 'relative',
-                  zIndex: 25
-                }}
-                onClick={() => window.open('https://ikac.ir/', '_blank')}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                  e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.transform = 'translateY(-4px) rotateY(15deg) translateZ(20px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                  e.currentTarget.style.opacity = '0.95';
-                  e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
-                }}
-              >
-                <div className="relative w-full" style={{ 
-                  height: 'calc((500px - 24px) / 2)',
-                  borderRadius: '16px',
-                  overflow: 'hidden'
-                }}>
-                  <img 
-                    src="/images/5reza.jpeg" 
-                    alt="Image 4"
-                    className="w-full h-full object-contain transition-opacity duration-300"
-                    style={{ 
-                      objectPosition: 'center center',
-                      transition: 'opacity 0.3s ease',
-                      height: '100%',
-                      width: '100%',
-                      imageRendering: '-webkit-optimize-contrast',
-                      borderRadius: '16px'
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Large Image - Right Side (40% width) - Second in order */}
-            <div 
-              className="bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2"
-              style={{ 
-                borderRadius: '16px',
-                border: '0.5px solid #d1d5db',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                opacity: 0.95,
-                transform: 'translateY(0)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                position: 'relative',
-                zIndex: 75,
-                marginRight: '-50px'
-              }}
-              onClick={() => navigate('/iranology')}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#d1d5db';
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                e.currentTarget.style.opacity = '1';
-                e.currentTarget.style.transform = 'translateY(-14px)';
-                e.currentTarget.style.marginRight = '-50px';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#d1d5db';
-                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                e.currentTarget.style.opacity = '0.95';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.marginRight = '-50px';
-              }}
-            >
-              {/* Large Image - Using 6reza.jpeg */}
-              <div className="relative w-full" style={{ 
-                height: 'clamp(320px, 40vw, 480px)',
-                borderRadius: '16px',
-                overflow: 'hidden'
-              }}>
-                <img 
-                  src="/images/6reza.jpeg" 
-                  alt="Featured destination"
-                  className="w-full h-full object-cover transition-opacity duration-300"
-                  style={{ 
-                    objectPosition: 'center center',
-                    transition: 'opacity 0.3s ease',
-                    imageRendering: '-webkit-optimize-contrast',
-                    borderRadius: '16px'
-                  }}
-                />
-              </div>
-            </div>
+                  {largeItem && (
+                    <div className="bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2" style={{ borderRadius: '16px', border: '0.5px solid #d1d5db', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)', opacity: 0.95, transform: 'translateY(0)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', position: 'relative', zIndex: 75, marginRight: '-50px' }}
+                      onClick={() => handleSectionItemClick(largeItem.link_url || '')}
+                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)'; e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(-14px)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)'; e.currentTarget.style.opacity = '0.95'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                    >
+                      <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)', borderRadius: '16px', overflow: 'hidden' }}>
+                        <img src={largeItem.image_url || '/images/6reza.jpeg'} alt={language === 'fa' ? largeItem.title_fa : language === 'ar' ? largeItem.title_ar : largeItem.title_en} className="w-full h-full object-cover transition-opacity duration-300" style={{ ...imgCommon, borderRadius: '16px' }} />
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </section>
@@ -3374,7 +3094,7 @@ const HomePage: React.FC = () => {
   </div>
 )}
       {/* Footer - Emirates Style */}
-      <footer className="relative z-10 py-8 sm:py-16" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '-56px', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
+      <footer className="relative z-10 pt-8 sm:pt-16 pb-0" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '-56px', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {/* درباره هواپیمایی نسیم Column */}
@@ -3699,70 +3419,59 @@ const HomePage: React.FC = () => {
                     {language === 'fa' ? 'حریم خصوصی و امنیت' : language === 'ar' ? 'الخصوصية والأمان' : 'Privacy & Security'}
                   </a>
                 </li>
+                <li className="pt-4">
+                  <p className={`text-sm font-medium text-white mb-3 ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    {t('footer.socialTitle')}
+                  </p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <a href="https://www.instagram.com/flynasim" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="Instagram" aria-label="Instagram">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="url(#footer-ig-gradient)" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="footer-ig-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f09433"/><stop offset="25%" stopColor="#e6683c"/><stop offset="50%" stopColor="#dc2743"/><stop offset="75%" stopColor="#cc2366"/><stop offset="100%" stopColor="#bc1888"/></linearGradient></defs><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.218 4.771 1.693 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                    </a>
+                    <a href="https://wa.me/989124268358" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="WhatsApp" aria-label="WhatsApp">
+                      <svg className="w-5 h-5" fill="#25D366" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      </svg>
+                    </a>
+                    <a href="https://www.linkedin.com/company/flynasim" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="LinkedIn" aria-label="LinkedIn">
+                      <svg className="w-5 h-5" fill="#0A66C2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                    </a>
+                    <a href="https://www.aparat.com/nasimair" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 transition-colors" title="آپارات" aria-label="Aparat">
+                      <img src="https://cdn.simpleicons.org/aparat/ea1d5d" alt="آپارات" className="w-5 h-5 object-contain" />
+                    </a>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>
-          <div className={`border-t mt-12 pt-8 pb-16 ${fontClass}`} style={{
+          <div className={`border-t mt-12 pt-4 sm:pt-5 pb-0 ${fontClass}`} style={{
             borderColor: '#3b82f6',
             fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
           }}>
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm font-medium text-white text-center md:text-right">
-                &copy; 2024 {t('common.nasimAir')} {t('footer.copyright') || 'تمام حقوق محفوظ است'}.
-              </p>
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                <a 
-                  href="https://www.instagram.com/flynasim" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-9 h-9 rounded-full text-white hover:bg-white/20 transition-colors"
-                  title="Instagram"
-                  aria-label="Instagram"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.218 4.771 1.693 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                  </svg>
-                </a>
-                <a 
-                  href="https://wa.me" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-9 h-9 rounded-full text-white hover:bg-white/20 transition-colors"
-                  title="WhatsApp"
-                  aria-label="WhatsApp"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                </a>
-                <a 
-                  href="https://www.linkedin.com/company/flynasim" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-9 h-9 rounded-full text-white hover:bg-white/20 transition-colors"
-                  title="LinkedIn"
-                  aria-label="LinkedIn"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                </a>
-                <span className="text-gray-400">|</span>
-                <a 
-                  href="https://www.enamad.ir" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
-                >
-                  <ShieldCheckIcon className="w-5 h-5 text-white" />
-                  <span>{language === 'fa' ? 'نماد اعتماد الکترونیکی' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge'}</span>
-                </a>
-                <span className="text-gray-400">|</span>
-                <span className="text-sm text-white">
-                  {language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO Licensed'}
-                </span>
-              </div>
+            <div className="flex flex-col md:flex-row justify-end items-center md:items-center gap-4 mb-10 sm:mb-12">
+              <a 
+                href="https://www.enamad.ir" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
+              >
+                <ShieldCheckIcon className="w-5 h-5 text-white" />
+                <span>{language === 'fa' ? 'نماد اعتماد الکترونیکی' : language === 'ar' ? 'شارة الثقة الإلكترونية' : 'Electronic Trust Badge'}</span>
+              </a>
+              <span className="text-gray-400">|</span>
+              <span className="text-sm text-white">
+                {language === 'fa' ? 'مجوز سازمان هواپیمایی کشوری' : language === 'ar' ? 'ترخيص منظمة الطيران المدني' : 'CAO Licensed'}
+              </span>
             </div>
+            <p className={`text-xs text-white/90 text-center pt-6 sm:pt-7 pb-3 ${fontClass}`} style={{
+              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+              maxWidth: '800px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              lineHeight: '1.6'
+            }}>
+              {t('footer.copyrightFull')}
+            </p>
           </div>
         </div>
       </footer>

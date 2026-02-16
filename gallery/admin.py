@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider
+from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
 
 User = get_user_model()
 
@@ -227,6 +227,90 @@ class GalleryImageAdmin(admin.ModelAdmin):
         updated = queryset.update(is_featured=True)
         self.message_user(request, f'{updated} تصویر ویژه شد.')
     make_featured.short_description = 'ویژه کردن تصاویر'
+
+
+@admin.register(HomePageSectionItem)
+class HomePageSectionItemAdmin(admin.ModelAdmin):
+    """
+    Admin for homepage section items - Special Services and Experience.
+    Both main admin and limited admin can manage.
+    """
+    list_display = [
+        'item_preview', 'title_fa', 'section_type', 'order', 'is_active',
+        'created_by', 'created_at'
+    ]
+    list_filter = ['section_type', 'is_active', 'created_at']
+    search_fields = ['title_fa', 'title_ar', 'title_en', 'link_url']
+    list_editable = ['order', 'is_active']
+    readonly_fields = ['uuid', 'created_at', 'updated_at', 'item_image_display']
+    
+    fieldsets = (
+        ('اطلاعات اصلی', {
+            'fields': ('section_type', 'title_fa', 'title_ar', 'title_en', 'image', 'item_image_display', 'link_url')
+        }),
+        ('تنظیمات نمایش', {
+            'fields': ('order', 'is_active')
+        }),
+        ('اطلاعات اضافی', {
+            'fields': ('uuid', 'created_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+    
+    def item_preview(self, obj):
+        """Preview image in list"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px;" />',
+                obj.image.url
+            )
+        return '-'
+    item_preview.short_description = 'تصویر'
+    
+    def item_image_display(self, obj):
+        """Full image preview in form"""
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 400px; max-height: 300px; border-radius: 8px;" />',
+                obj.image.url
+            )
+        return '-'
+    item_image_display.short_description = 'پیش‌نمایش تصویر'
+    
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(HomePageSectionConfig)
+class HomePageSectionConfigAdmin(admin.ModelAdmin):
+    """
+    Admin for section titles - both main and limited admin can manage.
+    """
+    list_display = ['section_type', 'title1_fa', 'updated_at']
+    list_filter = ['section_type']
+    search_fields = ['title1_fa', 'title2_fa', 'title3_fa']
+    readonly_fields = ['uuid', 'updated_at']
+    
+    fieldsets = (
+        ('بخش', {
+            'fields': ('section_type',)
+        }),
+        ('عنوان خط ۱', {
+            'fields': ('title1_fa', 'title1_ar', 'title1_en')
+        }),
+        ('عنوان خط ۲ (فقط برای بخش «پرواز با هواپیمایی نسیم»)', {
+            'fields': ('title2_fa', 'title2_ar', 'title2_en')
+        }),
+        ('عنوان خط ۳', {
+            'fields': ('title3_fa', 'title3_ar', 'title3_en')
+        }),
+        ('اطلاعات', {
+            'fields': ('uuid', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
 
 
 @admin.register(HeroSlider)
