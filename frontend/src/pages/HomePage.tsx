@@ -1173,7 +1173,7 @@ const HomePage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6" style={{ justifyContent: 'center' }}>
             {(
               specialServicesItems.length > 0 ? specialServicesItems : [
-                { id: 1, title_fa: 'انتخاب صندلی', title_ar: 'اختيار المقعد', title_en: 'Seat Selection', image_url: '/images/chair.jpeg', link_url: '#search-form', order: 1 },
+                { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/chair.jpeg', link_url: '#search-form', order: 1 },
                 { id: 2, title_fa: 'پیگیری چمدان', title_ar: 'تتبع الأمتعة', title_en: 'Luggage tracking', image_url: '/images/overload.jpeg', link_url: 'chat:luggage_tracking', order: 2 },
                 { id: 3, title_fa: 'غذای مسافر', title_ar: 'وجبة المسافر', title_en: 'Passenger meal', image_url: '/images/TravelingWithPets.jpg', link_url: '/meal-feedback', order: 3 },
                 { id: 4, title_fa: 'انتخاب پرواز از روی نقشه', title_ar: 'اختيار الرحلة من على الخريطة', title_en: 'Choose flight from map', image_url: '/images/travelwheelchair.jpeg', link_url: '/flights/map', order: 4 },

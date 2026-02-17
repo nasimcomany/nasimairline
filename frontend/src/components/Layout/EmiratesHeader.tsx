@@ -321,7 +321,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               >
                 <Link
                   to={item.path}
-                  className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                  className={`px-3 py-2 font-semibold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                   style={{ 
                     borderBottom: activeDropdown === item.key ? '2px solid #000' : '2px solid transparent',
                     textTransform: 'uppercase',
@@ -375,9 +375,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                               if (key === 'flyWithNasim') {
                                 if (itemIndex === 0) return <CalendarDaysIcon className="w-7 h-7" style={{ color: '#2563eb' }} />;
                                 if (itemIndex === 1) return <UserIcon className="w-7 h-7" style={{ color: '#16a34a' }} />;
-                                if (itemIndex === 2) return <UserGroupIcon className="w-7 h-7" style={{ color: '#9333ea' }} />;
-                                if (itemIndex === 3) return <ArrowPathIcon className="w-7 h-7" style={{ color: '#db2777' }} />;
-                                if (itemIndex === 4) return <TicketIcon className="w-7 h-7" style={{ color: '#ea580c' }} />;
+                                if (itemIndex === 2) return <UserGroupIcon className="w-7 h-7" style={{ color: '#9333ea' }} />; // مسافرین ویژه
+                                if (itemIndex === 3) return <ArrowPathIcon className="w-7 h-7" style={{ color: '#db2777' }} />; // استرداد
+                                if (itemIndex === 4) return <TicketIcon className="w-7 h-7" style={{ color: '#ea580c' }} />; // جامه دان
                                 return <PaperAirplaneIcon className="w-7 h-7" style={{ color: '#3b82f6' }} />;
                               }
                               if (key === 'wherewefly') {
@@ -408,7 +408,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 >
                                   {getSubItemIcon(subItem.label, item.key, index, subItem.path)}
                                   <span className="font-medium">{subItem.label}</span>
-                                  <ChevronDownIcon className="w-4 h-4 flex-shrink-0" style={{ transform: language === 'fa' || language === 'ar' ? 'rotate(90deg)' : 'rotate(-90deg)' }} />
+                                  <ChevronDownIcon className="w-4 h-4 flex-shrink-0" style={{ transform: language === 'fa' || language === 'ar' ? 'rotate(-90deg)' : 'rotate(90deg)' }} />
                                 </div>
                               ) : (
                               <Link
@@ -498,7 +498,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                         onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
                                       >
                                         <span className="font-medium">{child.label}</span>
-                                        <ChevronDownIcon className="w-4 h-4 flex-shrink-0" style={{ transform: language === 'fa' || language === 'ar' ? 'rotate(90deg)' : 'rotate(-90deg)' }} />
+                                        <ChevronDownIcon className="w-4 h-4 flex-shrink-0" style={{ transform: language === 'fa' || language === 'ar' ? 'rotate(-90deg)' : 'rotate(90deg)' }} />
                                       </div>
                                     ) : (
                                       <Link
@@ -777,8 +777,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               );
             })()}
 
-            {/* REMOVE_OLD_LANG_START */}
-              <div 
+            {false && <div 
                 className="relative"
                 onMouseEnter={() => {
                   if (languageDropdownTimeoutRef.current) {
@@ -860,7 +859,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     </button>
                   </div>
                 )}
-              </div>
+              </div>}
 
             {/* Login/Register/Logout */}
             {isAuthenticated ? (
@@ -879,7 +878,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <button
-                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`}
+                  className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                   style={{ 
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -951,7 +950,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   }}
                 >
                   <button
-                    className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`}
+                    className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                     style={{ 
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
@@ -996,15 +995,6 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                       >
                         {t('nav.loginPartner')}
                       </button>
-                      <button
-                        onClick={() => {
-                          window.location.href = '/limited-admin/';
-                          setIsLoginDropdownOpen(false);
-                        }}
-                        className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass}`}
-                      >
-                        {t('nav.loginStaff')}
-                      </button>
                     </div>
                   )}
                 </div>
@@ -1014,7 +1004,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     setAuthModalMode('register');
                     setIsAuthModalOpen(true);
                   }}
-                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`}
+                  className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                   style={{ 
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
@@ -1150,15 +1140,6 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                         className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginPartner')}
-                      </button>
-                      <button
-                        onClick={() => {
-                          window.location.href = '/limited-admin/';
-                          setIsMenuOpen(false);
-                        }}
-                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                      >
-                        {t('nav.loginStaff')}
                       </button>
                       <button
                         onClick={() => {

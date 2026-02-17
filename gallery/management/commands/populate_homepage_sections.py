@@ -41,7 +41,7 @@ class Command(BaseCommand):
 
         # Special Service items (4 items - use default images path, admin can upload later)
         special_services = [
-            {'order': 1, 'title_fa': 'انتخاب صندلی', 'title_ar': 'اختيار المقعد', 'title_en': 'Seat Selection', 'link_url': '#search-form'},
+            {'order': 1, 'title_fa': 'شبکه پروازی', 'title_ar': 'شبكة الطيران', 'title_en': 'Flight Network', 'link_url': '#search-form'},
             {'order': 2, 'title_fa': 'پیگیری چمدان', 'title_ar': 'تتبع الأمتعة', 'title_en': 'Luggage tracking', 'link_url': 'chat:luggage_tracking'},
             {'order': 3, 'title_fa': 'غذای مسافر', 'title_ar': 'وجبة المسافر', 'title_en': 'Passenger meal', 'link_url': '/meal-feedback'},
             {'order': 4, 'title_fa': 'انتخاب پرواز از روی نقشه', 'title_ar': 'اختيار الرحلة من على الخريطة', 'title_en': 'Choose flight from map', 'link_url': '/flights/map'},
