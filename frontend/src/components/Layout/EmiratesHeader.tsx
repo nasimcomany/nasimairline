@@ -321,7 +321,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               >
                 <Link
                   to={item.path}
-                  className={`px-3 py-2 font-semibold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                  className={`px-3 py-2 font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                   style={{ 
                     borderBottom: activeDropdown === item.key ? '2px solid #000' : '2px solid transparent',
                     textTransform: 'uppercase',
@@ -1080,7 +1080,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   <div key={item.key}>
                     <Link
                       to={item.path}
-                      className={`block px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      className={`block px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.label}

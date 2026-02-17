@@ -42,9 +42,9 @@ class Command(BaseCommand):
         # Special Service items (4 items - use default images path, admin can upload later)
         special_services = [
             {'order': 1, 'title_fa': 'شبکه پروازی', 'title_ar': 'شبكة الطيران', 'title_en': 'Flight Network', 'link_url': '#search-form'},
-            {'order': 2, 'title_fa': 'پیگیری چمدان', 'title_ar': 'تتبع الأمتعة', 'title_en': 'Luggage tracking', 'link_url': 'chat:luggage_tracking'},
-            {'order': 3, 'title_fa': 'غذای مسافر', 'title_ar': 'وجبة المسافر', 'title_en': 'Passenger meal', 'link_url': '/meal-feedback'},
-            {'order': 4, 'title_fa': 'انتخاب پرواز از روی نقشه', 'title_ar': 'اختيار الرحلة من على الخريطة', 'title_en': 'Choose flight from map', 'link_url': '/flights/map'},
+            {'order': 2, 'title_fa': 'آب و هوا', 'title_ar': 'الطقس', 'title_en': 'Weather', 'link_url': 'chat:luggage_tracking'},
+            {'order': 3, 'title_fa': 'پروازهای فرودگاه مهرآباد', 'title_ar': 'رحلات مطار مهرآباد', 'title_en': 'Mehrabad Airport Flights', 'link_url': '/meal-feedback'},
+            {'order': 4, 'title_fa': 'پروازهای فرودگاه امام', 'title_ar': 'رحلات مطار الإمام', 'title_en': 'Imam Airport Flights', 'link_url': '/flights/map'},
         ]
         for item_data in special_services:
             obj, created = HomePageSectionItem.objects.update_or_create(

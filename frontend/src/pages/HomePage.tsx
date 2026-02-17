@@ -1174,9 +1174,9 @@ const HomePage: React.FC = () => {
             {(
               specialServicesItems.length > 0 ? specialServicesItems : [
                 { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/chair.jpeg', link_url: '#search-form', order: 1 },
-                { id: 2, title_fa: 'پیگیری چمدان', title_ar: 'تتبع الأمتعة', title_en: 'Luggage tracking', image_url: '/images/overload.jpeg', link_url: 'chat:luggage_tracking', order: 2 },
-                { id: 3, title_fa: 'غذای مسافر', title_ar: 'وجبة المسافر', title_en: 'Passenger meal', image_url: '/images/TravelingWithPets.jpg', link_url: '/meal-feedback', order: 3 },
-                { id: 4, title_fa: 'انتخاب پرواز از روی نقشه', title_ar: 'اختيار الرحلة من على الخريطة', title_en: 'Choose flight from map', image_url: '/images/travelwheelchair.jpeg', link_url: '/flights/map', order: 4 },
+                { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: '/images/overload.jpeg', link_url: 'chat:luggage_tracking', order: 2 },
+                { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: '/images/TravelingWithPets.jpg', link_url: '/meal-feedback', order: 3 },
+                { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: '/images/travelwheelchair.jpeg', link_url: '/flights/map', order: 4 },
               ] as HomePageSectionItem[]
             ).map((item, idx) => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
