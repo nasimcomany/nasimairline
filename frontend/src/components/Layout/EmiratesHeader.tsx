@@ -346,7 +346,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
           </div>
 
           {/* Desktop Navigation - All items together and centered */}
-          <nav className="hidden lg:flex items-center justify-center space-x-3 space-x-reverse h-full" style={{ overflow: 'visible' }}>
+          <nav className={`hidden lg:flex items-center justify-center h-full ${language === 'fa' ? 'space-x-3 space-x-reverse' : 'space-x-1 space-x-reverse'}`} style={{ overflow: 'visible' }}>
             {menuItems.map((item) => (
               <div
                 key={item.key}
@@ -357,7 +357,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               >
                 <Link
                   to={item.path}
-                  className={`px-3 py-2 font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                  className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                   style={{ 
                     borderBottom: activeDropdown === item.key ? '2px solid #000' : '2px solid transparent',
                     textTransform: 'uppercase',
@@ -374,10 +374,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     }
                   }}
                 >
-                  {item.key === 'flyWithNasim' && <PaperAirplaneIcon className="w-5 h-5 text-black" />}
-                  {item.key === 'wherewefly' && <MapPinIcon className="w-5 h-5 text-black" />}
-                  {item.key === 'about' && <BuildingOfficeIcon className="w-5 h-5 text-black" />}
-                  {item.key === 'safetyReport' && <ExclamationTriangleIcon className="w-5 h-5 text-black" />}
+                  {item.key === 'flyWithNasim' && <PaperAirplaneIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
+                  {item.key === 'wherewefly' && <MapPinIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
+                  {item.key === 'about' && <BuildingOfficeIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
+                  {item.key === 'safetyReport' && <ExclamationTriangleIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
                   {item.label}
                 </Link>
                 
@@ -1015,13 +1015,13 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   }}
                 >
                   <button
-                    className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                    className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                     style={{ 
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
                     }}
                   >
-                    <UserIcon className="w-5 h-5 text-black" />
+                    <UserIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />
                     {t('nav.login') || 'ورود'}
                     <ChevronDownIcon className="w-4 h-4" />
                   </button>
@@ -1069,7 +1069,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     setAuthModalMode('register');
                     setIsAuthModalOpen(true);
                   }}
-                  className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                  className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                   style={{ 
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
@@ -1082,7 +1082,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     e.currentTarget.style.borderBottomColor = 'transparent';
                   }}
                 >
-                  <UserPlusIcon className="w-5 h-5 text-black" />
+                  <UserPlusIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />
                   {t('nav.register')}
                 </button>
               </>
@@ -1100,13 +1100,13 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               }}
             >
               <button 
-                className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                 style={{ borderBottom: '2px solid transparent', textTransform: 'uppercase', letterSpacing: '0.5px' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = '#000'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = 'transparent'; }}
               >
-                <GlobeAltIcon className="w-5 h-5 text-black" />
-                {language === 'fa' ? 'فارسی' : language === 'ar' ? 'العربية' : 'English'}
+                <GlobeAltIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />
+                فارسی
               </button>
               {isLanguageDropdownOpen && (
                 <div 

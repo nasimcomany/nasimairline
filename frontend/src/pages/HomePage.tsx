@@ -1527,12 +1527,12 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Skywards+ Section - Emirates Style */}
-      <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '48px', paddingTop: 'calc(2rem + 2cm)', paddingBottom: 'calc(2rem + 2cm)' }}>
+      <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '58px', paddingTop: 'calc(5rem + 1cm)', paddingBottom: 'calc(2rem + 2cm)' }}>
         <div 
           className="absolute inset-0 bg-cover"
           style={{
             backgroundImage: 'url(/images/airport-crew.jpg)',
-            backgroundPosition: 'center -38px'
+            backgroundPosition: 'center calc(-38px + 1cm)'
           }}
         >
           <div className="absolute inset-0 bg-black/40"></div>
@@ -1541,14 +1541,7 @@ const HomePage: React.FC = () => {
           className="relative z-10 max-w-7xl mx-auto flex"
           style={{ direction: 'ltr', justifyContent: 'flex-end', paddingLeft: '12rem', paddingRight: '0cm' }}
         >
-          <div className="max-w-2xl w-full" style={{ textAlign: language === 'fa' || language === 'ar' ? 'right' : 'left' }}>
-            <p className={`text-white text-xs sm:text-sm uppercase tracking-widest mb-2 opacity-95 ${fontClass}`} style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: language === 'en' ? 'ltr' : 'rtl',
-              textTransform: 'none'
-            }}>
-              {t('home.loyalty.programTitle')}
-            </p>
+          <div className="max-w-2xl w-full" style={{ textAlign: language === 'fa' || language === 'ar' ? 'right' : 'left', transform: 'translate(+4.5cm, -0.35cm)', paddingTop: '1.75rem' }}>
             <h2 className={`text-xl sm:text-3xl md:text-4xl font-semibold text-white mb-2 sm:mb-3 tracking-tight ${fontClass}`} style={{ 
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               direction: language === 'en' ? 'ltr' : 'rtl',
