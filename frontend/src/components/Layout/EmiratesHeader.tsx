@@ -155,20 +155,20 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
           path: '#',
           children: [
             { label: t('nav.seatSelection') || 'انتخاب صندلی', path: '#' },
-            {
-              label: t('nav.wheelchairRequest') || 'درخواست ولیچر',
-              path: '#',
-              children: [
-                { label: t('nav.passengerBaggage') || 'بار همراه مسافر', path: '#' },
-                { label: t('nav.carryOnAcceptance') || 'پذیرش بار همراه', path: '#' },
-                { label: t('nav.prohibitedItems') || 'اقلام ممنوعه', path: '#' },
-                { label: t('nav.excessBaggage') || 'اضافه بار', path: '#' },
-              ]
-            }
+            { label: t('nav.wheelchairRequest') || 'درخواست ولیچر', path: '#' },
           ]
         },
         { label: t('nav.refund') || 'استرداد', path: '#' },
-        { label: t('nav.baggage') || 'جامه دان', path: '#' },
+        {
+          label: t('nav.baggage') || 'جامه دان',
+          path: '#',
+          children: [
+            { label: t('nav.passengerBaggage') || 'بار همراه مسافر', path: '#' },
+            { label: t('nav.carryOnAcceptance') || 'پذیرش بار همراه', path: '#' },
+            { label: t('nav.prohibitedItems') || 'اقلام ممنوعه', path: '#' },
+            { label: t('nav.excessBaggage') || 'اضافه بار', path: '#' },
+          ]
+        },
       ]
     },
     {
@@ -321,7 +321,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               >
                 <Link
                   to={item.path}
-                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`}
+                  className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                   style={{ 
                     borderBottom: activeDropdown === item.key ? '2px solid #000' : '2px solid transparent',
                     textTransform: 'uppercase',
@@ -408,7 +408,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 >
                                   {getSubItemIcon(subItem.label, item.key, index, subItem.path)}
                                   <span className="font-medium">{subItem.label}</span>
-                                  <ChevronDownIcon className={`w-4 h-4 flex-shrink-0 ${language === 'fa' ? 'rotate-[-90deg]' : ''}`} />
+                                  <ChevronDownIcon className="w-4 h-4 flex-shrink-0" style={{ transform: language === 'fa' || language === 'ar' ? 'rotate(90deg)' : 'rotate(-90deg)' }} />
                                 </div>
                               ) : (
                               <Link
@@ -498,7 +498,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                         onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
                                       >
                                         <span className="font-medium">{child.label}</span>
-                                        <ChevronDownIcon className={`w-4 h-4 flex-shrink-0 ${language === 'fa' ? 'rotate-[-90deg]' : ''}`} />
+                                        <ChevronDownIcon className="w-4 h-4 flex-shrink-0" style={{ transform: language === 'fa' || language === 'ar' ? 'rotate(90deg)' : 'rotate(-90deg)' }} />
                                       </div>
                                     ) : (
                                       <Link
@@ -777,7 +777,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               );
             })()}
 
-            {/* Language Dropdown */}
+            {/* REMOVE_OLD_LANG_START */}
               <div 
                 className="relative"
                 onMouseEnter={() => {
@@ -1032,6 +1032,39 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 </button>
               </>
             )}
+
+            {/* Language Dropdown - at end of header */}
+            <div 
+              className="relative"
+              onMouseEnter={() => {
+                if (languageDropdownTimeoutRef.current) clearTimeout(languageDropdownTimeoutRef.current);
+                setIsLanguageDropdownOpen(true);
+              }}
+              onMouseLeave={() => {
+                languageDropdownTimeoutRef.current = setTimeout(() => setIsLanguageDropdownOpen(false), 200);
+              }}
+            >
+              <button 
+                className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                style={{ borderBottom: '2px solid transparent', textTransform: 'uppercase', letterSpacing: '0.5px' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = '#000'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = 'transparent'; }}
+              >
+                <GlobeAltIcon className="w-5 h-5 text-black" />
+                {language === 'fa' ? 'فارسی' : language === 'ar' ? 'العربية' : 'English'}
+              </button>
+              {isLanguageDropdownOpen && (
+                <div 
+                  className="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-40 bg-gray-200 rounded-lg shadow-lg border border-gray-300/30 py-2 z-50"
+                  onMouseEnter={() => { if (languageDropdownTimeoutRef.current) clearTimeout(languageDropdownTimeoutRef.current); }}
+                  onMouseLeave={() => { languageDropdownTimeoutRef.current = setTimeout(() => setIsLanguageDropdownOpen(false), 200); }}
+                >
+                  <button onClick={() => { setLanguage('fa'); setIsLanguageDropdownOpen(false); }} className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass} ${language === 'fa' ? 'bg-gray-300 font-semibold' : ''}`}>فارسی</button>
+                  <button onClick={() => { setLanguage('ar'); setIsLanguageDropdownOpen(false); }} className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass} ${language === 'ar' ? 'bg-gray-300 font-semibold' : ''}`}>العربية</button>
+                  <button onClick={() => { setLanguage('en'); setIsLanguageDropdownOpen(false); }} className={`w-full text-right px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass} ${language === 'en' ? 'bg-gray-300 font-semibold' : ''}`}>English</button>
+                </div>
+              )}
+            </div>
           </nav>
 
             {/* Mobile Menu Button */}
