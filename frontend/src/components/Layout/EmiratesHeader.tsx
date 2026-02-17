@@ -33,7 +33,10 @@ import {
   UserPlusIcon,
   NewspaperIcon,
   PhotoIcon,
-  WalletIcon
+  WalletIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import AuthModal from '../Auth/AuthModal';
@@ -61,6 +64,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const whereweflyTriggerRef = useRef<HTMLDivElement | null>(null);
   const [whereweflyDropdownStyle, setWhereweflyDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
   const [flyDescModal, setFlyDescModal] = useState<{ title: string; descKey: string } | null>(null);
+  const [aboutModal, setAboutModal] = useState<{ type: 'desc'; title: string; descKey: string } | { type: 'contact' } | null>(null);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -91,6 +95,15 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       return keys[childIndex] || null;
     }
     return null;
+  };
+
+  // Get modal config for about menu items (index: 0=history, 1=fleet/nav, 2=contact, 3=coop, 4=training, 5=magazine)
+  const getAboutModalConfig = (index: number, label: string): { type: 'desc'; title: string; descKey: string } | { type: 'contact' } | null => {
+    if (index === 2) return { type: 'contact' };
+    if (index === 0) return { type: 'desc', title: label, descKey: 'about.desc.nasimHistory' };
+    if (index === 3) return { type: 'desc', title: label, descKey: 'about.desc.cooperationRequest' };
+    if (index === 4) return { type: 'desc', title: label, descKey: 'about.desc.nasimTraining' };
+    return null; // index 1 (fleet) and 5 (magazine) navigate, no modal
   };
 
   // Get default image for each menu category
@@ -211,7 +224,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       dropdown: [
         { label: t('nav.nasimHistory') || 'تاریخچه نسیم', path: '#' },
         { label: t('nav.airlineFleet') || 'ناوگان هوایی', path: '/flights/map' },
-        { label: t('nav.contactUs') || 'تماس با ما', path: '/#faq' },
+        { label: t('nav.contactUs') || 'تماس با ما', path: '#' },
         { label: t('nav.cooperationRequest') || 'درخواست همکاری', path: '#' },
         { label: t('nav.nasimTraining') || 'آموزش نسیم', path: '#' },
         { label: t('nav.nasimMagazine') || 'مجله نسیم', path: '/magazine' },
@@ -445,6 +458,16 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     const descKey = getFlyDescKey(index);
                                     if (descKey) {
                                       setFlyDescModal({ title: subItem.label, descKey });
+                                      setActiveDropdown(null);
+                                    }
+                                    return;
+                                  }
+                                  // about: show description or contact modal for items with path '#'
+                                  if (item.key === 'about' && subItem.path === '#') {
+                                    e.preventDefault();
+                                    const config = getAboutModalConfig(index, subItem.label);
+                                    if (config) {
+                                      setAboutModal(config);
                                       setActiveDropdown(null);
                                     }
                                     return;
@@ -1132,9 +1155,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                         {(function flattenItems(items: DropdownSubItem[], depth = 0, path = '', menuKey: string): React.ReactNode[] {
                           return items.flatMap((subItem, index) => {
                             const p = path ? `${path}-${index}` : `${index}`;
+                            const { parentIndex } = parseFlattenPath(p);
                             const isFlyDesc = menuKey === 'flyWithNasim' && subItem.path === '#';
-                            const { parentIndex, childIndex } = parseFlattenPath(p);
-                            const descKey = isFlyDesc ? getFlyDescKey(parentIndex, childIndex) : null;
+                            const flyDescKey = isFlyDesc ? getFlyDescKey(parentIndex, parseFlattenPath(p).childIndex) : null;
+                            const aboutConfig = menuKey === 'about' && subItem.path === '#' ? getAboutModalConfig(parentIndex, subItem.label) : null;
                             return [
                             <Link
                               key={p}
@@ -1142,9 +1166,12 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                               className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors ${fontClass}`}
                               style={{ paddingLeft: `${16 + depth * 12}px` }}
                               onClick={(e) => {
-                                if (descKey) {
+                                if (flyDescKey) {
                                   e.preventDefault();
-                                  setFlyDescModal({ title: subItem.label, descKey });
+                                  setFlyDescModal({ title: subItem.label, descKey: flyDescKey });
+                                } else if (aboutConfig) {
+                                  e.preventDefault();
+                                  setAboutModal(aboutConfig);
                                 }
                                 setIsMenuOpen(false);
                               }}
@@ -1261,6 +1288,122 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               >
                 {t(flyDescModal.descKey)}
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* About Description Modal - blu900 theme */}
+      {aboutModal && aboutModal.type === 'desc' && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)' }}
+          onClick={() => setAboutModal(null)}
+        >
+          <div
+            className="relative w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-blue-800/50"
+            style={{
+              background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%)',
+              boxShadow: '0 25px 50px -12px rgba(30, 58, 138, 0.5)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 sm:p-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3
+                  className={`text-xl font-bold text-white ${fontClass}`}
+                  style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  }}
+                >
+                  {aboutModal.title}
+                </h3>
+                <button
+                  onClick={() => setAboutModal(null)}
+                  className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Close"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+              <p
+                className={`text-white/95 leading-relaxed ${fontClass}`}
+                style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  fontSize: '0.95rem',
+                  lineHeight: '1.7',
+                }}
+              >
+                {t(aboutModal.descKey)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Modal - با تماس با ما */}
+      {aboutModal && aboutModal.type === 'contact' && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)' }}
+          onClick={() => setAboutModal(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-blue-800/50"
+            style={{
+              background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%)',
+              boxShadow: '0 25px 50px -12px rgba(30, 58, 138, 0.5)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 sm:p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3
+                  className={`text-xl font-bold text-white ${fontClass}`}
+                  style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  }}
+                >
+                  {t('nav.contactUs')}
+                </h3>
+                <button
+                  onClick={() => setAboutModal(null)}
+                  className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Close"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+              <div className={`space-y-3 mb-6 ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                <div className="flex items-center gap-3 text-white/95">
+                  <PhoneIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
+                  <span><strong>{t('contact.phone')}:</strong> 7340000</span>
+                </div>
+                <div className="flex items-center gap-3 text-white/95">
+                  <DocumentTextIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
+                  <span><strong>{t('contact.fax')}:</strong> 77610753</span>
+                </div>
+                <div className="flex items-center gap-3 text-white/95">
+                  <EnvelopeIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
+                  <a href="mailto:info@nasimair.com" className="text-white/95 hover:text-white underline">{t('contact.email')}: info@nasimair.com</a>
+                </div>
+                <div className="flex items-start gap-3 text-white/95">
+                  <MapPinIcon className="w-5 h-5 flex-shrink-0 text-white/80 mt-0.5" />
+                  <span><strong>{t('contact.address')}:</strong> شریعتی پایین تر از بهارشیراز کوچه عشایر پلاک ۱۳</span>
+                </div>
+              </div>
+              <div className="rounded-xl overflow-hidden border border-white/20" style={{ height: '280px' }}>
+                <iframe
+                  title={t('nav.contactUs')}
+                  src={`https://www.google.com/maps?q=${encodeURIComponent('شریعتی پایین تر از بهارشیراز کوچه عشایر پلاک 13 تهران ایران')}&z=17&output=embed`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
             </div>
           </div>
         </div>
