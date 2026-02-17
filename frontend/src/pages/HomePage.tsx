@@ -317,6 +317,14 @@ const HomePage: React.FC = () => {
   // Helper: handle section item click (link_url)
   const handleSectionItemClick = (linkUrl: string) => {
     if (!linkUrl) return;
+    if (linkUrl === 'weather' || linkUrl === 'modal:weather') {
+      if (window.location.pathname !== '/' && window.location.pathname !== '/home') {
+        navigate('/', { state: { openWeather: true } });
+      } else {
+        setShowWeatherModal(true);
+      }
+      return;
+    }
     if (linkUrl.startsWith('chat:')) {
       const topic = linkUrl.replace('chat:', '');
       openChat(topic === 'luggage_tracking' ? 'luggage_tracking' : 'normal');
@@ -1173,10 +1181,10 @@ const HomePage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6" style={{ justifyContent: 'center' }}>
             {(
               specialServicesItems.length > 0 ? specialServicesItems : [
-                { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/chair.jpeg', link_url: '#search-form', order: 1 },
-                { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: '/images/overload.jpeg', link_url: 'chat:luggage_tracking', order: 2 },
-                { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: '/images/TravelingWithPets.jpg', link_url: '/meal-feedback', order: 3 },
-                { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: '/images/travelwheelchair.jpeg', link_url: '/flights/map', order: 4 },
+                { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/chair.jpeg', link_url: '/flights/map', order: 1 },
+                { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: '/images/overload.jpeg', link_url: 'weather', order: 2 },
+                { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: '/images/TravelingWithPets.jpg', link_url: 'https://fids.airport.ir/', order: 3 },
+                { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: '/images/travelwheelchair.jpeg', link_url: 'https://ikac.ir/', order: 4 },
               ] as HomePageSectionItem[]
             ).map((item, idx) => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;

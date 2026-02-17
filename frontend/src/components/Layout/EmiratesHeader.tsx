@@ -60,6 +60,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const menuDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const whereweflyTriggerRef = useRef<HTMLDivElement | null>(null);
   const [whereweflyDropdownStyle, setWhereweflyDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [flyDescModal, setFlyDescModal] = useState<{ title: string; descKey: string } | null>(null);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -68,6 +69,28 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
+  };
+
+  // Parse flatten path like "2-1" to { parentIndex: 2, childIndex: 1 }
+  const parseFlattenPath = (path: string): { parentIndex: number; childIndex?: number } => {
+    const parts = path.split('-').map(Number);
+    return parts.length === 1 ? { parentIndex: parts[0] } : { parentIndex: parts[0], childIndex: parts[1] };
+  };
+
+  // Get description key for flyWithNasim menu items (for modal display)
+  const getFlyDescKey = (parentIndex: number, childIndex?: number): string | null => {
+    if (parentIndex === 0) return 'flyWithNasim.desc.checkInTime';
+    if (parentIndex === 1) return 'flyWithNasim.desc.unacceptablePassengers';
+    if (parentIndex === 2 && childIndex !== undefined) {
+      if (childIndex === 0) return null; // seatSelection - goes to search form
+      if (childIndex === 1) return 'flyWithNasim.desc.wheelchairRequest';
+    }
+    if (parentIndex === 3) return 'flyWithNasim.desc.refund';
+    if (parentIndex === 4 && childIndex !== undefined) {
+      const keys = ['flyWithNasim.desc.passengerBaggage', 'flyWithNasim.desc.carryOnAcceptance', 'flyWithNasim.desc.prohibitedItems', 'flyWithNasim.desc.excessBaggage'];
+      return keys[childIndex] || null;
+    }
+    return null;
   };
 
   // Get default image for each menu category
@@ -148,13 +171,13 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.flyWithNasim') || 'پرواز با نسیم',
       path: '#',
       dropdown: [
-        { label: t('nav.checkInTime') || 'زمان مراجعه و پذیرش', path: '/#search-form' },
+        { label: t('nav.checkInTime') || 'زمان مراجعه و پذیرش', path: '#' },
         { label: t('nav.unacceptablePassengers') || 'مسافرین غیر قابل پذیرش', path: '#' },
         {
           label: t('nav.specialPassengers') || 'مسافرین ویژه',
           path: '#',
           children: [
-            { label: t('nav.seatSelection') || 'انتخاب صندلی', path: '#' },
+            { label: t('nav.seatSelection') || 'انتخاب صندلی', path: '/#search-form' },
             { label: t('nav.wheelchairRequest') || 'درخواست ولیچر', path: '#' },
           ]
         },
@@ -416,6 +439,16 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 to={subItem.path}
                                 className={linkClassName}
                                 onClick={(e) => {
+                                  // flyWithNasim: show description modal for items with path '#'
+                                  if (item.key === 'flyWithNasim' && subItem.path === '#') {
+                                    e.preventDefault();
+                                    const descKey = getFlyDescKey(index);
+                                    if (descKey) {
+                                      setFlyDescModal({ title: subItem.label, descKey });
+                                      setActiveDropdown(null);
+                                    }
+                                    return;
+                                  }
                                   // Disable navigation for inactive menu items
                                   if (subItem.path === '#') {
                                     e.preventDefault();
@@ -505,7 +538,16 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                         key={childIdx}
                                         to={child.path}
                                         className={`flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-gray-300 rounded-lg transition-all ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'}`}
-                                        onClick={(e) => { if (child.path === '#') { e.preventDefault(); setActiveDropdown(null); } }}
+                                        onClick={(e) => {
+                                          if (child.path === '#') {
+                                            e.preventDefault();
+                                            const descKey = getFlyDescKey(hoveredNestedPath[0], childIdx);
+                                            if (descKey) {
+                                              setFlyDescModal({ title: child.label, descKey });
+                                              setActiveDropdown(null);
+                                            }
+                                          }
+                                        }}
                                         onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
                                       >
                                         <span className="font-medium">{child.label}</span>
@@ -1087,23 +1129,32 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     </Link>
                     {item.dropdown && (
                       <div className="pr-4 mt-1 space-y-1">
-                        {(function flattenItems(items: DropdownSubItem[], depth = 0, path = ''): React.ReactNode[] {
+                        {(function flattenItems(items: DropdownSubItem[], depth = 0, path = '', menuKey: string): React.ReactNode[] {
                           return items.flatMap((subItem, index) => {
                             const p = path ? `${path}-${index}` : `${index}`;
+                            const isFlyDesc = menuKey === 'flyWithNasim' && subItem.path === '#';
+                            const { parentIndex, childIndex } = parseFlattenPath(p);
+                            const descKey = isFlyDesc ? getFlyDescKey(parentIndex, childIndex) : null;
                             return [
                             <Link
                               key={p}
                               to={subItem.path}
                               className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors ${fontClass}`}
                               style={{ paddingLeft: `${16 + depth * 12}px` }}
-                              onClick={() => setIsMenuOpen(false)}
+                              onClick={(e) => {
+                                if (descKey) {
+                                  e.preventDefault();
+                                  setFlyDescModal({ title: subItem.label, descKey });
+                                }
+                                setIsMenuOpen(false);
+                              }}
                             >
                               {subItem.label}
                             </Link>,
-                            ...(subItem.children ? flattenItems(subItem.children, depth + 1, p) : [])
+                            ...(subItem.children ? flattenItems(subItem.children, depth + 1, p, menuKey) : [])
                           ];
                           });
-                        })(item.dropdown, 0, '')}
+                        })(item.dropdown, 0, '', item.key)}
                       </div>
                     )}
                   </div>
@@ -1166,6 +1217,54 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         onClose={() => setIsAuthModalOpen(false)}
         initialMode={authModalMode}
       />
+
+      {/* Fly With Nasim Description Modal - blu900 theme */}
+      {flyDescModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)' }}
+          onClick={() => setFlyDescModal(null)}
+        >
+          <div
+            className="relative w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-blue-800/50"
+            style={{
+              background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%)',
+              boxShadow: '0 25px 50px -12px rgba(30, 58, 138, 0.5)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 sm:p-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3
+                  className={`text-xl font-bold text-white ${fontClass}`}
+                  style={{
+                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  }}
+                >
+                  {flyDescModal.title}
+                </h3>
+                <button
+                  onClick={() => setFlyDescModal(null)}
+                  className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Close"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+              <p
+                className={`text-white/95 leading-relaxed ${fontClass}`}
+                style={{
+                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  fontSize: '0.95rem',
+                  lineHeight: '1.7',
+                }}
+              >
+                {t(flyDescModal.descKey)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
