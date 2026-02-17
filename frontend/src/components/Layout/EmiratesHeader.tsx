@@ -1395,7 +1395,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               <div className="rounded-xl overflow-hidden border border-white/20" style={{ height: '280px' }}>
                 <iframe
                   title={t('nav.contactUs')}
-                  src={`https://www.google.com/maps?q=${encodeURIComponent('شریعتی پایین تر از بهارشیراز کوچه عشایر پلاک 13 تهران ایران')}&z=17&output=embed`}
+                  src="https://www.google.com/maps?q=35.712476,51.437845&z=18&output=embed"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -1404,6 +1404,16 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   referrerPolicy="no-referrer-when-downgrade"
                 />
               </div>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=35.712476,51.437845"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`mt-3 inline-flex items-center gap-2 text-white/90 hover:text-white text-sm ${fontClass}`}
+                style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}
+              >
+                <MapPinIcon className="w-4 h-4" />
+                {language === 'fa' ? 'مشاهده در گوگل مپ' : language === 'ar' ? 'عرض في خرائط جوجل' : 'View in Google Maps'}
+              </a>
             </div>
           </div>
         </div>
