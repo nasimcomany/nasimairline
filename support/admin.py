@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from .models import (
-    TicketCategory, Ticket, TicketMessage, TicketAttachment, ChatMessage
+    TicketCategory, Ticket, TicketMessage, TicketAttachment, ChatMessage, ComplaintForm
 )
 
 
@@ -335,3 +335,36 @@ class ChatMessageAdmin(admin.ModelAdmin):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+
+@admin.register(ComplaintForm)
+class ComplaintFormAdmin(admin.ModelAdmin):
+    """Admin for فرم انتقادات و پیشنهادات"""
+    list_display = ['complaint_type_short', 'first_name', 'last_name', 'email', 'mobile', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['complaint_type', 'complaint_subject', 'first_name', 'last_name', 'email', 'mobile']
+    readonly_fields = ['uuid', 'submission_ip', 'created_at']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        (_('نوع و موضوع'), {
+            'fields': ('complaint_type', 'complaint_subject')
+        }),
+        (_('اطلاعات شخصی'), {
+            'fields': ('first_name', 'last_name', 'national_id', 'mobile', 'email')
+        }),
+        (_('اطلاعات پرواز'), {
+            'fields': ('origin', 'destination', 'flight_date', 'ticket_number', 'flight_number')
+        }),
+        (_('توضیحات'), {
+            'fields': ('description',)
+        }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid', 'user', 'submission_ip', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def complaint_type_short(self, obj):
+        return obj.complaint_type[:40] + '...' if len(obj.complaint_type) > 40 else obj.complaint_type
+    complaint_type_short.short_description = _('نوع شکایت')

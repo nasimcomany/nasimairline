@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-r&m1)kdaada)m%2ik%4(v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -325,7 +325,11 @@ CORS_ALLOW_METHODS = [
 ]
 
 # Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# برای دیباگ: اگر می‌خواهید ایمیل‌ها در ترمینال چاپ شوند (بدون SMTP)، در .env بگذارید: EMAIL_USE_CONSOLE=1
+if os.environ.get('EMAIL_USE_CONSOLE', '').lower() in ('1', 'true', 'yes'):
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
@@ -344,6 +348,15 @@ SUPPORT_EMAIL_MAPPING = {
 
 # Security Contact Information (حراست)
 SECURITY_CONTACT_PHONE = os.environ.get('SECURITY_CONTACT_PHONE', '021123456789')
+
+# Complaint Form - ایمیل‌های دریافت اعلان شکایت (جدا شده با کاما)
+COMPLAINT_NOTIFICATION_EMAILS = [
+    email.strip() for email in 
+    os.environ.get('COMPLAINT_NOTIFICATION_EMAILS', 'info@nasimair.com,support@nasimair.com').split(',')
+    if email.strip()
+]
+if not COMPLAINT_NOTIFICATION_EMAILS:
+    COMPLAINT_NOTIFICATION_EMAILS = ['info@nasimair.com']
 
 # WhatsApp Configuration (برای اعلان‌های چت)
 # برای استفاده از واتساپ، باید API key و URL سرویس واتساپ خود را تنظیم کنید
@@ -402,6 +415,8 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
     'x-csrf-token',
+    'cache-control',
+    'pragma',
 ]
 
 # Allow all origins in development (for testing)

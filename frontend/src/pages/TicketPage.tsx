@@ -1,292 +1,195 @@
 /**
- * Support Request Page - Create and view support requests
+ * فرم انتقادات و پیشنهادات - شکایات
+ * Luxury minimal design with blue-900
  */
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
-import CustomSelect from '../components/CustomSelect/CustomSelect';
 import { useLanguage } from '../contexts/LanguageContext';
-import { ticketService, CreateTicketData } from '../services/ticketService';
-import { AppDispatch, RootState } from '../store';
-import { 
-  TicketIcon, 
-  ChatBubbleLeftRightIcon,
-  ExclamationCircleIcon,
-  CheckCircleIcon,
-  PhoneIcon,
-  XMarkIcon,
-  DocumentTextIcon,
-  PaperAirplaneIcon,
-  SparklesIcon
-} from '@heroicons/react/24/outline';
+import { complaintService, ComplaintFormData } from '../services/complaintService';
+
+// Complaint type options (نوع شکایت)
+const COMPLAINT_TYPES = [
+  'آسیب دیدگی جامه دان',
+  'مفقودی جامه دان',
+  'نارضایتی از عدم اطلاع رسانی تغییرات پرواز',
+  'نارضایتی از تاخیر پرواز',
+  'نارضایتی از لغو پرواز',
+  'مغایرت صندلی',
+  'صندلی معیوب',
+  'شکایت رفتاری',
+  'کترینگ',
+  'عدم ارائه سرویس های رزرو',
+  'عدم واریز وجه استرداد',
+  'اشیاء جامانده در پرواز',
+  'عدم پذیرایی در فرودگاه به هنگام تاخیر پرواز',
+  'دریافت بلیط بدون نرخ',
+  'خطاهای سایت',
+];
+
+// Subject options per type - { value, label, disabled (red/non-selectable) }
+const SUBJECT_OPTIONS: Record<string, Array<{ value: string; label: string; disabled: boolean }>> = {
+  'شکایت رفتاری': [
+    { value: 'پرسنل فروش', label: '۱ - پرسنل فروش', disabled: true },
+    { value: 'پرسنل ایستگاه', label: '۲ - پرسنل ایستگاه', disabled: false },
+    { value: 'کرو پروازی', label: '۳ - کرو پروازی', disabled: false },
+  ],
+  'کترینگ': [
+    { value: 'کیفیت', label: '۱ - کیفیت', disabled: false },
+    { value: 'بسته بندی', label: '۲ - بسته بندی', disabled: false },
+    { value: 'نحوه پذیرایی', label: '۳ - نحوه پذیرایی', disabled: false },
+    { value: 'کمیت', label: '۴ - کمیت', disabled: false },
+    { value: 'تنوع', label: '۵ - تنوع', disabled: false },
+  ],
+  'مغایرت صندلی': [
+    { value: 'حیوان خانگی', label: '۱ - حیوان خانگی', disabled: true },
+    { value: 'ویلچر', label: '۲ - ویلچر', disabled: false },
+    { value: 'صندلی', label: '۳ - صندلی', disabled: false },
+    { value: 'بار', label: '۴ - بار', disabled: true },
+  ],
+  'صندلی معیوب': [
+    { value: 'حیوان خانگی', label: '۱ - حیوان خانگی', disabled: true },
+    { value: 'ویلچر', label: '۲ - ویلچر', disabled: false },
+    { value: 'صندلی', label: '۳ - صندلی', disabled: false },
+    { value: 'بار', label: '۴ - بار', disabled: true },
+  ],
+  'خطاهای سایت': [
+    { value: 'بخش فروش بلیط', label: '۱ - بخش فروش بلیط', disabled: false },
+    { value: 'باشگاه مشتریان', label: '۲ - باشگاه مشتریان', disabled: false },
+    { value: 'سایر', label: '۳ - سایر', disabled: false },
+  ],
+};
 
 const TicketPage: React.FC = () => {
-  const { t, language, fontClass } = useLanguage();
-  const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  
-  // Captcha state
-  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+', answer: 0 });
-  const [captchaInput, setCaptchaInput] = useState('');
-  const [captchaVerified, setCaptchaVerified] = useState(false);
-  const [captchaError, setCaptchaError] = useState('');
-  
-  const [activeTab, setActiveTab] = useState<'create' | 'my-tickets'>('create');
-  const [categories, setCategories] = useState<any[]>([]);
-  const [myTickets, setMyTickets] = useState<any[]>([]);
+  const { language, fontClass } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [securityPhone, setSecurityPhone] = useState<string | null>(null);
-  
-  // Form state
-  const [formData, setFormData] = useState<CreateTicketData>({
-    title: '',
+  const [success, setSuccess] = useState(false);
+
+  const [complaintType, setComplaintType] = useState('');
+  const [complaintSubject, setComplaintSubject] = useState('');
+  const [selectedSubjectLabel, setSelectedSubjectLabel] = useState('');
+
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    national_id: '',
+    mobile: '',
+    email: '',
+    origin: '',
+    destination: '',
+    flight_date: '',
+    ticket_number: '',
+    flight_number: '',
     description: '',
-    category: 'MISC',
-    priority: 'NORMAL',
-    source: 'WEB',
   });
 
-  // Support request categories mapping
-  const getTicketCategories = () => [
-    { value: 'HR', label: t('ticket.category.hr') },
-    { value: 'FEEDBACK', label: t('ticket.category.feedback') },
-    { value: 'MISC', label: t('ticket.category.misc') },
-    { value: 'SECURITY', label: t('ticket.category.security') },
-    { value: 'BOOKING', label: t('ticket.category.booking') },
-    { value: 'FLIGHT', label: t('ticket.category.flight') },
-    { value: 'PAYMENT', label: t('ticket.category.payment') },
-  ];
-  
-  const getPriorityOptions = () => [
-    { value: 'LOW', label: t('ticket.priority.low') },
-    { value: 'NORMAL', label: t('ticket.priority.normal') },
-    { value: 'HIGH', label: t('ticket.priority.high') },
-    { value: 'URGENT', label: t('ticket.priority.urgent') },
-  ];
-
-  // Generate new captcha
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 20) + 1;
-    const num2 = Math.floor(Math.random() * 20) + 1;
-    const operators = ['+', '-'];
-    const operator = operators[Math.floor(Math.random() * operators.length)];
-    const answer = operator === '+' ? num1 + num2 : num1 - num2;
-    setCaptcha({ num1, num2, operator, answer });
-    setCaptchaInput('');
-    setCaptchaError('');
+  const fontStyle = {
+    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
   };
 
-  // Generate captcha on mount
+  const dir = language === 'en' ? 'ltr' : 'rtl';
+
+  // Reset subject when type changes
   useEffect(() => {
-    generateCaptcha();
-    setCaptchaVerified(false);
-  }, []);
+    setComplaintSubject('');
+    setSelectedSubjectLabel('');
+  }, [complaintType]);
 
-  // Handle captcha verification
-  const handleCaptchaVerify = () => {
-    const answer = parseInt(captchaInput.trim());
-    if (isNaN(answer) || answer !== captcha.answer) {
-      setCaptchaError(language === 'fa' ? 'کد امنیتی اشتباه است' : language === 'ar' ? 'رمز الأمان غير صحيح' : 'Security code is incorrect');
-      generateCaptcha();
-      return;
-    }
-    setCaptchaVerified(true);
-    setCaptchaError('');
+  const subjects = complaintType ? (SUBJECT_OPTIONS[complaintType] || []) : [];
+  const hasSubjects = subjects.length > 0;
+
+  // Auto-build complaint_subject field for API
+  const buildComplaintSubject = () => {
+    if (!complaintType) return '';
+    if (!hasSubjects) return complaintType;
+    if (!selectedSubjectLabel) return complaintType;
+    return `${complaintType} - ${selectedSubjectLabel}`;
   };
 
-  useEffect(() => {
-    // Load security contact info
-    loadSecurityContact();
-    
-    // Load user requests if authenticated
-    if (activeTab === 'my-tickets' && isAuthenticated) {
-      loadMyTickets();
-    }
-  }, [isAuthenticated, activeTab]);
-
-  const loadSecurityContact = async () => {
-    try {
-      const info = await ticketService.getSecurityContact();
-      setSecurityPhone(info.phone);
-    } catch (error) {
-      console.error('Error loading security contact:', error);
-    }
-  };
-
-  const loadMyTickets = async () => {
-    try {
-      setLoading(true);
-      const tickets = await ticketService.getMyTickets();
-      setMyTickets(tickets);
-    } catch (error: any) {
-      setError(t('ticket.errorLoading'));
-      console.error('Error loading tickets:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleSubjectClick = (type: string, opt: { value: string; label: string; disabled: boolean }) => {
+    if (opt.disabled) return;
+    setComplaintType(type);
+    setComplaintSubject(opt.value);
+    setSelectedSubjectLabel(opt.label);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
 
-    // Special handling for security category
-    if (formData.category === 'SECURITY') {
-      if (securityPhone) {
-        alert(`${t('ticket.securityContact')}:\n${securityPhone}`);
-      }
+    if (!complaintType) {
+      setError('لطفاً نوع شکایت را انتخاب کنید.');
       return;
     }
 
-    if (!formData.title || !formData.description) {
-      setError(t('ticket.pleaseFillFields'));
+    if (hasSubjects && !complaintSubject) {
+      setError('لطفاً موضوع شکایت را انتخاب کنید.');
+      return;
+    }
+
+    if (!formData.first_name || !formData.last_name || !formData.mobile || !formData.email) {
+      setError('لطفاً تمام فیلدهای ضروری را پر کنید.');
       return;
     }
 
     try {
       setLoading(true);
-      const ticket = await ticketService.createTicket(formData);
-      setSuccess(t('ticket.submitSuccess'));
-      setFormData({
-        title: '',
-        description: '',
-        category: 'MISC',
-        priority: 'NORMAL',
-        source: 'WEB',
-      });
-      // Reload requests
-      if (activeTab === 'my-tickets') {
-        await loadMyTickets();
-      }
-    } catch (error: any) {
-      setError(error.response?.data?.detail || t('ticket.submitError'));
-      console.error('Error creating ticket:', error);
+      const payload: ComplaintFormData = {
+        complaint_type: complaintType,
+        complaint_subject: buildComplaintSubject(),
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        national_id: formData.national_id,
+        mobile: formData.mobile,
+        email: formData.email,
+        origin: formData.origin,
+        destination: formData.destination,
+        flight_date: formData.flight_date,
+        ticket_number: formData.ticket_number,
+        flight_number: formData.flight_number,
+        description: formData.description,
+      };
+      await complaintService.submitComplaint(payload);
+      setSuccess(true);
+      setComplaintType('');
+      setComplaintSubject('');
+      setSelectedSubjectLabel('');
+      setFormData({ first_name: '', last_name: '', national_id: '', mobile: '', email: '', origin: '', destination: '', flight_date: '', ticket_number: '', flight_number: '', description: '' });
+    } catch (err: any) {
+      const serverError = err.response?.data?.error;
+      const statusMsg = err.response?.status ? ` (کد ${err.response.status})` : '';
+      const networkMsg = !err.response && err.message ? ` - ${err.message}` : '';
+      setError(serverError || `خطا در ثبت شکایت. لطفاً دوباره تلاش کنید.${statusMsg}${networkMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'OPEN':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'RESOLVED':
-        return 'bg-green-100 text-green-800';
-      case 'CLOSED':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const inputClass = `w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 transition-all bg-white ${fontClass}`;
+  const labelClass = `block text-sm font-medium text-gray-700 mb-1.5 ${fontClass}`;
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'CRITICAL':
-        return 'bg-red-100 text-red-800';
-      case 'URGENT':
-        return 'bg-orange-100 text-orange-800';
-      case 'HIGH':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'NORMAL':
-        return 'bg-blue-100 text-blue-800';
-      case 'LOW':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const fontStyle = {
-    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-  };
-
-  // Show captcha modal if not verified
-  if (!captchaVerified) {
+  if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-white flex items-center justify-center">
+      <div className="min-h-screen bg-blue-900">
         <EmiratesHeader />
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        >
-          <div 
-            className="bg-white rounded-3xl shadow-2xl border-2 border-blue-200 p-8 max-w-md w-full relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-900 to-blue-800 rounded-2xl mb-4">
-                <SparklesIcon className="h-8 w-8 text-white" />
-              </div>
-              <h2 className={`text-2xl font-bold text-blue-900 mb-2 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'تأیید امنیتی' : language === 'ar' ? 'التحقق الأمني' : 'Security Verification'}
-              </h2>
-              <p className={`text-gray-600 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' 
-                  ? 'لطفاً کد امنیتی زیر را حل کنید' 
-                  : language === 'ar' 
-                  ? 'يرجى حل رمز الأمان أدناه' 
-                  : 'Please solve the security code below'}
-              </p>
+        <div className="max-w-2xl mx-auto px-4 py-24 text-center" style={{ ...fontStyle, direction: dir }}>
+          <div className="bg-white rounded-2xl shadow-xl p-12">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-blue-900/10 flex items-center justify-center">
+              <svg className="w-8 h-8 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
             </div>
-
-            {/* Captcha */}
-            <div className="mb-6">
-              <label className={`block text-sm font-bold text-gray-700 mb-3 ${fontClass}`} style={fontStyle}>
-                {language === 'fa' ? 'کد امنیتی' : language === 'ar' ? 'رمز الأمان' : 'Security Code'}
-              </label>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 text-center">
-                  <span className={`text-2xl font-bold text-blue-900 ${fontClass}`} style={{ ...fontStyle, direction: 'ltr' }}>
-                    ? = {captcha.num1} {captcha.operator} {captcha.num2}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={generateCaptcha}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
-                  style={fontStyle}
-                >
-                  {language === 'fa' ? 'تغییر' : language === 'ar' ? 'تغيير' : 'Change'}
-                </button>
-              </div>
-              <input
-                type="text"
-                value={captchaInput}
-                onChange={(e) => {
-                  setCaptchaInput(e.target.value.replace(/\D/g, ''));
-                  setCaptchaError('');
-                }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleCaptchaVerify();
-                  }
-                }}
-                className={`w-full px-4 py-3 border-2 ${captchaError ? 'border-red-300' : 'border-blue-300'} rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 text-lg font-semibold text-gray-900 ${fontClass}`}
-                style={{ ...fontStyle, direction: 'ltr', textAlign: 'right' }}
-                placeholder={language === 'fa' ? 'پاسخ را وارد کنید' : language === 'ar' ? 'أدخل الإجابة' : 'Enter the answer'}
-                autoFocus
-              />
-              {captchaError && (
-                <p className={`text-red-600 text-sm mt-2 ${fontClass}`} style={fontStyle}>
-                  {captchaError}
-                </p>
-              )}
-            </div>
-
-            {/* Verify Button */}
+            <h2 className="text-xl font-bold text-blue-900 mb-2" style={fontStyle}>
+              شکایت شما با موفقیت ثبت شد
+            </h2>
+            <p className="text-gray-600 mb-8 text-sm">
+              در اسرع وقت به شکایت شما رسیدگی خواهد شد.
+            </p>
             <button
-              onClick={handleCaptchaVerify}
-              disabled={!captchaInput.trim()}
-              className={`w-full py-3 px-6 bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${fontClass}`}
-              style={fontStyle}
+              onClick={() => setSuccess(false)}
+              className="px-6 py-3 bg-blue-900 hover:bg-blue-800 text-white rounded-xl font-medium transition-colors"
             >
-              {language === 'fa' ? 'تأیید و ادامه' : language === 'ar' ? 'تأكيد والمتابعة' : 'Verify and Continue'}
+              ثبت شکایت جدید
             </button>
           </div>
         </div>
@@ -295,308 +198,209 @@ const TicketPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-blue-900">
       <EmiratesHeader />
-      
-      {/* Hero Section - Similar to ComplaintPage */}
-      <section className="relative min-h-[40vh] sm:min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}></div>
-        </div>
-        
-        {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          {/* Logo */}
-          <div className="flex justify-center mb-4 sm:mb-6">
-            <img 
-              src="/images/nasim0.png" 
-              alt="هواپیمایی نسیم" 
-              className="h-40 sm:h-60 md:h-80 w-auto object-contain"
-              style={{ 
-                filter: 'drop-shadow(2px 2px 8px rgba(0,0,0,0.5))'
-              }}
-            />
-          </div>
-          
-          <h1 
-            className="text-white mb-6"
-            style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              fontSize: 'clamp(2.5rem, 8vw, 4rem)',
-              fontWeight: 'bold',
-              lineHeight: '1.2',
-              textShadow: '2px 2px 8px rgba(0,0,0,0.5)',
-              direction: 'rtl'
-            }}
-          >
-            {language === 'en' ? 'Support Requests' : language === 'ar' ? 'طلبات الدعم' : 'پشتیبانی و درخواست‌ها'}
+
+      {/* Hero */}
+      <section className="relative py-10 sm:py-12 text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4">
+          <h1 className="text-white text-2xl sm:text-4xl font-bold mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}>
+            فرم انتقادات و پیشنهادات
           </h1>
-          <p 
-            className="text-white/90 mb-8"
-            style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
-              fontWeight: 'normal',
-              lineHeight: '1.6',
-              textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
-              direction: 'rtl'
-            }}
-          >
-            {language === 'en' 
-              ? 'Create a support request or view your existing requests' 
-              : language === 'ar' 
-              ? 'إنشاء طلب دعم أو عرض طلباتك الموجودة'
-              : 'درخواست پشتیبانی ایجاد کنید یا درخواست‌های خود را مشاهده کنید'}
+          <p className="text-white/80 text-sm sm:text-base" style={fontStyle}>
+            شکایات و تجربیات خود را با ما به اشتراک بگذارید
           </p>
         </div>
       </section>
 
-      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        <div className="max-w-6xl mx-auto">
-
-          {/* Tabs */}
-          <div className="flex space-x-2 sm:space-x-4 mb-4 sm:mb-6 border-b border-gray-200 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('create')}
-              className={`px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
-                activeTab === 'create'
-                  ? 'text-blue-900 border-b-2 border-blue-900'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-            >
-              {t('ticket.createTicket')}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('my-tickets');
-                if (isAuthenticated) {
-                  loadMyTickets();
-                }
-              }}
-              className={`px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
-                activeTab === 'my-tickets'
-                  ? 'text-blue-900 border-b-2 border-blue-900'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-            >
-              {t('ticket.myTickets')}
-            </button>
+      {/* Form - یک کارت واحد */}
+      <section className="relative z-10 max-w-4xl mx-auto px-4 pb-24">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          {/* Header اطلاعات شکایت */}
+          <div className="bg-blue-900/90 px-6 sm:px-8 py-4">
+            <h2 className="text-white text-lg font-semibold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}>
+              اطلاعات شکایت
+            </h2>
           </div>
 
-          {/* Error/Success Messages */}
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-              <ExclamationCircleIcon className="h-5 w-5 text-red-600 mr-2" />
-              <span className="text-red-800">{error}</span>
-              <button onClick={() => setError(null)} className="ml-auto">
-                <XMarkIcon className="h-5 w-5 text-red-600" />
-              </button>
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
-              <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
-              <span className="text-green-800">{success}</span>
-              <button onClick={() => setSuccess(null)} className="ml-auto">
-                <XMarkIcon className="h-5 w-5 text-green-600" />
-              </button>
-            </div>
-          )}
-
-          {/* Create Support Request Form */}
-          {activeTab === 'create' && (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-900 to-blue-800 px-4 sm:px-6 py-3 sm:py-4">
-                <h2 
-                  className="text-white text-lg sm:text-2xl font-bold"
-                  style={{ 
-                    fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                    direction: language === 'en' ? 'ltr' : 'rtl'
-                  }}
-                >
-                  {t('ticket.formTitle')}
-                </h2>
+          <div className="p-6 sm:p-8 space-y-6" style={{ direction: dir }}>
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2">
+                <span>{error}</span>
+                <button type="button" onClick={() => setError(null)} className="mr-auto">×</button>
               </div>
-              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-                {/* Category */}
-                <div>
-                  <label className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                    <TicketIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900" />
-                    {t('ticket.category')}
-                  </label>
-                  <CustomSelect
-                    value={formData.category}
-                    onChange={(value) => setFormData({ ...formData, category: value as any })}
-                    options={getTicketCategories()}
-                    required
-                  />
-                </div>
+            )}
 
-                {/* Security Notice */}
-                {formData.category === 'SECURITY' && securityPhone && (
-                  <div className="p-3 sm:p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2 sm:gap-3">
-                    <PhoneIcon className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-xs sm:text-sm text-yellow-800" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                        {language === 'en' ? 'Contact Security' : language === 'ar' ? 'اتصل بالأمن' : 'ارتباط با حراست'}
-                      </p>
-                      <p className="text-xs sm:text-sm text-yellow-700 mt-1" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                        {language === 'en' 
-                          ? `Please contact security at: ${securityPhone}`
-                          : language === 'ar'
-                          ? `يرجى الاتصال بالأمن على: ${securityPhone}`
-                          : `لطفاً با حراست تماس بگیرید: ${securityPhone}`}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Title */}
-                <div>
-                  <label className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                    <DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900" />
-                    {t('ticket.title')} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-                    placeholder={t('ticket.titlePlaceholder')}
-                    required={formData.category !== 'SECURITY'}
-                    disabled={formData.category === 'SECURITY'}
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                    <DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900" />
-                    {t('ticket.description')} <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={6}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all resize-none"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-                    placeholder={t('ticket.descriptionPlaceholder')}
-                    required={formData.category !== 'SECURITY'}
-                    disabled={formData.category === 'SECURITY'}
-                  />
-                </div>
-
-                {/* Priority */}
-                <div>
-                  <label className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                    <ExclamationCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900" />
-                    {t('ticket.priority')}
-                  </label>
-                  <CustomSelect
-                    value={formData.priority || 'NORMAL'}
-                    onChange={(value) => setFormData({ ...formData, priority: value as any })}
-                    options={getPriorityOptions()}
-                    disabled={formData.category === 'SECURITY'}
-                  />
-                </div>
-
-                {/* Submit Button */}
-                <div className="flex justify-center pt-2 sm:pt-4">
-                  <button
-                    type="submit"
-                    disabled={loading || formData.category === 'SECURITY'}
-                    className="w-full sm:w-auto bg-blue-900 hover:bg-blue-800 text-white font-semibold px-6 sm:px-12 py-3 sm:py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base"
-                    style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                      direction: language === 'en' ? 'ltr' : 'rtl'
-                    }}
-                  >
-                    {loading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
-                        {t('ticket.loading')}
-                      </>
-                    ) : (
-                      <>
-                        <PaperAirplaneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                        {t('ticket.submit')}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* My Requests List */}
-          {activeTab === 'my-tickets' && (
-            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="mt-4 text-gray-600">
-                    {language === 'en' ? 'Loading requests...' : language === 'ar' ? 'جارٍ تحميل الطلبات...' : 'در حال بارگذاری درخواست‌ها...'}
-                  </p>
-                </div>
-              ) : myTickets.length === 0 ? (
-                <div className="text-center py-8">
-                  <TicketIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">
-                    {language === 'en' ? 'No requests found' : language === 'ar' ? 'لم يتم العثور على طلبات' : 'درخواستی یافت نشد'}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3 sm:space-y-4">
-                  {myTickets.map((ticket) => (
-                    <div
-                      key={ticket.uuid}
-                      className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0">
-                        <div className="flex-1 w-full sm:w-auto">
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mb-2">
-                            <h3 className="text-base sm:text-lg font-semibold text-gray-900">{ticket.title}</h3>
-                            <span className="text-xs sm:text-sm text-gray-500">#{ticket.reference}</span>
-                          </div>
-                          <p className="text-sm sm:text-base text-gray-600 mb-2 sm:mb-3 line-clamp-2">{ticket.description}</p>
-                          <div className="flex flex-wrap gap-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
-                              {ticket.status}
-                            </span>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(ticket.priority)}`}>
-                              {ticket.priority}
-                            </span>
-                            {ticket.message_count > 0 && (
-                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 flex items-center">
-                                <ChatBubbleLeftRightIcon className="h-3 w-3 mr-1" />
-                                {ticket.message_count} {language === 'en' ? 'messages' : language === 'ar' ? 'رسائل' : 'پیام'}
-                              </span>
+            {/* ۱ و ۲ - نوع و موضوع شکایت (داخل بخش اطلاعات شکایت) */}
+            <div className="space-y-4">
+              <div className="text-blue-900 font-medium text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                ۱ - نوع شکایت و ۲ - موضوع شکایت
+              </div>
+              <div className="overflow-x-auto overflow-y-auto max-h-[320px] rounded-xl border border-gray-200">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="text-right py-3 px-4 font-medium text-gray-700 min-w-[180px]">نوع شکایت</th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-700 min-w-[200px]">موضوع شکایت</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COMPLAINT_TYPES.map((type) => {
+                      const rowSubjects = SUBJECT_OPTIONS[type] || [];
+                      return (
+                        <tr key={type} className="border-t border-gray-100 hover:bg-gray-50/50">
+                          <td className="py-2 px-4 align-top">
+                            <button
+                              type="button"
+                              onClick={() => setComplaintType(type)}
+                              className={`w-full px-3 py-2 rounded-lg text-right text-sm transition-all ${fontClass} ${
+                                complaintType === type
+                                  ? 'bg-blue-900 text-white'
+                                  : 'bg-white hover:bg-blue-50 border border-gray-200 text-gray-700'
+                              }`}
+                            >
+                              {type}
+                            </button>
+                          </td>
+                          <td className="py-2 px-4 align-top">
+                            {rowSubjects.length > 0 ? (
+                              <div className="flex flex-wrap gap-1.5">
+                                {rowSubjects.map((opt) => (
+                                  <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => handleSubjectClick(type, opt)}
+                                    disabled={opt.disabled}
+                                    className={`px-2.5 py-1 rounded text-xs transition-all ${fontClass} ${
+                                      opt.disabled
+                                        ? 'bg-red-50 text-red-400 cursor-not-allowed line-through'
+                                        : complaintType === type && complaintSubject === opt.value
+                                        ? 'bg-blue-900 text-white'
+                                        : 'bg-white hover:bg-blue-50 border border-gray-200 text-gray-700'
+                                    }`}
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-gray-300">—</span>
                             )}
-                          </div>
-                        </div>
-                        <div className="text-right text-sm text-gray-500">
-                          {new Date(ticket.created_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>۱ - نوع شکایت (انتخاب شده)</label>
+                  <input type="text" value={complaintType} readOnly placeholder="از جدول انتخاب کنید" className={`${inputClass} bg-gray-50 cursor-default`} dir={dir} />
                 </div>
-              )}
+                <div>
+                  <label className={labelClass}>۲ - موضوع شکایت (انتخاب شده)</label>
+                  <input type="text" value={selectedSubjectLabel || complaintType || ''} readOnly placeholder="از جدول انتخاب کنید" className={`${inputClass} bg-gray-50 cursor-default`} dir={dir} />
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
+
+            {/* ۳ - اطلاعات شخصی */}
+            <div className="pt-6 border-t border-gray-200">
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                ۳ - اطلاعات شخصی
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>نام:</label>
+                  <input type="text" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} className={inputClass} required dir={dir} />
+                </div>
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>نام خانوادگی:</label>
+                  <input type="text" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} className={inputClass} required dir={dir} />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className={labelClass} style={{ direction: dir }}>کدملی:</label>
+                  <input type="text" value={formData.national_id} onChange={(e) => setFormData({ ...formData, national_id: e.target.value })} className={inputClass} dir={dir} />
+                </div>
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>شماره تلفن همراه مسافر:</label>
+                  <input type="tel" value={formData.mobile} onChange={(e) => setFormData({ ...formData, mobile: e.target.value })} className={inputClass} required dir={dir} />
+                </div>
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>آدرس ایمیل:</label>
+                  <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} required dir={dir} />
+                </div>
+              </div>
+            </div>
+
+            {/* ۴ - اطلاعات پرواز */}
+            <div className="pt-6 border-t border-gray-200">
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                ۴ - اطلاعات پرواز
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>مبدا:</label>
+                  <input type="text" value={formData.origin} onChange={(e) => setFormData({ ...formData, origin: e.target.value })} className={inputClass} dir={dir} />
+                </div>
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>مقصد:</label>
+                  <input type="text" value={formData.destination} onChange={(e) => setFormData({ ...formData, destination: e.target.value })} className={inputClass} dir={dir} />
+                </div>
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>تاریخ:</label>
+                  <input type="text" value={formData.flight_date} onChange={(e) => setFormData({ ...formData, flight_date: e.target.value })} className={inputClass} dir={dir} placeholder="۱۴۰۴/۱۰/۱۵" />
+                </div>
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>شماره بلیت:</label>
+                  <input type="text" value={formData.ticket_number} onChange={(e) => setFormData({ ...formData, ticket_number: e.target.value })} className={inputClass} dir={dir} />
+                </div>
+                <div>
+                  <label className={labelClass} style={{ direction: dir }}>شماره پرواز:</label>
+                  <input type="text" value={formData.flight_number} onChange={(e) => setFormData({ ...formData, flight_number: e.target.value })} className={inputClass} dir={dir} />
+                </div>
+              </div>
+            </div>
+
+            {/* ۵ - توضیحات */}
+            <div className="pt-6 border-t border-gray-200">
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                ۵ - توضیحات
+              </h3>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={4}
+                className={`${inputClass} resize-none`}
+                dir={dir}
+                placeholder="توضیحات تکمیلی..."
+              />
+            </div>
+
+            {/* Submit */}
+            <div className="pt-6 border-t border-gray-200">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 bg-blue-900 hover:bg-blue-800 disabled:bg-blue-900/70 text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                    در حال ارسال...
+                  </>
+                ) : (
+                  'ارسال'
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
     </div>
   );
 };
 
 export default TicketPage;
-

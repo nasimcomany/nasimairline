@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
-from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage
+from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage, ComplaintForm
 from .permissions import IsTicketOwnerOrStaff
 from .serializers import (
     TicketSerializer,
@@ -299,6 +299,96 @@ class TicketAttachmentViewSet(viewsets.ModelViewSet):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def submit_complaint_form(request):
+    """
+    Submit complaint/suggestion form - no auth required
+    Saves to ComplaintForm and emails all COMPLAINT_NOTIFICATION_EMAILS
+    """
+    from django.core.mail import send_mail
+    from django.conf import settings
+    
+    data = request.data
+    required = ['complaint_type', 'complaint_subject', 'first_name', 'last_name', 'mobile', 'email']
+    for field in required:
+        if not data.get(field):
+            return Response(
+                {'error': f'فیلد {field} الزامی است.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    # Get client IP
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
+    
+    # Create complaint - user is optional
+    user = request.user if request.user.is_authenticated else None
+    complaint = ComplaintForm.objects.create(
+        complaint_type=data.get('complaint_type', ''),
+        complaint_subject=data.get('complaint_subject', ''),
+        first_name=data.get('first_name', ''),
+        last_name=data.get('last_name', ''),
+        national_id=data.get('national_id', ''),
+        mobile=data.get('mobile', ''),
+        email=data.get('email', ''),
+        origin=data.get('origin', ''),
+        destination=data.get('destination', ''),
+        flight_date=data.get('flight_date', ''),
+        ticket_number=data.get('ticket_number', ''),
+        flight_number=data.get('flight_number', ''),
+        description=data.get('description', ''),
+        user=user,
+        submission_ip=ip,
+    )
+    
+    # ارسال ایمیل اعلان (همزمان - timeout فرانت ۳۰ ثانیه است)
+    recipient_list = getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
+    if recipient_list:
+        try:
+            from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
+            email_body = f"""
+شکایت/پیشنهاد جدید ثبت شد:
+
+نوع شکایت: {complaint.complaint_type}
+موضوع شکایت: {complaint.complaint_subject}
+
+اطلاعات شخصی:
+نام: {complaint.first_name} {complaint.last_name}
+کدملی: {complaint.national_id or ''}
+تلفن: {complaint.mobile}
+ایمیل: {complaint.email}
+
+اطلاعات پرواز:
+مبدا: {complaint.origin or ''}
+مقصد: {complaint.destination or ''}
+تاریخ: {complaint.flight_date or ''}
+شماره بلیت: {complaint.ticket_number or ''}
+شماره پرواز: {complaint.flight_number or ''}
+
+توضیحات:
+{complaint.description or ''}
+
+---
+تاریخ ثبت: {complaint.created_at}
+"""
+            send_mail(
+                subject=f"شکایت جدید - {complaint.complaint_type[:50]}",
+                message=email_body,
+                from_email=from_email,
+                recipient_list=list(recipient_list),
+                fail_silently=True,
+            )
+        except Exception:
+            pass  # شکایت ذخیره شده؛ عدم ارسال ایمیل باعث خطا نشود
+    
+    return Response({
+        'success': True,
+        'message': 'شکایت شما با موفقیت ثبت شد.',
+        'uuid': str(complaint.uuid),
+    }, status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET'])

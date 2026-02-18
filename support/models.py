@@ -700,3 +700,60 @@ class ChatMessage(models.Model):
             return False
         from django.utils import timezone
         return timezone.now() > self.expires_at
+
+
+class ComplaintForm(models.Model):
+    """
+    فرم انتقادات و پیشنهادات - شکایات بدون نیاز به لاگین
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    
+    # نوع و موضوع شکایت (خودکار از انتخاب‌های کاربر)
+    complaint_type = models.CharField(_('نوع شکایت'), max_length=255)
+    complaint_subject = models.TextField(_('موضوع شکایت'), help_text=_('ترکیب نوع و موضوع انتخاب شده'))
+    
+    # اطلاعات شخصی
+    first_name = models.CharField(_('نام'), max_length=100)
+    last_name = models.CharField(_('نام خانوادگی'), max_length=100)
+    national_id = models.CharField(_('کدملی'), max_length=50, blank=True)
+    mobile = models.CharField(_('شماره تلفن همراه مسافر'), max_length=30)
+    email = models.EmailField(_('آدرس ایمیل'))
+    
+    # اطلاعات پرواز
+    origin = models.CharField(_('مبدا'), max_length=100, blank=True)
+    destination = models.CharField(_('مقصد'), max_length=100, blank=True)
+    flight_date = models.CharField(_('تاریخ'), max_length=50, blank=True)
+    ticket_number = models.CharField(_('شماره بلیت'), max_length=50, blank=True)
+    flight_number = models.CharField(_('شماره پرواز'), max_length=50, blank=True)
+    
+    # توضیحات
+    description = models.TextField(_('توضیحات'), blank=True)
+    
+    # کاربر (اختیاری - اگر لاگین باشد)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='complaint_forms',
+        verbose_name=_('کاربر'),
+    )
+    
+    # IP برای ردیابی
+    submission_ip = models.GenericIPAddressField(_('آی‌پی ثبت'), null=True, blank=True)
+    
+    created_at = models.DateTimeField(_('تاریخ ثبت'), auto_now_add=True, db_index=True)
+    
+    class Meta:
+        verbose_name = _('فرم شکایت')
+        verbose_name_plural = _('فرم‌های شکایت')
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.complaint_type} - {self.email} - {self.created_at}"

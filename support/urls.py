@@ -10,6 +10,7 @@ from .views import (
     TicketCategoryViewSet,
     ChatMessageViewSet,
     security_contact_info,
+    submit_complaint_form,
 )
 
 app_name = 'support'
@@ -24,5 +25,6 @@ router.register(r'chat', ChatMessageViewSet, basename='chat')
 urlpatterns = [
     path('', include(router.urls)),
     path('security/contact/', security_contact_info, name='security-contact'),
+    path('complaints/submit/', submit_complaint_form, name='complaint-submit'),
 ]
 

@@ -13,9 +13,9 @@ class LimitedAdminSite(AdminSite):
     """
     Custom Admin Site that limits access to only blog and gallery apps
     """
-    site_header = 'پنل مدیریت محدود - مقالات، چت، گالری، مشتریان و پیامک'
+    site_header = 'پنل مدیریت محدود - مقالات، چت، شکایات، گالری، مشتریان و پیامک'
     site_title = 'پنل محدود'
-    index_title = 'مدیریت مقالات، چت، گالری، مشتریان و پیامک'
+    index_title = 'مدیریت مقالات، چت، شکایات، گالری، مشتریان و پیامک'
     
     def has_permission(self, request):
         """
@@ -96,11 +96,12 @@ limited_admin_site.register(HeroSlider, HeroSliderAdmin)
 limited_admin_site.register(HomePageSectionItem, HomePageSectionItemAdmin)
 limited_admin_site.register(HomePageSectionConfig, HomePageSectionConfigAdmin)
 
-# Register support (chat) models to limited admin site
-from support.models import ChatMessage
-from support.admin import ChatMessageAdmin
+# Register support (chat + complaints) models to limited admin site
+from support.models import ChatMessage, ComplaintForm
+from support.admin import ChatMessageAdmin, ComplaintFormAdmin
 
 limited_admin_site.register(ChatMessage, ChatMessageAdmin)
+limited_admin_site.register(ComplaintForm, ComplaintFormAdmin)
 
 # Register SMS models to limited admin site (ارسال پیامک به باشگاه مشتریان)
 from sms.models import SmsLog
