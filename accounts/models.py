@@ -177,6 +177,13 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
     last_login = models.DateTimeField(_('آخرین ورود'), null=True, blank=True)
     
+    # وضعیت کارمند - پیش‌فرض False؛ فقط کاربرانی که در پنل ادمین is_staff=True شده‌اند می‌توانند ورود پرسنل داشته باشند
+    is_staff = models.BooleanField(
+        _('وضعیت کارمند'),
+        default=False,
+        help_text=_('فقط کاربران با این گزینه فعال می‌توانند از ورود پرسنل استفاده کنند.'),
+    )
+    
     # Override username to make it optional
     username = models.CharField(
         _('نام کاربری'),

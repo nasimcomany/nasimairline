@@ -3,6 +3,7 @@
  */
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { loginUser } from '../../store/slices/authSlice';
 import { AppDispatch } from '../../store';
@@ -21,6 +22,7 @@ const StaffLoginModal: React.FC<StaffLoginModalProps> = ({ isOpen, onClose }) =>
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { t, language, fontClass } = useLanguage();
   const dir = language === 'en' ? 'ltr' : 'rtl';
 
@@ -41,6 +43,7 @@ const StaffLoginModal: React.FC<StaffLoginModalProps> = ({ isOpen, onClose }) =>
       onClose();
       setEmail('');
       setPassword('');
+      navigate('/staff-dashboard');
     } catch (err: any) {
       const msg = err.response?.data?.email?.[0]
         || err.response?.data?.non_field_errors?.[0]
