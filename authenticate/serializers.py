@@ -145,6 +145,16 @@ class UserLoginSerializer(serializers.Serializer):
         return attrs
 
 
+class StaffLoginSerializer(UserLoginSerializer):
+    """ورود پرسنل - فقط کاربران با دسترسی پرسنل (is_staff)"""
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        user = attrs['user']
+        if not user.is_staff:
+            raise serializers.ValidationError('شما دسترسی ورود پرسنل ندارید.')
+        return attrs
+
+
 class TokenObtainPairResponseSerializer(serializers.Serializer):
     """
     Serializer for JWT token response

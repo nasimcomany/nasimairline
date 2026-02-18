@@ -64,6 +64,14 @@ export const authService = {
   },
 
   /**
+   * Staff login - only for users with is_staff
+   */
+  staffLogin: async (credentials: LoginCredentials): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>('/auth/staff-login/', credentials);
+    return response.data;
+  },
+
+  /**
    * Logout user
    */
   logout: async (): Promise<void> => {

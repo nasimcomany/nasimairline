@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import (
 from .views import (
     UserRegistrationView,
     UserLoginView,
+    StaffLoginView,
     user_profile,
     logout,
     verify_captcha,
@@ -22,6 +23,7 @@ urlpatterns = [
     # Registration and Login
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('login/', UserLoginView.as_view(), name='login'),
+    path('staff-login/', StaffLoginView.as_view(), name='staff_login'),
     path('logout/', logout, name='logout'),
     
     # Token Management

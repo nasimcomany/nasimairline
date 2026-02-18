@@ -14,6 +14,7 @@ from .models import PasswordResetCode
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
+    StaffLoginSerializer,
     TokenObtainPairResponseSerializer,
 )
 from accounts.serializers import UserSerializer
@@ -115,6 +116,33 @@ class UserLoginView(generics.GenericAPIView):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+
+class StaffLoginView(generics.GenericAPIView):
+    """
+    ورود پرسنل - فقط برای کاربران دارای دسترسی پرسنل (is_staff=True)
+    """
+    serializer_class = StaffLoginSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = serializer.validated_data['user']
+        refresh = RefreshToken.for_user(user)
+        user.last_login_ip = self._get_client_ip(request)
+        user.last_login = timezone.now()
+        user.save(update_fields=['last_login_ip', 'last_login'])
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': UserSerializer(user).data,
+        }, status=status.HTTP_200_OK)
+
+    def _get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
 
 @api_view(['POST'])

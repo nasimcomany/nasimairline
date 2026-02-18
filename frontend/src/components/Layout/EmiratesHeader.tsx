@@ -40,6 +40,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import AuthModal from '../Auth/AuthModal';
+import StaffLoginModal from '../Auth/StaffLoginModal';
 
 interface EmiratesHeaderProps {
   onWeatherClick?: () => void;
@@ -55,6 +56,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [selectedDestinationIndex, setSelectedDestinationIndex] = useState<number | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [isStaffLoginModalOpen, setIsStaffLoginModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const languageDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -1053,12 +1055,12 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                       </button>
                       <button
                         onClick={() => {
-                          // No action for now - will be linked later
+                          setIsStaffLoginModalOpen(true);
                           setIsLoginDropdownOpen(false);
                         }}
                         className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-sm text-black hover:bg-gray-300 transition-colors ${fontClass}`}
                       >
-                        {t('nav.loginPartner')}
+                        {t('nav.loginStaff')}
                       </button>
                     </div>
                   )}
@@ -1212,12 +1214,12 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                       </button>
                       <button
                         onClick={() => {
-                          // No action for now - will be linked later
+                          setIsStaffLoginModalOpen(true);
                           setIsMenuOpen(false);
                         }}
                         className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
-                        {t('nav.loginPartner')}
+                        {t('nav.loginStaff')}
                       </button>
                       <button
                         onClick={() => {
@@ -1243,6 +1245,12 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         initialMode={authModalMode}
+      />
+
+      {/* Staff Login Modal - ورود پرسنل */}
+      <StaffLoginModal
+        isOpen={isStaffLoginModalOpen}
+        onClose={() => setIsStaffLoginModalOpen(false)}
       />
 
       {/* Fly With Nasim Description Modal - blu900 theme */}
