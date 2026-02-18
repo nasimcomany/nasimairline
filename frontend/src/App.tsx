@@ -28,6 +28,7 @@ import MembershipPage from './pages/MembershipPage';
 import SupportPage from './pages/SupportPage';
 import TicketPage from './pages/TicketPage';
 import ComplaintPage from './pages/ComplaintPage';
+import SurveyPage from './pages/SurveyPage';
 import MagazinePage from './pages/MagazinePage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import IranologyPage from './pages/IranologyPage';
@@ -63,6 +64,7 @@ function App() {
               <Route path="/membership" element={<MembershipPage />} />
               <Route path="/tickets" element={<TicketPage />} />
               <Route path="/complaint" element={<ComplaintPage />} />
+              <Route path="/survey" element={<SurveyPage />} />
               <Route path="/magazine" element={<MagazinePage />} />
               <Route path="/magazine/:slug" element={<ArticleDetailPage />} />
               <Route path="/iranology" element={<IranologyPage />} />

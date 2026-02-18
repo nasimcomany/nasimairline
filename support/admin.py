@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from .models import (
-    TicketCategory, Ticket, TicketMessage, TicketAttachment, ChatMessage, ComplaintForm
+    TicketCategory, Ticket, TicketMessage, TicketAttachment, ChatMessage, ComplaintForm, SurveyForm
 )
 
 
@@ -368,3 +368,32 @@ class ComplaintFormAdmin(admin.ModelAdmin):
     def complaint_type_short(self, obj):
         return obj.complaint_type[:40] + '...' if len(obj.complaint_type) > 40 else obj.complaint_type
     complaint_type_short.short_description = _('نوع شکایت')
+
+
+@admin.register(SurveyForm)
+class SurveyFormAdmin(admin.ModelAdmin):
+    """Admin for فرم نظرسنجی"""
+    list_display = ['full_name', 'flight_number', 'contact_number', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['full_name', 'flight_number', 'contact_number', 'email']
+    readonly_fields = ['uuid', 'submission_ip', 'created_at']
+    date_hierarchy = 'created_at'
+
+    fieldsets = (
+        (_('اطلاعات شخصی و پرواز'), {
+            'fields': ('full_name', 'seat_number', 'age', 'education', 'flight_number', 'contact_number', 'email', 'flight_route', 'ticketing_website')
+        }),
+        (_('سوالات چندگزینه‌ای'), {
+            'fields': ('trips_with_nasim', 'annual_flights', 'travel_purpose', 'nasim_choice_reason')
+        }),
+        (_('امتیازها'), {
+            'fields': ('station_staff_rating', 'cabin_hygiene_rating', 'seat_comfort_rating', 'cabin_temp_rating', 'attendants_service_rating', 'attendants_appearance_rating', 'sound_system_rating', 'catering_quality_rating', 'pilot_communication_rating', 'on_time_rating', 'vs_domestic_rating', 'recommend_nasim')
+        }),
+        (_('پیشنهادها و انتقادها'), {
+            'fields': ('suggestions',)
+        }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid', 'submission_ip', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )

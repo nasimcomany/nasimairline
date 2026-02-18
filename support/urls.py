@@ -11,6 +11,7 @@ from .views import (
     ChatMessageViewSet,
     security_contact_info,
     submit_complaint_form,
+    submit_survey_form,
 )
 
 app_name = 'support'
@@ -26,5 +27,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('security/contact/', security_contact_info, name='security-contact'),
     path('complaints/submit/', submit_complaint_form, name='complaint-submit'),
+    path('surveys/submit/', submit_survey_form, name='survey-submit'),
 ]
 

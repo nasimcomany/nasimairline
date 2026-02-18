@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
-from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage, ComplaintForm
+from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage, ComplaintForm, SurveyForm
 from .permissions import IsTicketOwnerOrStaff
 from .serializers import (
     TicketSerializer,
@@ -388,6 +388,132 @@ def submit_complaint_form(request):
         'success': True,
         'message': 'شکایت شما با موفقیت ثبت شد.',
         'uuid': str(complaint.uuid),
+    }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def submit_survey_form(request):
+    """
+    Submit survey form - no auth required
+    Saves to SurveyForm and emails SURVEY_NOTIFICATION_EMAILS (or COMPLAINT_NOTIFICATION_EMAILS)
+    """
+    from django.core.mail import send_mail
+
+    data = request.data
+    required = ['full_name', 'flight_number', 'contact_number']
+    for field in required:
+        if not data.get(field):
+            return Response(
+                {'error': f'فیلد {field} الزامی است.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
+
+    survey = SurveyForm.objects.create(
+        full_name=data.get('full_name', ''),
+        seat_number=data.get('seat_number', ''),
+        age=data.get('age', ''),
+        education=data.get('education', ''),
+        flight_number=data.get('flight_number', ''),
+        contact_number=data.get('contact_number', ''),
+        email=data.get('email', ''),
+        flight_route=data.get('flight_route', ''),
+        ticketing_website=data.get('ticketing_website', ''),
+        trips_with_nasim=data.get('trips_with_nasim', ''),
+        annual_flights=data.get('annual_flights', ''),
+        travel_purpose=data.get('travel_purpose', ''),
+        nasim_choice_reason=data.get('nasim_choice_reason', ''),
+        station_staff_rating=data.get('station_staff_rating', ''),
+        cabin_hygiene_rating=data.get('cabin_hygiene_rating', ''),
+        seat_comfort_rating=data.get('seat_comfort_rating', ''),
+        cabin_temp_rating=data.get('cabin_temp_rating', ''),
+        attendants_service_rating=data.get('attendants_service_rating', ''),
+        attendants_appearance_rating=data.get('attendants_appearance_rating', ''),
+        sound_system_rating=data.get('sound_system_rating', ''),
+        catering_quality_rating=data.get('catering_quality_rating', ''),
+        pilot_communication_rating=data.get('pilot_communication_rating', ''),
+        on_time_rating=data.get('on_time_rating', ''),
+        vs_domestic_rating=data.get('vs_domestic_rating', ''),
+        recommend_nasim=data.get('recommend_nasim', ''),
+        suggestions=data.get('suggestions', ''),
+        submission_ip=ip,
+    )
+
+    recipient_list = getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
+    if recipient_list:
+        try:
+            from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
+            RATING_LABELS = {'excellent': 'عالی', 'good': 'خوب', 'average': 'متوسط', 'poor': 'ضعیف'}
+            CHOICE_LABELS = {
+                'weekly': 'هفته‌ای یکبار', 'monthly': 'ماهی یکبار', 'few_months': 'هر چند ماه', 'yearly': 'سالی یکبار',
+                '0-5': '۰-۵', '5-10': '۵-۱۰', '10-20': '۱۰-۲۰', '20+': 'بیشتر از ۲۰',
+                'work': 'کار', 'leisure': 'تفریح', 'education': 'تحصیل', 'other': 'سایر',
+                'timing': 'زمانبندی مناسب', 'services': 'خدمات مناسب', 'cost': 'هزینه مناسب', 'recommendation': 'پیشنهاد دیگران',
+                'yes': 'بله', 'no': 'خیر',
+            }
+
+            def lbl(v):
+                if not v: return '—'
+                return RATING_LABELS.get(v, CHOICE_LABELS.get(v, v))
+
+            email_body = f"""
+فرم نظرسنجی جدید ثبت شد:
+
+اطلاعات شخصی:
+نام و نام خانوادگی: {survey.full_name}
+شماره صندلی: {survey.seat_number or '—'}
+سن: {survey.age or '—'}
+مدرک تحصیلی: {survey.education or '—'}
+شماره پرواز: {survey.flight_number}
+شماره تماس: {survey.contact_number}
+ایمیل: {survey.email or '—'}
+مسیر پرواز: {survey.flight_route or '—'}
+وبسایت تهیه بلیط: {survey.ticketing_website or '—'}
+
+سوالات:
+تعداد سفر با نسیم: {lbl(survey.trips_with_nasim)}
+تعداد سفرهای هوایی در سال: {lbl(survey.annual_flights)}
+هدف از سفر: {lbl(survey.travel_purpose)}
+دلیل انتخاب نسیم: {lbl(survey.nasim_choice_reason)}
+
+امتیازها (عالی/خوب/متوسط/ضعیف):
+پرسنل ایستگاه و گیت: {lbl(survey.station_staff_rating)}
+آراستگی و بهداشت کابین: {lbl(survey.cabin_hygiene_rating)}
+راحتی صندلی و کابین: {lbl(survey.seat_comfort_rating)}
+دمای کابین: {lbl(survey.cabin_temp_rating)}
+سرویس مهمانداران: {lbl(survey.attendants_service_rating)}
+ظاهر مهمانداران: {lbl(survey.attendants_appearance_rating)}
+سیستم صوتی: {lbl(survey.sound_system_rating)}
+کیفیت پذیرایی: {lbl(survey.catering_quality_rating)}
+ارتباط خلبان: {lbl(survey.pilot_communication_rating)}
+به موقع پرواز: {lbl(survey.on_time_rating)}
+نسیم در قیاس با داخلی: {lbl(survey.vs_domestic_rating)}
+
+پیشنهاد سفر با نسیم: {lbl(survey.recommend_nasim)}
+
+پیشنهادها و انتقادها:
+{survey.suggestions or '—'}
+
+---
+تاریخ ثبت: {survey.created_at}
+"""
+            send_mail(
+                subject=f"نظرسنجی جدید - {survey.full_name} - {survey.flight_number}",
+                message=email_body,
+                from_email=from_email,
+                recipient_list=list(recipient_list),
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
+    return Response({
+        'success': True,
+        'message': 'نظرسنجی شما با موفقیت ثبت شد.',
+        'uuid': str(survey.uuid),
     }, status=status.HTTP_201_CREATED)
 
 

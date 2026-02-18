@@ -358,6 +358,15 @@ COMPLAINT_NOTIFICATION_EMAILS = [
 if not COMPLAINT_NOTIFICATION_EMAILS:
     COMPLAINT_NOTIFICATION_EMAILS = ['info@nasimair.com']
 
+# Survey Form - ایمیل‌های دریافت اعلان نظرسنجی (پیش‌فرض: همان شکایت)
+SURVEY_NOTIFICATION_EMAILS = [
+    email.strip() for email in
+    os.environ.get('SURVEY_NOTIFICATION_EMAILS', '').split(',')
+    if email.strip()
+]
+if not SURVEY_NOTIFICATION_EMAILS:
+    SURVEY_NOTIFICATION_EMAILS = COMPLAINT_NOTIFICATION_EMAILS
+
 # WhatsApp Configuration (برای اعلان‌های چت)
 # برای استفاده از واتساپ، باید API key و URL سرویس واتساپ خود را تنظیم کنید
 # می‌توانید از سرویس‌های مختلف مثل Twilio، کاوه نگار، پیامک گستر و غیره استفاده کنید

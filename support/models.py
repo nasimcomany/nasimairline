@@ -757,3 +757,117 @@ class ComplaintForm(models.Model):
     
     def __str__(self):
         return f"{self.complaint_type} - {self.email} - {self.created_at}"
+
+
+RATING_CHOICES = [
+    ('excellent', 'عالی'),
+    ('good', 'خوب'),
+    ('average', 'متوسط'),
+    ('poor', 'ضعیف'),
+]
+
+
+class SurveyForm(models.Model):
+    """
+    فرم نظرسنجی - بدون نیاز به لاگین
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+
+    # اطلاعات شخصی و پرواز
+    full_name = models.CharField(_('نام و نام خانوادگی'), max_length=200)
+    seat_number = models.CharField(_('شماره صندلی'), max_length=20, blank=True)
+    age = models.CharField(_('سن'), max_length=10, blank=True)
+    education = models.CharField(_('مدرک تحصیلی'), max_length=100, blank=True)
+    flight_number = models.CharField(_('شماره پرواز'), max_length=50)
+    contact_number = models.CharField(_('شماره تماس'), max_length=30)
+    email = models.EmailField(_('ایمیل'), blank=True)
+    flight_route = models.CharField(_('مسیر پرواز'), max_length=255, blank=True)
+    ticketing_website = models.CharField(_('نام وبسایت تهیه بلیط یا آژانس'), max_length=255, blank=True)
+
+    # سوالات چندگزینه‌ای
+    trips_with_nasim = models.CharField(
+        _('تعداد سفر با نسیم'),
+        max_length=50,
+        blank=True,
+        choices=[
+            ('weekly', 'هفته‌ای یکبار'),
+            ('monthly', 'ماهی یکبار'),
+            ('few_months', 'هر چند ماه'),
+            ('yearly', 'سالی یکبار'),
+        ],
+    )
+    annual_flights = models.CharField(
+        _('تعداد سفرهای هوایی در سال'),
+        max_length=20,
+        blank=True,
+        choices=[
+            ('0-5', '۰-۵'),
+            ('5-10', '۵-۱۰'),
+            ('10-20', '۱۰-۲۰'),
+            ('20+', 'بیشتر از ۲۰'),
+        ],
+    )
+    travel_purpose = models.CharField(
+        _('هدف از سفر'),
+        max_length=50,
+        blank=True,
+        choices=[
+            ('work', 'کار'),
+            ('leisure', 'تفریح'),
+            ('education', 'تحصیل'),
+            ('other', 'سایر'),
+        ],
+    )
+    nasim_choice_reason = models.CharField(
+        _('دلیل انتخاب نسیم'),
+        max_length=50,
+        blank=True,
+        choices=[
+            ('timing', 'زمانبندی مناسب'),
+            ('services', 'خدمات مناسب'),
+            ('cost', 'هزینه مناسب'),
+            ('recommendation', 'پیشنهاد دیگران'),
+        ],
+    )
+
+    # امتیازدهی (عالی، خوب، متوسط، ضعیف)
+    station_staff_rating = models.CharField(_('نحوه برخورد پرسنل ایستگاه و گیت'), max_length=20, blank=True, choices=RATING_CHOICES)
+    cabin_hygiene_rating = models.CharField(_('آراستگی و بهداشت کابین هواپیما'), max_length=20, blank=True, choices=RATING_CHOICES)
+    seat_comfort_rating = models.CharField(_('راحتی صندلی ها و کابین هواپیما'), max_length=20, blank=True, choices=RATING_CHOICES)
+    cabin_temp_rating = models.CharField(_('دمای کابین روی زمین و در طول پرواز'), max_length=20, blank=True, choices=RATING_CHOICES)
+    attendants_service_rating = models.CharField(_('نحوه برخورد و سرویس دهی مهمانداران'), max_length=20, blank=True, choices=RATING_CHOICES)
+    attendants_appearance_rating = models.CharField(_('راستگی ظاهری و یونیفرم مهمانداران'), max_length=20, blank=True, choices=RATING_CHOICES)
+    sound_system_rating = models.CharField(_('کیفیت سیستم صوتی و شیوایی بیان'), max_length=20, blank=True, choices=RATING_CHOICES)
+    catering_quality_rating = models.CharField(_('کیفیت بسته پذیرایی'), max_length=20, blank=True, choices=RATING_CHOICES)
+    pilot_communication_rating = models.CharField(_('برقراری ارتباط خلبان با مسافرین'), max_length=20, blank=True, choices=RATING_CHOICES)
+    on_time_rating = models.CharField(_('رضایتمندی از انجام به موقع پرواز'), max_length=20, blank=True, choices=RATING_CHOICES)
+    vs_domestic_rating = models.CharField(_('رضایتمندی از نسیم در قیاس با شرکت‌های داخلی'), max_length=20, blank=True, choices=RATING_CHOICES)
+
+    recommend_nasim = models.CharField(
+        _('پیشنهاد سفر با نسیم به سایرین'),
+        max_length=10,
+        blank=True,
+        choices=[
+            ('yes', 'بله'),
+            ('no', 'خیر'),
+        ],
+    )
+
+    suggestions = models.TextField(_('پیشنهادها و انتقادها'), blank=True)
+
+    submission_ip = models.GenericIPAddressField(_('آی‌پی ثبت'), null=True, blank=True)
+    created_at = models.DateTimeField(_('تاریخ ثبت'), auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = _('فرم نظرسنجی')
+        verbose_name_plural = _('فرم‌های نظرسنجی')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.full_name} - {self.flight_number} - {self.created_at}"
