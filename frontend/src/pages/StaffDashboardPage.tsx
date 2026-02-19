@@ -10,7 +10,7 @@ import SafetyHazardForm from '../components/Staff/SafetyHazardForm';
 
 // مسیر لوگوها در frontend/public/images (بدون staff)
 const STAFF_OPTIONS = [
-  { id: 'hozorgheyab', label: 'حضور و غیاب', logo: '/images/hozorgheyab.png' },
+  { id: 'hozorgheyab', label: 'حضور و غیاب', logo: '/images/حضورغیاب.png' },
   { id: 'skybag', label: 'SkyBag', logo: '/images/skybag.png' },
   { id: 'pdf', label: 'PDF', logo: '/images/pdf.png' },
   { id: 'auto', label: 'Auto', logo: '/images/auto.png' },
