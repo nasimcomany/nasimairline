@@ -96,13 +96,15 @@ limited_admin_site.register(HeroSlider, HeroSliderAdmin)
 limited_admin_site.register(HomePageSectionItem, HomePageSectionItemAdmin)
 limited_admin_site.register(HomePageSectionConfig, HomePageSectionConfigAdmin)
 
-# Register support (chat + complaints + survey) models to limited admin site
-from support.models import ChatMessage, ComplaintForm, SurveyForm
-from support.admin import ChatMessageAdmin, ComplaintFormAdmin, SurveyFormAdmin
+# Register support (chat + complaints + survey + cabin safety + safety hazard) models to limited admin site
+from support.models import ChatMessage, ComplaintForm, SurveyForm, CabinSafetyReportForm, SafetyHazardReportForm
+from support.admin import ChatMessageAdmin, ComplaintFormAdmin, SurveyFormAdmin, CabinSafetyReportFormAdmin, SafetyHazardReportFormAdmin
 
 limited_admin_site.register(ChatMessage, ChatMessageAdmin)
 limited_admin_site.register(ComplaintForm, ComplaintFormAdmin)
 limited_admin_site.register(SurveyForm, SurveyFormAdmin)
+limited_admin_site.register(CabinSafetyReportForm, CabinSafetyReportFormAdmin)
+limited_admin_site.register(SafetyHazardReportForm, SafetyHazardReportFormAdmin)
 
 # Register SMS models to limited admin site (ارسال پیامک به باشگاه مشتریان)
 from sms.models import SmsLog

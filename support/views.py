@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
-from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage, ComplaintForm, SurveyForm
+from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage, ComplaintForm, SurveyForm, CabinSafetyReportForm, SafetyHazardReportForm
 from .permissions import IsTicketOwnerOrStaff
 from .serializers import (
     TicketSerializer,
@@ -514,6 +514,213 @@ def submit_survey_form(request):
         'success': True,
         'message': 'نظرسنجی شما با موفقیت ثبت شد.',
         'uuid': str(survey.uuid),
+    }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def submit_cabin_safety_form(request):
+    """
+    گزارش اجباری ایمنی کابین - فقط برای پرسنل (is_staff)
+    """
+    from django.core.mail import send_mail
+
+    if not request.user.is_staff:
+        return Response({'error': 'فقط پرسنل مجاز به ثبت این فرم هستند.'}, status=status.HTTP_403_FORBIDDEN)
+
+    data = request.data
+    required = ['reporter_name', 'reporter_family']
+    for field in required:
+        if not data.get(field):
+            return Response(
+                {'error': f'فیلد {field} الزامی است.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
+
+    report = CabinSafetyReportForm.objects.create(
+        reporter_name=data.get('reporter_name', ''),
+        reporter_family=data.get('reporter_family', ''),
+        protect_personal_info=bool(data.get('protect_personal_info')),
+        occurrence_day=data.get('occurrence_day', ''),
+        occurrence_month=data.get('occurrence_month', ''),
+        occurrence_year=data.get('occurrence_year', ''),
+        time_utc=data.get('time_utc', ''),
+        time_local=data.get('time_local', ''),
+        time_of_day=data.get('time_of_day', ''),
+        route_from=data.get('route_from', ''),
+        route_to=data.get('route_to', ''),
+        ac_type=data.get('ac_type', ''),
+        ac_registration=data.get('ac_registration', ''),
+        crew_count=data.get('crew_count', ''),
+        pax_count=data.get('pax_count', ''),
+        flight_number=data.get('flight_number', ''),
+        flight_phase=data.get('flight_phase') if isinstance(data.get('flight_phase'), list) else [],
+        occurrence_type_37=data.get('occurrence_type_37') if isinstance(data.get('occurrence_type_37'), list) else [],
+        occurrence_type_b=data.get('occurrence_type_b') if isinstance(data.get('occurrence_type_b'), list) else [],
+        occurrence_type_c=data.get('occurrence_type_c') if isinstance(data.get('occurrence_type_c'), list) else [],
+        occurrence_type_d=data.get('occurrence_type_d') if isinstance(data.get('occurrence_type_d'), list) else [],
+        occurrence_type_e=data.get('occurrence_type_e') if isinstance(data.get('occurrence_type_e'), list) else [],
+        description=data.get('description', ''),
+        other_info_suggestions=data.get('other_info_suggestions', ''),
+        submission_ip=ip,
+        user=request.user,
+    )
+
+    recipient_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
+    if recipient_list:
+        try:
+            from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
+            def fmt_list(lst):
+                return ', '.join(lst) if lst else '—'
+            email_body = f"""
+گزارش اجباری ایمنی کابین ثبت شد:
+
+اطلاعات گزارش‌دهنده:
+نام: {report.reporter_name}
+نام خانوادگی: {report.reporter_family}
+محافظت اطلاعات: {'بله' if report.protect_personal_info else 'خیر'}
+
+تاریخ رویداد: {report.occurrence_day or '—'}/{report.occurrence_month or '—'}/{report.occurrence_year or '—'}
+زمان UTC: {report.time_utc or '—'}
+زمان محلی: {report.time_local or '—'}
+وضعیت زمان: {report.get_time_of_day_display() if report.time_of_day else '—'}
+
+جزئیات پرواز:
+مسیر: {report.route_from or '—'} به {report.route_to or '—'}
+نوع هواپیما: {report.ac_type or '—'}
+ثبت هواپیما: {report.ac_registration or '—'}
+تعداد خدمه: {report.crew_count or '—'}
+تعداد مسافر: {report.pax_count or '—'}
+شماره پرواز: {report.flight_number or '—'}
+فاز پرواز: {fmt_list(report.flight_phase)}
+
+نوع رویداد (۳۷): {fmt_list(report.occurrence_type_37)}
+رفتار مسافر (B): {fmt_list(report.occurrence_type_b)}
+اقدامات خدمه (C): {fmt_list(report.occurrence_type_c)}
+رویدادهای عمومی (D): {fmt_list(report.occurrence_type_d)}
+مشکلات فنی (E): {fmt_list(report.occurrence_type_e)}
+
+توضیح رویداد:
+{report.description or '—'}
+
+اطلاعات دیگر و پیشنهاد اقدام پیشگیرانه:
+{report.other_info_suggestions or '—'}
+
+---
+تاریخ ثبت: {report.created_at}
+"""
+            send_mail(
+                subject=f"گزارش ایمنی کابین - {report.reporter_name} {report.reporter_family} - {report.flight_number or '—'}",
+                message=email_body,
+                from_email=from_email,
+                recipient_list=list(recipient_list),
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
+    return Response({
+        'success': True,
+        'message': 'گزارش ایمنی کابین با موفقیت ثبت شد.',
+        'uuid': str(report.uuid),
+    }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def submit_safety_hazard_form(request):
+    """
+    گزارش مخاطرات ایمنی (SHOR) - فقط برای پرسنل (is_staff)
+    """
+    from django.core.mail import send_mail
+
+    if not request.user.is_staff:
+        return Response({'error': 'فقط پرسنل مجاز به ثبت این فرم هستند.'}, status=status.HTTP_403_FORBIDDEN)
+
+    data = request.data
+    if not data.get('reporter_name', '').strip():
+        return Response({'error': 'نام و نام خانوادگی الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
+
+    director_actions = data.get('director_actions')
+    if not isinstance(director_actions, dict):
+        director_actions = {}
+
+    report = SafetyHazardReportForm.objects.create(
+        reporter_name=data.get('reporter_name', '').strip(),
+        section=data.get('section', ''),
+        tel=data.get('tel', ''),
+        report_date=data.get('report_date', ''),
+        report_number=data.get('report_number', ''),
+        ac_registration=data.get('ac_registration', ''),
+        type_of_hazard=data.get('type_of_hazard') if isinstance(data.get('type_of_hazard'), list) else [],
+        type_of_hazard_others=data.get('type_of_hazard_others', ''),
+        spec_time=data.get('spec_time', ''),
+        spec_date=data.get('spec_date', ''),
+        spec_location=data.get('spec_location', ''),
+        hazard_description=data.get('hazard_description', ''),
+        safety_director_decision=data.get('safety_director_decision', ''),
+        director_actions=director_actions,
+        director_name=data.get('director_name', ''),
+        sign_and_date=data.get('sign_and_date', ''),
+        submission_ip=ip,
+        user=request.user,
+    )
+
+    recipient_list = getattr(settings, 'SAFETY_HAZARD_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['Safety@nasimair.com'])
+    if recipient_list:
+        try:
+            from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
+            email_body = f"""
+گزارش مخاطرات ایمنی ثبت شد:
+
+نام و نام خانوادگی: {report.reporter_name}
+واحد سازمانی: {report.section or '—'}
+تلفن تماس: {report.tel or '—'}
+تاریخ: {report.report_date or '—'}
+شماره گزارش: {report.report_number or '—'}
+ثبت هواپیما: {report.ac_registration or '—'}
+
+نوع مخاطره: {', '.join(report.type_of_hazard) if report.type_of_hazard else '—'}
+سایر: {report.type_of_hazard_others or '—'}
+
+مشخصات مخاطره:
+زمان: {report.spec_time or '—'}
+تاریخ: {report.spec_date or '—'}
+مکان: {report.spec_location or '—'}
+
+توضیحات دقیق مخاطره:
+{report.hazard_description or '—'}
+
+تصمیم مدیر ایمنی:
+{report.safety_director_decision or '—'}
+
+اقدامات مدیر: {str(report.director_actions) if report.director_actions else '—'}
+نام مدیر: {report.director_name or '—'}
+امضا و تاریخ: {report.sign_and_date or '—'}
+
+---
+تاریخ ثبت: {report.created_at}
+"""
+            send_mail(
+                subject=f"گزارش مخاطرات ایمنی - {report.reporter_name[:50]}",
+                message=email_body,
+                from_email=from_email,
+                recipient_list=list(recipient_list),
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
+    return Response({
+        'success': True,
+        'message': 'گزارش مخاطرات ایمنی با موفقیت ثبت شد.',
+        'uuid': str(report.uuid),
     }, status=status.HTTP_201_CREATED)
 
 

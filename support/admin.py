@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from .models import (
-    TicketCategory, Ticket, TicketMessage, TicketAttachment, ChatMessage, ComplaintForm, SurveyForm
+    TicketCategory, Ticket, TicketMessage, TicketAttachment, ChatMessage, ComplaintForm, SurveyForm, CabinSafetyReportForm, SafetyHazardReportForm
 )
 
 
@@ -368,6 +368,67 @@ class ComplaintFormAdmin(admin.ModelAdmin):
     def complaint_type_short(self, obj):
         return obj.complaint_type[:40] + '...' if len(obj.complaint_type) > 40 else obj.complaint_type
     complaint_type_short.short_description = _('نوع شکایت')
+
+
+@admin.register(CabinSafetyReportForm)
+class CabinSafetyReportFormAdmin(admin.ModelAdmin):
+    """Admin for گزارش اجباری ایمنی کابین"""
+    list_display = ['reporter_name', 'reporter_family', 'flight_number', 'route_from', 'route_to', 'created_at']
+    list_filter = ['created_at', 'protect_personal_info']
+    search_fields = ['reporter_name', 'reporter_family', 'flight_number', 'ac_type', 'ac_registration', 'description']
+    readonly_fields = ['uuid', 'submission_ip', 'created_at']
+    date_hierarchy = 'created_at'
+
+    fieldsets = (
+        (_('اطلاعات گزارش‌دهنده'), {
+            'fields': ('reporter_name', 'reporter_family', 'protect_personal_info')
+        }),
+        (_('تاریخ و زمان رویداد'), {
+            'fields': ('occurrence_day', 'occurrence_month', 'occurrence_year', 'time_utc', 'time_local', 'time_of_day')
+        }),
+        (_('جزئیات پرواز'), {
+            'fields': ('route_from', 'route_to', 'ac_type', 'ac_registration', 'crew_count', 'pax_count', 'flight_number', 'flight_phase')
+        }),
+        (_('نوع رویداد'), {
+            'fields': ('occurrence_type_37', 'occurrence_type_b', 'occurrence_type_c', 'occurrence_type_d', 'occurrence_type_e')
+        }),
+        (_('توضیحات'), {
+            'fields': ('description', 'other_info_suggestions')
+        }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid', 'user', 'submission_ip', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(SafetyHazardReportForm)
+class SafetyHazardReportFormAdmin(admin.ModelAdmin):
+    """Admin for گزارش مخاطرات ایمنی"""
+    list_display = ['reporter_name', 'section', 'report_number', 'report_date', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['reporter_name', 'section', 'tel', 'report_number', 'hazard_description']
+    readonly_fields = ['uuid', 'submission_ip', 'created_at']
+    date_hierarchy = 'created_at'
+
+    fieldsets = (
+        (_('اطلاعات گزارش‌دهنده'), {
+            'fields': ('reporter_name', 'section', 'tel', 'report_date', 'report_number', 'ac_registration')
+        }),
+        (_('نوع و مشخصات مخاطره'), {
+            'fields': ('type_of_hazard', 'type_of_hazard_others', 'spec_time', 'spec_date', 'spec_location')
+        }),
+        (_('توضیحات مخاطره'), {
+            'fields': ('hazard_description',)
+        }),
+        (_('بخش مدیر ایمنی'), {
+            'fields': ('safety_director_decision', 'director_actions', 'director_name', 'sign_and_date')
+        }),
+        (_('اطلاعات فنی'), {
+            'fields': ('uuid', 'user', 'submission_ip', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
 
 @admin.register(SurveyForm)

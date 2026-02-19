@@ -871,3 +871,117 @@ class SurveyForm(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.flight_number} - {self.created_at}"
+
+
+class CabinSafetyReportForm(models.Model):
+    """
+    گزارش اجباری ایمنی کابین (CABIN MANDATORY SAFETY REPORT)
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    # اطلاعات گزارش‌دهنده
+    reporter_name = models.CharField(_('نام'), max_length=100)
+    reporter_family = models.CharField(_('نام خانوادگی'), max_length=100)
+    protect_personal_info = models.BooleanField(_('محافظت بیشتر اطلاعات شخصی'), default=False)
+    # تاریخ و زمان رویداد
+    occurrence_day = models.CharField(_('روز رویداد'), max_length=2, blank=True)
+    occurrence_month = models.CharField(_('ماه رویداد'), max_length=2, blank=True)
+    occurrence_year = models.CharField(_('سال رویداد'), max_length=4, blank=True)
+    time_utc = models.CharField(_('زمان UTC'), max_length=20, blank=True)
+    time_local = models.CharField(_('زمان محلی'), max_length=20, blank=True)
+    time_of_day = models.CharField(_('وضعیت زمان'), max_length=20, blank=True, choices=[
+        ('daylight', 'روز'), ('dawn', 'سپیده‌دم'), ('night', 'شب'), ('dusk', 'غروب'),
+    ])
+    # جزئیات پرواز
+    route_from = models.CharField(_('مبدا'), max_length=100, blank=True)
+    route_to = models.CharField(_('مقصد'), max_length=100, blank=True)
+    ac_type = models.CharField(_('نوع هواپیما'), max_length=50, blank=True)
+    ac_registration = models.CharField(_('ثبت هواپیما'), max_length=50, blank=True)
+    crew_count = models.CharField(_('تعداد خدمه'), max_length=10, blank=True)
+    pax_count = models.CharField(_('تعداد مسافر'), max_length=10, blank=True)
+    flight_number = models.CharField(_('شماره پرواز'), max_length=50, blank=True)
+    # فاز پرواز (چند گزینه) و نوع رویداد (چند گزینه) - ذخیره به صورت JSON
+    flight_phase = models.JSONField(_('فاز پرواز'), default=list, blank=True)
+    occurrence_type_37 = models.JSONField(_('نوع رویداد ۳۷'), default=list, blank=True)  # A1,A2,D1,D2
+    occurrence_type_b = models.JSONField(_('رفتار مسافر B'), default=list, blank=True)   # B1-B7
+    occurrence_type_c = models.JSONField(_('اقدامات خدمه C'), default=list, blank=True)  # C1-C7
+    occurrence_type_d = models.JSONField(_('رویدادهای عمومی D'), default=list, blank=True)  # D3-D9
+    occurrence_type_e = models.JSONField(_('مشکلات فنی E'), default=list, blank=True)    # E1-E7
+    # توضیحات متنی
+    description = models.TextField(_('توضیح رویداد (۳۸)'), blank=True)
+    other_info_suggestions = models.TextField(_('اطلاعات دیگر و پیشنهاد اقدام پیشگیرانه (۳۹)'), blank=True)
+    submission_ip = models.GenericIPAddressField(_('آی‌پی ثبت'), null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cabin_safety_reports',
+        verbose_name=_('کاربر'),
+    )
+    created_at = models.DateTimeField(_('تاریخ ثبت'), auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = _('گزارش اجباری ایمنی کابین')
+        verbose_name_plural = _('گزارش‌های اجباری ایمنی کابین')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reporter_name} {self.reporter_family} - {self.flight_number or '—'} - {self.created_at}"
+
+
+class SafetyHazardReportForm(models.Model):
+    """
+    گزارش مخاطرات ایمنی (SAFETY / HAZARD OBSERVATION REPORT - SHOR)
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    # اطلاعات گزارش‌دهنده - فقط نام و نام خانوادگی اجباری
+    reporter_name = models.CharField(_('نام و نام خانوادگی'), max_length=200)
+    section = models.CharField(_('واحد سازمانی'), max_length=200, blank=True)
+    tel = models.CharField(_('تلفن تماس'), max_length=50, blank=True)
+    report_date = models.CharField(_('تاریخ'), max_length=20, blank=True)
+    report_number = models.CharField(_('شماره گزارش'), max_length=50, blank=True)
+    ac_registration = models.CharField(_('ثبت هواپیما'), max_length=50, blank=True)
+    # نوع مخاطره (چند گزینه)
+    type_of_hazard = models.JSONField(_('نوع مخاطره'), default=list, blank=True)
+    type_of_hazard_others = models.CharField(_('سایر نوع مخاطره'), max_length=200, blank=True)
+    # مشخصات مخاطره
+    spec_time = models.CharField(_('زمان'), max_length=50, blank=True)
+    spec_date = models.CharField(_('تاریخ مشخصات'), max_length=50, blank=True)
+    spec_location = models.CharField(_('مکان'), max_length=200, blank=True)
+    # توضیحات
+    hazard_description = models.TextField(_('توضیحات دقیق مخاطره / شرح جزئیات خطر'), blank=True)
+    # بخش مدیر ایمنی (اختیاری - ممکن است بعداً در پنل ادمین پر شود)
+    safety_director_decision = models.TextField(_('تصمیم مدیر ایمنی'), blank=True)
+    director_actions = models.JSONField(_('اقدامات مدیر'), default=dict, blank=True)
+    director_name = models.CharField(_('نام مدیر ایمنی'), max_length=200, blank=True)
+    sign_and_date = models.CharField(_('امضا و تاریخ'), max_length=200, blank=True)
+    submission_ip = models.GenericIPAddressField(_('آی‌پی ثبت'), null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='safety_hazard_reports',
+        verbose_name=_('کاربر'),
+    )
+    created_at = models.DateTimeField(_('تاریخ ثبت'), auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = _('گزارش مخاطرات ایمنی')
+        verbose_name_plural = _('گزارش‌های مخاطرات ایمنی')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reporter_name} - {self.report_number or '—'} - {self.created_at}"
