@@ -1,5 +1,5 @@
 /**
- * داشبورد پرسنل - صفحه شیک با ۵ گزینه (لوگو)
+ * داشبورد پرسنل - صفحه شیک با گزینه‌های لوگو
  */
 import React, { useState } from 'react';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
@@ -9,12 +9,14 @@ import CabinSafetyForm from '../components/Staff/CabinSafetyForm';
 import SafetyHazardForm from '../components/Staff/SafetyHazardForm';
 
 // مسیر لوگوها در frontend/public/images (بدون staff)
+// دو لوگوی PDF: یکی مثل AirPocket (CabinSafetyForm)، یکی مثل Auto (SafetyHazardForm)
 const STAFF_OPTIONS = [
-  { id: 'hozorgheyab', label: 'حضور و غیاب', logo: '/images/حضورغیاب.png' },
-  { id: 'skybag', label: 'SkyBag', logo: '/images/skybag.png' },
-  { id: 'pdf', label: 'PDF', logo: '/images/pdf.png' },
-  { id: 'auto', label: 'Auto', logo: '/images/auto.png' },
-  { id: 'airpocket', label: 'AirPocket', logo: '/images/airpocket.png' },
+  { id: 'hozorgheyab', label: 'حضور و غیاب', logo: '/images/حضورغیاب.png', formType: null },
+  { id: 'skybag', label: 'SkyBag', logo: '/images/skybag.png', formType: null },
+  { id: 'pdf-airpocket', label: 'PDF', logo: '/images/pdf.png', formType: 'cabin' as const },
+  { id: 'pdf-auto', label: 'PDF', logo: '/images/pdf.png', formType: 'safety' as const },
+  { id: 'auto', label: 'Auto', logo: '/images/auto.png', formType: 'safety' as const },
+  { id: 'airpocket', label: 'AirPocket', logo: '/images/airpocket.png', formType: 'cabin' as const },
 ];
 
 const StaffDashboardPage: React.FC = () => {
@@ -73,7 +75,7 @@ const StaffDashboardPage: React.FC = () => {
       <section className="relative z-10 -mt-16 px-4 pb-20">
         <div className="max-w-6xl mx-auto">
           <div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6"
             style={{ direction: dir }}
           >
             {STAFF_OPTIONS.map((opt) => (
@@ -121,7 +123,7 @@ const StaffDashboardPage: React.FC = () => {
           onClick={() => setOpenModalKey(null)}
         >
           <div
-            className={`relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto ${(selectedOption?.id === 'airpocket' || selectedOption?.id === 'auto') ? 'max-w-4xl' : 'max-w-lg'}`}
+            className={`relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto ${(selectedOption?.formType === 'cabin' || selectedOption?.formType === 'safety') ? 'max-w-4xl' : 'max-w-lg'}`}
             style={{ direction: dir }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -140,12 +142,12 @@ const StaffDashboardPage: React.FC = () => {
               </button>
             </div>
             <div className="p-6">
-              {selectedOption?.id === 'airpocket' ? (
+              {selectedOption?.formType === 'cabin' ? (
                 <CabinSafetyForm
                   onSuccess={() => setOpenModalKey(null)}
                   onCancel={() => setOpenModalKey(null)}
                 />
-              ) : selectedOption?.id === 'auto' ? (
+              ) : selectedOption?.formType === 'safety' ? (
                 <SafetyHazardForm
                   onSuccess={() => setOpenModalKey(null)}
                   onCancel={() => setOpenModalKey(null)}
