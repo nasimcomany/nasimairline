@@ -10,13 +10,14 @@ import SafetyHazardForm from '../components/Staff/SafetyHazardForm';
 
 // مسیر لوگوها در frontend/public/images (بدون staff)
 // دو لوگوی PDF: یکی مثل AirPocket (CabinSafetyForm)، یکی مثل Auto (SafetyHazardForm)
+// AirPocket و SkyBag به آدرس خارجی هدایت می‌شوند
 const STAFF_OPTIONS = [
-  { id: 'hozorgheyab', label: 'حضور و غیاب', logo: '/images/حضورغیاب.png', formType: null },
-  { id: 'skybag', label: 'SkyBag', logo: '/images/skybag.png', formType: null },
-  { id: 'pdf-airpocket', label: 'PDF', logo: '/images/pdf.png', formType: 'cabin' as const },
-  { id: 'pdf-auto', label: 'PDF', logo: '/images/pdf.png', formType: 'safety' as const },
-  { id: 'auto', label: 'Auto', logo: '/images/auto.png', formType: 'safety' as const },
-  { id: 'airpocket', label: 'AirPocket', logo: '/images/airpocket.png', formType: 'cabin' as const },
+  { id: 'hozorgheyab', label: 'حضور و غیاب', logo: '/images/حضورغیاب.png', formType: null, externalUrl: null },
+  { id: 'skybag', label: 'SkyBag', logo: '/images/skybag.png', formType: null, externalUrl: 'https://skybag.nasimairlines.ir' },
+  { id: 'pdf-airpocket', label: 'PDF', logo: '/images/pdf.png', formType: 'cabin' as const, externalUrl: null },
+  { id: 'pdf-auto', label: 'PDF', logo: '/images/pdf.png', formType: 'safety' as const, externalUrl: null },
+  { id: 'auto', label: 'Auto', logo: '/images/auto.png', formType: 'safety' as const, externalUrl: null },
+  { id: 'airpocket', label: 'AirPocket', logo: '/images/airpocket.png', formType: null, externalUrl: 'https://airpocket.nasimairlines.ir' },
 ];
 
 const StaffDashboardPage: React.FC = () => {
@@ -27,6 +28,14 @@ const StaffDashboardPage: React.FC = () => {
 
   const selectedOption = openModalKey ? STAFF_OPTIONS.find(o => o.id === openModalKey) : null;
   const handleImageError = (id: string) => setFailedImages(prev => new Set(prev).add(id));
+
+  const handleOptionClick = (opt: (typeof STAFF_OPTIONS)[number]) => {
+    if (opt.externalUrl) {
+      window.open(opt.externalUrl, '_blank');
+    } else {
+      setOpenModalKey(opt.id);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -81,7 +90,7 @@ const StaffDashboardPage: React.FC = () => {
             {STAFF_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
-                onClick={() => setOpenModalKey(opt.id)}
+                onClick={() => handleOptionClick(opt)}
                 className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl border border-gray-100 overflow-hidden transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-900/40 focus:ring-offset-2"
               >
                 <div className="aspect-square flex flex-col items-center justify-center p-6">
