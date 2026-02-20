@@ -1640,7 +1640,7 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-0 justify-center items-center" style={{ perspective: '1000px', overflow: 'visible', direction: 'rtl' }}>
             {(() => {
               const defaultExp: HomePageSectionItem[] = [
-                { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/tickets', order: 1, section_type: 'EXPERIENCE', is_active: true },
+                { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
                 { id: 2, title_fa: 'تصویر ۲', title_ar: 'صورة ٢', title_en: 'Image 2', image_url: '/images/three.png', link_url: '/tickets', order: 2, section_type: 'EXPERIENCE', is_active: true },
                 { id: 3, title_fa: 'فرودگاه مهرآباد', title_ar: 'مطار مهرآباد', title_en: 'Mehrabad Airport', image_url: '/images/4reza.jpeg', link_url: 'https://fids.airport.ir/', order: 3, section_type: 'EXPERIENCE', is_active: true },
                 { id: 4, title_fa: 'تصویر ۴', title_ar: 'صورة ٤', title_en: 'Image 4', image_url: '/images/5reza.jpeg', link_url: 'https://ikac.ir/', order: 4, section_type: 'EXPERIENCE', is_active: true },
@@ -1662,7 +1662,7 @@ const HomePage: React.FC = () => {
                       return (
                         <div key={item.id} className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
                           style={{ ...cardBase, transformOrigin: isLeft ? 'right center' : 'left center', marginRight: isLeft ? '170px' : undefined }}
-                          onClick={() => handleSectionItemClick(item.link_url || '')}
+                          onClick={() => handleSectionItemClick(idx === 0 ? '/survey' : idx === 1 ? '/tickets' : (item.link_url || ''))}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = '#d1d5db';
                             e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
@@ -3139,7 +3139,7 @@ const HomePage: React.FC = () => {
                 </h4>
                 <ul className="space-y-2">
                   <li>
-                    <a href="/complaint" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="/tickets" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <DocumentTextIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'ثبت شکایت' : language === 'ar' ? 'تسجيل شكوى' : 'Register Complaint'}
                     </a>
@@ -3151,7 +3151,7 @@ const HomePage: React.FC = () => {
                     </a>
                   </li>
                   <li>
-                    <a href="#" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="/survey" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <ChartBarIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'نظرسنجی' : language === 'ar' ? 'استطلاع الرأي' : 'Survey'}
                     </a>
@@ -3199,7 +3199,7 @@ const HomePage: React.FC = () => {
               <a href="https://www.enamad.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
                 <img src="/images/enamad.png" alt="eNAMAD" className="h-16 sm:h-20 w-auto object-contain" />
               </a>
-              <a href="https://www.cao.ir/paxrights" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
+              <a href="https://www.caa.gov.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
                 <img src="/images/hmosafer.png" alt={language === 'fa' ? 'حقوق مسافر' : language === 'ar' ? 'حقوق الراكب' : 'Passenger Rights'} className="h-16 sm:h-20 w-auto object-contain" />
               </a>
               </div>
