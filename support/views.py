@@ -345,7 +345,7 @@ def submit_complaint_form(request):
     )
     
     # ارسال ایمیل اعلان (همزمان - timeout فرانت ۳۰ ثانیه است)
-    recipient_list = getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
+    recipient_list = list(getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])) + ['publicrelation@nasimair.com']
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -442,7 +442,8 @@ def submit_survey_form(request):
         submission_ip=ip,
     )
 
-    recipient_list = getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
+    base_list = getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
+    recipient_list = list(base_list) + ['publicrelation@nasimair.com']
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -569,7 +570,8 @@ def submit_cabin_safety_form(request):
         user=request.user,
     )
 
-    recipient_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
+    base_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
+    recipient_list = list(base_list) + ['safety@nasimair.com']
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -672,7 +674,8 @@ def submit_safety_hazard_form(request):
         user=request.user,
     )
 
-    recipient_list = getattr(settings, 'SAFETY_HAZARD_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['Safety@nasimair.com'])
+    base_list = getattr(settings, 'SAFETY_HAZARD_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['Safety@nasimair.com'])
+    recipient_list = list(base_list) + ['safety@nasimair.com']
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
