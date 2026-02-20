@@ -14,8 +14,8 @@ import SafetyHazardForm from '../components/Staff/SafetyHazardForm';
 const STAFF_OPTIONS = [
   { id: 'hozorgheyab', label: 'حضور و غیاب', logo: '/images/حضورغیاب.png', formType: null, externalUrl: null },
   { id: 'skybag', label: 'SkyBag', logo: '/images/skybag.png', formType: null, externalUrl: 'https://skybag.nasimairlines.ir' },
-  { id: 'pdf-airpocket', label: 'PDF', logo: '/images/pdf.png', formType: 'cabin' as const, externalUrl: null },
-  { id: 'pdf-auto', label: 'PDF', logo: '/images/pdf.png', formType: 'safety' as const, externalUrl: null },
+  { id: 'pdf-airpocket', label: 'گزارش اجباری ایمنی کابین', logo: '/images/pdf.png', formType: 'cabin' as const, externalUrl: null },
+  { id: 'pdf-auto', label: 'گزارش مخاطرات ایمنی (SHOR)', logo: '/images/pdf.png', formType: 'safety' as const, externalUrl: null },
   { id: 'auto', label: 'Auto', logo: '/images/auto.png', formType: null, externalUrl: null },
   { id: 'airpocket', label: 'AirPocket', logo: '/images/airpocket.png', formType: null, externalUrl: 'https://airpocket.nasimairlines.ir' },
 ];
