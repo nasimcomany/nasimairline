@@ -3199,7 +3199,7 @@ const HomePage: React.FC = () => {
               <a href="https://www.enamad.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
                 <img src="/images/enamad.png" alt="eNAMAD" className="h-16 sm:h-20 w-auto object-contain" />
               </a>
-              <a href="https://www.caa.gov.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
+              <a href="https://farasa.cao.ir/sysworkflow/fa/modern/3810212626028ab03488017019616799/6464336316028ab04e3c618028352200.php" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
                 <img src="/images/hmosafer.png" alt={language === 'fa' ? 'حقوق مسافر' : language === 'ar' ? 'حقوق الراكب' : 'Passenger Rights'} className="h-16 sm:h-20 w-auto object-contain" />
               </a>
               </div>

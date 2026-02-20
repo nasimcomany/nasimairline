@@ -205,7 +205,7 @@ const TicketPage: React.FC = () => {
       <section className="relative py-10 sm:py-12 text-center">
         <div className="relative z-10 max-w-4xl mx-auto px-4">
           <h1 className="text-white text-2xl sm:text-4xl font-bold mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}>
-            فرم انتقادات و پیشنهادات
+            فرم ثبت شکایات
           </h1>
           <p className="text-white/80 text-sm sm:text-base" style={fontStyle}>
             شکایات و تجربیات خود را با ما به اشتراک بگذارید
