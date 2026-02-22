@@ -237,7 +237,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.safetyReport') || 'گزارش ایمنی',
       path: '#',
       dropdown: [
-        { label: t('nav.cabinSafetyReport') || 'گزارش اجباری ایمنی کابین', path: '/safety-report/cabin' },
+        { label: t('nav.safetyHazardReport') || 'گزارش مخاطرات ایمنی (SHOR)', path: '/safety-report/safety' },
       ]
     }
   ];

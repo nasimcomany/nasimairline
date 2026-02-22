@@ -37,6 +37,7 @@ import IranologyArticleDetailPage from './pages/IranologyArticleDetailPage';
 import MealFeedbackPage from './pages/MealFeedbackPage';
 import StaffDashboardPage from './pages/StaffDashboardPage';
 import SafetyReportCabinPage from './pages/SafetyReportCabinPage';
+import SafetyReportSafetyPage from './pages/SafetyReportSafetyPage';
 import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
 import DisabledRoute from './components/DisabledRoute';
@@ -80,6 +81,7 @@ function App() {
 
               {/* Safety Reports - accessible from header */}
               <Route path="/safety-report/cabin" element={<SafetyReportCabinPage />} />
+              <Route path="/safety-report/safety" element={<SafetyReportSafetyPage />} />
 
               {/* Disabled Routes - Redirect to Home for Security */}
               <Route path="/splash" element={<DisabledRoute />} />
