@@ -30,6 +30,7 @@ export interface SurveyFormData {
   vs_domestic_rating?: string;
   recommend_nasim?: string;
   suggestions?: string;
+  language?: 'fa' | 'en' | 'ar';
 }
 
 export const surveyService = {

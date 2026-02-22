@@ -3,7 +3,7 @@
  * Service for calling NIRA flight APIs
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 export interface OriginCity {
   CITYNAME_FA: string;
@@ -79,7 +79,7 @@ export interface DestinationsResponse {
  */
 export const getOriginCities = async (): Promise<OriginCity[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/flights/nira/routes/origins/`);
+    const response = await fetch(`${API_BASE_URL}/flights/nira/routes/origins/`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -103,7 +103,7 @@ export const getOriginCities = async (): Promise<OriginCity[]> => {
  */
 export const getDestinations = async (origin: string): Promise<OriginCity[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/flights/nira/routes/destinations/?origin=${origin}`);
+    const response = await fetch(`${API_BASE_URL}/flights/nira/routes/destinations/?origin=${origin}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -136,7 +136,7 @@ export const checkAvailability = async (params: {
   infant_qty?: number;
 }): Promise<FlightAvailability[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/flights/nira/availability/`, {
+    const response = await fetch(`${API_BASE_URL}/flights/nira/availability/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

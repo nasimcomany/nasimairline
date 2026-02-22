@@ -236,7 +236,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       key: 'safetyReport',
       label: t('nav.safetyReport') || 'گزارش ایمنی',
       path: '#',
-      dropdown: []
+      dropdown: [
+        { label: t('nav.cabinSafetyReport') || 'گزارش اجباری ایمنی کابین', path: '/safety-report/cabin' },
+      ]
     }
   ];
 
@@ -429,6 +431,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 if (itemIndex === 4) return <TrophyIcon className="w-7 h-7" style={{ color: '#ea580c' }} />; // آموزش نسیم
                                 if (itemIndex === 5) return <NewspaperIcon className="w-7 h-7" style={{ color: '#6366f1' }} />; // مجله نسیم
                                 return <BuildingOfficeIcon className="w-7 h-7" style={{ color: '#3b82f6' }} />;
+                              }
+                              if (key === 'safetyReport') {
+                                return <ExclamationTriangleIcon className="w-7 h-7" style={{ color: '#dc2626' }} />;
                               }
                               return null;
                             };

@@ -344,38 +344,45 @@ def submit_complaint_form(request):
         submission_ip=ip,
     )
     
-    # ارسال ایمیل اعلان (همزمان - timeout فرانت ۳۰ ثانیه است)
+    # ارسال ایمیل اعلان - چندزبان (fa/en/ar) و تمام فیلدها
+    lang = (data.get('language') or 'fa').lower()
+    if lang not in ('fa', 'en', 'ar'):
+        lang = 'fa'
+    from .email_i18n import get_labels
+    L = get_labels(lang, 'complaint')
+
     recipient_list = list(getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])) + ['publicrelation@nasimair.com']
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
             email_body = f"""
-شکایت/پیشنهاد جدید ثبت شد:
+{L['title']}
 
-نوع شکایت: {complaint.complaint_type}
-موضوع شکایت: {complaint.complaint_subject}
+{L['type']} {complaint.complaint_type}
+{L['subject']} {complaint.complaint_subject}
 
-اطلاعات شخصی:
-نام: {complaint.first_name} {complaint.last_name}
-کدملی: {complaint.national_id or ''}
-تلفن: {complaint.mobile}
-ایمیل: {complaint.email}
+{L['personal']}
+{L['first_name']} {complaint.first_name}
+{L['last_name']} {complaint.last_name}
+{L['national_id']} {complaint.national_id or '—'}
+{L['mobile']} {complaint.mobile}
+{L['email']} {complaint.email}
 
-اطلاعات پرواز:
-مبدا: {complaint.origin or ''}
-مقصد: {complaint.destination or ''}
-تاریخ: {complaint.flight_date or ''}
-شماره بلیت: {complaint.ticket_number or ''}
-شماره پرواز: {complaint.flight_number or ''}
+{L['flight_info']}
+{L['origin']} {complaint.origin or '—'}
+{L['destination']} {complaint.destination or '—'}
+{L['flight_date']} {complaint.flight_date or '—'}
+{L['ticket_number']} {complaint.ticket_number or '—'}
+{L['flight_number']} {complaint.flight_number or '—'}
 
-توضیحات:
-{complaint.description or ''}
+{L['description']}
+{complaint.description or '—'}
 
 ---
-تاریخ ثبت: {complaint.created_at}
+{L['submitted_at']} {complaint.created_at}
 """
             send_mail(
-                subject=f"شکایت جدید - {complaint.complaint_type[:50]}",
+                subject=f"{L['subject_prefix']} {complaint.complaint_type[:50]}",
                 message=email_body,
                 from_email=from_email,
                 recipient_list=list(recipient_list),
@@ -442,67 +449,63 @@ def submit_survey_form(request):
         submission_ip=ip,
     )
 
+    lang = (data.get('language') or 'fa').lower()
+    if lang not in ('fa', 'en', 'ar'):
+        lang = 'fa'
+    from .email_i18n import get_labels, get_survey_label
+    L = get_labels(lang, 'survey')
+
+    def lbl(v):
+        return get_survey_label(v, lang)
+
     base_list = getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
     recipient_list = list(base_list) + ['publicrelation@nasimair.com']
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
-            RATING_LABELS = {'excellent': 'عالی', 'good': 'خوب', 'average': 'متوسط', 'poor': 'ضعیف'}
-            CHOICE_LABELS = {
-                'weekly': 'هفته‌ای یکبار', 'monthly': 'ماهی یکبار', 'few_months': 'هر چند ماه', 'yearly': 'سالی یکبار',
-                '0-5': '۰-۵', '5-10': '۵-۱۰', '10-20': '۱۰-۲۰', '20+': 'بیشتر از ۲۰',
-                'work': 'کار', 'leisure': 'تفریح', 'education': 'تحصیل', 'other': 'سایر',
-                'timing': 'زمانبندی مناسب', 'services': 'خدمات مناسب', 'cost': 'هزینه مناسب', 'recommendation': 'پیشنهاد دیگران',
-                'yes': 'بله', 'no': 'خیر',
-            }
-
-            def lbl(v):
-                if not v: return '—'
-                return RATING_LABELS.get(v, CHOICE_LABELS.get(v, v))
-
             email_body = f"""
-فرم نظرسنجی جدید ثبت شد:
+{L['title']}
 
-اطلاعات شخصی:
-نام و نام خانوادگی: {survey.full_name}
-شماره صندلی: {survey.seat_number or '—'}
-سن: {survey.age or '—'}
-مدرک تحصیلی: {survey.education or '—'}
-شماره پرواز: {survey.flight_number}
-شماره تماس: {survey.contact_number}
-ایمیل: {survey.email or '—'}
-مسیر پرواز: {survey.flight_route or '—'}
-وبسایت تهیه بلیط: {survey.ticketing_website or '—'}
+{L['personal']}
+{L['full_name']} {survey.full_name}
+{L['seat_number']} {survey.seat_number or '—'}
+{L['age']} {survey.age or '—'}
+{L['education']} {survey.education or '—'}
+{L['flight_number']} {survey.flight_number}
+{L['contact_number']} {survey.contact_number}
+{L['email']} {survey.email or '—'}
+{L['flight_route']} {survey.flight_route or '—'}
+{L['ticketing_website']} {survey.ticketing_website or '—'}
 
-سوالات:
-تعداد سفر با نسیم: {lbl(survey.trips_with_nasim)}
-تعداد سفرهای هوایی در سال: {lbl(survey.annual_flights)}
-هدف از سفر: {lbl(survey.travel_purpose)}
-دلیل انتخاب نسیم: {lbl(survey.nasim_choice_reason)}
+{L['questions']}
+{L['trips_with_nasim']} {lbl(survey.trips_with_nasim)}
+{L['annual_flights']} {lbl(survey.annual_flights)}
+{L['travel_purpose']} {lbl(survey.travel_purpose)}
+{L['nasim_choice_reason']} {lbl(survey.nasim_choice_reason)}
 
-امتیازها (عالی/خوب/متوسط/ضعیف):
-پرسنل ایستگاه و گیت: {lbl(survey.station_staff_rating)}
-آراستگی و بهداشت کابین: {lbl(survey.cabin_hygiene_rating)}
-راحتی صندلی و کابین: {lbl(survey.seat_comfort_rating)}
-دمای کابین: {lbl(survey.cabin_temp_rating)}
-سرویس مهمانداران: {lbl(survey.attendants_service_rating)}
-ظاهر مهمانداران: {lbl(survey.attendants_appearance_rating)}
-سیستم صوتی: {lbl(survey.sound_system_rating)}
-کیفیت پذیرایی: {lbl(survey.catering_quality_rating)}
-ارتباط خلبان: {lbl(survey.pilot_communication_rating)}
-به موقع پرواز: {lbl(survey.on_time_rating)}
-نسیم در قیاس با داخلی: {lbl(survey.vs_domestic_rating)}
+{L['ratings']}
+{L['station_staff_rating']} {lbl(survey.station_staff_rating)}
+{L['cabin_hygiene_rating']} {lbl(survey.cabin_hygiene_rating)}
+{L['seat_comfort_rating']} {lbl(survey.seat_comfort_rating)}
+{L['cabin_temp_rating']} {lbl(survey.cabin_temp_rating)}
+{L['attendants_service_rating']} {lbl(survey.attendants_service_rating)}
+{L['attendants_appearance_rating']} {lbl(survey.attendants_appearance_rating)}
+{L['sound_system_rating']} {lbl(survey.sound_system_rating)}
+{L['catering_quality_rating']} {lbl(survey.catering_quality_rating)}
+{L['pilot_communication_rating']} {lbl(survey.pilot_communication_rating)}
+{L['on_time_rating']} {lbl(survey.on_time_rating)}
+{L['vs_domestic_rating']} {lbl(survey.vs_domestic_rating)}
 
-پیشنهاد سفر با نسیم: {lbl(survey.recommend_nasim)}
+{L['recommend_nasim']} {lbl(survey.recommend_nasim)}
 
-پیشنهادها و انتقادها:
+{L['suggestions']}
 {survey.suggestions or '—'}
 
 ---
-تاریخ ثبت: {survey.created_at}
+{L['submitted_at']} {survey.created_at}
 """
             send_mail(
-                subject=f"نظرسنجی جدید - {survey.full_name} - {survey.flight_number}",
+                subject=f"{L['subject_prefix']} {survey.full_name} - {survey.flight_number}",
                 message=email_body,
                 from_email=from_email,
                 recipient_list=list(recipient_list),
@@ -570,52 +573,62 @@ def submit_cabin_safety_form(request):
         user=request.user,
     )
 
+    lang = (data.get('language') or 'fa').lower()
+    if lang not in ('fa', 'en', 'ar'):
+        lang = 'fa'
+    from .email_i18n import get_labels, get_cabin_time_of_day
+    L = get_labels(lang, 'cabin')
+    yes_no = {'fa': ('بله', 'خیر'), 'en': ('Yes', 'No'), 'ar': ('نعم', 'لا')}
+    yn = yes_no.get(lang, yes_no['fa'])
+
+    def fmt_list(lst):
+        return ', '.join(lst) if lst else '—'
+
     base_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
     recipient_list = list(base_list) + ['safety@nasimair.com']
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
-            def fmt_list(lst):
-                return ', '.join(lst) if lst else '—'
             email_body = f"""
-گزارش اجباری ایمنی کابین ثبت شد:
+{L['title']}
 
-اطلاعات گزارش‌دهنده:
-نام: {report.reporter_name}
-نام خانوادگی: {report.reporter_family}
-محافظت اطلاعات: {'بله' if report.protect_personal_info else 'خیر'}
+{L['reporter']}
+{L['name']} {report.reporter_name}
+{L['family']} {report.reporter_family}
+{L['protect_info']} {yn[0] if report.protect_personal_info else yn[1]}
 
-تاریخ رویداد: {report.occurrence_day or '—'}/{report.occurrence_month or '—'}/{report.occurrence_year or '—'}
-زمان UTC: {report.time_utc or '—'}
-زمان محلی: {report.time_local or '—'}
-وضعیت زمان: {report.get_time_of_day_display() if report.time_of_day else '—'}
+{L['event_date']} {report.occurrence_day or '—'}/{report.occurrence_month or '—'}/{report.occurrence_year or '—'}
+{L['time_utc']} {report.time_utc or '—'}
+{L['time_local']} {report.time_local or '—'}
+{L['time_of_day']} {get_cabin_time_of_day(report.time_of_day, lang)}
 
-جزئیات پرواز:
-مسیر: {report.route_from or '—'} به {report.route_to or '—'}
-نوع هواپیما: {report.ac_type or '—'}
-ثبت هواپیما: {report.ac_registration or '—'}
-تعداد خدمه: {report.crew_count or '—'}
-تعداد مسافر: {report.pax_count or '—'}
-شماره پرواز: {report.flight_number or '—'}
-فاز پرواز: {fmt_list(report.flight_phase)}
+{L['flight_details']}
+{L['route_from']} {report.route_from or '—'}
+{L['route_to']} {report.route_to or '—'}
+{L['ac_type']} {report.ac_type or '—'}
+{L['ac_reg']} {report.ac_registration or '—'}
+{L['crew_count']} {report.crew_count or '—'}
+{L['pax_count']} {report.pax_count or '—'}
+{L['flight_number']} {report.flight_number or '—'}
+{L['flight_phase']} {fmt_list(report.flight_phase)}
 
-نوع رویداد (۳۷): {fmt_list(report.occurrence_type_37)}
-رفتار مسافر (B): {fmt_list(report.occurrence_type_b)}
-اقدامات خدمه (C): {fmt_list(report.occurrence_type_c)}
-رویدادهای عمومی (D): {fmt_list(report.occurrence_type_d)}
-مشکلات فنی (E): {fmt_list(report.occurrence_type_e)}
+{L['occurrence_37']} {fmt_list(report.occurrence_type_37)}
+{L['occurrence_b']} {fmt_list(report.occurrence_type_b)}
+{L['occurrence_c']} {fmt_list(report.occurrence_type_c)}
+{L['occurrence_d']} {fmt_list(report.occurrence_type_d)}
+{L['occurrence_e']} {fmt_list(report.occurrence_type_e)}
 
-توضیح رویداد:
+{L['description']}
 {report.description or '—'}
 
-اطلاعات دیگر و پیشنهاد اقدام پیشگیرانه:
+{L['other_info']}
 {report.other_info_suggestions or '—'}
 
 ---
-تاریخ ثبت: {report.created_at}
+{L['submitted_at']} {report.created_at}
 """
             send_mail(
-                subject=f"گزارش ایمنی کابین - {report.reporter_name} {report.reporter_family} - {report.flight_number or '—'}",
+                subject=f"{L['subject_prefix']} {report.reporter_name} {report.reporter_family} - {report.flight_number or '—'}",
                 message=email_body,
                 from_email=from_email,
                 recipient_list=list(recipient_list),
@@ -674,44 +687,50 @@ def submit_safety_hazard_form(request):
         user=request.user,
     )
 
+    lang = (data.get('language') or 'fa').lower()
+    if lang not in ('fa', 'en', 'ar'):
+        lang = 'fa'
+    from .email_i18n import get_labels
+    L = get_labels(lang, 'safety_hazard')
+
     base_list = getattr(settings, 'SAFETY_HAZARD_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['Safety@nasimair.com'])
     recipient_list = list(base_list) + ['safety@nasimair.com']
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
             email_body = f"""
-گزارش مخاطرات ایمنی ثبت شد:
+{L['title']}
 
-نام و نام خانوادگی: {report.reporter_name}
-واحد سازمانی: {report.section or '—'}
-تلفن تماس: {report.tel or '—'}
-تاریخ: {report.report_date or '—'}
-شماره گزارش: {report.report_number or '—'}
-ثبت هواپیما: {report.ac_registration or '—'}
+{L['reporter_name']} {report.reporter_name}
+{L['section']} {report.section or '—'}
+{L['tel']} {report.tel or '—'}
+{L['report_date']} {report.report_date or '—'}
+{L['report_number']} {report.report_number or '—'}
+{L['ac_registration']} {report.ac_registration or '—'}
 
-نوع مخاطره: {', '.join(report.type_of_hazard) if report.type_of_hazard else '—'}
-سایر: {report.type_of_hazard_others or '—'}
+{L['type_of_hazard']} {', '.join(report.type_of_hazard) if report.type_of_hazard else '—'}
+{L['others']} {report.type_of_hazard_others or '—'}
 
-مشخصات مخاطره:
-زمان: {report.spec_time or '—'}
-تاریخ: {report.spec_date or '—'}
-مکان: {report.spec_location or '—'}
+{L['hazard_specs']}
+{L['spec_time']} {report.spec_time or '—'}
+{L['spec_date']} {report.spec_date or '—'}
+{L['spec_location']} {report.spec_location or '—'}
 
-توضیحات دقیق مخاطره:
+{L['description']}
 {report.hazard_description or '—'}
 
-تصمیم مدیر ایمنی:
+{L['director_decision']}
 {report.safety_director_decision or '—'}
 
-اقدامات مدیر: {str(report.director_actions) if report.director_actions else '—'}
-نام مدیر: {report.director_name or '—'}
-امضا و تاریخ: {report.sign_and_date or '—'}
+{L['director_actions']} {str(report.director_actions) if report.director_actions else '—'}
+{L['director_name']} {report.director_name or '—'}
+{L['sign_and_date']} {report.sign_and_date or '—'}
 
 ---
-تاریخ ثبت: {report.created_at}
+{L['submitted_at']} {report.created_at}
 """
             send_mail(
-                subject=f"گزارش مخاطرات ایمنی - {report.reporter_name[:50]}",
+                subject=f"{L['subject_prefix']} {report.reporter_name[:50]}",
                 message=email_body,
                 from_email=from_email,
                 recipient_list=list(recipient_list),

@@ -17,6 +17,7 @@ export interface ComplaintFormData {
   ticket_number?: string;
   flight_number?: string;
   description?: string;
+  language?: 'fa' | 'en' | 'ar';
 }
 
 export const complaintService = {

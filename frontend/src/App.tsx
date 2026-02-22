@@ -36,6 +36,7 @@ import CityArticlesPage from './pages/CityArticlesPage';
 import IranologyArticleDetailPage from './pages/IranologyArticleDetailPage';
 import MealFeedbackPage from './pages/MealFeedbackPage';
 import StaffDashboardPage from './pages/StaffDashboardPage';
+import SafetyReportCabinPage from './pages/SafetyReportCabinPage';
 import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
 import DisabledRoute from './components/DisabledRoute';
@@ -76,6 +77,9 @@ function App() {
               {/* Auth Routes */}
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/staff-dashboard" element={<StaffDashboardPage />} />
+
+              {/* Safety Reports - accessible from header */}
+              <Route path="/safety-report/cabin" element={<SafetyReportCabinPage />} />
 
               {/* Disabled Routes - Redirect to Home for Security */}
               <Route path="/splash" element={<DisabledRoute />} />

@@ -12,19 +12,20 @@ import SafetyHazardForm from '../components/Staff/SafetyHazardForm';
 // دو لوگوی PDF: یکی مثل AirPocket (CabinSafetyForm)، یکی مثل Auto (SafetyHazardForm)
 // AirPocket و SkyBag به آدرس خارجی هدایت می‌شوند
 const STAFF_OPTIONS = [
-  { id: 'hozorgheyab', label: 'حضور و غیاب', logo: '/images/حضورغیاب.png', formType: null, externalUrl: null },
-  { id: 'skybag', label: 'SkyBag', logo: '/images/skybag.png', formType: null, externalUrl: 'https://skybag.nasimairlines.ir' },
-  { id: 'pdf-airpocket', label: 'گزارش اجباری ایمنی کابین', logo: '/images/pdf.png', formType: 'cabin' as const, externalUrl: null },
-  { id: 'pdf-auto', label: 'گزارش مخاطرات ایمنی (SHOR)', logo: '/images/pdf.png', formType: 'safety' as const, externalUrl: null },
-  { id: 'auto', label: 'Auto', logo: '/images/auto.png', formType: null, externalUrl: null },
-  { id: 'airpocket', label: 'AirPocket', logo: '/images/airpocket.png', formType: null, externalUrl: 'https://airpocket.nasimairlines.ir' },
+  { id: 'hozorgheyab', labelKey: 'staff.attendance', labelEn: 'Attendance', logo: '/images/حضورغیاب.png', formType: null, externalUrl: 'https://saat.nasimairlines.ir' },
+  { id: 'skybag', labelKey: null, labelEn: 'SkyBag', logo: '/images/skybag.png', formType: null, externalUrl: 'https://skybag.nasimairlines.ir' },
+  { id: 'pdf-airpocket', labelKey: 'nav.cabinSafetyReport', labelEn: 'Mandatory Cabin Safety Report', logo: '/images/pdf.png', formType: 'cabin' as const, externalUrl: null },
+  { id: 'pdf-auto', labelKey: 'nav.safetyHazardReport', labelEn: 'Safety Hazard Report (SHOR)', logo: '/images/pdf.png', formType: 'safety' as const, externalUrl: null },
+  { id: 'auto', labelKey: null, labelEn: 'Auto', logo: '/images/auto.png', formType: null, externalUrl: 'https://auto.nasimairlines.ir' },
+  { id: 'airpocket', labelKey: null, labelEn: 'AirPocket', logo: '/images/airpocket.png', formType: null, externalUrl: 'https://airpocket.nasimairlines.ir' },
 ];
 
 const StaffDashboardPage: React.FC = () => {
-  const { fontClass, language } = useLanguage();
+  const { fontClass, language, t } = useLanguage();
   const [openModalKey, setOpenModalKey] = useState<string | null>(null);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const dir = language === 'en' ? 'ltr' : 'rtl';
+  const getOptionLabel = (opt: (typeof STAFF_OPTIONS)[number]) => opt.labelKey ? t(opt.labelKey) : (opt.labelEn || opt.id);
 
   const selectedOption = openModalKey ? STAFF_OPTIONS.find(o => o.id === openModalKey) : null;
   const handleImageError = (id: string) => setFailedImages(prev => new Set(prev).add(id));
@@ -61,10 +62,10 @@ const StaffDashboardPage: React.FC = () => {
               fontWeight: 'bold',
               lineHeight: '1.2',
               textShadow: '2px 2px 8px rgba(0,0,0,0.5)',
-              direction: 'rtl',
+              direction: dir,
             }}
           >
-            پنل پرسنل
+            {t('staff.panelTitle')}
           </h1>
           <p
             className="text-white/90"
@@ -72,10 +73,10 @@ const StaffDashboardPage: React.FC = () => {
               fontFamily: 'DigiHamisheBold, Arial, sans-serif',
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
               textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
-              direction: 'rtl',
+              direction: dir,
             }}
           >
-            یکی از گزینه‌های زیر را انتخاب کنید
+            {t('staff.selectOption')}
           </p>
         </div>
       </section>
@@ -98,7 +99,7 @@ const StaffDashboardPage: React.FC = () => {
                     {!failedImages.has(opt.id) ? (
                       <img
                         src={opt.logo}
-                        alt={opt.label}
+                        alt={getOptionLabel(opt)}
                         className="max-w-full max-h-full object-contain"
                         onError={() => handleImageError(opt.id)}
                       />
@@ -107,7 +108,7 @@ const StaffDashboardPage: React.FC = () => {
                         className="w-16 h-16 rounded-lg bg-blue-900/10 flex items-center justify-center text-blue-900/50 text-2xl font-bold"
                         style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                       >
-                        {opt.label.charAt(0)}
+                        {getOptionLabel(opt).charAt(0)}
                       </div>
                     )}
                   </div>
@@ -115,7 +116,7 @@ const StaffDashboardPage: React.FC = () => {
                     className="text-gray-800 font-semibold text-sm sm:text-base group-hover:text-blue-900 transition-colors"
                     style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                   >
-                    {opt.label}
+                    {getOptionLabel(opt)}
                   </span>
                 </div>
               </button>
@@ -141,7 +142,7 @@ const StaffDashboardPage: React.FC = () => {
                 className="text-white text-xl font-bold"
                 style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
               >
-                {selectedOption.label}
+                {selectedOption && getOptionLabel(selectedOption)}
               </h2>
               <button
                 onClick={() => setOpenModalKey(null)}
@@ -166,7 +167,7 @@ const StaffDashboardPage: React.FC = () => {
                   className="text-gray-600 text-center py-8"
                   style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
                 >
-                  فرم به زودی اضافه می‌شود.
+                  {t('staff.formComingSoon')}
                 </p>
               )}
             </div>

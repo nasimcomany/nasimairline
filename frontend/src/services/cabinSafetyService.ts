@@ -28,6 +28,7 @@ export interface CabinSafetyFormData {
   occurrence_type_e?: string[];
   description?: string;
   other_info_suggestions?: string;
+  language?: 'fa' | 'en' | 'ar';
 }
 
 export const cabinSafetyService = {

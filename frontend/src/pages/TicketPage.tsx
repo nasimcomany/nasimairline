@@ -148,6 +148,7 @@ const TicketPage: React.FC = () => {
         ticket_number: formData.ticket_number,
         flight_number: formData.flight_number,
         description: formData.description,
+        language,
       };
       await complaintService.submitComplaint(payload);
       setSuccess(true);

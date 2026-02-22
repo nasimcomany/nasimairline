@@ -20,6 +20,7 @@ export interface SafetyHazardFormData {
   director_actions?: Record<string, boolean | string>;
   director_name?: string;
   sign_and_date?: string;
+  language?: 'fa' | 'en' | 'ar';
 }
 
 export const safetyHazardService = {

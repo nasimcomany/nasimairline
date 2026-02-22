@@ -15,7 +15,7 @@ const RATING_OPTIONS = [
 ];
 
 const SurveyPage: React.FC = () => {
-  const { fontClass } = useLanguage();
+  const { fontClass, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -82,7 +82,7 @@ const SurveyPage: React.FC = () => {
     }
     try {
       setLoading(true);
-      await surveyService.submitSurvey(formData);
+      await surveyService.submitSurvey({ ...formData, language });
       setSuccess(true);
       setFormData({
         full_name: '', seat_number: '', age: '', education: '', flight_number: '', contact_number: '', email: '',
