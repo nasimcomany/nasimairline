@@ -2837,18 +2837,22 @@ const HomePage: React.FC = () => {
     {[
       { 
         id: 'booking', 
+        image: '', // عکس را از پوشه public/images انتخاب کنید، مثلاً '/images/faq-booking.jpg'
         description: language === 'fa' ? 'راهنمای رزرو و خرید بلیط' : language === 'ar' ? 'دليل الحجز وشراء التذاكر' : 'Booking guide'
       },
       { 
         id: 'services', 
+        image: '', // مثلاً '/images/faq-services.jpg'
         description: language === 'fa' ? 'امکانات و خدمات در پرواز' : language === 'ar' ? 'المرافق والخدمات' : 'Flight amenities'
       },
       { 
         id: 'flight-info', 
+        image: '', // مثلاً '/images/faq-flight.jpg'
         description: language === 'fa' ? 'وضعیت پرواز و جزئیات' : language === 'ar' ? 'حالة الرحلة والتفاصيل' : 'Flight status'
       },
       { 
         id: 'support', 
+        image: '', // مثلاً '/images/faq-support.jpg'
         description: language === 'fa' ? 'راه‌های ارتباط با پشتیبانی' : language === 'ar' ? 'طرق الاتصال بالدعم' : 'Contact support'
       }
     ].map((faq) => {
@@ -2872,7 +2876,8 @@ const HomePage: React.FC = () => {
               transform: 'translateY(0)',
               transition: 'all 0.25s ease',
               backgroundColor: '#93c5fd',
-              position: 'relative'
+              position: 'relative',
+              overflow: 'hidden'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-6px) scale(1.03)';
@@ -2883,6 +2888,14 @@ const HomePage: React.FC = () => {
               e.currentTarget.style.boxShadow = '0 18px 35px rgba(0,0,0,0.4)';
             }}
           >
+            {faq.image ? (
+              <img
+                src={faq.image}
+                alt={faq.description}
+                className="w-full h-full object-cover rounded-full absolute inset-0"
+                style={{ zIndex: 1 }}
+              />
+            ) : null}
             <span
               className={`text-sm sm:text-base font-medium text-center ${fontClass}`}
               style={{ 
