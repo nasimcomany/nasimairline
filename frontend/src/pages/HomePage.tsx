@@ -1192,6 +1192,14 @@ const HomePage: React.FC = () => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
               const imgSrc = item.image_url || (idx === 0 ? '/images/chair.jpeg' : idx === 1 ? '/images/overload.jpeg' : idx === 2 ? '/images/TravelingWithPets.jpg' : '/images/travelwheelchair.jpeg');
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
+              // لینک با fallback: شبکه پروازی -> /flights/map، آب و هوا/وضعیت آب و هوا -> weather
+              const linkUrl = (() => {
+                const isNetwork = /شبکه پروازی|Flight Network|شبكة الطيران/i.test(title) || item.id === 1;
+                const isWeather = /آب و هوا|وضعیت آب و هوا|Weather|الطقس|حالة الطقس/i.test(title) || item.id === 2;
+                if (isNetwork) return '/flights/map';
+                if (isWeather) return 'weather';
+                return item.link_url || '';
+              })();
               return (
                 <div 
                   key={item.id || idx}
@@ -1205,7 +1213,7 @@ const HomePage: React.FC = () => {
                   }}
                   onMouseEnter={() => setHoveredService(idx + 1)}
                   onMouseLeave={() => setHoveredService(null)}
-                  onClick={() => handleSectionItemClick(item.link_url || '')}
+                  onClick={() => handleSectionItemClick(linkUrl)}
                 >
                   <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
                     <img 

@@ -21,11 +21,21 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
   cities = ['Tehran', 'Mashhad', 'Kish', 'Abadan', 'Isfahan'] 
 }) => {
   const { language, fontClass } = useLanguage();
-  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
+  const [weatherData, setWeatherData] = useState<WeatherData[]>(() =>
+    cities.map(city => ({
+      city,
+      temperature: 0,
+      description: '',
+      icon: '',
+      humidity: 0,
+      windSpeed: 0,
+      loading: true,
+      error: null,
+    }))
+  );
   const hasFetchedRef = useRef(false);
   const citiesRef = useRef<string[]>([]);
 
-  // City names in different languages
   const cityNames: Record<string, Record<string, string>> = {
     Tehran: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
     Mashhad: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
@@ -34,95 +44,82 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
     Isfahan: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
   };
 
-  useEffect(() => {
-    // Check if cities have changed
-    const citiesString = JSON.stringify(cities);
-    const previousCitiesString = JSON.stringify(citiesRef.current);
-    
-    // Only fetch if cities changed or haven't fetched yet
-    if (hasFetchedRef.current && citiesString === previousCitiesString) {
-      return;
-    }
+  // City ID برای یک درخواست گروهی (سریع‌تر از ۵ درخواست جدا)
+  const cityToId: Record<string, number> = {
+    Tehran: 112931,
+    Mashhad: 124665,
+    Kish: 126909,
+    Abadan: 144446,
+    Isfahan: 418863,
+  };
 
+  useEffect(() => {
+    const citiesString = JSON.stringify(cities);
+    if (hasFetchedRef.current && citiesString === JSON.stringify(citiesRef.current)) return;
     citiesRef.current = cities;
     hasFetchedRef.current = true;
 
-    const fetchWeather = async () => {
-      // Initialize with loading state
-      setWeatherData(
-        cities.map(city => ({
+    const API_KEY = process.env.REACT_APP_WEATHER_API_KEY || '';
+    if (!API_KEY) {
+      setWeatherData(cities.map(city => ({
+        city,
+        temperature: 0,
+        description: '',
+        icon: '',
+        humidity: 0,
+        windSpeed: 0,
+        loading: false,
+        error: 'API Key تنظیم نشده',
+      })));
+      return;
+    }
+
+    const ids = cities.map(c => cityToId[c] || 112931).filter((v, i, a) => a.indexOf(v) === i);
+    const url = `https://api.openweathermap.org/data/2.5/group?id=${ids.join(',')}&units=metric&lang=${language === 'fa' ? 'fa' : language === 'ar' ? 'ar' : 'en'}&appid=${API_KEY}`;
+
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 12000);
+
+    fetch(url, { signal: controller.signal })
+      .then(res => {
+        clearTimeout(t);
+        if (!res.ok) throw new Error('خطا در دریافت');
+        return res.json();
+      })
+      .then((data: { list?: Array<{ id: number; main: { temp: number; humidity: number }; weather: Array<{ description: string; icon: string }>; wind: { speed: number } }> }) => {
+        const byId = new Map<number, { id: number; main: { temp: number; humidity: number }; weather: Array<{ description: string; icon: string }>; wind: { speed: number } }>();
+        (data.list ?? []).forEach((item) => byId.set(item.id, item));
+        setWeatherData(cities.map(city => {
+          const id = cityToId[city];
+          const item = id != null ? byId.get(id) : null;
+          if (!item) {
+            return { city, temperature: 0, description: '', icon: '', humidity: 0, windSpeed: 0, loading: false, error: 'یافت نشد' };
+          }
+          return {
+            city,
+            temperature: Math.round(item.main.temp),
+            description: item.weather[0]?.description || '',
+            icon: item.weather[0]?.icon || '01d',
+            humidity: item.main.humidity || 0,
+            windSpeed: Math.round((item.wind?.speed || 0) * 3.6),
+            loading: false,
+            error: null,
+          };
+        }));
+      })
+      .catch(() => {
+        clearTimeout(t);
+        setWeatherData(cities.map(city => ({
           city,
           temperature: 0,
           description: '',
           icon: '',
           humidity: 0,
           windSpeed: 0,
-          loading: true,
-          error: null,
-        }))
-      );
-
-      // Fetch weather for each city
-      const weatherPromises = cities.map(async (city) => {
-        try {
-          // Using OpenWeatherMap API (free tier)
-          // You need to get API key from https://openweathermap.org/api
-          const API_KEY = process.env.REACT_APP_WEATHER_API_KEY || '';
-          
-          if (!API_KEY) {
-            // Fallback: Use mock data if API key is not set
-            return {
-              city,
-              temperature: Math.floor(Math.random() * 15) + 20, // 20-35°C
-              description: language === 'fa' ? 'آفتابی' : language === 'ar' ? 'مشمس' : 'Sunny',
-              icon: '01d',
-              humidity: Math.floor(Math.random() * 30) + 40, // 40-70%
-              windSpeed: Math.floor(Math.random() * 10) + 5, // 5-15 km/h
-              loading: false,
-              error: null,
-            };
-          }
-
-          const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?q=${city},IR&appid=${API_KEY}&units=metric&lang=${language === 'fa' ? 'fa' : language === 'ar' ? 'ar' : 'en'}`
-          );
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch weather');
-          }
-
-          const data = await response.json();
-          
-          return {
-            city,
-            temperature: Math.round(data.main.temp),
-            description: data.weather[0].description,
-            icon: data.weather[0].icon,
-            humidity: data.main.humidity,
-            windSpeed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
-            loading: false,
-            error: null,
-          };
-        } catch (error) {
-          console.error(`Error fetching weather for ${city}:`, error);
-          return {
-            city,
-            temperature: 0,
-            description: '',
-            icon: '',
-            humidity: 0,
-            windSpeed: 0,
-            loading: false,
-            error: 'خطا در دریافت اطلاعات',
-          };
-        }
+          loading: false,
+          error: 'خطا در دریافت اطلاعات',
+        })));
       });
-
-      const results = await Promise.all(weatherPromises);
-      setWeatherData(results);
-    };
-
-    fetchWeather();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cities]);
 
