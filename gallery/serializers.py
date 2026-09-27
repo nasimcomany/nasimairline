@@ -347,6 +347,7 @@ class HomePageSectionItemSerializer(serializers.ModelSerializer):
         model = HomePageSectionItem
         fields = [
             'id', 'uuid', 'section_type', 'title_fa', 'title_ar', 'title_en',
+            'description_fa', 'description_ar', 'description_en',
             'image_url', 'link_url', 'order', 'is_active'
         ]
     

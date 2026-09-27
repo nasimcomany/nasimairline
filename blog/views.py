@@ -25,8 +25,9 @@ class ArticleViewSet(viewsets.ModelViewSet):
     """
     queryset = Article.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly]
+    lookup_field = 'slug'
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['status', 'article_type', 'category', 'tags', 'author', 'is_featured']
+    filterset_fields = ['status', 'article_type', 'category', 'tags', 'author', 'is_featured', 'slug']
     search_fields = ['title', 'excerpt', 'content', 'meta_keywords']
     ordering_fields = ['published_at', 'created_at', 'view_count', 'reading_time']
     ordering = ['-published_at']
@@ -111,17 +112,29 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.active()
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
+    lookup_field = 'slug'
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['order', 'name', 'created_at']
     ordering = ['order', 'name']
     
     @action(detail=True, methods=['get'], permission_classes=[AllowAny])
-    def articles(self, request, pk=None):
+    def articles(self, request, slug=None):
         """Get articles in this category"""
         category = self.get_object()
-        articles = Article.objects.published().filter(category=category)
-        
+        articles = (
+            Article.objects.published()
+            .filter(category=category)
+            .order_by('-published_at', '-created_at')
+        )
+        search = (request.query_params.get('search') or '').strip()
+        if search:
+            articles = articles.filter(
+                Q(title__icontains=search)
+                | Q(excerpt__icontains=search)
+                | Q(content__icontains=search)
+            )
+
         # Pagination
         page = self.paginate_queryset(articles)
         if page is not None:

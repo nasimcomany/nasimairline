@@ -1,3 +1,9 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /limited-admin/
+Disallow: /api/
+
+# In production Django also serves /robots.txt with the real Sitemap URL.
+# Keep this file as a fallback for static hosting of the CRA build.
+Sitemap: /sitemap.xml

@@ -55,8 +55,11 @@ def auto_generate_seo_fields(sender, instance, **kwargs):
         # Calculate reading time
         instance.reading_time = calculate_reading_time(instance.content)
         
-        # Update backlink count from related model
-        instance.backlink_count = instance.backlinks.filter(status='active').count()
+        # Update backlink count from related model (only after article has PK)
+        if instance.pk:
+            instance.backlink_count = instance.backlinks.filter(status='active').count()
+        else:
+            instance.backlink_count = 0
 
 
 @receiver(post_save, sender=Article)

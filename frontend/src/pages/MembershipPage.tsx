@@ -190,12 +190,12 @@ const MembershipPage: React.FC = () => {
                 <UserGroupIcon className="h-12 w-12 text-white mx-auto" />
               </div>
               <h2 className="text-xl font-bold text-gray-900 mb-2" style={{
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
               }}>
                 {t('membershipPage.clubTitle')}
               </h2>
               <p className="text-gray-600 mb-4 text-sm" style={{
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
               }}>
                 {t('membershipPage.loginToView')}
               </p>
@@ -206,7 +206,7 @@ const MembershipPage: React.FC = () => {
                 }}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all text-sm"
                 style={{
-                  fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+                  fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
                 }}
               >
                 {t('membershipPage.loginButton')}
@@ -231,7 +231,7 @@ const MembershipPage: React.FC = () => {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-            <p className="text-lg" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <p className="text-lg" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
               {t('common.loading')}
             </p>
           </div>
@@ -246,7 +246,7 @@ const MembershipPage: React.FC = () => {
         <EmiratesHeader />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="bg-white rounded-xl p-6 max-w-md mx-4">
-            <p className="text-red-600 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <p className="text-red-600 text-center" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
               {error || t('membershipPage.genericError')}
             </p>
           </div>
@@ -271,7 +271,7 @@ const MembershipPage: React.FC = () => {
                 <TierIcon className="h-16 w-16 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-2" style={{
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
               }}>
                 {language === 'en' ? `${getTierDisplayName(membershipStatus.current_tier)} ${t('membershipPage.member')}` : `${t('membershipPage.member')} ${getTierDisplayName(membershipStatus.current_tier)}`}
               </h2>
@@ -280,7 +280,7 @@ const MembershipPage: React.FC = () => {
               </p>
               <div className="flex items-center gap-2 text-white/80 text-sm">
                 <CalendarIcon className="h-5 w-5" />
-                <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {t('membershipPage.membershipSince')} {formatNumber(membershipStatus.membership_duration_days)} {t('membershipPage.daysAgo')}
                 </span>
               </div>
@@ -294,11 +294,11 @@ const MembershipPage: React.FC = () => {
                 <div className="bg-blue-100 rounded-lg p-2">
                   <TicketIcon className="h-6 w-6 text-blue-600" />
                 </div>
-                <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {t('membershipPage.totalBookings')}
                 </span>
               </div>
-              <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {getMetricDisplay('total_bookings', membershipStatus.total_bookings)}
               </div>
             </div>
@@ -308,11 +308,11 @@ const MembershipPage: React.FC = () => {
                 <div className="bg-indigo-100 rounded-lg p-2">
                   <ClockIcon className="h-6 w-6 text-indigo-600" />
                 </div>
-                <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {t('membershipPage.membershipDays')}
                 </span>
               </div>
-              <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {getMetricDisplay('membership_days', membershipStatus.membership_duration_days)}
               </div>
             </div>
@@ -322,11 +322,11 @@ const MembershipPage: React.FC = () => {
                 <div className="bg-purple-100 rounded-lg p-2">
                   <CalendarIcon className="h-6 w-6 text-purple-600" />
                 </div>
-                <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {t('membershipPage.bookingsPerMonth')}
                 </span>
               </div>
-              <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {getMetricDisplay('monthly_bookings', membershipStatus.bookings_last_30_days)}
               </div>
             </div>
@@ -336,11 +336,11 @@ const MembershipPage: React.FC = () => {
                 <div className="bg-orange-100 rounded-lg p-2">
                   <FireIcon className="h-6 w-6 text-orange-600" />
                 </div>
-                <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <span className="text-gray-700 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {t('membershipPage.activeMonths')}
                 </span>
               </div>
-              <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="text-gray-900 font-bold text-2xl" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {getMetricDisplay('active_months', membershipStatus.active_months_count)}
               </div>
             </div>
@@ -358,10 +358,10 @@ const MembershipPage: React.FC = () => {
                   <ArrowTrendingUpIcon className="h-7 w-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                     {t('membershipPage.progressToTier')} {getTierDisplayName(membershipStatus.next_tier || '')}
                   </h3>
-                  <p className="text-gray-600 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  <p className="text-gray-600 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                     {t('membershipPage.onPathToUpgrade')}
                   </p>
                 </div>
@@ -381,16 +381,16 @@ const MembershipPage: React.FC = () => {
                           ) : (
                             <div className="h-6 w-6 rounded-full border-2 border-gray-300"></div>
                           )}
-                          <span className="text-gray-900 font-bold text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <span className="text-gray-900 font-bold text-base" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {getProgressLabel(key)}
                           </span>
                         </div>
                         <div className="text-left">
-                          <span className="text-blue-600 font-bold text-lg" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <span className="text-blue-600 font-bold text-lg" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {formatNumber(progress.current)}
                           </span>
                           <span className="text-gray-400 mx-1">/</span>
-                          <span className="text-gray-700 font-semibold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <span className="text-gray-700 font-semibold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {formatNumber(progress.required)}
                           </span>
                         </div>
@@ -411,7 +411,7 @@ const MembershipPage: React.FC = () => {
                       </div>
                       
                       <div className="mt-2 text-left">
-                        <span className={`text-sm font-semibold ${isComplete ? 'text-green-600' : 'text-blue-600'}`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                        <span className={`text-sm font-semibold ${isComplete ? 'text-green-600' : 'text-blue-600'}`} style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                           {progress.percentage}%
                         </span>
                       </div>
@@ -431,14 +431,14 @@ const MembershipPage: React.FC = () => {
             <h2 
               className="text-gray-900 mb-6 text-center font-bold text-2xl"
               style={{
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
               }}
             >
               {t('membershipPage.yourBenefits')}
             </h2>
 
             <div className="mb-6">
-              <h3 className="text-lg font-bold text-blue-900 mb-3 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-lg font-bold text-blue-900 mb-3 text-center" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {t('membershipPage.currentTierBenefits')} ({getTierDisplayName(membershipStatus.current_tier)})
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -449,10 +449,10 @@ const MembershipPage: React.FC = () => {
                         <benefit.icon className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <h4 className="text-gray-900 font-bold text-sm mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                        <h4 className="text-gray-900 font-bold text-sm mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                           {benefit.title}
                         </h4>
-                        <p className="text-gray-600 text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                        <p className="text-gray-600 text-xs" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                           {benefit.desc}
                         </p>
                       </div>
@@ -464,7 +464,7 @@ const MembershipPage: React.FC = () => {
 
             {membershipStatus.next_tier && membershipStatus.next_tier_display && nextTierBenefits.length > 0 ? (
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-bold text-emerald-700 mb-3 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <h3 className="text-lg font-bold text-emerald-700 mb-3 text-center" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {t('membershipPage.ifYouBecome')} {getTierDisplayName(membershipStatus.next_tier || '')} {t('membershipPage.becomeGetBenefits')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -475,10 +475,10 @@ const MembershipPage: React.FC = () => {
                           <benefit.icon className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <h4 className="text-gray-900 font-bold text-sm mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <h4 className="text-gray-900 font-bold text-sm mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {benefit.title}
                           </h4>
-                          <p className="text-gray-600 text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <p className="text-gray-600 text-xs" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {benefit.desc}
                           </p>
                         </div>
@@ -489,14 +489,14 @@ const MembershipPage: React.FC = () => {
               </div>
             ) : (
               <div className="border-t border-gray-200 pt-6 text-center">
-                <p className="text-emerald-700 font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <p className="text-emerald-700 font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {t('membershipPage.highestTier')}
                 </p>
               </div>
             )}
             
             <div className="mt-5 text-center">
-              <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {t('membershipPage.benefitsDisclaimer')}
               </p>
             </div>

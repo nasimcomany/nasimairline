@@ -57,7 +57,7 @@ const StaffDashboardPage: React.FC = () => {
           <h1
             className="text-white mb-4"
             style={{
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
               fontSize: 'clamp(2rem, 6vw, 3.5rem)',
               fontWeight: 'bold',
               lineHeight: '1.2',
@@ -70,7 +70,7 @@ const StaffDashboardPage: React.FC = () => {
           <p
             className="text-white/90"
             style={{
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
               fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
               textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
               direction: dir,
@@ -106,7 +106,7 @@ const StaffDashboardPage: React.FC = () => {
                     ) : (
                       <div
                         className="w-16 h-16 rounded-lg bg-blue-900/10 flex items-center justify-center text-blue-900/50 text-2xl font-bold"
-                        style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                        style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                       >
                         {getOptionLabel(opt).charAt(0)}
                       </div>
@@ -114,7 +114,7 @@ const StaffDashboardPage: React.FC = () => {
                   </div>
                   <span
                     className="text-gray-800 font-semibold text-sm sm:text-base group-hover:text-blue-900 transition-colors"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                   >
                     {getOptionLabel(opt)}
                   </span>
@@ -140,7 +140,7 @@ const StaffDashboardPage: React.FC = () => {
             <div className="sticky top-0 bg-gradient-to-r from-blue-900 to-blue-800 px-6 py-4 flex items-center justify-between rounded-t-2xl">
               <h2
                 className="text-white text-xl font-bold"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
               >
                 {selectedOption && getOptionLabel(selectedOption)}
               </h2>
@@ -165,7 +165,7 @@ const StaffDashboardPage: React.FC = () => {
               ) : (
                 <p
                   className="text-gray-600 text-center py-8"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   {t('staff.formComingSoon')}
                 </p>

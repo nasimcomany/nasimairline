@@ -14,24 +14,43 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
-# Load environment variables from .env file
+from nasim.production import (
+    build_allowed_hosts,
+    build_csrf_trusted_origins,
+    env_bool,
+    env_csv,
+)
+
+# Load environment variables from .env file (local only; Railway injects env vars)
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Running on Railway / any real host
+IS_RAILWAY = bool(os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('RAILWAY_PROJECT_ID'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-r&m1)kdaada)m%2ik%4(vwjb@2qd+y9@1h5zaw-*qmq^p3sn%@')
+_DEFAULT_INSECURE_KEY = 'django-insecure-r&m1)kdaada)m%2ik%4(vwjb@2qd+y9@1h5zaw-*qmq^p3sn%@'
+SECRET_KEY = os.environ.get('SECRET_KEY', _DEFAULT_INSECURE_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+# On Railway default to False unless explicitly set True
+_debug_default = 'False' if IS_RAILWAY else 'True'
+DEBUG = env_bool('DEBUG', _debug_default == 'True')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = build_allowed_hosts(env_csv('ALLOWED_HOSTS', 'localhost,127.0.0.1'))
+
+if not DEBUG and (not SECRET_KEY or SECRET_KEY == _DEFAULT_INSECURE_KEY or SECRET_KEY.startswith('django-insecure')):
+    raise ImproperlyConfigured(
+        'SECRET_KEY must be set to a strong unique value when DEBUG=False (e.g. on Railway).'
+    )
 
 
 # Application definition
@@ -71,6 +90,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # static files on Railway / Gunicorn
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # CORS middleware
     'django.middleware.common.CommonMiddleware',
@@ -102,17 +122,35 @@ WSGI_APPLICATION = 'nasim.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+#
+# Railway: add Postgres plugin → it injects DATABASE_URL automatically.
+# Local: keep using DB_NAME / DB_USER / DB_PASSWORD / DB_HOST / DB_PORT in .env
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
+_DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+
+if _DATABASE_URL:
+    # Production / Railway (or any host that provides a single Postgres URL)
+    _ssl_require = os.environ.get('DB_SSL_REQUIRE', 'true').lower() in ('1', 'true', 'yes')
+    DATABASES = {
+        'default': dj_database_url.parse(
+            _DATABASE_URL,
+            conn_max_age=int(os.environ.get('DB_CONN_MAX_AGE', '600')),
+            conn_health_checks=True,
+            ssl_require=_ssl_require,
+        )
     }
-}
+else:
+    # Local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
 
 
 # Password validation
@@ -162,76 +200,99 @@ if os.path.exists(FRONTEND_BUILD_DIR):
     if os.path.exists(static_dir):
         STATICFILES_DIRS.append(static_dir)
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# WhiteNoise: serve collected static files efficiently under Gunicorn
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
+WHITENOISE_USE_FINDERS = DEBUG
+WHITENOISE_MANIFEST_STRICT = False
+if os.path.exists(FRONTEND_BUILD_DIR):
+    WHITENOISE_ROOT = FRONTEND_BUILD_DIR
 
-# CKEditor Configuration
+# Media files — on Railway mount a Volume at /data and set MEDIA_ROOT=/data/media
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
+# Serve media via Django when no CDN/S3 (Railway bootstrap). Prefer a persistent volume.
+SERVE_MEDIA = env_bool('SERVE_MEDIA', True)
+
+# CKEditor Configuration — professional SEO writing toolkit
 CKEDITOR_UPLOAD_PATH = 'blog/uploads/'
+CKEDITOR_IMAGE_BACKEND = 'pillow'
+CKEDITOR_ALLOW_NONIMAGE_FILES = False
+CKEDITOR_RESTRICT_BY_USER = True
+CKEDITOR_BROWSE_SHOW_DIRS = True
 CKEDITOR_CONFIGS = {
     'default': {
-        'toolbar': 'full',
-        'height': 400,
+        'language': 'fa',
+        'contentsLangDirection': 'rtl',
+        'height': 420,
         'width': '100%',
-        'toolbar_Custom': [
-            ['Bold', 'Italic', 'Underline'],
-            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
-            ['Link', 'Unlink'],
-            ['RemoveFormat', 'Source'],
-            ['Image', 'Flash', 'Table', 'HorizontalRule'],
-            ['Styles', 'Format', 'Font', 'FontSize'],
-            ['TextColor', 'BGColor'],
-            ['Maximize', 'ShowBlocks'],
-        ],
         'toolbar': 'Custom',
-        'filebrowserWindowHeight': 725,
-        'filebrowserWindowWidth': 940,
-        'toolbarCanCollapse': True,
-        'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
-        'tabSpaces': 4,
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'],
+            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'],
+            ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'],
+            ['Link', 'Unlink', 'Anchor'],
+            ['Image', 'Table', 'HorizontalRule', 'SpecialChar'],
+            ['Format', 'Styles', 'FontSize'],
+            ['TextColor', 'BGColor'],
+            ['Maximize', 'Source'],
+        ],
+        'format_tags': 'p;h1;h2;h3;h4;h5;h6;pre;div',
+        'removePlugins': 'stylesheetparser',
+        'allowedContent': True,
+        'extraAllowedContent': '*(*){*}[*];iframe[*];table(*);td(*);th(*);tr(*);img[*]',
         'extraPlugins': ','.join([
-            'uploadimage',  # the upload image feature
-            'div',
-            'autolink',
-            'autoembed',
-            'embedsemantic',
-            'autogrow',
-            'widget',
-            'lineutils',
-            'clipboard',
-            'dialog',
-            'dialogui',
-            'elementspath'
+            'uploadimage', 'autolink', 'autoembed', 'embedsemantic',
+            'autogrow', 'widget', 'lineutils', 'clipboard', 'dialog',
+            'dialogui', 'elementspath', 'justify', 'bidi',
         ]),
+        'autoGrow_minHeight': 350,
+        'autoGrow_maxHeight': 900,
         'filebrowserBrowseUrl': '/ckeditor/browse/',
         'filebrowserUploadUrl': '/ckeditor/upload/',
         'filebrowserImageBrowseUrl': '/ckeditor/browse/',
         'filebrowserImageUploadUrl': '/ckeditor/upload/',
     },
     'seo_optimized': {
-        'toolbar': 'full',
-        'height': 500,
+        'language': 'fa',
+        'contentsLangDirection': 'rtl',
+        'height': 620,
         'width': '100%',
-        'toolbar_Custom': [
-            ['Source', '-', 'Save', 'NewPage', 'Preview', 'Print', '-', 'Templates'],
+        'toolbar': 'SEOFull',
+        'toolbar_SEOFull': [
+            ['Source', '-', 'Preview', 'Print', '-', 'Templates'],
             ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'],
-            ['Find', 'Replace', '-', 'SelectAll', '-', 'Scayt'],
-            ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton', 'HiddenField'],
+            ['Find', 'Replace', '-', 'SelectAll'],
             '/',
             ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'],
-            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'],
+            [
+                'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-',
+                'Blockquote', 'CreateDiv', '-',
+                'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-',
+                'BidiLtr', 'BidiRtl',
+            ],
             ['Link', 'Unlink', 'Anchor'],
-            ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe'],
+            ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'PageBreak', 'Iframe'],
             '/',
             ['Styles', 'Format', 'Font', 'FontSize'],
             ['TextColor', 'BGColor'],
             ['Maximize', 'ShowBlocks'],
-            ['About'],
         ],
-        'toolbar': 'Custom',
-        'filebrowserWindowHeight': 725,
-        'filebrowserWindowWidth': 940,
-        'toolbarCanCollapse': True,
+        'format_tags': 'p;h1;h2;h3;h4;h5;h6;pre;div',
+        'stylesSet': [
+            {'name': 'نکته کلیدی (باکس آبی)', 'element': 'div', 'attributes': {'class': 'nasim-key-points'}},
+            {'name': 'متن برجسته', 'element': 'span', 'attributes': {'class': 'nasim-highlight'}},
+            {'name': 'لینک داخلی مقاله', 'element': 'a', 'attributes': {'class': 'nasim-internal-link'}},
+        ],
+        'removePlugins': 'stylesheetparser',
+        'allowedContent': True,
+        'extraAllowedContent': '*(*){*}[*];iframe[*];table(*);td(*);th(*);tr(*);img[*];div(nasim-key-points);span(nasim-highlight);a(nasim-internal-link)',
         'extraPlugins': ','.join([
             'uploadimage',
             'div',
@@ -246,8 +307,28 @@ CKEDITOR_CONFIGS = {
             'dialogui',
             'elementspath',
             'codesnippet',
+            'justify',
+            'bidi',
+            'colorbutton',
+            'colordialog',
+            'font',
+            'find',
+            'templates',
+            'iframe',
         ]),
         'codeSnippet_theme': 'monokai_sublime',
+        'autoGrow_minHeight': 500,
+        'autoGrow_maxHeight': 1200,
+        'contentsCss': [
+            'body { font-family: Tahoma, Arial, sans-serif; font-size: 15px; line-height: 1.9; direction: rtl; text-align: justify; }',
+            'h1,h2,h3,h4 { color: #1e3a8a; font-weight: 700; }',
+            'a { color: #1d4ed8; }',
+            '.nasim-key-points { background: #eff6ff; border: 1px solid #93c5fd; border-radius: 12px; padding: 16px 20px; margin: 16px 0; }',
+            '.nasim-highlight { background: #dbeafe; padding: 0 4px; }',
+        ],
+        'filebrowserWindowHeight': 725,
+        'filebrowserWindowWidth': 940,
+        'toolbarCanCollapse': False,
         'filebrowserBrowseUrl': '/ckeditor/browse/',
         'filebrowserUploadUrl': '/ckeditor/upload/',
         'filebrowserImageBrowseUrl': '/ckeditor/browse/',
@@ -271,8 +352,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    'DEFAULT_PAGINATION_CLASS': 'nasim.pagination.FlexiblePageNumberPagination',
+    'PAGE_SIZE': 9,
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
@@ -306,12 +387,10 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React dev server
-    "http://127.0.0.1:3000",  # React dev server
-    "http://localhost:8000",  # Django served frontend
-    "http://127.0.0.1:8000",  # Django served frontend
-]
+CORS_ALLOWED_ORIGINS = env_csv(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+)
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -323,6 +402,12 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
+
+# CSRF (required behind Railway HTTPS)
+CSRF_TRUSTED_ORIGINS = build_csrf_trusted_origins(
+    ALLOWED_HOSTS,
+    env_csv('CSRF_TRUSTED_ORIGINS'),
+)
 
 # Email Configuration
 # برای دیباگ: اگر می‌خواهید ایمیل‌ها در ترمینال چاپ شوند (بدون SMTP)، در .env بگذارید: EMAIL_USE_CONSOLE=1
@@ -340,23 +425,39 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@nasimair.com'
 # Support Email Mapping (هر دسته‌بندی به یک ایمیل مشخص)
 SUPPORT_EMAIL_MAPPING = {
     'HR': os.environ.get('SUPPORT_EMAIL_HR', 'grifindorekamyar@gmail.com'),  # همکاری با ما
-    'FEEDBACK': os.environ.get('SUPPORT_EMAIL_FEEDBACK', 'gryffyndorkamyar@gmail.com'),  # انتقادات و پیشنهادات
-    'MISC': os.environ.get('SUPPORT_EMAIL_MISC', 'gryffyndorekamyar@gmail.com'),  # متفرقه
+    'FEEDBACK': os.environ.get('SUPPORT_EMAIL_FEEDBACK', 'grifindorekamyar@gmail.com'),  # انتقادات و پیشنهادات
+    'MISC': os.environ.get('SUPPORT_EMAIL_MISC', 'grifindorekamyar@gmail.com'),  # متفرقه
     # سایر دسته‌بندی‌ها به این ایمیل می‌روند (اختیاری)
-    'DEFAULT': os.environ.get('SUPPORT_EMAIL_DEFAULT', 'support@nasimair.com'),
+    'DEFAULT': os.environ.get('SUPPORT_EMAIL_DEFAULT', 'grifindorekamyar@gmail.com'),
 }
 
 # Security Contact Information (حراست)
 SECURITY_CONTACT_PHONE = os.environ.get('SECURITY_CONTACT_PHONE', '021123456789')
 
+# Weather API (OpenWeatherMap) - برای پروکسی آب و هوا
+WEATHER_API_KEY = os.environ.get('REACT_APP_WEATHER_API_KEY', '') or os.environ.get('WEATHER_API_KEY', '')
+
+# ایمیل‌هایی که همیشه باید نوتیف همه فرم‌ها / چت / تیکت را بگیرند
+ALWAYS_NOTIFY_EMAILS = [
+    email.strip() for email in
+    os.environ.get(
+        'ALWAYS_NOTIFY_EMAILS',
+        'grifindorekamyar@gmail.com,info@nasimair.com,support@nasimair.com,publicrelation@nasimair.com,safety@nasimair.com',
+    ).split(',')
+    if email.strip()
+]
+
 # Complaint Form - ایمیل‌های دریافت اعلان شکایت (جدا شده با کاما)
 COMPLAINT_NOTIFICATION_EMAILS = [
     email.strip() for email in 
-    os.environ.get('COMPLAINT_NOTIFICATION_EMAILS', 'info@nasimair.com,support@nasimair.com').split(',')
+    os.environ.get(
+        'COMPLAINT_NOTIFICATION_EMAILS',
+        'grifindorekamyar@gmail.com,info@nasimair.com,support@nasimair.com',
+    ).split(',')
     if email.strip()
 ]
 if not COMPLAINT_NOTIFICATION_EMAILS:
-    COMPLAINT_NOTIFICATION_EMAILS = ['info@nasimair.com']
+    COMPLAINT_NOTIFICATION_EMAILS = list(ALWAYS_NOTIFY_EMAILS) or ['grifindorekamyar@gmail.com']
 
 # Survey Form - ایمیل‌های دریافت اعلان نظرسنجی (پیش‌فرض: همان شکایت)
 SURVEY_NOTIFICATION_EMAILS = [
@@ -366,6 +467,24 @@ SURVEY_NOTIFICATION_EMAILS = [
 ]
 if not SURVEY_NOTIFICATION_EMAILS:
     SURVEY_NOTIFICATION_EMAILS = COMPLAINT_NOTIFICATION_EMAILS
+
+# Chat widget — ایمیل اعلان پیام کاربر (علاوه بر تلگرام/واتساپ)
+CHAT_NOTIFICATION_EMAILS = [
+    email.strip() for email in
+    os.environ.get('CHAT_NOTIFICATION_EMAILS', '').split(',')
+    if email.strip()
+]
+if not CHAT_NOTIFICATION_EMAILS:
+    CHAT_NOTIFICATION_EMAILS = list(ALWAYS_NOTIFY_EMAILS) or ['grifindorekamyar@gmail.com']
+
+# Meal feedback notifications (پیش‌فرض: همان ALWAYS)
+MEAL_FEEDBACK_NOTIFICATION_EMAILS = [
+    email.strip() for email in
+    os.environ.get('MEAL_FEEDBACK_NOTIFICATION_EMAILS', '').split(',')
+    if email.strip()
+]
+if not MEAL_FEEDBACK_NOTIFICATION_EMAILS:
+    MEAL_FEEDBACK_NOTIFICATION_EMAILS = list(ALWAYS_NOTIFY_EMAILS) or list(COMPLAINT_NOTIFICATION_EMAILS)
 
 # WhatsApp Configuration (برای اعلان‌های چت)
 # برای استفاده از واتساپ، باید API key و URL سرویس واتساپ خود را تنظیم کنید
@@ -381,6 +500,8 @@ ADMIN_WHATSAPP_NUMBER = os.environ.get('ADMIN_WHATSAPP_NUMBER', '+989379146130')
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
 ADMIN_BASE_URL = os.environ.get('ADMIN_BASE_URL', 'http://127.0.0.1:8000')  # آدرس پایه پنل ادمین (در production تغییر دهید)
+# Public website origin for sitemap/canonical/OG (same host as SPA in production)
+PUBLIC_SITE_URL = os.environ.get('PUBLIC_SITE_URL', ADMIN_BASE_URL).rstrip('/')
 # پروکسی برای تلگرام (اختیاری - اگر api.telegram.org در دسترس نیست، مثلاً: http://127.0.0.1:1080)
 TELEGRAM_PROXY = os.environ.get('TELEGRAM_PROXY', '')
 
@@ -395,23 +516,19 @@ MELLIPAYAMAK_FROM_NUMBER = os.environ.get('MELLIPAYAMAK_FROM_NUMBER', '')  # ش�
 NIRA_BASE_URL = os.environ.get('NIRA_BASE_URL', '')  # URL پایه سیستم نیرا (مثال: https://airline.example.com)
 NIRA_OFFICE_USER = os.environ.get('NIRA_OFFICE_USER', '')  # نام کاربری Office برای دسترسی به Web Service
 NIRA_OFFICE_PASS = os.environ.get('NIRA_OFFICE_PASS', '')  # رمز عبور Office
-NIRA_API_TIMEOUT = int(os.environ.get('NIRA_API_TIMEOUT', '60'))  # Timeout برای درخواست‌های API (ثانیه) - افزایش یافت به 60
+# Cap prevents a single slow Nira call from pinning a Gunicorn worker (502/OOM risk)
+NIRA_API_TIMEOUT = min(int(os.environ.get('NIRA_API_TIMEOUT', '25')), int(os.environ.get('NIRA_API_TIMEOUT_CAP', '45')))
+NIRA_ROUTES_CACHE_TTL = int(os.environ.get('NIRA_ROUTES_CACHE_TTL', '180'))
+NIRA_AVAILABILITY_CACHE_TTL = int(os.environ.get('NIRA_AVAILABILITY_CACHE_TTL', '45'))
+NIRA_ENRICH_STATUS_ASYNC = env_bool('NIRA_ENRICH_STATUS_ASYNC', True)
 
 # تنظیمات API برای دریافت اطلاعات لحظه‌ای پروازها
-# این API ها برای دریافت زمان واقعی، تأخیر، گیت و تعداد توقف استفاده می‌شوند
-# وقتی API Key ها آماده شدند، فقط باید در فایل .env تنظیم شوند
-
-# سازمان هواپیمایی کشوری (CAO)
-CAO_API_URL = os.environ.get('CAO_API_URL', '')  # URL API سازمان هواپیمایی کشوری
-CAO_API_KEY = os.environ.get('CAO_API_KEY', '')  # API Key سازمان هواپیمایی کشوری
-
-# فرودگاه‌ها (امام خمینی، مهرآباد و غیره)
-AIRPORT_API_URL = os.environ.get('AIRPORT_API_URL', '')  # URL API فرودگاه‌ها
-AIRPORT_API_KEY = os.environ.get('AIRPORT_API_KEY', '')  # API Key فرودگاه‌ها
-
-# سرویس‌های بین‌المللی (برای پروازهای خارجی - اختیاری)
-FLIGHTAWARE_API_KEY = os.environ.get('FLIGHTAWARE_API_KEY', '')  # API Key FlightAware (برای پروازهای بین‌المللی)
-AVIATIONSTACK_API_KEY = os.environ.get('AVIATIONSTACK_API_KEY', '')  # API Key AviationStack (برای پروازهای بین‌المللی)
+CAO_API_URL = os.environ.get('CAO_API_URL', '')
+CAO_API_KEY = os.environ.get('CAO_API_KEY', '')
+AIRPORT_API_URL = os.environ.get('AIRPORT_API_URL', '')
+AIRPORT_API_KEY = os.environ.get('AIRPORT_API_KEY', '')
+FLIGHTAWARE_API_KEY = os.environ.get('FLIGHTAWARE_API_KEY', '')
+AVIATIONSTACK_API_KEY = os.environ.get('AVIATIONSTACK_API_KEY', '')
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -428,22 +545,147 @@ CORS_ALLOW_HEADERS = [
     'pragma',
 ]
 
-# Allow all origins in development (for testing)
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 
-# Redis Cache Configuration (برای استفاده در آینده)
-# موقتاً غیرفعال شده تا زمانی که django-redis نصب شود
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'LOCATION': os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1'),
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         }
-#     }
-# }
+REACT_DEV_SERVER = os.environ.get('REACT_DEV_SERVER', 'http://127.0.0.1:3000')
 
-# Session Configuration (موقتاً به database تغییر یافت)
-# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-# SESSION_CACHE_ALIAS = 'default'
+# ---------------------------------------------------------------------------
+# Celery — dedicated queues / workers (see Procfile + bin/celery-worker.sh)
+# ---------------------------------------------------------------------------
+_REDIS_URL = os.environ.get('REDIS_URL', '').strip()
+
+if _REDIS_URL:
+    CELERY_BROKER_URL = _REDIS_URL
+    CELERY_RESULT_BACKEND = _REDIS_URL
+    CELERY_TASK_ALWAYS_EAGER = env_bool('CELERY_TASK_ALWAYS_EAGER', False)
+else:
+    # Local without Redis: run tasks inline (still correct, just sync)
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = int(os.environ.get('CELERY_PREFETCH', '1'))
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_WORKER_MAX_TASKS_PER_CHILD = int(os.environ.get('CELERY_MAX_TASKS_PER_CHILD', '200'))
+CELERY_WORKER_MAX_MEMORY_PER_CHILD = int(os.environ.get('CELERY_MAX_MEMORY_KB', '250000'))  # ~250MB
+CELERY_TASK_SOFT_TIME_LIMIT = int(os.environ.get('CELERY_SOFT_TIME_LIMIT', '50'))
+CELERY_TASK_TIME_LIMIT = int(os.environ.get('CELERY_TIME_LIMIT', '70'))
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+CELERY_TASK_ROUTES = {
+    'notifications.*': {'queue': 'notify'},
+    'sms.*': {'queue': 'sms'},
+    'flights.*': {'queue': 'nira'},
+    'bookings.*': {'queue': 'default'},
+}
+CELERY_TASK_ANNOTATIONS = {
+    'notifications.send_email': {'rate_limit': '30/m'},
+    'sms.send_sms': {'rate_limit': '20/m'},
+}
+CELERY_BEAT_SCHEDULE = {
+    'warm-nira-origins': {
+        'task': 'flights.prefetch_origins',
+        'schedule': 120.0,  # every 2 minutes
+    },
+    'expire-booking-holds': {
+        'task': 'bookings.expire_holds',
+        'schedule': 60.0,  # every minute
+    },
+}
+
+BOOKING_HOLD_MINUTES = int(os.environ.get('BOOKING_HOLD_MINUTES', '15'))
+BOOKING_SOFT_HOLD_CAP = int(os.environ.get('BOOKING_SOFT_HOLD_CAP', '9'))
+
+# Nira IBE payment bridge (same pattern as other Nira airlines)
+# Template placeholders: {ref} {callback} {return_url} {amount}
+NIRA_PAYMENT_REDIRECT_URL = os.environ.get('NIRA_PAYMENT_REDIRECT_URL', '').strip()
+NIRA_RESERVE_URL = os.environ.get('NIRA_RESERVE_URL', '').strip()
+NIRA_RESERVATION_LOOKUP_URL = os.environ.get('NIRA_RESERVATION_LOOKUP_URL', '').strip()
+NIRA_CALLBACK_SECRET = os.environ.get('NIRA_CALLBACK_SECRET', '').strip()
+NIRA_CALLBACK_IPS = os.environ.get('NIRA_CALLBACK_IPS', '').strip()
+NIRA_CALLBACK_SUCCESS_VALUES = os.environ.get(
+    'NIRA_CALLBACK_SUCCESS_VALUES', '1,ok,success,paid,true,yes'
+)
+NIRA_CALLBACK_FAIL_VALUES = os.environ.get(
+    'NIRA_CALLBACK_FAIL_VALUES', '0,nok,failed,fail,cancel,cancelled,false'
+)
+
+# Cache / Redis — auto-enable when Railway Redis (or any REDIS_URL) is linked
+if _REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': _REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'IGNORE_EXCEPTIONS': True,
+                'SOCKET_CONNECT_TIMEOUT': 2,
+                'SOCKET_TIMEOUT': 2,
+            },
+            'KEY_PREFIX': 'nasim',
+            'TIMEOUT': int(os.environ.get('CACHE_TIMEOUT', '300')),
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'nasim-local',
+            'TIMEOUT': 300,
+        }
+    }
+
+# Production security (HTTPS behind Railway proxy)
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', True)
+    SECURE_REDIRECT_EXEMPT = [r'^healthz/$', r'^api/health/$']
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    X_FRAME_OPTIONS = 'DENY'
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False  # SPA may need to read CSRF token if used
+
+# Logging — visible in Railway deploy logs
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[{levelname}] {asctime} {name}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': os.environ.get('LOG_LEVEL', 'INFO' if not DEBUG else 'DEBUG'),
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}

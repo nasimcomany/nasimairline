@@ -14,6 +14,7 @@ class CategorySerializer(serializers.ModelSerializer):
     """
     article_count = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
     
     class Meta:
         model = Category
@@ -31,6 +32,15 @@ class CategorySerializer(serializers.ModelSerializer):
     def get_url(self, obj):
         """Get absolute URL"""
         return obj.get_absolute_url()
+
+    def get_image(self, obj):
+        if not obj.image:
+            return None
+        request = self.context.get('request')
+        url = obj.image.url
+        if request:
+            return request.build_absolute_uri(url)
+        return url
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -83,29 +93,28 @@ class ArticleListSerializer(serializers.ModelSerializer):
     Serializer for Article list view (lightweight)
     """
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
-    category_name = serializers.CharField(source='category.name', read_only=True)
-    category_slug = serializers.CharField(source='category.slug', read_only=True)
+    category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     url = serializers.SerializerMethodField()
-    featured_image_url = serializers.SerializerMethodField()
+    featured_image = serializers.SerializerMethodField()
     
     class Meta:
         model = Article
         fields = [
-            'uuid', 'title', 'slug', 'excerpt', 'author', 'author_name',
-            'category', 'category_name', 'category_slug', 'tags',
-            'article_type', 'featured_image', 'featured_image_url',
+            'id', 'uuid', 'title', 'slug', 'excerpt', 'author', 'author_name',
+            'category', 'tags',
+            'article_type', 'featured_image',
             'is_featured', 'is_pinned', 'view_count', 'reading_time',
             'published_at', 'url', 'created_at'
         ]
-        read_only_fields = ['uuid', 'view_count', 'reading_time', 'created_at']
+        read_only_fields = ['id', 'uuid', 'view_count', 'reading_time', 'created_at']
     
     def get_url(self, obj):
         """Get absolute URL"""
         return obj.get_absolute_url()
     
-    def get_featured_image_url(self, obj):
-        """Get featured image URL"""
+    def get_featured_image(self, obj):
+        """Absolute featured image URL for magazine cards"""
         if obj.featured_image:
             request = self.context.get('request')
             if request:
@@ -127,22 +136,23 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
     canonical_url = serializers.SerializerMethodField()
     og_image_url = serializers.SerializerMethodField()
+    featured_image = serializers.SerializerMethodField()
     seo_data = serializers.SerializerMethodField()
     
     class Meta:
         model = Article
         fields = [
-            'uuid', 'title', 'slug', 'excerpt', 'content', 'author', 
+            'id', 'uuid', 'title', 'slug', 'excerpt', 'content', 'author', 
             'author_name', 'author_email', 'category', 'tags', 'article_type',
             'featured_image', 'image_alt', 'meta_title', 'meta_description',
             'meta_keywords', 'seo_priority', 'og_title', 'og_description',
             'og_image', 'canonical_url', 'status', 'is_featured', 'is_pinned',
             'allow_comments', 'view_count', 'reading_time', 'metadata',
-            'published_at', 'url', 'canonical_url', 'og_image_url',
+            'published_at', 'url', 'og_image_url',
             'comments', 'related_articles', 'seo_data', 'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'uuid', 'view_count', 'reading_time', 'published_at',
+            'id', 'uuid', 'view_count', 'reading_time', 'published_at',
             'created_at', 'updated_at'
         ]
     
@@ -167,6 +177,14 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
     def get_og_image_url(self, obj):
         """Get Open Graph image URL"""
         return obj.get_og_image_url()
+
+    def get_featured_image(self, obj):
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return None
     
     def get_seo_data(self, obj):
         """Get SEO data if exists"""
@@ -175,8 +193,12 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
             return {
                 'robots_index': seo_data.robots_index,
                 'robots_follow': seo_data.robots_follow,
+                'robots_noarchive': seo_data.robots_noarchive,
+                'robots_nosnippet': seo_data.robots_nosnippet,
                 'sitemap_priority': str(seo_data.sitemap_priority),
                 'sitemap_changefreq': seo_data.sitemap_changefreq,
+                'structured_data': seo_data.structured_data,
+                'schema_markup': seo_data.schema_markup,
             }
         except SEOData.DoesNotExist:
             return None

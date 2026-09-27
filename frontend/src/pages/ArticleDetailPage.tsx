@@ -1,168 +1,155 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import SeoHead from '../components/SEO/SeoHead';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import {
   CalendarDaysIcon,
   ClockIcon,
   UserIcon,
-  TagIcon,
-  ArrowLeftIcon,
   EyeIcon,
-  ShareIcon
+  ShareIcon,
+  TicketIcon,
 } from '@heroicons/react/24/outline';
 
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
 interface Article {
-  id: number;
+  id?: number;
+  uuid?: string;
   title: string;
   excerpt: string;
   content: string;
-  author: {
-    id: number;
-    username: string;
-    first_name?: string;
-    last_name?: string;
-  };
-  category: {
-    id: number;
-    name: string;
-    slug: string;
-  };
-  tags: Array<{
-    id: number;
-    name: string;
-    slug: string;
-  }>;
+  author?: { username?: string; first_name?: string; last_name?: string };
+  author_name?: string;
+  category: { id: number; name: string; slug: string };
+  tags: Array<{ id: number; name: string; slug: string }>;
   featured_image?: string;
   published_at: string;
+  updated_at?: string;
   reading_time: number;
   view_count: number;
-  is_featured: boolean;
   slug: string;
   meta_title?: string;
   meta_description?: string;
   meta_keywords?: string;
+  og_title?: string;
+  og_description?: string;
+  og_image_url?: string;
+  canonical_url?: string;
+  seo_data?: {
+    robots_index?: boolean;
+    structured_data?: any;
+    schema_markup?: any;
+  };
+}
+
+function slugifyHeading(text: string, index: number) {
+  const base = text
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\u0600-\u06FF-]/g, '')
+    .slice(0, 60);
+  return `h-${index}-${base || 'section'}`;
+}
+
+function enrichContentWithIds(html: string): { html: string; toc: TocItem[] } {
+  if (!html) return { html: '', toc: [] };
+  const toc: TocItem[] = [];
+  let i = 0;
+  const enriched = html.replace(/<h([2-4])([^>]*)>([\s\S]*?)<\/h\1>/gi, (_m, level, attrs, inner) => {
+    const text = String(inner).replace(/<[^>]+>/g, '').trim();
+    const id = slugifyHeading(text, i++);
+    toc.push({ id, text, level: Number(level) });
+    if (/\sid=/.test(attrs)) {
+      return `<h${level}${attrs}>${inner}</h${level}>`;
+    }
+    return `<h${level}${attrs} id="${id}">${inner}</h${level}>`;
+  });
+  return { html: enriched, toc };
 }
 
 const ArticleDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { t, fontClass, language } = useLanguage();
+  const { fontClass, language } = useLanguage();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
+  const [activeToc, setActiveToc] = useState<string>('');
 
   useEffect(() => {
-    if (slug) {
-      fetchArticle();
-    }
+    if (!slug) return;
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/blog/articles/${slug}/`);
+        setArticle(res.data);
+        setError(null);
+      } catch (err: any) {
+        setError(err.response?.data?.detail || 'خطا در دریافت مقاله');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, [slug]);
 
-  const fetchArticle = async () => {
-    try {
-      setLoading(true);
-      // Try to fetch by slug first, if fails try by ID
-      let response;
-      try {
-        response = await api.get(`/blog/articles/?slug=${slug}`);
-        if (response.data.results && response.data.results.length > 0) {
-          const articleId = response.data.results[0].id;
-          response = await api.get(`/blog/articles/${articleId}/`);
-        } else if (response.data.length > 0) {
-          const articleId = response.data[0].id;
-          response = await api.get(`/blog/articles/${articleId}/`);
-        } else {
-          // If slug doesn't work, try as ID
-          response = await api.get(`/blog/articles/${slug}/`);
-        }
-      } catch {
-        // If slug fails, try as ID
-        response = await api.get(`/blog/articles/${slug}/`);
+  const { html: contentHtml, toc } = useMemo(
+    () => enrichContentWithIds(article?.content || ''),
+    [article?.content]
+  );
+
+  useEffect(() => {
+    if (!toc.length) return;
+    const onScroll = () => {
+      let current = toc[0]?.id || '';
+      for (const item of toc) {
+        const el = document.getElementById(item.id);
+        if (el && el.getBoundingClientRect().top <= 140) current = item.id;
       }
-      
-      setArticle(response.data);
-      fetchRelatedArticles(response.data.category.id);
-      setError(null);
-    } catch (err: any) {
-      console.error('Error fetching article:', err);
-      setError(err.response?.data?.detail || 'خطا در دریافت مقاله');
-    } finally {
-      setLoading(false);
-    }
-  };
+      setActiveToc(current);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [toc]);
 
-  const fetchRelatedArticles = async (categoryId: number) => {
-    try {
-      const response = await api.get(`/blog/articles/?category=${categoryId}&page_size=3`);
-      if (response.data.results) {
-        setRelatedArticles(response.data.results.filter((a: Article) => a.id !== article?.id).slice(0, 3));
-      } else {
-        setRelatedArticles(response.data.filter((a: Article) => a.id !== article?.id).slice(0, 3));
-      }
-    } catch (err) {
-      console.error('Error fetching related articles:', err);
-    }
-  };
+  const dir = language === 'en' ? 'ltr' : 'rtl';
+  const font =
+    language === 'fa'
+      ? 'DigiHamishe, DigiHamisheBold, sans-serif'
+      : language === 'en'
+      ? 'Inter, sans-serif'
+      : "'Noto Sans Arabic', sans-serif";
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    if (language === 'fa') {
-      return new Intl.DateTimeFormat('fa-IR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
-    } else if (language === 'ar') {
-      return new Intl.DateTimeFormat('ar-SA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
-    } else {
-      return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
-    }
-  };
+  const authorName =
+    article?.author_name ||
+    [article?.author?.first_name, article?.author?.last_name].filter(Boolean).join(' ') ||
+    article?.author?.username ||
+    'Nasim Air';
 
-  const getDefaultImage = () => {
-    return '/images/airport-plane-photo_991869-62.jpg';
-  };
-
-  const shareArticle = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: article?.title,
-        text: article?.excerpt,
-        url: window.location.href
-      });
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      alert(language === 'fa' ? 'لینک کپی شد' : language === 'ar' ? 'تم نسخ الرابط' : 'Link copied');
-    }
+  const formatDate = (value?: string) => {
+    if (!value) return '';
+    const d = new Date(value);
+    return new Intl.DateTimeFormat(language === 'en' ? 'en-US' : language === 'ar' ? 'ar-SA' : 'fa-IR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(d);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#f8fafc]">
         <EmiratesHeader />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p
-              className={`mt-4 text-gray-600 ${fontClass}`}
-              style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-              }}
-            >
-              {language === 'fa' ? 'در حال بارگذاری...' : language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
-            </p>
-          </div>
+        <div className="flex justify-center py-24 text-slate-500" style={{ fontFamily: font }}>
+          {language === 'fa' ? 'در حال بارگذاری...' : 'Loading...'}
         </div>
       </div>
     );
@@ -170,234 +157,221 @@ const ArticleDetailPage: React.FC = () => {
 
   if (error || !article) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#f8fafc]">
         <EmiratesHeader />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <p
-              className={`text-red-600 ${fontClass}`}
-              style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-              }}
-            >
-              {error || (language === 'fa' ? 'مقاله یافت نشد' : language === 'ar' ? 'لم يتم العثور على المقال' : 'Article not found')}
-            </p>
-            <Link
-              to="/magazine"
-              className={`mt-4 inline-block text-blue-600 hover:text-blue-800 ${fontClass}`}
-              style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-              }}
-            >
-              {language === 'fa' ? 'بازگشت به مجله' : language === 'ar' ? 'العودة إلى المجلة' : 'Back to Magazine'}
-            </Link>
-          </div>
+        <div className="text-center py-24">
+          <p className="text-red-600 mb-4" style={{ fontFamily: font }}>{error || 'Not found'}</p>
+          <button
+            onClick={() => navigate('/magazine')}
+            className="text-[#1e3a8a] underline"
+            style={{ fontFamily: font }}
+          >
+            {language === 'fa' ? 'بازگشت به مجله' : 'Back to magazine'}
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f8fafc]" style={{ direction: dir }}>
+      <SeoHead
+        title={article.meta_title || article.og_title || article.title}
+        description={article.meta_description || article.og_description || article.excerpt}
+        keywords={article.meta_keywords}
+        canonical={article.canonical_url || (typeof window !== 'undefined' ? window.location.href : undefined)}
+        image={article.og_image_url || article.featured_image}
+        type="article"
+        noindex={article.seo_data?.robots_index === false}
+        jsonLd={
+          article.seo_data?.structured_data ||
+          article.seo_data?.schema_markup || {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: article.title,
+            description: article.meta_description || article.excerpt,
+            image: article.og_image_url || article.featured_image,
+            datePublished: article.published_at,
+            author: { '@type': 'Person', name: authorName },
+          }
+        }
+      />
       <EmiratesHeader />
-      
-      {/* Article Header */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Link
-            to="/magazine"
-            className={`inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6 ${fontClass}`}
-            style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-              direction: language === 'en' ? 'ltr' : 'rtl'
-            }}
-          >
-            <ArrowLeftIcon className="w-5 h-5" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
-            <span>{language === 'fa' ? 'بازگشت به مجله' : language === 'ar' ? 'العودة إلى المجلة' : 'Back to Magazine'}</span>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        {/* Breadcrumb */}
+        <nav className={`text-sm text-slate-500 mb-6 flex flex-wrap items-center gap-2 ${fontClass}`} style={{ fontFamily: font }}>
+          <Link to="/" className="hover:text-[#1e3a8a]">{language === 'fa' ? 'خانه' : 'Home'}</Link>
+          <span>/</span>
+          <Link to="/magazine" className="hover:text-[#1e3a8a]">{language === 'fa' ? 'مجله' : 'Magazine'}</Link>
+          <span>/</span>
+          <Link to={`/magazine/category/${article.category.slug}`} className="hover:text-[#1e3a8a]">
+            {article.category.name}
           </Link>
+          <span>/</span>
+          <span className="text-slate-700 line-clamp-1">{article.title}</span>
+        </nav>
 
-          <div className="flex items-center gap-2 mb-4">
-            <TagIcon className="w-5 h-5 text-gray-500" />
-            <span className={`text-gray-600 ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
-              {article.category.name}
-            </span>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+          {/* Sidebar — left in LTR visual = end in RTL grid */}
+          <aside className="lg:col-span-4 xl:col-span-3 order-2 lg:order-1">
+            <div className="lg:sticky lg:top-24 space-y-5">
+              {toc.length > 0 && (
+                <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                  <h3
+                    className={`text-base font-bold text-[#0b1f4d] mb-4 ${fontClass}`}
+                    style={{ fontFamily: font }}
+                  >
+                    {language === 'fa' ? 'فهرست مطالب' : 'Table of contents'}
+                  </h3>
+                  <ol className="space-y-2">
+                    {toc.map((item, idx) => (
+                      <li key={item.id}>
+                        <a
+                          href={`#${item.id}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setActiveToc(item.id);
+                          }}
+                          className={`flex gap-3 text-sm leading-snug rounded-lg px-2 py-1.5 transition ${
+                            activeToc === item.id
+                              ? 'text-[#1e3a8a] font-semibold bg-blue-50 border-r-2 border-[#1e3a8a]'
+                              : 'text-slate-600 hover:text-[#1e3a8a] hover:bg-slate-50'
+                          }`}
+                          style={{ fontFamily: font, paddingInlineStart: item.level > 2 ? 12 : 0 }}
+                        >
+                          <span className="text-slate-400 tabular-nums shrink-0">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          <span>{item.text}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
 
-          <h1
-            className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 ${fontClass}`}
-            style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-              direction: language === 'en' ? 'ltr' : 'rtl'
-            }}
-          >
-            {article.title}
-          </h1>
-
-          <p
-            className={`text-xl text-gray-600 mb-6 ${fontClass}`}
-            style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-              direction: language === 'en' ? 'ltr' : 'rtl'
-            }}
-          >
-            {article.excerpt}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <UserIcon className="w-5 h-5" />
-              <span className={fontClass} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
-                {article.author.first_name && article.author.last_name
-                  ? `${article.author.first_name} ${article.author.last_name}`
-                  : article.author.username}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CalendarDaysIcon className="w-5 h-5" />
-              <span className={fontClass} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
-                {formatDate(article.published_at)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ClockIcon className="w-5 h-5" />
-              <span className={fontClass} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
-                {article.reading_time} {language === 'fa' ? 'دقیقه' : language === 'ar' ? 'دقيقة' : 'min'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <EyeIcon className="w-5 h-5" />
-              <span className={fontClass} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
-                {article.view_count} {language === 'fa' ? 'بازدید' : language === 'ar' ? 'مشاهدة' : 'views'}
-              </span>
-            </div>
-            <button
-              onClick={shareArticle}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <ShareIcon className="w-5 h-5" />
-              <span className={fontClass} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
-                {language === 'fa' ? 'اشتراک‌گذاری' : language === 'ar' ? 'مشاركة' : 'Share'}
-              </span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Image */}
-      {article.featured_image && (
-        <section className="bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <img
-              src={article.featured_image}
-              alt={article.title}
-              className="w-full h-auto rounded-xl shadow-lg"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = getDefaultImage();
-              }}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Article Content */}
-      <section className="bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div
-            className={`prose prose-lg max-w-none ${fontClass}`}
-            style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-              direction: language === 'en' ? 'ltr' : 'rtl'
-            }}
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
-        </div>
-      </section>
-
-      {/* Tags */}
-      {article.tags && article.tags.length > 0 && (
-        <section className="bg-white border-t border-gray-200">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`text-gray-700 font-semibold ${fontClass}`}
-                style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}
-              >
-                {language === 'fa' ? 'برچسب‌ها:' : language === 'ar' ? 'العلامات:' : 'Tags:'}
-              </span>
-              {article.tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
-                >
-                  {tag.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Related Articles */}
-      {relatedArticles.length > 0 && (
-        <section className="bg-gray-50 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2
-              className={`text-2xl sm:text-3xl font-bold mb-8 text-gray-900 ${fontClass}`}
-              style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                direction: language === 'en' ? 'ltr' : 'rtl'
-              }}
-            >
-              {language === 'fa' ? 'مقالات مرتبط' : language === 'ar' ? 'مقالات ذات صلة' : 'Related Articles'}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedArticles.map((relatedArticle) => (
+              <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#0b1f4d] to-[#1e3a8a] text-white p-5 shadow-md">
+                <h4 className={`font-bold text-lg mb-2 ${fontClass}`} style={{ fontFamily: font }}>
+                  {language === 'fa' ? 'سفر بعدی‌تان را رزرو کنید' : 'Book your next flight'}
+                </h4>
+                <p className={`text-sm text-blue-100 mb-4 leading-relaxed ${fontClass}`} style={{ fontFamily: font }}>
+                  {language === 'fa'
+                    ? 'از مجله به پرواز — بلیط هواپیمایی نسیم را آنلاین تهیه کنید.'
+                    : 'From magazine to runway — book Nasim Air tickets online.'}
+                </p>
                 <Link
-                  key={relatedArticle.id}
-                  to={`/magazine/${relatedArticle.slug || relatedArticle.id}`}
-                  className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  to="/tickets"
+                  className="inline-flex items-center justify-center gap-2 w-full bg-white text-[#0b1f4d] font-semibold rounded-xl py-2.5 hover:bg-blue-50 transition"
+                  style={{ fontFamily: font }}
                 >
-                  <div className="relative h-48 overflow-hidden">
+                  <TicketIcon className="w-5 h-5" />
+                  {language === 'fa' ? 'مشاهده پروازها' : 'View flights'}
+                </Link>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main article */}
+          <article className="lg:col-span-8 xl:col-span-9 order-1 lg:order-2">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-5 sm:p-8 lg:p-10">
+                <h1
+                  className={`text-2xl sm:text-4xl font-bold text-[#0b1f4d] mb-4 leading-tight ${fontClass}`}
+                  style={{ fontFamily: font }}
+                >
+                  {article.title}
+                </h1>
+
+                <div
+                  className={`flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 mb-4 ${fontClass}`}
+                  style={{ fontFamily: font }}
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    <UserIcon className="w-4 h-4" />
+                    {authorName}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <CalendarDaysIcon className="w-4 h-4" />
+                    {formatDate(article.published_at)}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <ClockIcon className="w-4 h-4" />
+                    {article.reading_time || 1} {language === 'fa' ? 'دقیقه مطالعه' : 'min read'}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <EyeIcon className="w-4 h-4" />
+                    {article.view_count || 0}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({ title: article.title, url: window.location.href });
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 text-[#1e3a8a] hover:underline"
+                  >
+                    <ShareIcon className="w-4 h-4" />
+                    {language === 'fa' ? 'اشتراک' : 'Share'}
+                  </button>
+                </div>
+
+                {(article.tags?.length > 0 || article.category) && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    <Link
+                      to={`/magazine/category/${article.category.slug}`}
+                      className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-[#1e3a8a]"
+                      style={{ fontFamily: font }}
+                    >
+                      {article.category.name}
+                    </Link>
+                    {article.tags?.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700"
+                        style={{ fontFamily: font }}
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {article.featured_image && (
+                  <div className="rounded-xl overflow-hidden mb-8 border border-slate-100">
                     <img
-                      src={relatedArticle.featured_image || getDefaultImage()}
-                      alt={relatedArticle.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = getDefaultImage();
-                      }}
+                      src={article.featured_image}
+                      alt={article.title}
+                      className="w-full max-h-[420px] object-cover"
                     />
                   </div>
-                  <div className="p-6">
-                    <h3
-                      className={`text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 ${fontClass}`}
-                      style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                        direction: language === 'en' ? 'ltr' : 'rtl'
-                      }}
-                    >
-                      {relatedArticle.title}
-                    </h3>
-                    <p
-                      className={`text-gray-600 text-sm line-clamp-2 ${fontClass}`}
-                      style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                        direction: language === 'en' ? 'ltr' : 'rtl'
-                      }}
-                    >
-                      {relatedArticle.excerpt}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+                )}
+
+                {article.excerpt && (
+                  <p
+                    className={`text-lg text-slate-600 mb-8 leading-relaxed border-r-4 border-[#1e3a8a] pr-4 ${fontClass}`}
+                    style={{ fontFamily: font }}
+                  >
+                    {article.excerpt}
+                  </p>
+                )}
+
+                <div
+                  className="nasim-article-body"
+                  style={{ fontFamily: font, direction: dir }}
+                  dangerouslySetInnerHTML={{ __html: contentHtml }}
+                />
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </article>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default ArticleDetailPage;
-

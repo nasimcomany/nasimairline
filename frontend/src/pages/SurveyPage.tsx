@@ -21,7 +21,7 @@ const SurveyPage: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   const dir = 'rtl';
-  const fontStyle = { fontFamily: "'Vazirmatn', sans-serif" };
+  const fontStyle = { fontFamily: "'DigiHamishe', 'DigiHamisheBold', sans-serif" };
 
   const [formData, setFormData] = useState<SurveyFormData>({
     full_name: '',
@@ -126,7 +126,7 @@ const SurveyPage: React.FC = () => {
       <EmiratesHeader />
       <section className="relative py-10 sm:py-12 text-center">
         <div className="relative z-10 max-w-4xl mx-auto px-4">
-          <h1 className="text-white text-2xl sm:text-4xl font-bold mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}>
+          <h1 className="text-white text-2xl sm:text-4xl font-bold mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: dir }}>
             فرم نظرسنجی
           </h1>
           <p className="text-white/80 text-sm sm:text-base" style={fontStyle}>
@@ -138,7 +138,7 @@ const SurveyPage: React.FC = () => {
       <section className="relative z-10 max-w-4xl mx-auto px-4 pb-24">
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-blue-900/90 px-6 sm:px-8 py-4">
-            <h2 className="text-white text-lg font-semibold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}>
+            <h2 className="text-white text-lg font-semibold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: dir }}>
               اطلاعات شخصی و پرواز
             </h2>
           </div>
@@ -191,7 +191,7 @@ const SurveyPage: React.FC = () => {
             </div>
 
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 تعداد سفر با نسیم
               </h3>
               <RadioGroup name="trips_with_nasim" options={[
@@ -203,7 +203,7 @@ const SurveyPage: React.FC = () => {
             </div>
 
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 تعداد سفرهای هوایی در سال
               </h3>
               <RadioGroup name="annual_flights" options={[
@@ -215,7 +215,7 @@ const SurveyPage: React.FC = () => {
             </div>
 
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 هدف از سفر
               </h3>
               <RadioGroup name="travel_purpose" options={[
@@ -227,7 +227,7 @@ const SurveyPage: React.FC = () => {
             </div>
 
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 دلیل انتخاب نسیم
               </h3>
               <RadioGroup name="nasim_choice_reason" options={[
@@ -239,7 +239,7 @@ const SurveyPage: React.FC = () => {
             </div>
 
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 نحوه برخورد پرسنل ایستگاه و گیت سوار شدن به هواپیما
               </h3>
               <RadioGroup name="station_staff_rating" options={RATING_OPTIONS} />
@@ -258,7 +258,7 @@ const SurveyPage: React.FC = () => {
               { key: 'vs_domestic_rating', label: 'رضایتمندی از نسیم در قیاس با شرکت های داخلی' },
             ].map(({ key, label }) => (
               <div key={key} className="pt-4 border-t border-gray-200">
-                <h3 className="text-blue-900 font-semibold mb-3 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <h3 className="text-blue-900 font-semibold mb-3 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {label}
                 </h3>
                 <RadioGroup name={key as keyof SurveyFormData} options={RATING_OPTIONS} />
@@ -266,7 +266,7 @@ const SurveyPage: React.FC = () => {
             ))}
 
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 پیشنهاد سفر با نسیم به سایرین
               </h3>
               <RadioGroup name="recommend_nasim" options={[
@@ -276,7 +276,7 @@ const SurveyPage: React.FC = () => {
             </div>
 
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 پیشنهادها و انتقادها
               </h3>
               <textarea
@@ -294,7 +294,7 @@ const SurveyPage: React.FC = () => {
                 type="submit"
                 disabled={loading}
                 className="w-full py-4 bg-blue-900 hover:bg-blue-800 disabled:bg-blue-900/70 text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}
+                style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: dir }}
               >
                 {loading ? (
                   <>

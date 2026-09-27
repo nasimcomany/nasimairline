@@ -71,7 +71,7 @@ const StaffLoginModal: React.FC<StaffLoginModalProps> = ({ isOpen, onClose }) =>
           <XMarkIcon className="w-5 h-5 text-gray-500" />
         </button>
 
-        <h2 className="text-xl font-bold text-blue-900 mb-6" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+        <h2 className="text-xl font-bold text-blue-900 mb-6" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
           {t('nav.loginStaff') || 'ورود پرسنل'}
         </h2>
         <p className="text-gray-600 text-sm mb-4">

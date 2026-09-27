@@ -30,7 +30,7 @@ interface SafetyHazardFormProps {
 const SafetyHazardForm: React.FC<SafetyHazardFormProps> = ({ onSuccess, onCancel }) => {
   const { fontClass, language, t } = useLanguage();
   const dir = language === 'en' ? 'ltr' : 'rtl';
-  const fontStyle = { fontFamily: 'DigiHamisheBold, Arial, sans-serif' };
+  const fontStyle = { fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' };
   const inputClass = `w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-900/30 focus:border-blue-900 ${fontClass}`;
   const labelClass = `block text-sm font-medium text-gray-700 mb-1.5 ${fontClass}`;
 

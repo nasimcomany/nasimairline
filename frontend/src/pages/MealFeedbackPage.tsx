@@ -138,7 +138,7 @@ const MealFeedbackPage: React.FC = () => {
     
     return (
       <div className="mb-4">
-        <label className="block text-gray-800 text-xs font-bold mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+        <label className="block text-gray-800 text-xs font-bold mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
           {label}
         </label>
         <div className="flex gap-1" dir="ltr">
@@ -161,7 +161,7 @@ const MealFeedbackPage: React.FC = () => {
             </button>
           ))}
         </div>
-        <div className="mt-1 text-xs text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+        <div className="mt-1 text-xs text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
           {value !== null && (
             <>
               {value === 5 && (language === 'fa' ? 'عالی' : 'Excellent')}
@@ -186,13 +186,13 @@ const MealFeedbackPage: React.FC = () => {
             <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h1
               className="text-2xl font-bold text-gray-900 mb-3"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
             >
               {language === 'fa' ? '✅ بازخورد شما ثبت شد' : '✅ Thank You!'}
             </h1>
             <p
               className="text-sm text-gray-600 mb-6"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
             >
               {language === 'fa'
                 ? 'از اینکه وقت گذاشتید سپاسگزاریم. نظرات شما به ما کمک می‌کند تا کیفیت خدمات خود را بهبود بخشیم.'
@@ -201,7 +201,7 @@ const MealFeedbackPage: React.FC = () => {
             <button
               onClick={() => navigate('/')}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all text-sm"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
             >
               {language === 'fa' ? 'بازگشت به صفحه اصلی' : 'Back to Home'}
             </button>
@@ -222,14 +222,14 @@ const MealFeedbackPage: React.FC = () => {
             <div className="inline-block bg-white rounded-xl shadow-lg px-6 py-3 mb-4">
               <h1
                 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
               >
                 {language === 'fa' ? '🍽️ نظرسنجی غذای پرواز' : '🍽️ Flight Meal Feedback'}
               </h1>
             </div>
             <p
               className="text-sm text-white max-w-xl mx-auto"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
             >
               {language === 'fa'
                 ? 'نظر شما برای ما ارزشمند است. لطفاً کیفیت غذای پرواز را ارزیابی کنید.'
@@ -242,13 +242,13 @@ const MealFeedbackPage: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
               <h2
                 className="text-xl font-bold text-gray-900 mb-4 text-center"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
               >
                 {language === 'fa' ? '🔐 تایید امنیتی' : '🔐 Security Verification'}
               </h2>
               <div className="max-w-sm mx-auto">
                 <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg p-4 mb-3 text-center">
-                  <p className="text-xs text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  <p className="text-xs text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                     {language === 'fa' ? 'حاصل این عمل را وارد کنید:' : 'Solve this:'}
                   </p>
                   <p className="text-2xl font-bold text-gray-900">{captchaValue}</p>
@@ -260,10 +260,10 @@ const MealFeedbackPage: React.FC = () => {
                   onKeyPress={(e) => e.key === 'Enter' && verifyCaptcha()}
                   placeholder={language === 'fa' ? 'جواب' : 'Answer'}
                   className="w-full px-3 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-3 text-center text-lg"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 />
                 {captchaError && (
-                  <p className="text-red-600 text-xs mb-3 text-center" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  <p className="text-red-600 text-xs mb-3 text-center" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                     {language === 'fa' ? '❌ پاسخ اشتباه است' : '❌ Wrong answer'}
                   </p>
                 )}
@@ -272,7 +272,7 @@ const MealFeedbackPage: React.FC = () => {
                     type="button"
                     onClick={verifyCaptcha}
                     className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2.5 rounded-lg font-bold hover:from-blue-700 hover:to-indigo-700 transition-all text-sm"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                   >
                     {language === 'fa' ? 'تایید' : 'Verify'}
                   </button>
@@ -280,7 +280,7 @@ const MealFeedbackPage: React.FC = () => {
                     type="button"
                     onClick={generateCaptcha}
                     className="px-4 py-2.5 border-2 border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition-all text-sm"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                   >
                     🔄
                   </button>
@@ -296,13 +296,13 @@ const MealFeedbackPage: React.FC = () => {
               <div className="mb-6">
                 <h2
                   className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-200"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   {language === 'fa' ? '✈️ اطلاعات پرواز' : '✈️ Flight Information'}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                       {language === 'fa' ? 'شماره پرواز' : 'Flight Number'}
                     </label>
                     <input
@@ -311,11 +311,11 @@ const MealFeedbackPage: React.FC = () => {
                       onChange={(e) => handleInputChange('flight_number', e.target.value)}
                       placeholder={language === 'fa' ? 'مثال: NSN6650' : 'e.g., NSN6650'}
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                       {language === 'fa' ? 'شهر مبدا' : 'Origin City'}
                     </label>
                     <input
@@ -324,11 +324,11 @@ const MealFeedbackPage: React.FC = () => {
                       onChange={(e) => handleInputChange('origin_city', e.target.value)}
                       placeholder={language === 'fa' ? 'مثال: تهران' : 'e.g., Tehran'}
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                       {language === 'fa' ? 'شهر مقصد' : 'Destination City'}
                     </label>
                     <input
@@ -337,7 +337,7 @@ const MealFeedbackPage: React.FC = () => {
                       onChange={(e) => handleInputChange('destination_city', e.target.value)}
                       placeholder={language === 'fa' ? 'مثال: مشهد' : 'e.g., Mashhad'}
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                     />
                   </div>
                 </div>
@@ -347,13 +347,13 @@ const MealFeedbackPage: React.FC = () => {
               <div className="mb-6">
                 <h2
                   className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-200"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   {language === 'fa' ? '👤 اطلاعات مسافر' : '👤 Passenger Information'}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                       {language === 'fa' ? 'نام' : 'First Name'}
                     </label>
                     <input
@@ -361,11 +361,11 @@ const MealFeedbackPage: React.FC = () => {
                       value={formData.first_name}
                       onChange={(e) => handleInputChange('first_name', e.target.value)}
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <label className="block text-gray-700 text-xs font-bold mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                       {language === 'fa' ? 'نام خانوادگی' : 'Last Name'}
                     </label>
                     <input
@@ -373,7 +373,7 @@ const MealFeedbackPage: React.FC = () => {
                       value={formData.last_name}
                       onChange={(e) => handleInputChange('last_name', e.target.value)}
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                     />
                   </div>
                 </div>
@@ -383,7 +383,7 @@ const MealFeedbackPage: React.FC = () => {
               <div className="mb-6">
                 <h2
                   className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-200"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   {language === 'fa' ? '⭐ ارزیابی کیفیت غذا' : '⭐ Meal Quality Rating'}
                 </h2>
@@ -435,7 +435,7 @@ const MealFeedbackPage: React.FC = () => {
               <div className="mb-6">
                 <h2
                   className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-200"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   {language === 'fa' ? '💬 نظرات و پیشنهادات' : '💬 Comments & Suggestions'}
                 </h2>
@@ -445,14 +445,14 @@ const MealFeedbackPage: React.FC = () => {
                   rows={4}
                   placeholder={language === 'fa' ? 'نظرات یا پیشنهادات خود را بنویسید...' : 'Your comments or suggestions...'}
                   className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none text-sm"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 />
               </div>
               
               {/* Submit Error */}
               {submitError && (
                 <div className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded-lg">
-                  <p className="text-red-600 text-center text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  <p className="text-red-600 text-center text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                     {submitError}
                   </p>
                 </div>
@@ -466,13 +466,13 @@ const MealFeedbackPage: React.FC = () => {
                   className={`bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg text-sm font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl ${
                     isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   {isSubmitting
                     ? (language === 'fa' ? '⏳ در حال ارسال...' : '⏳ Submitting...')
                     : (language === 'fa' ? '✅ ارسال بازخورد' : '✅ Submit Feedback')}
                 </button>
-                <p className="mt-3 text-xs text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <p className="mt-3 text-xs text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {language === 'fa'
                     ? '* تمام فیلدها اختیاری هستند'
                     : '* All fields are optional'}

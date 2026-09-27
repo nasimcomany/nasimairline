@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import SeoHead from '../components/SEO/SeoHead';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import {
@@ -105,6 +106,16 @@ const IranologyPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <SeoHead
+        title={language === 'fa' ? 'ایران‌شناسی | هواپیمایی نسیم' : language === 'ar' ? 'إيرانولوجيا | نسيم' : 'Iranology | Nasim Air'}
+        description={
+          language === 'fa'
+            ? 'آشنایی با شهرها و مقاصد ایران'
+            : 'Discover cities and destinations across Iran'
+        }
+        canonical={typeof window !== 'undefined' ? `${window.location.origin}/iranology` : undefined}
+        type="website"
+      />
       <EmiratesHeader />
       
       {/* Hero Section */}
@@ -117,7 +128,7 @@ const IranologyPage: React.FC = () => {
             <h1
               className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 ${fontClass}`}
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
@@ -126,7 +137,7 @@ const IranologyPage: React.FC = () => {
             <p
               className={`text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto ${fontClass}`}
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
@@ -157,7 +168,7 @@ const IranologyPage: React.FC = () => {
                 }}
                  className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   direction: language === 'en' ? 'ltr' : 'rtl',
                   paddingLeft: language === 'en' ? '2.5rem' : '1rem',
                   paddingRight: language === 'en' ? '1rem' : '2.5rem'
@@ -178,7 +189,7 @@ const IranologyPage: React.FC = () => {
                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                  } ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {language === 'fa' ? 'همه استان‌ها' : language === 'ar' ? 'جميع المحافظات' : 'All Provinces'}
@@ -196,7 +207,7 @@ const IranologyPage: React.FC = () => {
                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                    } ${fontClass}`}
                   style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}
                 >
                   {province.province} ({province.city_count})
@@ -216,7 +227,7 @@ const IranologyPage: React.FC = () => {
               <p
                 className={`mt-4 text-gray-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {language === 'fa' ? 'در حال بارگذاری...' : language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
@@ -227,7 +238,7 @@ const IranologyPage: React.FC = () => {
               <p
                 className={`text-red-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {error}
@@ -239,7 +250,7 @@ const IranologyPage: React.FC = () => {
               <p
                 className={`text-gray-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {language === 'fa' ? 'شهری یافت نشد' : language === 'ar' ? 'لم يتم العثور على مدينة' : 'No cities found'}
@@ -272,7 +283,7 @@ const IranologyPage: React.FC = () => {
                         <h3
                           className={`text-xl font-bold ${fontClass}`}
                           style={{
-                            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                            fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                             direction: language === 'en' ? 'ltr' : 'rtl'
                           }}
                         >
@@ -285,7 +296,7 @@ const IranologyPage: React.FC = () => {
                         <p
                           className={`text-gray-600 mb-4 line-clamp-2 text-sm ${fontClass}`}
                           style={{
-                            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                            fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                             direction: language === 'en' ? 'ltr' : 'rtl'
                           }}
                         >
@@ -322,7 +333,7 @@ const IranologyPage: React.FC = () => {
                   <span
                     className={`px-4 py-2 ${fontClass}`}
                     style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                     }}
                   >
                     {language === 'fa' ? `صفحه ${currentPage} از ${totalPages}` : language === 'ar' ? `صفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}

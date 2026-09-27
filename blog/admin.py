@@ -4,6 +4,7 @@ Admin configuration for blog app
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
+from ckeditor_uploader.fields import RichTextUploadingField
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from .models import Article, Category, Tag, Comment, SEOData, InternalLink, ExternalLink, Backlink, IranCity, IranologyArticle
 
@@ -13,20 +14,44 @@ class CategoryAdmin(admin.ModelAdmin):
     """
     Admin configuration for Category model
     """
-    list_display = ['name', 'slug', 'is_active', 'order', 'article_count', 'created_at']
+    list_display = ['image_preview', 'name', 'slug', 'is_active', 'order', 'article_count', 'created_at']
     list_filter = ['is_active', 'created_at']
     search_fields = ['name', 'slug', 'description']
     list_editable = ['is_active', 'order']
     prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ['image_preview_large']
     fieldsets = (
         ('اطلاعات پایه', {
-            'fields': ('name', 'slug', 'description', 'image', 'is_active', 'order')
+            'fields': ('name', 'slug', 'description', 'image', 'image_preview_large', 'is_active', 'order'),
+            'description': (
+                'نام و تصویر دسته در صفحه مجله نمایش داده می‌شود. '
+                'با خاموش کردن «فعال»، دسته از سایت حذف می‌شود (مقالاتش حذف نمی‌شوند). '
+                'اسلاگ بخشی از آدرس است: /magazine/category/اسلاگ/'
+            ),
         }),
-        ('SEO', {
+        ('SEO دسته‌بندی', {
             'fields': ('meta_title', 'meta_description', 'meta_keywords'),
-            'classes': ('collapse',),
+            'description': 'عنوان و توضیح متا برای صفحه /magazine/category/…',
         }),
     )
+
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="width:48px;height:48px;object-fit:cover;border-radius:9999px;" />',
+                obj.image.url,
+            )
+        return '—'
+    image_preview.short_description = 'تصویر'
+
+    def image_preview_large(self, obj):
+        if obj and obj.image:
+            return format_html(
+                '<img src="{}" style="max-width:280px;max-height:180px;object-fit:cover;border-radius:12px;" />',
+                obj.image.url,
+            )
+        return 'هنوز تصویری آپلود نشده'
+    image_preview_large.short_description = 'پیش‌نمایش تصویر'
     
     def article_count(self, obj):
         """Display article count"""
@@ -132,56 +157,57 @@ class ArticleAdmin(admin.ModelAdmin):
     ]
     date_hierarchy = 'published_at'
     
-    # Use CKEditor with upload capability for content field
+    # Force professional SEO CKEditor (H1–H6, justify, links, images, tables)
     formfield_overrides = {
-        'RichTextUploadingField': {'widget': CKEditorUploadingWidget(config_name='seo_optimized')},
+        RichTextUploadingField: {
+            'widget': CKEditorUploadingWidget(config_name='seo_optimized'),
+        },
     }
     
     fieldsets = (
-        ('اطلاعات پایه', {
-            'fields': ('title', 'slug', 'excerpt', 'content', 'author', 'article_type')
+        ('۱) نوشتن مقاله', {
+            'fields': ('title', 'slug', 'excerpt', 'content', 'author', 'article_type'),
+            'description': (
+                'در ویرایشگر از Format برای H1/H2/H3/H4 استفاده کنید. '
+                'متن را Justify کنید، لینک داخلی/خارجی بگذارید، تصویر و جدول اضافه کنید.'
+            ),
         }),
-        ('دسته‌بندی', {
-            'fields': ('category', 'tags')
+        ('۲) دسته‌بندی و تگ', {
+            'fields': ('category', 'tags'),
+            'description': 'بعد از انتشار، مقاله در صفحه مجله و صفحه همان دسته نمایش داده می‌شود.',
         }),
-        ('رسانه', {
+        ('۳) تصویر شاخص', {
             'fields': ('featured_image', 'image_alt')
         }),
-        ('SEO - مهم برای گوگل', {
+        ('۴) SEO — کلمه کلیدی و نمایش در گوگل', {
             'fields': (
-                'meta_title', 'meta_description', 'meta_keywords', 
+                'meta_title', 'meta_description', 'meta_keywords',
                 'seo_priority', 'canonical_url', 'keyword_density'
             ),
-            'description': 'این فیلدها برای ایندکس شدن در گوگل بسیار مهم هستند'
+            'description': (
+                'meta_keywords: کلمه کلیدی اصلی + مترادف‌ها با کاما. '
+                'meta_title حداکثر حدود ۶۰ کاراکتر، meta_description حدود ۱۶۰ کاراکتر.'
+            ),
         }),
-        ('Open Graph & Social Media', {
+        ('۵) شبکه‌های اجتماعی (Open Graph)', {
             'fields': ('og_title', 'og_description', 'og_image'),
-            'classes': ('collapse',),
         }),
-        ('ساختار محتوا (Headings)', {
-            'fields': ('h1_title', 'h2_count', 'h3_count', 'h4_count'),
-            'description': 'ساختار هدینگ‌ها برای SEO بسیار مهم است',
-            'classes': ('collapse',),
-        }),
-        ('لینک‌ها', {
-            'fields': ('internal_link_count', 'external_link_count', 'backlink_count'),
-            'classes': ('collapse',),
-        }),
-        ('تحلیل محتوا', {
-            'fields': ('word_count', 'content_length', 'reading_time'),
-            'classes': ('collapse',),
-        }),
-        ('وضعیت و نمایش', {
+        ('۶) انتشار', {
             'fields': (
-                'status', 'is_featured', 'is_pinned', 
+                'status', 'is_featured', 'is_pinned',
                 'allow_comments', 'published_at'
-            )
+            ),
+            'description': 'برای نمایش عمومی، وضعیت را روی «منتشر شده» بگذارید (یا از اکشن «منتشر کردن» استفاده کنید).',
         }),
-        ('آمار', {
-            'fields': ('view_count',),
+        ('آمار ساختار محتوا (خودکار)', {
+            'fields': (
+                'h1_title', 'h2_count', 'h3_count', 'h4_count',
+                'internal_link_count', 'external_link_count', 'backlink_count',
+                'word_count', 'content_length', 'reading_time', 'view_count',
+            ),
             'classes': ('collapse',),
         }),
-        ('اطلاعات اضافی', {
+        ('اطلاعات سیستمی', {
             'fields': ('uuid', 'metadata', 'created_at', 'updated_at'),
             'classes': ('collapse',),
         }),
@@ -441,9 +467,10 @@ class IranologyArticleAdmin(admin.ModelAdmin):
     ]
     date_hierarchy = 'published_at'
     
-    # Use CKEditor with upload capability for content field
     formfield_overrides = {
-        'RichTextUploadingField': {'widget': CKEditorUploadingWidget(config_name='seo_optimized')},
+        RichTextUploadingField: {
+            'widget': CKEditorUploadingWidget(config_name='seo_optimized'),
+        },
     }
     
     fieldsets = (

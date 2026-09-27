@@ -43,6 +43,8 @@ const NeighboringCountryMap: React.FC<NeighboringCountryMapProps> = ({
         <img
           src={imagePath}
           alt={name.fa}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105 group-hover:opacity-90 drop-shadow-lg"
         />
       </div>
@@ -51,13 +53,13 @@ const NeighboringCountryMap: React.FC<NeighboringCountryMapProps> = ({
       <div className="mt-2 text-center">
         <p 
           className="text-sm font-bold text-gray-800"
-          style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+          style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
         >
           {name.fa}
         </p>
         <p 
           className="text-xs text-gray-600"
-          style={{ fontFamily: 'Arial, sans-serif' }}
+          style={{ fontFamily: 'Inter, sans-serif' }}
         >
           {name.en}
         </p>

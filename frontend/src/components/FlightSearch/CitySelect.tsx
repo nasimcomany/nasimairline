@@ -1,54 +1,79 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { MapPinIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { getOriginCities, OriginCity } from '../../services/niraApi';
+import { getOriginCities, getDestinations, OriginCity } from '../../services/niraApi';
 
 interface CitySelectProps {
   value: string;
   onChange: (cityCode: string) => void;
   label: string;
   placeholder?: string;
+  /** origin = all Nira origins; destination = routes from originCode */
+  mode?: 'origin' | 'destination';
+  /** Required when mode=destination */
+  originCode?: string;
+}
+
+interface DropdownPos {
+  top: number;
+  left: number;
+  width: number;
+  maxHeight: number;
 }
 
 const CitySelect: React.FC<CitySelectProps> = ({
   value,
   onChange,
   label,
-  placeholder = 'جستجوی شهر یا فرودگاه'
+  placeholder = 'جستجوی شهر یا فرودگاه',
+  mode = 'origin',
+  originCode = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [cities, setCities] = useState<OriginCity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dropdownStyle, setDropdownStyle] = useState<{ top?: number; bottom?: number; left: number; width: number } | null>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<DropdownPos | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { language } = useLanguage();
 
-  // Fetch cities from API on component mount
   useEffect(() => {
+    let cancelled = false;
+
     const fetchCities = async () => {
       try {
         setLoading(true);
-        const originCities = await getOriginCities();
-        setCities(originCities);
+        if (mode === 'destination') {
+          if (!originCode) {
+            if (!cancelled) setCities([]);
+            return;
+          }
+          const destCities = await getDestinations(originCode);
+          if (!cancelled) setCities(destCities.filter((c) => c.CITY !== originCode));
+        } else {
+          const originCities = await getOriginCities();
+          if (!cancelled) setCities(originCities);
+        }
       } catch (error) {
         console.error('Error loading cities:', error);
-        // Fallback to empty array if API fails
-        setCities([]);
+        if (!cancelled) setCities([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchCities();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, originCode]);
 
   const selectedCity = cities.find(city => city.CITY === value);
-  
+
   const getCityName = (city: OriginCity) => {
     return language === 'en' ? city.CITYNAME_EN : city.CITYNAME_FA;
   };
@@ -58,6 +83,34 @@ const CitySelect: React.FC<CitySelectProps> = ({
     city.CITYNAME_EN.toLowerCase().includes(searchTerm.toLowerCase()) ||
     city.CITY.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // همیشه بالای فیلد باز شود تا لیست واضح دیده شود
+  const updateDropdownPosition = useCallback(() => {
+    if (!isOpen || !triggerRef.current) {
+      setDropdownStyle(null);
+      return;
+    }
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const gap = 8;
+    const preferredHeight = 360;
+    const maxHeight = Math.max(200, Math.min(preferredHeight, rect.top - gap - 12));
+    const width = Math.max(rect.width, 280);
+    let left = rect.left;
+
+    // اگر از لبه راست صفحه بیرون زد، جا به جا کن
+    if (left + width > window.innerWidth - 8) {
+      left = Math.max(8, window.innerWidth - width - 8);
+    }
+    if (left < 8) left = 8;
+
+    setDropdownStyle({
+      top: Math.max(8, rect.top - maxHeight - gap),
+      left,
+      width,
+      maxHeight
+    });
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -76,60 +129,8 @@ const CitySelect: React.FC<CitySelectProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        const dropdownHeight = 320;
-        const gap = 6;
-        const spaceAbove = rect.top;
-        const spaceBelow = window.innerHeight - rect.bottom;
-        if (spaceAbove >= dropdownHeight + gap || spaceAbove >= spaceBelow) {
-          setDropdownStyle({
-            bottom: window.innerHeight - rect.top + gap,
-            left: rect.left,
-            width: Math.max(rect.width, 240)
-          });
-        } else {
-          setDropdownStyle({
-            top: rect.bottom + gap,
-            left: rect.left,
-            width: Math.max(rect.width, 240)
-          });
-        }
-      }
-    } else {
-      setDropdownStyle(null);
-    }
-  }, [isOpen]);
-
-  const updateDropdownPosition = () => {
-    if (isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      const dropdownHeight = 320;
-      const gap = 6;
-      const spaceAbove = rect.top;
-      const spaceBelow = window.innerHeight - rect.bottom;
-      if (spaceAbove >= dropdownHeight + gap || spaceAbove >= spaceBelow) {
-        setDropdownStyle({
-          bottom: window.innerHeight - rect.top + gap,
-          left: rect.left,
-          width: Math.max(rect.width, 240)
-        });
-      } else {
-        setDropdownStyle({
-          top: rect.bottom + gap,
-          left: rect.left,
-          width: Math.max(rect.width, 240)
-        });
-      }
-    } else {
-      setDropdownStyle(null);
-    }
-  };
-
-  useEffect(() => {
     updateDropdownPosition();
-  }, [isOpen]);
+  }, [updateDropdownPosition]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -139,7 +140,7 @@ const CitySelect: React.FC<CitySelectProps> = ({
       window.removeEventListener('scroll', updateDropdownPosition, true);
       window.removeEventListener('resize', updateDropdownPosition);
     };
-  }, [isOpen]);
+  }, [isOpen, updateDropdownPosition]);
 
   useEffect(() => {
     if (isOpen && searchInputRef.current) {
@@ -152,6 +153,8 @@ const CitySelect: React.FC<CitySelectProps> = ({
     setIsOpen(false);
     setSearchTerm('');
   };
+
+  const listMaxHeight = dropdownStyle ? Math.max(140, dropdownStyle.maxHeight - 64) : 280;
 
   return (
     <>
@@ -172,124 +175,123 @@ const CitySelect: React.FC<CitySelectProps> = ({
         }
       `}</style>
       <div ref={dropdownRef} className="relative">
-        <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+        <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
           {label}
         </label>
-      
-      {/* Selected City Display */}
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right flex items-center justify-between hover:border-gray-400"
-        style={{
-          fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-          direction: 'rtl',
-          minHeight: '48px',
-          height: '48px'
-        }}
-      >
-        <div className="flex items-center gap-1">
-          <MapPinIcon className="w-4 h-4 text-gray-400" />
-          {loading ? (
-            <span className="text-sm text-gray-400">در حال بارگذاری...</span>
-          ) : selectedCity ? (
-            <div className={language === 'en' ? 'text-left' : 'text-right'}>
-              <div className="text-sm text-gray-900 font-bold">{getCityName(selectedCity)}</div>
-              <div className="text-xs text-gray-500">{selectedCity.CITY}</div>
-            </div>
-          ) : (
-            <span className="text-sm text-gray-400">{placeholder}</span>
-          )}
-        </div>
-      </button>
 
-      {/* Dropdown - Portal برای نمایش کامل و بدون clipping - عین کلاس */}
-      {isOpen && dropdownStyle && createPortal(
-        <div
-          ref={portalRef}
-          className="fixed z-[99999] bg-white border border-gray-300 rounded-xl shadow-2xl overflow-hidden"
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right flex items-center justify-between hover:border-gray-400"
           style={{
-            left: dropdownStyle.left,
-            width: Math.min(dropdownStyle.width, 320),
-            ...(dropdownStyle.bottom !== undefined 
-              ? { bottom: dropdownStyle.bottom } 
-              : { top: dropdownStyle.top })
+            fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
+            direction: 'rtl',
+            minHeight: '48px',
+            height: '48px'
           }}
         >
-          {/* Search Input */}
-          <div className="p-3 border-b border-gray-200 sticky top-0 bg-white z-10">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="جستجو..."
-                className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                style={{
-                  fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                  direction: 'rtl'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Cities List */}
-          <div 
-            className="overflow-y-auto city-select-scrollbar"
-            style={{
-              maxHeight: '280px',
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#cbd5e1 #f1f5f9'
-            }}
-          >
+          <div className="flex items-center gap-1">
+            <MapPinIcon className="w-4 h-4 text-gray-400" />
             {loading ? (
-              <div className="px-4 py-8 text-center text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                در حال بارگذاری...
+              <span className="text-sm text-gray-400">در حال بارگذاری...</span>
+            ) : selectedCity ? (
+              <div className={language === 'en' ? 'text-left' : 'text-right'}>
+                <div className="text-sm text-gray-900 font-bold">{getCityName(selectedCity)}</div>
+                <div className="text-xs text-gray-500">{selectedCity.CITY}</div>
               </div>
-            ) : filteredCities.length > 0 ? (
-              filteredCities.map((city) => (
-                <button
-                  key={city.CITY}
-                  type="button"
-                  onClick={() => handleSelect(city.CITY)}
-                  className={`w-full px-4 py-3.5 ${language === 'en' ? 'text-left' : 'text-right'} cursor-pointer transition-colors border-b border-gray-50 last:border-b-0 ${
-                    city.CITY === value 
-                      ? 'bg-blue-100 text-blue-900' 
-                      : 'text-gray-900 hover:bg-gray-100'
-                  }`}
-                  style={{
-                    fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                    fontWeight: 'bold',
-                    fontSize: '13px'
-                  }}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className={`flex-1 min-w-0 ${language === 'en' ? 'text-left' : 'text-right'}`}>
-                      <div className="text-sm font-bold truncate leading-tight">{getCityName(city)}</div>
-                      <div className="text-xs opacity-80 truncate leading-tight mt-0.5">
-                        {language === 'en' ? city.CITYNAME_FA : city.CITYNAME_EN}
-                      </div>
-                    </div>
-                    <div className="text-xs font-bold text-blue-900 whitespace-nowrap flex-shrink-0">{city.CITY}</div>
-                  </div>
-                </button>
-              ))
             ) : (
-              <div className="px-4 py-8 text-center text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                نتیجه‌ای یافت نشد
-              </div>
+              <span className="text-sm text-gray-400">{placeholder}</span>
             )}
           </div>
-        </div>,
-        document.body
-      )}
+        </button>
+
+        {isOpen && dropdownStyle && createPortal(
+          <div
+            ref={portalRef}
+            className="fixed z-[99999] bg-white border border-gray-300 rounded-xl shadow-2xl"
+            style={{
+              top: dropdownStyle.top,
+              left: dropdownStyle.left,
+              width: Math.min(dropdownStyle.width, 340),
+              maxHeight: dropdownStyle.maxHeight,
+              minHeight: 200,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            <div className="p-3 border-b border-gray-200 bg-white flex-shrink-0">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="جستجو..."
+                  className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                  style={{
+                    fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
+                    direction: 'rtl'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div
+              className="overflow-y-auto city-select-scrollbar flex-1"
+              style={{
+                maxHeight: listMaxHeight,
+                minHeight: 140,
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#cbd5e1 #f1f5f9'
+              }}
+            >
+              {loading ? (
+                <div className="px-4 py-8 text-center text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                  در حال بارگذاری...
+                </div>
+              ) : filteredCities.length > 0 ? (
+                filteredCities.map((city) => (
+                  <button
+                    key={city.CITY}
+                    type="button"
+                    onClick={() => handleSelect(city.CITY)}
+                    className={`w-full px-4 py-3.5 ${language === 'en' ? 'text-left' : 'text-right'} cursor-pointer transition-colors border-b border-gray-50 last:border-b-0 ${
+                      city.CITY === value
+                        ? 'bg-blue-100 text-blue-900'
+                        : 'text-gray-900 hover:bg-gray-100'
+                    }`}
+                    style={{
+                      fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
+                      fontWeight: 'bold',
+                      fontSize: '13px'
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className={`flex-1 min-w-0 ${language === 'en' ? 'text-left' : 'text-right'}`}>
+                        <div className="text-sm font-bold truncate leading-tight">{getCityName(city)}</div>
+                        <div className="text-xs opacity-80 truncate leading-tight mt-0.5">
+                          {language === 'en' ? city.CITYNAME_FA : city.CITYNAME_EN}
+                        </div>
+                      </div>
+                      <div className="text-xs font-bold text-blue-900 whitespace-nowrap flex-shrink-0">{city.CITY}</div>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="px-4 py-8 text-center text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                  نتیجه‌ای یافت نشد
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
       </div>
     </>
   );
 };
 
 export default CitySelect;
-

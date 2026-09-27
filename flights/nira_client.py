@@ -30,11 +30,12 @@ class NiraClient:
         self.ws_url = f"{self.base_url}/ws1/NRSCWS.jsp" if self.base_url else None
         self.office_user = getattr(settings, 'NIRA_OFFICE_USER', '')
         self.office_pass = getattr(settings, 'NIRA_OFFICE_PASS', '')
-        self.timeout = getattr(settings, 'NIRA_API_TIMEOUT', 60)  # Default 60 seconds for slow APIs
+        self.timeout = int(getattr(settings, 'NIRA_API_TIMEOUT', 25))
+        self.routes_cache_ttl = int(getattr(settings, 'NIRA_ROUTES_CACHE_TTL', 180))
+        self.availability_cache_ttl = int(getattr(settings, 'NIRA_AVAILABILITY_CACHE_TTL', 45))
         
-        # TTL Cache: maxsize=100 items, ttl=180 seconds (3 minutes)
-        # فقط برای لیست شهرها و مقاصد، نه برای availability
-        self._routes_cache = TTLCache(maxsize=100, ttl=180)  # 3 minutes cache
+        # Process-local fallback if Redis/LocMem glitches mid-request
+        self._routes_cache = TTLCache(maxsize=100, ttl=self.routes_cache_ttl)
         
         if not self.base_url:
             logger.warning("NIRA_BASE_URL is not set in settings")
@@ -79,6 +80,41 @@ class NiraClient:
         except Exception as e:
             logger.error(f"Error converting Jalali date to Gregorian: {e}")
             return None
+
+    @staticmethod
+    def _is_nira_test_city(city: Any) -> bool:
+        """
+        Nira often ships dummy route rows labeled "(Test)" (e.g. UGT, TTQ)
+        for IBE sandbox — not real Nasim destinations.
+        """
+        if not isinstance(city, dict):
+            return False
+        code = str(city.get('CITY') or '').strip().upper()
+        if code in {'UGT', 'TTQ'}:
+            return True
+        name_en = str(city.get('CITYNAME_EN') or '')
+        name_fa = str(city.get('CITYNAME_FA') or '')
+        blob = f'{name_en} {name_fa}'.lower()
+        return '(test)' in blob or 'تست' in name_fa
+
+    def _strip_test_route_cities(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Remove Nira test cities from RoutesApp payloads before returning to clients."""
+        if not result.get('success'):
+            return result
+        data = result.get('data')
+        if not isinstance(data, dict):
+            return result
+        cities = data.get('NRSRoutesApp')
+        if not isinstance(cities, list):
+            return result
+        cleaned = [c for c in cities if not self._is_nira_test_city(c)]
+        if len(cleaned) == len(cities):
+            return result
+        out = dict(result)
+        out_data = dict(data)
+        out_data['NRSRoutesApp'] = cleaned
+        out['data'] = out_data
+        return out
     
     def check_availability(
         self,
@@ -89,7 +125,8 @@ class NiraClient:
         return_date: Optional[datetime] = None,
         adult_qty: int = 1,
         child_qty: int = 0,
-        infant_qty: int = 0
+        infant_qty: int = 0,
+        use_cache: bool = True,
     ) -> Dict[str, Any]:
         """
         Check flight availability using Nira IBE API
@@ -130,6 +167,25 @@ class NiraClient:
                 'success': False,
                 'error': 'Nira Office credentials are not configured'
             }
+
+        # Short shared cache — absorbs search spikes without serving stale inventory for long
+        from nasim.cache_utils import cache_get, cache_set, cache_key as shared_cache_key
+        avail_key = shared_cache_key(
+            'nira_avail',
+            origin.upper(),
+            destination.upper(),
+            departure_date.date().isoformat(),
+            (return_date.date().isoformat() if return_date else 'oneway'),
+            adult_qty,
+            child_qty,
+            infant_qty,
+            int(bool(round_trip)),
+        )
+        if use_cache and self.availability_cache_ttl > 0:
+            cached = cache_get(avail_key)
+            if cached and isinstance(cached, dict):
+                logger.info('Nira availability cache HIT')
+                return cached
         
         # Convert dates to Jalali format
         departure_date_jalali = self._convert_to_jalali(departure_date)
@@ -180,11 +236,14 @@ class NiraClient:
             if 'application/json' in content_type or response.text.strip().startswith('{'):
                 try:
                     data = response.json()
-                    return {
+                    result = {
                         'success': True,
                         'data': data,
                         'status_code': response.status_code
                     }
+                    if use_cache and self.availability_cache_ttl > 0:
+                        cache_set(avail_key, result, self.availability_cache_ttl)
+                    return result
                 except ValueError:
                     pass  # Fall through to check if it's HTML
             
@@ -192,18 +251,24 @@ class NiraClient:
             if response.status_code == 200 and ('text/html' in content_type or response.text.strip().startswith('<!')):
                 logger.warning("Received HTML from /ibe/Availability, trying fallback endpoint")
                 # Fallback: Use the working endpoint
-                return self._check_availability_fallback(
+                result = self._check_availability_fallback(
                     origin, destination, departure_date, round_trip, return_date,
                     adult_qty, child_qty, infant_qty, departure_date_jalali, return_date_jalali, office_pass_encoded
                 )
+                if result.get('success') and use_cache and self.availability_cache_ttl > 0:
+                    cache_set(avail_key, result, self.availability_cache_ttl)
+                return result
             
             # If not JSON and not HTML, return as is
-            return {
+            result = {
                 'success': True,
                 'data': response.text,
                 'status_code': response.status_code,
                 'content_type': content_type
             }
+            if use_cache and self.availability_cache_ttl > 0:
+                cache_set(avail_key, result, self.availability_cache_ttl)
+            return result
             
         except requests.exceptions.Timeout:
             return {
@@ -361,25 +426,26 @@ class NiraClient:
         key_string = "|".join(key_parts)
         return hashlib.md5(key_string.encode()).hexdigest()
     
-    def get_origin_cities(self) -> Dict[str, Any]:
+    def get_origin_cities(self, force_refresh: bool = False) -> Dict[str, Any]:
         """
         Get list of origin cities from Nira Routes API
-        با استفاده از TTL Cache برای بهبود سرعت (3 دقیقه)
-        
-        Note: origin parameter should be empty to get all origin cities
-        
-        Returns:
-            Dictionary containing list of origin cities or error information
+        Shared Redis/LocMem cache (all Gunicorn workers) + process TTL fallback.
         """
-        # Generate cache key
-        cache_key = self._generate_cache_key('get_origin_cities')
+        from nasim.cache_utils import cache_get, cache_set, cache_key as shared_cache_key
+
+        shared_key = shared_cache_key('nira_origins')
+        local_key = self._generate_cache_key('get_origin_cities')
+
+        if not force_refresh:
+            shared = cache_get(shared_key)
+            if shared and isinstance(shared, dict):
+                logger.info('Origin cities shared-cache HIT')
+                return self._strip_test_route_cities(shared)
+            if local_key in self._routes_cache:
+                logger.info('Origin cities process-cache HIT')
+                return self._strip_test_route_cities(self._routes_cache[local_key])
         
-        # Check cache first
-        if cache_key in self._routes_cache:
-            logger.info(f"🚀 Cache HIT: Returning origin cities from cache")
-            return self._routes_cache[cache_key]
-        
-        logger.info(f"🔄 Cache MISS: Fetching origin cities from Nira API")
+        logger.info('Origin cities cache MISS — fetching Nira')
         
         if not self.ws_url:
             return {
@@ -435,9 +501,10 @@ class NiraClient:
                         'data': data,
                         'status_code': response.status_code
                     }
-                    self._routes_cache[cache_key] = result
-                    logger.info(f"✅ Cached origin cities for 3 minutes")
-                    return result
+                    self._routes_cache[local_key] = result
+                    cache_set(shared_key, result, self.routes_cache_ttl)
+                    logger.info('Cached origin cities')
+                    return self._strip_test_route_cities(result)
                 except ValueError:
                     # If not JSON, check if it's "SIGN" string
                     if response.text.strip() == "SIGN":
@@ -456,9 +523,10 @@ class NiraClient:
                         'status_code': response.status_code,
                         'content_type': response.headers.get('Content-Type', '')
                     }
-                    self._routes_cache[cache_key] = result
-                    logger.info(f"✅ Cached origin cities (text format) for 3 minutes")
-                    return result
+                    self._routes_cache[local_key] = result
+                    cache_set(shared_key, result, self.routes_cache_ttl)
+                    logger.info('Cached origin cities (text format)')
+                    return self._strip_test_route_cities(result)
             else:
                 return {
                     'success': False,
@@ -489,23 +557,23 @@ class NiraClient:
     def get_destinations(self, origin: str) -> Dict[str, Any]:
         """
         Get list of flight destinations from a specific origin
-        با استفاده از TTL Cache برای بهبود سرعت (3 دقیقه)
-        
-        Args:
-            origin: Origin airport IATA code (e.g., 'THR')
-            
-        Returns:
-            Dictionary containing list of destinations or error information
+        Shared Redis/LocMem cache + process TTL fallback.
         """
-        # Generate cache key based on origin
-        cache_key = self._generate_cache_key('get_destinations', origin=origin.upper())
-        
-        # Check cache first
+        from nasim.cache_utils import cache_get, cache_set, cache_key as shared_cache_key
+
+        origin_u = origin.upper()
+        shared_key = shared_cache_key('nira_dest', origin_u)
+        cache_key = self._generate_cache_key('get_destinations', origin=origin_u)
+
+        shared = cache_get(shared_key)
+        if shared and isinstance(shared, dict):
+            logger.info('Destinations shared-cache HIT for %s', origin_u)
+            return self._strip_test_route_cities(shared)
         if cache_key in self._routes_cache:
-            logger.info(f"🚀 Cache HIT: Returning destinations for {origin} from cache")
-            return self._routes_cache[cache_key]
+            logger.info('Destinations process-cache HIT for %s', origin_u)
+            return self._strip_test_route_cities(self._routes_cache[cache_key])
         
-        logger.info(f"🔄 Cache MISS: Fetching destinations for {origin} from Nira API")
+        logger.info('Destinations cache MISS for %s', origin_u)
         
         if not self.ws_url:
             return {
@@ -530,7 +598,7 @@ class NiraClient:
         params = {
             'ModuleType': 'SP',
             'ModuleName': 'RoutesApp',
-            'Origin': origin.upper(),  # IATA code of origin (capital O)
+            'Origin': origin_u,  # IATA code of origin (capital O)
             'OfficeUser': self.office_user,
             'OfficePass': office_pass_encoded,  # Use encoded password with date
         }
@@ -552,8 +620,9 @@ class NiraClient:
                         'status_code': response.status_code
                     }
                     self._routes_cache[cache_key] = result
-                    logger.info(f"✅ Cached destinations for {origin} for 3 minutes")
-                    return result
+                    cache_set(shared_key, result, self.routes_cache_ttl)
+                    logger.info('Cached destinations for %s', origin_u)
+                    return self._strip_test_route_cities(result)
                 except ValueError:
                     # If not JSON, might be XML or HTML
                     result = {
@@ -563,8 +632,9 @@ class NiraClient:
                         'content_type': response.headers.get('Content-Type', '')
                     }
                     self._routes_cache[cache_key] = result
-                    logger.info(f"✅ Cached destinations for {origin} (text format) for 3 minutes")
-                    return result
+                    cache_set(shared_key, result, self.routes_cache_ttl)
+                    logger.info('Cached destinations for %s (text)', origin_u)
+                    return self._strip_test_route_cities(result)
             else:
                 return {
                     'success': False,
@@ -589,4 +659,88 @@ class NiraClient:
                 'success': False,
                 'error': f'Unexpected error: {str(e)}'
             }
+
+    # ------------------------------------------------------------------
+    # Reservation / payment — NOT in current project Nira docs.
+    # Explicit stubs so we never invent fake PNRs.
+    # ------------------------------------------------------------------
+
+    def create_reservation(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Placeholder for Nira seat hold / PNR create."""
+        reserve_url = getattr(settings, 'NIRA_RESERVE_URL', '').strip()
+        if not reserve_url:
+            return {
+                'success': False,
+                'supported': False,
+                'code': 'NIRA_RESERVE_UNSUPPORTED',
+                'error': 'Nira Reserve/Book API is not configured for this project yet.',
+            }
+        return {
+            'success': False,
+            'supported': False,
+            'code': 'NIRA_RESERVE_NOT_IMPLEMENTED',
+            'error': 'NIRA_RESERVE_URL is set but HTTP client awaits official docs.',
+            'url': reserve_url,
+        }
+
+    def get_payment_redirect(self, reservation_ref: str, callback_url: str = '', return_url: str = '') -> Dict[str, Any]:
+        """
+        Build Nira-hosted payment UI URL from NIRA_PAYMENT_REDIRECT_URL template.
+        Placeholders: {ref} {callback} {return_url}
+        """
+        tpl = getattr(settings, 'NIRA_PAYMENT_REDIRECT_URL', '').strip()
+        if not tpl:
+            return {
+                'success': False,
+                'supported': False,
+                'code': 'NIRA_PAYMENT_UNSUPPORTED',
+                'error': 'Nira payment UI redirect is not configured. Using local payment gateways.',
+            }
+        try:
+            url = tpl.format(
+                ref=reservation_ref or '',
+                callback=callback_url or '',
+                return_url=return_url or '',
+                amount='',
+            )
+        except Exception as exc:
+            return {'success': False, 'supported': True, 'error': f'Bad NIRA_PAYMENT_REDIRECT_URL: {exc}'}
+        return {
+            'success': True,
+            'supported': True,
+            'payment_url': url,
+            'provider': 'nira',
+        }
+
+    def fetch_paid_reservation(self, reservation_ref: str, session_id: str = '') -> Dict[str, Any]:
+        """
+        Optional post-payment lookup for PNR / e-tickets.
+        Configure NIRA_RESERVATION_LOOKUP_URL with {ref} and optional {session}.
+        """
+        tpl = getattr(settings, 'NIRA_RESERVATION_LOOKUP_URL', '').strip()
+        if not tpl:
+            return {'success': False, 'supported': False, 'code': 'NIRA_LOOKUP_UNSUPPORTED'}
+        try:
+            url = tpl.format(ref=reservation_ref or '', session=session_id or '')
+        except Exception as exc:
+            return {'success': False, 'error': str(exc)}
+        try:
+            response = requests.get(url, timeout=self.timeout)
+            if response.status_code != 200:
+                return {'success': False, 'status_code': response.status_code, 'error': response.text[:300]}
+            data = response.json() if 'application/json' in (response.headers.get('Content-Type') or '') else {'raw': response.text}
+            # Best-effort extract
+            pnr = ''
+            tickets = []
+            if isinstance(data, dict):
+                pnr = str(data.get('PNR') or data.get('pnr') or data.get('ReservationCode') or '')
+                t = data.get('tickets') or data.get('TicketNumbers') or data.get('ETickets') or []
+                if isinstance(t, list):
+                    tickets = [str(x) for x in t]
+                elif t:
+                    tickets = [str(t)]
+            return {'success': True, 'supported': True, 'pnr': pnr, 'tickets': tickets, 'data': data}
+        except Exception as exc:
+            logger.warning('fetch_paid_reservation failed: %s', exc)
+            return {'success': False, 'error': str(exc)}
 

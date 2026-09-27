@@ -84,7 +84,7 @@ const TicketPage: React.FC = () => {
   });
 
   const fontStyle = {
-    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
   };
 
   const dir = language === 'en' ? 'ltr' : 'rtl';
@@ -205,7 +205,7 @@ const TicketPage: React.FC = () => {
       {/* Hero */}
       <section className="relative py-10 sm:py-12 text-center">
         <div className="relative z-10 max-w-4xl mx-auto px-4">
-          <h1 className="text-white text-2xl sm:text-4xl font-bold mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}>
+          <h1 className="text-white text-2xl sm:text-4xl font-bold mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: dir }}>
             فرم ثبت شکایات
           </h1>
           <p className="text-white/80 text-sm sm:text-base" style={fontStyle}>
@@ -219,7 +219,7 @@ const TicketPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header اطلاعات شکایت */}
           <div className="bg-blue-900/90 px-6 sm:px-8 py-4">
-            <h2 className="text-white text-lg font-semibold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}>
+            <h2 className="text-white text-lg font-semibold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: dir }}>
               اطلاعات شکایت
             </h2>
           </div>
@@ -234,7 +234,7 @@ const TicketPage: React.FC = () => {
 
             {/* ۱ و ۲ - نوع و موضوع شکایت (داخل بخش اطلاعات شکایت) */}
             <div className="space-y-4">
-              <div className="text-blue-900 font-medium text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <div className="text-blue-900 font-medium text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 ۱ - نوع شکایت و ۲ - موضوع شکایت
               </div>
               <div className="overflow-x-auto overflow-y-auto max-h-[320px] rounded-xl border border-gray-200">
@@ -308,7 +308,7 @@ const TicketPage: React.FC = () => {
 
             {/* ۳ - اطلاعات شخصی */}
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 ۳ - اطلاعات شخصی
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -337,7 +337,7 @@ const TicketPage: React.FC = () => {
 
             {/* ۴ - اطلاعات پرواز */}
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 ۴ - اطلاعات پرواز
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -366,7 +366,7 @@ const TicketPage: React.FC = () => {
 
             {/* ۵ - توضیحات */}
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <h3 className="text-blue-900 font-semibold mb-4 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 ۵ - توضیحات
               </h3>
               <textarea
@@ -385,7 +385,7 @@ const TicketPage: React.FC = () => {
                 type="submit"
                 disabled={loading}
                 className="w-full py-4 bg-blue-900 hover:bg-blue-800 disabled:bg-blue-900/70 text-white rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: dir }}
+                style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: dir }}
               >
                 {loading ? (
                   <>

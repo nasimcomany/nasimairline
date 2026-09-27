@@ -106,10 +106,10 @@ const DestinationsPage: React.FC = () => {
           
           {/* Header */}
           <div className="text-center mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
               {t('destinations.title')}
             </h1>
-            <p className="text-blue-200 text-xs sm:text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+            <p className="text-blue-200 text-xs sm:text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
               {t('destinations.subtitle')}
             </p>
           </div>
@@ -133,7 +133,7 @@ const DestinationsPage: React.FC = () => {
                   </div>
                   <div className="absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2">
                     <div className="bg-white/20 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1">
-                      <span className="text-white text-xs font-medium" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>{destination.country}</span>
+                      <span className="text-white text-xs font-medium" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>{destination.country}</span>
                     </div>
                   </div>
                 </div>
@@ -141,23 +141,23 @@ const DestinationsPage: React.FC = () => {
                 {/* Content */}
                 <div className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                    <h3 className="text-base sm:text-lg font-semibold text-white" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <h3 className="text-base sm:text-lg font-semibold text-white" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {destination.name}
                     </h3>
-                    <div className="text-white/60 text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <div className="text-white/60 text-xs" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {destination.flights}
                     </div>
                   </div>
                   
-                  <p className="text-white/70 text-xs sm:text-sm mb-2 sm:mb-3" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <p className="text-white/70 text-xs sm:text-sm mb-2 sm:mb-3" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {destination.description}
                   </p>
                   
                   <div className="flex items-center justify-between gap-2">
-                    <div className="text-white font-semibold text-xs sm:text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <div className="text-white font-semibold text-xs sm:text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {destination.price}
                     </div>
-                    <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-1 sm:py-1.5 px-2 sm:px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-1 sm:py-1.5 px-2 sm:px-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {language === 'en' ? 'View' : language === 'ar' ? 'عرض' : 'مشاهده'}
                     </button>
                   </div>

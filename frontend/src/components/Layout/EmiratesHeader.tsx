@@ -183,7 +183,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const menuItems: { key: string; label: string; path: string; dropdown: DropdownSubItem[] }[] = [
     {
       key: 'flyWithNasim',
-      label: t('nav.flyWithNasim') || 'پرواز با نسیم',
+      label: t('nav.flyWithNasim') || 'رزرو',
       path: '#',
       dropdown: [
         { label: t('nav.checkInTime') || 'زمان مراجعه و پذیرش', path: '#' },
@@ -211,7 +211,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     },
     {
       key: 'wherewefly',
-      label: t('nav.flightDestinations') || 'مقاصد پروازی',
+      label: t('nav.flightDestinations') || 'مقاصد',
       path: '#',
       dropdown: [
         { label: t('nav.domestic') || 'داخلی', path: '/flights/map' },
@@ -221,7 +221,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     },
     {
       key: 'about',
-      label: t('nav.about') || 'درباره ما',
+      label: t('nav.about') || 'کمک',
       path: '#',
       dropdown: [
         { label: t('nav.nasimHistory') || 'تاریخچه نسیم', path: '#' },
@@ -230,16 +230,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
         { label: t('nav.cooperationRequest') || 'درخواست همکاری', path: '#' },
         { label: t('nav.nasimTraining') || 'آموزش نسیم', path: '#' },
         { label: t('nav.nasimMagazine') || 'مجله نسیم', path: '/magazine' },
-      ]
-    },
-    {
-      key: 'safetyReport',
-      label: t('nav.safetyReport') || 'گزارش ایمنی',
-      path: '#',
-      dropdown: [
         { label: t('nav.safetyHazardReport') || 'گزارش مخاطرات ایمنی (SHOR)', path: '/safety-report/safety' },
       ]
-    }
+    },
   ];
 
   const handleMouseEnter = (key: string, hasDropdown: boolean) => {
@@ -378,10 +371,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     }
                   }}
                 >
-                  {item.key === 'flyWithNasim' && <PaperAirplaneIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
+                  {item.key === 'flyWithNasim' && <CalendarDaysIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
                   {item.key === 'wherewefly' && <MapPinIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
-                  {item.key === 'about' && <BuildingOfficeIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
-                  {item.key === 'safetyReport' && <ExclamationTriangleIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
+                  {item.key === 'about' && <QuestionMarkCircleIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
                   {item.label}
                 </Link>
                 
@@ -430,10 +422,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                 if (itemIndex === 3) return <UserGroupIcon className="w-7 h-7" style={{ color: '#a855f7' }} />; // درخواست همکاری
                                 if (itemIndex === 4) return <TrophyIcon className="w-7 h-7" style={{ color: '#ea580c' }} />; // آموزش نسیم
                                 if (itemIndex === 5) return <NewspaperIcon className="w-7 h-7" style={{ color: '#6366f1' }} />; // مجله نسیم
+                                if (itemIndex === 6) return <ExclamationTriangleIcon className="w-7 h-7" style={{ color: '#dc2626' }} />; // گزارش ایمنی
                                 return <BuildingOfficeIcon className="w-7 h-7" style={{ color: '#3b82f6' }} />;
-                              }
-                              if (key === 'safetyReport') {
-                                return <ExclamationTriangleIcon className="w-7 h-7" style={{ color: '#dc2626' }} />;
                               }
                               return null;
                             };
@@ -710,7 +700,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                     <span 
                                       className={`city-text text-sm font-medium ${fontClass}`}
                                       style={{
-                                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                                         whiteSpace: 'nowrap'
                                       }}
                                     >
@@ -834,7 +824,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
                             <div className="city-label absolute bottom-2 left-2 bg-gray-700/90 text-white px-4 py-2 rounded-md transition-all duration-300 ease-out" style={{ transformOrigin: 'bottom left' }}>
                               <div className="city-text-wrapper flex items-center justify-center w-full h-full" style={{ minWidth: '100%', minHeight: '100%' }}>
-                                <span className={`city-text text-sm font-medium ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif", whiteSpace: 'nowrap' }}>
+                                <span className={`city-text text-sm font-medium ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif", whiteSpace: 'nowrap' }}>
                                   {destination.name}
                                 </span>
                               </div>
@@ -1132,7 +1122,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 text-white hover:text-gray-300"
+              className="lg:hidden p-2 text-black hover:text-gray-700"
             >
               {isMenuOpen ? (
                 <XMarkIcon className="w-6 h-6" />
@@ -1278,7 +1268,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 <h3
                   className={`text-xl font-bold text-white ${fontClass}`}
                   style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   }}
                 >
                   {flyDescModal.title}
@@ -1294,7 +1284,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               <p
                 className={`text-white/95 leading-relaxed ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   fontSize: '0.95rem',
                   lineHeight: '1.7',
                 }}
@@ -1326,7 +1316,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 <h3
                   className={`text-xl font-bold text-white ${fontClass}`}
                   style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   }}
                 >
                   {aboutModal.title}
@@ -1342,7 +1332,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               <p
                 className={`text-white/95 leading-relaxed ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   fontSize: '0.95rem',
                   lineHeight: '1.7',
                 }}
@@ -1374,7 +1364,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 <h3
                   className={`text-xl font-bold text-white ${fontClass}`}
                   style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   }}
                 >
                   {t('nav.contactUs')}
@@ -1387,7 +1377,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
-              <div className={`space-y-3 mb-6 ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+              <div className={`space-y-3 mb-6 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                 <div className="flex items-center gap-3 text-white/95">
                   <PhoneIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
                   <span><strong>{t('contact.phone')}:</strong> 7340000</span>
@@ -1422,7 +1412,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`mt-3 inline-flex items-center gap-2 text-white/90 hover:text-white text-sm ${fontClass}`}
-                style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}
+                style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}
               >
                 <MapPinIcon className="w-4 h-4" />
                 {language === 'fa' ? 'مشاهده در گوگل مپ' : language === 'ar' ? 'عرض في خرائط جوجل' : 'View in Google Maps'}

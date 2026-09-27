@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import SeoHead from '../components/SEO/SeoHead';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import {
@@ -36,6 +37,7 @@ interface Article {
   meta_title?: string;
   meta_description?: string;
   meta_keywords?: string;
+  url?: string;
 }
 
 const IranologyArticleDetailPage: React.FC = () => {
@@ -144,7 +146,7 @@ const IranologyArticleDetailPage: React.FC = () => {
           <p
             className={`mt-4 text-gray-600 ${fontClass}`}
             style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
             }}
           >
             {language === 'fa' ? 'در حال بارگذاری...' : language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
@@ -162,7 +164,7 @@ const IranologyArticleDetailPage: React.FC = () => {
           <p
             className={`text-red-600 ${fontClass}`}
             style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
             }}
           >
             {error || (language === 'fa' ? 'مقاله یافت نشد' : language === 'ar' ? 'لم يتم العثور على المقال' : 'Article not found')}
@@ -174,6 +176,23 @@ const IranologyArticleDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <SeoHead
+        title={article.meta_title || article.title}
+        description={article.meta_description || article.excerpt}
+        keywords={article.meta_keywords}
+        canonical={typeof window !== 'undefined' ? window.location.href : undefined}
+        image={article.featured_image_url}
+        type="article"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: article.title,
+          description: article.meta_description || article.excerpt,
+          image: article.featured_image_url,
+          datePublished: article.published_at,
+          author: { '@type': 'Person', name: article.author_name || 'Nasim Air' },
+        }}
+      />
       <EmiratesHeader />
       
       {/* Breadcrumb */}
@@ -206,7 +225,7 @@ const IranologyArticleDetailPage: React.FC = () => {
           onClick={() => navigate(`/iranology/${article.city.slug}`)}
           className={`mb-6 flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors ${fontClass}`}
           style={{
-            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+            fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
             direction: language === 'en' ? 'ltr' : 'rtl'
           }}
         >
@@ -247,7 +266,7 @@ const IranologyArticleDetailPage: React.FC = () => {
           <h1
             className={`text-4xl sm:text-5xl font-bold text-gray-900 mb-6 ${fontClass}`}
             style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+              fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
               direction: language === 'en' ? 'ltr' : 'rtl'
             }}
           >
@@ -288,7 +307,7 @@ const IranologyArticleDetailPage: React.FC = () => {
             <p
               className={`text-xl text-gray-600 mb-8 leading-relaxed ${fontClass}`}
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
@@ -301,7 +320,7 @@ const IranologyArticleDetailPage: React.FC = () => {
         <div
           className={`prose prose-lg max-w-none ${fontClass}`}
           style={{
-            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+            fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
             direction: language === 'en' ? 'ltr' : 'rtl'
           }}
           dangerouslySetInnerHTML={{ __html: article.content }}
@@ -315,7 +334,7 @@ const IranologyArticleDetailPage: React.FC = () => {
             <h2
               className={`text-3xl font-bold mb-8 text-gray-900 ${fontClass}`}
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
@@ -341,7 +360,7 @@ const IranologyArticleDetailPage: React.FC = () => {
                     <h3
                       className={`text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors line-clamp-2 ${fontClass}`}
                       style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                         direction: language === 'en' ? 'ltr' : 'rtl'
                       }}
                     >
@@ -350,7 +369,7 @@ const IranologyArticleDetailPage: React.FC = () => {
                     <p
                       className={`text-gray-600 mb-4 line-clamp-3 ${fontClass}`}
                       style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                         direction: language === 'en' ? 'ltr' : 'rtl'
                       }}
                     >

@@ -17,12 +17,21 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 from .admin_site import limited_admin_site
-from .views import ReactAppView
+from .views import ReactAppView, HealthCheckView
+from blog.sitemap_views import sitemap_xml, robots_txt
 
 # API Router for API root view
 api_router = DefaultRouter()
 
 urlpatterns = [
+    # Ops health (Railway healthcheck / uptime)
+    path('healthz/', HealthCheckView.as_view(), name='healthz'),
+    path('api/health/', HealthCheckView.as_view(), name='api-health'),
+
+    # SEO: robots + sitemap (must be before SPA catch-all)
+    path('robots.txt', robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap_xml, name='sitemap_xml'),
+
     # Admin
     path('admin/', admin.site.urls),
     
@@ -57,15 +66,17 @@ urlpatterns = [
     
     # Serve static files from React build
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
-    # Serve images from React build
+    # Serve images from React build (fallback if WhiteNoise miss)
     re_path(r'^images/(?P<path>.*)$', serve, {
-        'document_root': os.path.join(settings.FRONTEND_BUILD_DIR, 'images') if os.path.exists(settings.FRONTEND_BUILD_DIR) else os.path.join(settings.BASE_DIR, 'frontend', 'public', 'images'),
+        'document_root': os.path.join(settings.FRONTEND_BUILD_DIR, 'images') if os.path.exists(os.path.join(getattr(settings, 'FRONTEND_BUILD_DIR', ''), 'images')) else os.path.join(settings.BASE_DIR, 'frontend', 'public', 'images'),
     }),
 ]
 
-# Serve media files in development (MUST be before static file patterns)
-if settings.DEBUG:
+# Media: development always; production when SERVE_MEDIA (Railway volume recommended)
+if settings.DEBUG or getattr(settings, 'SERVE_MEDIA', True):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # Serve other static files from React build (AFTER media files)
@@ -78,5 +89,5 @@ urlpatterns += [
 # Serve React app for all other routes (SPA)
 # This must be last to catch all unmatched routes
 urlpatterns += [
-    re_path(r'^(?!api|admin|limited-admin|ckeditor|media|static).*$', ReactAppView.as_view(), name='react-app'),
+    re_path(r'^(?!api|admin|limited-admin|ckeditor|media|static|healthz|robots\.txt|sitemap\.xml).*$', ReactAppView.as_view(), name='react-app'),
 ]

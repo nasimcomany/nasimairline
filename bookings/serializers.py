@@ -88,12 +88,16 @@ class BookingSerializer(BaseBookingSerializer):
             'status', 'booking_source', 'special_requests',
             'cancellation_reason', 'cancelled_at', 'passenger_count',
             'is_refundable', 'can_modify', 'days_until_flight', 'booking_ip', 'metadata',
+            'hold_expires_at', 'nira_pnr', 'nira_ticket_numbers',
+            'nira_session_id', 'ticket_issued_at',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
             'id', 'uuid', 'booking_reference', 'created_at', 'updated_at',
             'cancelled_at', 'passenger_count', 'is_refundable', 'can_modify',
-            'user_email', 'flight_number', 'days_until_flight', 'booking_ip', 'metadata'
+            'user_email', 'flight_number', 'days_until_flight', 'booking_ip', 'metadata',
+            'hold_expires_at', 'nira_pnr', 'nira_ticket_numbers',
+            'nira_session_id', 'ticket_issued_at',
         ]
     
     def get_passenger_count(self, obj):
@@ -134,13 +138,17 @@ class BookingDetailSerializer(BaseBookingSerializer):
             'cancellation_reason', 'cancelled_at', 'passengers',
             'extras', 'passenger_count', 'is_refundable', 'can_modify',
             'days_until_flight', 'refund_amount', 'booking_ip', 'metadata',
+            'hold_expires_at', 'nira_pnr', 'nira_ticket_numbers',
+            'nira_session_id', 'ticket_issued_at',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
             'id', 'uuid', 'booking_reference', 'created_at', 'updated_at',
             'cancelled_at', 'passenger_count', 'is_refundable', 'can_modify',
             'user_detail', 'flight_detail', 'passengers', 'extras',
-            'days_until_flight', 'refund_amount', 'booking_ip', 'metadata'
+            'days_until_flight', 'refund_amount', 'booking_ip', 'metadata',
+            'hold_expires_at', 'nira_pnr', 'nira_ticket_numbers',
+            'nira_session_id', 'ticket_issued_at',
         ]
     
     def get_passenger_count(self, obj):

@@ -52,11 +52,8 @@ const HomePage: React.FC = () => {
   const location = useLocation();
   const { t, fontClass, language } = useLanguage();
   const { openChat } = useChat();
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('general');
-  const [selectedFAQ, setSelectedFAQ] = useState<string | null>(null);
   
   // Hero Slider state
   // تصاویر از API دریافت می‌شوند و هر 12 ثانیه به صورت افقی تغییر می‌کنند
@@ -112,7 +109,11 @@ const HomePage: React.FC = () => {
   const [activeFlightTab, setActiveFlightTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
   const [specialServicesItems, setSpecialServicesItems] = useState<HomePageSectionItem[]>([]);
   const [experienceItems, setExperienceItems] = useState<HomePageSectionItem[]>([]);
+  const [surveyItems, setSurveyItems] = useState<HomePageSectionItem[]>([]);
+  const [faqItems, setFaqItems] = useState<HomePageSectionItem[]>([]);
+  const [popularRouteItems, setPopularRouteItems] = useState<HomePageSectionItem[]>([]);
   const [sectionConfigs, setSectionConfigs] = useState<Record<string, HomePageSectionConfig>>({});
+  const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
 
   const reservedSeats = ['A1', 'B2', 'C3', 'D4', 'A5', 'B6'];
   
@@ -129,9 +130,10 @@ const HomePage: React.FC = () => {
     image: string;
     alt: string;
     fallbackImage: string;
+    linkUrl?: string;
   }
 
-  const allOfferCards: OfferCard[] = [
+  const defaultOfferCards: OfferCard[] = [
     {
       id: 1,
       from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
@@ -234,6 +236,38 @@ const HomePage: React.FC = () => {
     }
   ];
 
+  const splitRouteTitle = (title: string) => {
+    const parts = title.split(/\s*[-–—]\s*/);
+    return {
+      from: (parts[0] || title).trim(),
+      to: (parts[1] || '').trim(),
+    };
+  };
+
+  const activeOfferCards: OfferCard[] = useMemo(() => {
+    if (!popularRouteItems.length) return defaultOfferCards;
+    return popularRouteItems.map((item) => {
+      const fa = splitRouteTitle(item.title_fa || '');
+      const ar = splitRouteTitle(item.title_ar || item.title_fa || '');
+      const en = splitRouteTitle(item.title_en || item.title_fa || '');
+      return {
+        id: item.id,
+        from: { fa: fa.from, ar: ar.from, en: en.from },
+        to: { fa: fa.to, ar: ar.to, en: en.to },
+        price: {
+          fa: item.description_fa || '',
+          ar: item.description_ar || '',
+          en: item.description_en || '',
+        },
+        date: { fa: '', ar: '', en: '' },
+        image: item.image_url || '/images/tehran.jpg',
+        alt: item.title_fa,
+        fallbackImage: '/images/airport-plane-photo_991869-62.jpg',
+        linkUrl: item.link_url || '/tickets',
+      };
+    });
+  }, [popularRouteItems]);
+
   // State for managing visible cards and queue
   const [visibleCardIds, setVisibleCardIds] = useState<number[]>([1, 2, 3, 4]);
   const [queueCardIds, setQueueCardIds] = useState<number[]>([5, 6, 7, 8, 9, 10]);
@@ -243,6 +277,7 @@ const HomePage: React.FC = () => {
   // Use refs to access current state in interval
   const visibleRef = useRef(visibleCardIds);
   const queueRef = useRef(queueCardIds);
+  const offerCardsRef = useRef(activeOfferCards);
   
   useEffect(() => {
     visibleRef.current = visibleCardIds;
@@ -253,13 +288,8 @@ const HomePage: React.FC = () => {
   }, [queueCardIds]);
 
   useEffect(() => {
-    setIsLoaded(true);
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+    offerCardsRef.current = activeOfferCards;
+  }, [activeOfferCards]);
 
   // Update default values when language changes
   useEffect(() => {
@@ -275,30 +305,22 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchHeroSliders = async () => {
       try {
-        console.log('Fetching hero sliders from API...');
         const sliders = await galleryService.getHeroSliders();
-        console.log('Hero sliders received:', sliders);
         
         if (sliders && sliders.length > 0) {
           setHeroSliders(sliders);
-          // Extract image URLs from API response
           const imageUrls = sliders.map(slider => slider.image_url);
-          console.log('Image URLs extracted:', imageUrls);
           setHeroImages(imageUrls);
-        } else {
-          console.log('No sliders received from API, using default images');
         }
-        // If no sliders from API, keep default images
       } catch (error) {
         console.error('Error loading hero sliders:', error);
-        // Keep default images on error
       }
     };
 
     fetchHeroSliders();
   }, []);
 
-  // Fetch Homepage section items (Special Services + Experience)
+  // Fetch Homepage section items + titles from CMS
   useEffect(() => {
     const fetchSections = async () => {
       try {
@@ -308,13 +330,38 @@ const HomePage: React.FC = () => {
         ]);
         setSpecialServicesItems(items.special_services);
         setExperienceItems(items.experience);
+        setSurveyItems(items.survey);
+        setFaqItems(items.faq);
+        setPopularRouteItems(items.popular_routes);
         setSectionConfigs(configs);
+        if (items.popular_routes.length > 0) {
+          const ids = items.popular_routes.map((r) => r.id);
+          setVisibleCardIds(ids.slice(0, 4));
+          setQueueCardIds(ids.slice(4));
+        }
       } catch (error) {
         console.error('Error loading homepage sections:', error);
       }
     };
     fetchSections();
   }, []);
+
+  const pickLang = (fa?: string, ar?: string, en?: string, fallback = '') => {
+    const value = language === 'fa' ? fa : language === 'ar' ? ar : en;
+    return (value && value.trim()) || fallback;
+  };
+
+  const pickConfig = (
+    key: string,
+    line: 1 | 2 | 3,
+    fallback = ''
+  ) => {
+    const c = sectionConfigs[key];
+    if (!c) return fallback;
+    if (line === 1) return pickLang(c.title1_fa, c.title1_ar, c.title1_en, fallback);
+    if (line === 2) return pickLang(c.title2_fa, c.title2_ar, c.title2_en, fallback);
+    return pickLang(c.title3_fa, c.title3_ar, c.title3_en, fallback);
+  };
 
   // Helper: handle section item click (link_url)
   const handleSectionItemClick = (linkUrl: string) => {
@@ -390,7 +437,7 @@ const HomePage: React.FC = () => {
       const cardToHideId = currentVisible[0];
       // Move first card from queue to visible
       const cardToShowId = currentQueue[0];
-      const cardToHide = allOfferCards.find(c => c.id === cardToHideId) || null;
+      const cardToHide = offerCardsRef.current.find(c => c.id === cardToHideId) || null;
       
       // Remember the card that is leaving so we can animate its exit
       setRemovingCard(cardToHide);
@@ -1009,21 +1056,13 @@ const HomePage: React.FC = () => {
         >
           {/* Slider - Dynamic images from API */}
           {heroImages.map((imageUrl, index) => {
-            const slider = heroSliders[index]; // Get corresponding slider data if available
-            console.log(`🖼️ Slider ${index}:`, slider);
-            console.log(`🔗 Link URL:`, slider?.link_url);
+            const slider = heroSliders[index];
             
             const SliderWrapper = slider?.link_url ? 'a' : 'div';
             const wrapperProps = slider?.link_url ? {
               href: slider.link_url,
               target: slider.link_url.startsWith('/') || slider.link_url.includes(window.location.hostname) ? '_self' : '_blank',
               rel: slider.link_url.startsWith('/') ? undefined : 'noopener noreferrer',
-              onClick: (e: React.MouseEvent) => {
-                console.log('🖱️ Image clicked! Index:', index);
-                console.log('🔗 Slider data:', slider);
-                console.log('🔗 Link URL:', slider.link_url);
-                console.log('✅ Navigating to:', slider.link_url);
-              },
               title: `کلیک کنید برای مشاهده: ${slider.title}`
             } : {};
             
@@ -1040,6 +1079,9 @@ const HomePage: React.FC = () => {
                 <img
                   src={imageUrl}
                   alt={slider?.alt_text || `Hero image ${index + 1}`}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  fetchPriority={index === 0 ? 'high' : 'low'}
                   className={`w-full h-full object-cover ${slider?.link_url ? 'hover:opacity-95' : ''} transition-opacity`}
                   style={{
                     width: '100%',
@@ -1050,7 +1092,6 @@ const HomePage: React.FC = () => {
                     pointerEvents: 'none'
                   }}
                 />
-                {/* Overlay - must not block clicks */}
                 <div className="absolute inset-0 bg-black/10" style={{ pointerEvents: 'none' }}></div>
               </SliderWrapper>
             );
@@ -1089,7 +1130,7 @@ const HomePage: React.FC = () => {
               <h1 
                 className="text-white mb-3"
                 style={{ 
-                  fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                  fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                   fontSize: 'clamp(1.8rem, 5vw, 3rem)',
                   fontWeight: 'bold',
                   lineHeight: '1.2',
@@ -1097,12 +1138,12 @@ const HomePage: React.FC = () => {
                   direction: language === 'en' ? 'ltr' : 'rtl'
                 }}
               >
-                {t('home.hero.flyWithNasim')}
+                {pickConfig('HERO', 1, t('home.hero.flyWithNasim'))}
               </h1>
               <p 
                 className="text-white mb-4"
                 style={{ 
-                  fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                  fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                   fontSize: 'clamp(0.9rem, 2vw, 1.2rem)',
                   fontWeight: '500',
                   lineHeight: '1.5',
@@ -1110,13 +1151,13 @@ const HomePage: React.FC = () => {
                   direction: language === 'en' ? 'ltr' : 'rtl'
                 }}
               >
-                {t('home.hero.safeTripDescription')}
+                {pickConfig('HERO', 2, t('home.hero.safeTripDescription'))}
               </p>
             </div>
           </div>
 
           {/* Flight Search Form at Bottom - سایز بزرگتر؛ 1cm پایین‌تر */}
-          <div className="max-w-7xl mx-auto w-full px-6 sm:px-8 pb-6 sm:pb-10 overflow-visible" style={{ marginTop: 'clamp(48px, 7vw, 88px)', padding: 'clamp(28px, 4vw, 48px)', paddingTop: 'calc(clamp(28px, 4vw, 48px) + 1cm)', pointerEvents: 'auto' }}>
+          <div className="max-w-7xl mx-auto w-full px-3 sm:px-6 md:px-8 pb-6 sm:pb-10 overflow-x-hidden overflow-y-visible" style={{ marginTop: 'clamp(24px, 5vw, 88px)', paddingTop: 'calc(clamp(16px, 3vw, 48px) + 0.5cm)', pointerEvents: 'auto' }}>
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
               </div>
             </div>
@@ -1127,27 +1168,29 @@ const HomePage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 
-              className="text-gray-500 flex items-center justify-center gap-2 sm:gap-3 flex-nowrap whitespace-nowrap"
+              className="text-gray-500 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3 flex-wrap px-2"
               style={{ 
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-                fontSize: 'clamp(1.25rem, 3.2vw, 2.2rem)',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
+                fontSize: 'clamp(1rem, 3.2vw, 2.2rem)',
                 fontWeight: 'bold',
                 lineHeight: '1.4',
                 letterSpacing: '0.3px'
               }}
             >
-              <span style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                {language === 'fa' ? (
-                  <>سفری امن، <span className="text-gray-900" style={{ fontWeight: 900 }}>راحت</span> و به یادماندنی</>
-                ) : language === 'ar' ? (
-                  <>رحلة آمنة، <span className="text-gray-900" style={{ fontWeight: 900 }}>مريحة</span> لا تُنسى</>
-                ) : (
-                  <>A safe, <span className="text-gray-900" style={{ fontWeight: 900 }}>comfortable</span> and memorable journey</>
+              <span className="text-center" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                {pickConfig(
+                  'QUOTE',
+                  1,
+                  language === 'fa'
+                    ? 'سفری امن، راحت و به یادماندنی'
+                    : language === 'ar'
+                    ? 'رحلة آمنة، مريحة لا تُنسى'
+                    : 'A safe, comfortable and memorable journey'
                 )}
               </span>
-              <span className="text-gray-400 mx-2 shrink-0">|</span>
-              <span style={{ direction: 'ltr' }}>
-                A safe, <span className="text-gray-900" style={{ fontWeight: 900 }}>comfortable</span> and memorable trip
+              <span className="text-gray-400 mx-2 shrink-0 hidden sm:inline">|</span>
+              <span className="text-center hidden sm:inline" style={{ direction: 'ltr' }}>
+                {pickConfig('QUOTE', 2, 'A safe, comfortable and memorable trip')}
               </span>
             </h2>
           </div>
@@ -1162,7 +1205,7 @@ const HomePage: React.FC = () => {
             <h2 
               className="text-gray-900"
               style={{ 
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
                 fontWeight: 'bold',
                 lineHeight: '1.4',
@@ -1225,7 +1268,7 @@ const HomePage: React.FC = () => {
                       }}
                     />
                     <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                      <p className="text-black text-right font-semibold mb-2" style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif", fontSize: '1.1rem' }}>
+                      <p className="text-black text-right font-semibold mb-2" style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif", fontSize: '1.1rem' }}>
                         {title}
                       </p>
                       <div className="h-0.5 transition-colors duration-300" style={{ backgroundColor: hoveredService === idx + 1 ? '#1e3a8a' : '#9ca3af' }}></div>
@@ -1245,7 +1288,7 @@ const HomePage: React.FC = () => {
             <p 
               className="text-gray-700 flex items-center justify-center gap-2 sm:gap-3 flex-wrap"
               style={{ 
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 fontSize: 'clamp(1.55rem, 3.5vw, 2.35rem)',
                 fontWeight: 'normal',
                 lineHeight: '1.4',
@@ -1279,14 +1322,13 @@ const HomePage: React.FC = () => {
       <section className="relative z-10 py-5" style={{ overflow: 'visible', marginTop: '1.5rem' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
           <div 
-            className="bg-blue-900 flex flex-col md:flex-row items-center justify-between gap-5 px-8 py-6 relative"
+            className="bg-blue-900 flex flex-col md:flex-row items-center justify-between gap-5 px-4 sm:px-8 py-6 relative overflow-hidden md:overflow-visible"
             style={{
               borderRadius: '14px',
-              overflow: 'visible'
             }}
           >
             <div 
-              className="flex items-center" 
+              className="hidden md:flex items-center" 
               style={{ 
                 position: 'absolute',
                 right: '-22px',
@@ -1376,28 +1418,28 @@ const HomePage: React.FC = () => {
 
             <div className="flex-1 text-center md:text-left" style={{ paddingRight: language === 'en' ? '0' : '0' }}>
               <h3 className={`text-lg sm:text-xl md:text-2xl font-semibold text-white mb-2 ${fontClass}`} style={{ 
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}>
-                {t('home.loyalty.joinTitle')}
+                {pickConfig('MEMBERSHIP', 1, t('home.loyalty.joinTitle'))}
               </h3>
               <p className={`text-gray-400 text-sm md:text-base ${fontClass}`} style={{ 
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl',
                 lineHeight: '1.5'
               }}>
-                {t('home.loyalty.joinDescription')}
+                {pickConfig('MEMBERSHIP', 2, t('home.loyalty.joinDescription'))}
               </p>
             </div>
 
             <button 
               onClick={() => navigate('/membership')}
               className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-5 sm:px-7 py-2.5 rounded-lg transition-colors whitespace-nowrap text-sm sm:text-base" style={{ 
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              {t('home.loyalty.joinNow')}
+              {pickConfig('MEMBERSHIP', 3, t('home.loyalty.joinNow'))}
             </button>
           </div>
         </div>
@@ -1433,7 +1475,7 @@ const HomePage: React.FC = () => {
             <h2
               className="text-gray-900"
               style={{
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
                 fontWeight: 'bold',
                 lineHeight: '1.4',
@@ -1441,7 +1483,7 @@ const HomePage: React.FC = () => {
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              {t('home.popularRoutes')}
+              {pickConfig('POPULAR_ROUTES', 1, t('home.popularRoutes'))}
             </h2>
           </div>
 
@@ -1461,10 +1503,10 @@ const HomePage: React.FC = () => {
               return (
               <div 
                 key={`${card.id}-${variant}-${index}`} 
-                onClick={() => navigate('/iranology')}
+                onClick={() => handleSectionItemClick(card.linkUrl || '/iranology')}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && navigate('/iranology')}
+                onKeyDown={(e) => e.key === 'Enter' && handleSectionItemClick(card.linkUrl || '/iranology')}
                 className="group bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden cursor-pointer"
                 style={{
                   animation,
@@ -1491,13 +1533,13 @@ const HomePage: React.FC = () => {
                   >
                     <div className="flex items-center justify-center gap-2">
                       <span className={`text-white font-semibold text-base ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                       }}>
                         {card.from[language]}
                       </span>
                       <PaperAirplaneIcon className="w-4 h-4 text-white" />
                       <span className={`text-white font-semibold text-base ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                       }}>
                         {card.to[language]}
                       </span>
@@ -1519,7 +1561,7 @@ const HomePage: React.FC = () => {
                       }}
                     >
                   {visibleCardIds.map((cardId, index) => {
-                    const card = allOfferCards.find(c => c.id === cardId);
+                    const card = activeOfferCards.find(c => c.id === cardId);
                     return card ? renderOfferCard(card, index, 'normal') : null;
                   })}
                 </div>
@@ -1534,42 +1576,69 @@ const HomePage: React.FC = () => {
                       </div>
       </section>
 
-      {/* Skywards+ Section - Emirates Style */}
-      <section className="relative z-10 py-8 sm:py-16 bg-white overflow-hidden" style={{ marginTop: '58px', paddingTop: 'calc(5rem + 1cm)', paddingBottom: 'calc(2rem + 2cm)' }}>
-        <div 
-          className="absolute inset-0 bg-cover"
+      {/* Loyalty / Survey banner — CMS editable image + copy */}
+      <section
+        className="relative z-10 overflow-hidden bg-slate-900 loyalty-survey-banner"
+        style={{
+          marginTop: '58px',
+        }}
+      >
+        <div
+          className="loyalty-survey-banner__media absolute inset-0"
           style={{
-            backgroundImage: 'url(/images/airport-crew.jpg)',
-            backgroundPosition: 'center calc(-38px + 1cm)'
+            backgroundImage: `url(${surveyItems[0]?.image_url || '/images/airport-crew.jpg'})`,
+          }}
+          aria-hidden
+        >
+          <div className="absolute inset-0 bg-gradient-to-l from-black/75 via-black/50 to-black/20" />
+        </div>
+
+        <div
+          className="relative z-10 max-w-7xl mx-auto flex items-center px-4 sm:px-6 lg:px-10 loyalty-survey-banner__inner"
+          style={{
+            direction: language === 'en' ? 'ltr' : 'rtl',
           }}
         >
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-        <div 
-          className="relative z-10 max-w-7xl mx-auto flex"
-          style={{ direction: 'ltr', justifyContent: 'flex-end', paddingLeft: '12rem', paddingRight: '0cm' }}
-        >
-          <div className="max-w-2xl w-full" style={{ textAlign: language === 'fa' || language === 'ar' ? 'right' : 'left', transform: 'translate(+4.5cm, -0.35cm)', paddingTop: '1.75rem' }}>
-            <h2 className={`text-xl sm:text-3xl md:text-4xl font-semibold text-white mb-2 sm:mb-3 tracking-tight ${fontClass}`} style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: language === 'en' ? 'ltr' : 'rtl',
-              fontWeight: 600,
-              lineHeight: 1.25
-            }}>
-              {t('home.loyalty.enhanceTitle')}
+          <div
+            className="loyalty-banner-copy w-full"
+            style={{
+              textAlign: language === 'en' ? 'left' : 'right',
+            }}
+          >
+            <h2
+              className={`loyalty-survey-banner__title text-white tracking-tight break-words ${fontClass}`}
+              style={{
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
+                direction: language === 'en' ? 'ltr' : 'rtl',
+                fontWeight: 700,
+                textShadow: '0 2px 20px rgba(0,0,0,0.4)',
+              }}
+            >
+              {pickConfig('SURVEY', 1, t('home.loyalty.enhanceTitle'))}
             </h2>
-            <p className={`text-white/95 text-sm sm:text-base mb-4 sm:mb-5 leading-snug ${fontClass}`} style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: language === 'en' ? 'ltr' : 'rtl',
-              lineHeight: '1.65'
-            }}>
-              {t('home.loyalty.fullDescription')}
+            <p
+              className={`loyalty-survey-banner__desc text-white/95 break-words ${fontClass}`}
+              style={{
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
+                direction: language === 'en' ? 'ltr' : 'rtl',
+                textShadow: '0 1px 12px rgba(0,0,0,0.35)',
+              }}
+            >
+              {pickConfig('SURVEY', 2, t('home.loyalty.fullDescription'))}
             </p>
-            <button onClick={() => navigate('/membership')} className="bg-white hover:bg-gray-100 text-gray-900 font-medium px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg transition-colors text-sm" style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
-              direction: language === 'en' ? 'ltr' : 'rtl'
-            }}>
-              {language === 'fa' ? 'لینک نظرسنجی' : language === 'ar' ? 'رابط الاستبيان' : 'Survey Link'}
+            <button
+              onClick={() => handleSectionItemClick(surveyItems[0]?.link_url || '/membership')}
+              className="loyalty-survey-banner__btn bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-xl transition-colors shadow-xl"
+              style={{
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
+                direction: language === 'en' ? 'ltr' : 'rtl',
+              }}
+            >
+              {pickConfig(
+                'SURVEY',
+                3,
+                language === 'fa' ? 'لینک نظرسنجی' : language === 'ar' ? 'رابط الاستبيان' : 'Survey Link'
+              )}
             </button>
           </div>
         </div>
@@ -1581,7 +1650,7 @@ const HomePage: React.FC = () => {
           {/* Title Section - Same style as Section 2 */}
           <div className="text-center mb-4 sm:mb-8">
             <div style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
               color: '#000000',
               opacity: 1
             }}>
@@ -1618,7 +1687,7 @@ const HomePage: React.FC = () => {
                 gap: '8px',
                 flexWrap: 'wrap',
                 justifyContent: 'center',
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
               }}>
                 {(() => {
                   const c = sectionConfigs['EXPERIENCE'];
@@ -1634,7 +1703,7 @@ const HomePage: React.FC = () => {
                 marginBottom: '0',
                 color: '#000000',
                 opacity: 1,
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
               }}>
                 {(() => {
                   const c = sectionConfigs['EXPERIENCE'];
@@ -1644,8 +1713,8 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Layout: 4 Small Images Left (2x2), Large Image Right - Dynamic from API */}
-          <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-0 justify-center items-center" style={{ perspective: '1000px', overflow: 'visible', direction: 'rtl' }}>
+          {/* Layout: 4 کارت کوچک + ۱ کارت بزرگ — ارتفاع برابر و وسط‌چین */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
             {(() => {
               const defaultExp: HomePageSectionItem[] = [
                 { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
@@ -1657,48 +1726,69 @@ const HomePage: React.FC = () => {
               const items = experienceItems.length >= 5 ? experienceItems : defaultExp;
               const smallItems = items.slice(0, 4);
               const largeItem = items[4];
-              const smallImgStyle = { height: 'calc((500px - 24px) / 2)', borderRadius: '16px', overflow: 'hidden' as const };
-              const imgCommon = { objectPosition: 'center center', transition: 'opacity 0.3s ease', height: '100%', width: '100%', imageRendering: '-webkit-optimize-contrast' as const, borderRadius: '16px' };
-              const cardBase: React.CSSProperties = { borderRadius: '16px', border: '0.5px solid #d1d5db', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)', opacity: 0.95, transform: 'translateY(0)', transformStyle: 'preserve-3d', transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)', width: '68%', maxWidth: '100%', position: 'relative', zIndex: 25 };
               return (
                 <>
-                  <div className="grid grid-cols-2 gap-1 sm:gap-2 order-1 lg:order-1" style={{ perspective: '1000px', width: '100%', overflow: 'visible', direction: 'rtl' }}>
+                  <div className="lg:col-span-3 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 w-full min-w-0 self-stretch" style={{ minHeight: 'clamp(280px, 42vw, 500px)' }}>
                     {smallItems.map((item, idx) => {
-                      const isLeft = idx % 2 === 0;
                       const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
                       const imgSrc = item.image_url || (['/images/two.png', '/images/three.png', '/images/4reza.jpeg', '/images/5reza.jpeg'])[idx];
                       return (
-                        <div key={item.id} className="bg-white overflow-visible group cursor-pointer transition-all duration-500 mx-auto"
-                          style={{ ...cardBase, transformOrigin: isLeft ? 'right center' : 'left center', marginRight: isLeft ? '170px' : undefined }}
+                        <div
+                          key={item.id}
+                          className="bg-white overflow-hidden group cursor-pointer transition-all duration-300 w-full min-w-0 h-full min-h-0"
+                          style={{
+                            borderRadius: '16px',
+                            border: '0.5px solid #d1d5db',
+                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                          }}
                           onClick={() => handleSectionItemClick(idx === 0 ? '/survey' : idx === 1 ? '/tickets' : (item.link_url || ''))}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = '#d1d5db';
-                            e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)';
-                            e.currentTarget.style.opacity = '1';
-                            e.currentTarget.style.transform = `translateY(-4px) rotateY(${isLeft ? -15 : 15}deg) translateZ(20px)`;
+                            e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)';
+                            e.currentTarget.style.transform = 'translateY(-4px)';
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = '#d1d5db';
                             e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
-                            e.currentTarget.style.opacity = '0.95';
-                            e.currentTarget.style.transform = 'translateY(0) rotateY(0deg) translateZ(0px)';
+                            e.currentTarget.style.transform = 'translateY(0)';
                           }}
                         >
-                          <div className="relative w-full" style={smallImgStyle}>
-                            <img src={imgSrc} alt={title} className="w-full h-full object-contain transition-opacity duration-300" style={imgCommon} />
+                          <div className="relative w-full h-full">
+                            <img
+                              src={imgSrc}
+                              alt={title}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              style={{ borderRadius: '16px', objectPosition: 'center' }}
+                            />
                           </div>
                         </div>
                       );
                     })}
                   </div>
                   {largeItem && (
-                    <div className="bg-white overflow-hidden group cursor-pointer transition-all duration-300 order-2 lg:order-2" style={{ borderRadius: '16px', border: '0.5px solid #d1d5db', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)', opacity: 0.95, transform: 'translateY(0)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', position: 'relative', zIndex: 75, marginRight: '-50px' }}
+                    <div
+                      className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 w-full min-w-0 self-stretch"
+                      style={{
+                        borderRadius: '16px',
+                        border: '0.5px solid #d1d5db',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+                        minHeight: 'clamp(220px, 36vw, 500px)',
+                      }}
                       onClick={() => handleSectionItemClick(largeItem.link_url || '')}
-                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)'; e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(-14px)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)'; e.currentTarget.style.opacity = '0.95'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)';
+                        e.currentTarget.style.transform = 'translateY(-6px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.03)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
                     >
-                      <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)', borderRadius: '16px', overflow: 'hidden' }}>
-                        <img src={largeItem.image_url || '/images/6reza.jpeg'} alt={language === 'fa' ? largeItem.title_fa : language === 'ar' ? largeItem.title_ar : largeItem.title_en} className="w-full h-full object-cover transition-opacity duration-300" style={{ ...imgCommon, borderRadius: '16px' }} />
+                      <div className="relative w-full h-full min-h-[220px]">
+                        <img
+                          src={largeItem.image_url || '/images/6reza.jpeg'}
+                          alt={language === 'fa' ? largeItem.title_fa : language === 'ar' ? largeItem.title_ar : largeItem.title_en}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          style={{ borderRadius: '16px', objectPosition: 'center' }}
+                        />
                       </div>
                     </div>
                   )}
@@ -1985,7 +2075,7 @@ const HomePage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className={`text-2xl md:text-3xl ${fontClass}`} style={{ 
-              fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+              fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
               fontWeight: language === 'fa' ? 300 : 400,
               letterSpacing: language === 'en' ? '1.5px' : '0.2px',
               marginBottom: '0',
@@ -2067,7 +2157,7 @@ const HomePage: React.FC = () => {
                     className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
                       letterSpacing: language === 'en' ? '1.5px' : '0.2px',
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                       textTransform: language === 'en' ? 'uppercase' : 'none',
                       fontWeight: language === 'fa' ? 300 : 400,
                       lineHeight: '1.4',
@@ -2082,7 +2172,7 @@ const HomePage: React.FC = () => {
                   <h3 
                     className={`mb-2 text-center ${fontClass}`} 
                     style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                       fontWeight: language === 'fa' ? 600 : 700,
                       lineHeight: language === 'fa' ? '1.3' : '1.2',
                       letterSpacing: language === 'en' ? '-0.3px' : 'normal',
@@ -2098,7 +2188,7 @@ const HomePage: React.FC = () => {
                   <p 
                     className={`text-center ${fontClass}`} 
                     style={{ 
-                      fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                      fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                       fontWeight: language === 'fa' ? 300 : 400,
                       lineHeight: '1.5',
                       fontSize: language === 'fa' ? '11px' : '13px',
@@ -2794,7 +2884,7 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-    {/* FAQ Section - استایل جدید دایره‌ای و جدا از فوتر */}
+    {/* FAQ Section - CMS editable */}
 <section
   id="faq"
   className="relative flex flex-col justify-center items-center"
@@ -2806,7 +2896,6 @@ const HomePage: React.FC = () => {
     gap: '24px'
   }}
 >
-  {/* عنوان و توضیح بخش FAQ */}
   <div className="text-center max-w-2xl">
     <h2 
       style={{
@@ -2816,10 +2905,14 @@ const HomePage: React.FC = () => {
         marginBottom: '8px',
         color: '#000000',
         opacity: 1,
-        fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+        fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
       }}
     >
-      {language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+      {pickConfig(
+        'FAQ',
+        1,
+        language === 'fa' ? 'سوالات متداول' : language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'
+      )}
     </h2>
     <p 
       style={{
@@ -2829,41 +2922,32 @@ const HomePage: React.FC = () => {
         marginBottom: '0',
         color: '#000000',
         opacity: 1,
-        fontFamily: 'DigiHamisheBold, Arial, sans-serif'
+        fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
       }}
     >
-      {language === 'fa' 
-        ? 'پاسخ سوالات رایج خود را در مورد رزرو، پرواز، خدمات و پشتیبانی پیدا کنید'
-        : language === 'ar'
-        ? 'ابحث عن إجابات لأسئلتك الشائعة حول الحجز والرحلات والخدمات والدعم'
-        : 'Find answers to your common questions about booking, flights, services and support'}
+      {pickConfig(
+        'FAQ',
+        2,
+        language === 'fa'
+          ? 'پاسخ سوالات رایج خود را در مورد رزرو، پرواز، خدمات و پشتیبانی پیدا کنید'
+          : language === 'ar'
+          ? 'ابحث عن إجابات لأسئلتك الشائعة حول الحجز والرحلات والخدمات والدعم'
+          : 'Find answers to your common questions about booking, flights, services and support'
+      )}
     </p>
   </div>
 
-  {/* دایره‌های FAQ با عکس و توضیح زیر دایره‌ها */}
-  <div className="flex justify-center items-center flex-wrap" style={{ gap: '42px', padding: '20px 0' }}>
-    {[
-      { 
-        id: 'booking', 
-        image: '', // عکس را از پوشه public/images انتخاب کنید، مثلاً '/images/faq-booking.jpg'
-        description: language === 'fa' ? 'راهنمای رزرو و خرید بلیط' : language === 'ar' ? 'دليل الحجز وشراء التذاكر' : 'Booking guide'
-      },
-      { 
-        id: 'services', 
-        image: '', // مثلاً '/images/faq-services.jpg'
-        description: language === 'fa' ? 'امکانات و خدمات در پرواز' : language === 'ar' ? 'المرافق والخدمات' : 'Flight amenities'
-      },
-      { 
-        id: 'flight-info', 
-        image: '', // مثلاً '/images/faq-flight.jpg'
-        description: language === 'fa' ? 'وضعیت پرواز و جزئیات' : language === 'ar' ? 'حالة الرحلة والتفاصيل' : 'Flight status'
-      },
-      { 
-        id: 'support', 
-        image: '', // مثلاً '/images/faq-support.jpg'
-        description: language === 'fa' ? 'راه‌های ارتباط با پشتیبانی' : language === 'ar' ? 'طرق الاتصال بالدعم' : 'Contact support'
-      }
-    ].map((faq) => {
+  <div className="flex justify-center items-center flex-wrap gap-4 sm:gap-8 md:gap-[42px] px-2 py-4 sm:py-5">
+    {(faqItems.length > 0
+      ? faqItems
+      : [
+          { id: 1, title_fa: 'راهنمای رزرو و خرید بلیط', title_ar: 'دليل الحجز وشراء التذاكر', title_en: 'Booking guide', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 1, is_active: true, section_type: 'FAQ' },
+          { id: 2, title_fa: 'امکانات و خدمات در پرواز', title_ar: 'المرافق والخدمات', title_en: 'Flight amenities', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 2, is_active: true, section_type: 'FAQ' },
+          { id: 3, title_fa: 'وضعیت پرواز و جزئیات', title_ar: 'حالة الرحلة والتفاصيل', title_en: 'Flight status', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 3, is_active: true, section_type: 'FAQ' },
+          { id: 4, title_fa: 'راه‌های ارتباط با پشتیبانی', title_ar: 'طرق الاتصال بالدعم', title_en: 'Contact support', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 4, is_active: true, section_type: 'FAQ' },
+        ] as HomePageSectionItem[]
+    ).map((faq) => {
+      const label = pickLang(faq.title_fa, faq.title_ar, faq.title_en);
       return (
         <div key={faq.id} className="flex flex-col items-center">
           <button
@@ -2872,12 +2956,12 @@ const HomePage: React.FC = () => {
             style={{
               fontFamily:
                 language === 'fa'
-                  ? "'Vazirmatn', sans-serif"
+                  ? "'DigiHamishe', 'DigiHamisheBold', sans-serif"
                   : language === 'en'
                   ? 'Arial, sans-serif'
                   : "'Noto Sans Arabic', sans-serif",
-              width: '195px',
-              height: '195px',
+              width: 'clamp(120px, 42vw, 195px)',
+              height: 'clamp(120px, 42vw, 195px)',
               borderRadius: '9999px',
               border: '3px solid #1e40af',
               boxShadow: '0 18px 35px rgba(0,0,0,0.4)',
@@ -2885,9 +2969,11 @@ const HomePage: React.FC = () => {
               transition: 'all 0.25s ease',
               backgroundColor: '#93c5fd',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              maxWidth: '100%',
             }}
             onMouseEnter={(e) => {
+              if (window.innerWidth < 768) return;
               e.currentTarget.style.transform = 'translateY(-6px) scale(1.03)';
               e.currentTarget.style.boxShadow = '0 22px 40px rgba(0,0,0,0.55)';
             }}
@@ -2896,39 +2982,25 @@ const HomePage: React.FC = () => {
               e.currentTarget.style.boxShadow = '0 18px 35px rgba(0,0,0,0.4)';
             }}
           >
-            {faq.image ? (
+            {faq.image_url ? (
               <img
-                src={faq.image}
-                alt={faq.description}
+                src={faq.image_url}
+                alt={label}
                 className="w-full h-full object-cover rounded-full absolute inset-0"
                 style={{ zIndex: 1 }}
               />
             ) : null}
-            <span
-              className={`text-sm sm:text-base font-medium text-center ${fontClass}`}
-              style={{ 
-                position: 'relative',
-                zIndex: 2,
-                lineHeight: 1.4,
-                color: '#ffffff',
-                textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-              }}
-            >
-             
-            </span>
           </button>
-          
-          {/* توضیح زیر دایره (خارج از دایره) */}
           <span
             className={`text-xs text-center mt-3 ${fontClass}`}
             style={{ 
               lineHeight: 3,
               color: '#000000',
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+              fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
               fontSize: '16px'
             }}
           >
-            {faq.description}
+            {label}
           </span>
         </div>
       );
@@ -2936,23 +3008,39 @@ const HomePage: React.FC = () => {
   </div>
 </section>
 
-{/* FAQ Modal */}
-{selectedFAQ && (
+{selectedFAQ != null && (() => {
+  const faqList = faqItems.length > 0
+    ? faqItems
+    : [
+        { id: 1, title_fa: 'راهنمای رزرو و خرید بلیط', title_ar: 'دليل الحجز وشراء التذاكر', title_en: 'Booking guide', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 1, is_active: true, section_type: 'FAQ' },
+        { id: 2, title_fa: 'امکانات و خدمات در پرواز', title_ar: 'المرافق والخدمات', title_en: 'Flight amenities', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 2, is_active: true, section_type: 'FAQ' },
+        { id: 3, title_fa: 'وضعیت پرواز و جزئیات', title_ar: 'حالة الرحلة والتفاصيل', title_en: 'Flight status', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 3, is_active: true, section_type: 'FAQ' },
+        { id: 4, title_fa: 'راه‌های ارتباط با پشتیبانی', title_ar: 'طرق الاتصال بالدعم', title_en: 'Contact support', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 4, is_active: true, section_type: 'FAQ' },
+      ] as HomePageSectionItem[];
+  const activeFaq = faqList.find((f) => f.id === selectedFAQ)
+    || ({
+      id: selectedFAQ,
+      title_fa: 'سوالات متداول',
+      title_ar: 'الأسئلة الشائعة',
+      title_en: 'FAQ',
+      description_fa: '',
+      description_ar: '',
+      description_en: '',
+    } as HomePageSectionItem);
+  const modalTitle = pickLang(activeFaq.title_fa, activeFaq.title_ar, activeFaq.title_en);
+  const modalBody = pickLang(activeFaq.description_fa, activeFaq.description_ar, activeFaq.description_en);
+  return (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div 
       className="absolute inset-0 bg-black/50 backdrop-blur-sm"
       onClick={() => setSelectedFAQ(null)}
     ></div>
     <div className="relative bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-      {/* Header */}
       <div className="bg-gray-900 px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <h3 className={`text-xl font-semibold text-white ${fontClass}`} style={{
-          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
         }}>
-          {selectedFAQ === 'booking' && (language === 'fa' ? 'رزرو پرواز' : language === 'ar' ? 'حجز الطيران' : 'Flight Booking')}
-          {selectedFAQ === 'services' && (language === 'fa' ? 'خدمات مسافران' : language === 'ar' ? 'خدمات الركاب' : 'Passenger Services')}
-          {selectedFAQ === 'flight-info' && (language === 'fa' ? 'اطلاعات پرواز' : language === 'ar' ? 'معلومات الرحلة' : 'Flight Information')}
-          {selectedFAQ === 'support' && (language === 'fa' ? 'پشتیبانی و تماس' : language === 'ar' ? 'الدعم والاتصال' : 'Support & Contact')}
+          {modalTitle}
         </h3>
         <button
           onClick={() => setSelectedFAQ(null)}
@@ -2961,162 +3049,18 @@ const HomePage: React.FC = () => {
           <XMarkIcon className="w-6 h-6" />
         </button>
       </div>
-
-      {/* Content */}
       <div className="px-6 py-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-        <div className="space-y-6">
-          {selectedFAQ === 'booking' && (
-            <>
-              <div>
-                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' ? 'چگونه می‌توانم پرواز خود را رزرو کنم؟' : language === 'ar' ? 'كيف يمكنني حجز رحلتي؟' : 'How can I book my flight?'}
-                </h4>
-                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' 
-                    ? 'شما می‌توانید به راحتی از طریق وب‌سایت هواپیمایی نسیم، اپلیکیشن موبایل یا تماس با مرکز رزرواسیون ما پرواز خود را رزرو کنید. ما با مجوز رسمی از سازمان هواپیمایی کشوری و دارای نماد اعتماد الکترونیکی هستیم و تمامی تراکنش‌های شما به صورت امن انجام می‌شود.'
-                    : language === 'ar'
-                    ? 'يمكنك بسهولة حجز رحلتك من خلال موقع نسيم إير الإلكتروني أو تطبيق الهاتف المحمول أو الاتصال بمركز الحجز لدينا. نحن مرخصون رسمياً من منظمة الطيران المدني ونتحلى بشارة الثقة الإلكترونية، وجميع معاملاتك تتم بأمان.'
-                    : 'You can easily book your flight through Nasim Air website, mobile app, or by contacting our reservation center. We are officially licensed by the Civil Aviation Organization and have an electronic trust badge, and all your transactions are secure.'}
-                </p>
-              </div>
-              <div>
-                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' ? 'آیا امکان تغییر یا لغو رزرو وجود دارد؟' : language === 'ar' ? 'هل يمكن تغيير أو إلغاء الحجز؟' : 'Can I change or cancel my booking?'}
-                </h4>
-                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa'
-                    ? 'بله، شما می‌توانید با توجه به قوانین و شرایط بلیط خود، تغییرات یا لغو را از طریق پنل کاربری یا تماس با پشتیبانی انجام دهید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای رضایت شما انجام می‌دهیم.'
-                    : language === 'ar'
-                    ? 'نعم، يمكنك إجراء التغييرات أو الإلغاء من خلال لوحة المستخدم أو الاتصال بالدعم وفقاً لقواعد وشروط تذكرتك. كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإرضائك.'
-                    : 'Yes, you can make changes or cancellations through your user panel or by contacting support, according to your ticket rules and conditions. As a trusted Iranian airline, we do our best to satisfy you.'}
-                </p>
-              </div>
-            </>
-          )}
-
-          {selectedFAQ === 'services' && (
-            <>
-              <div>
-                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' ? 'چه خدماتی در طول پرواز ارائه می‌شود؟' : language === 'ar' ? 'ما هي الخدمات المقدمة أثناء الرحلة؟' : 'What services are provided during the flight?'}
-                </h4>
-                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa'
-                    ? 'هواپیمایی نسیم با افتخار خدمات متنوعی از جمله پذیرایی، اینترنت وای‌فای، سرگرمی‌های پرواز و خدمات ویژه برای مسافران VIP ارائه می‌دهد. تمامی خدمت‌رسانان ما آموزش‌دیده و متعهد به ارائه بهترین تجربه سفر برای شما هستند.'
-                    : language === 'ar'
-                    ? 'تقدم نسيم إير بفخر خدمات متنوعة تشمل الضيافة والإنترنت اللاسلكي ووسائل الترفيه وخدمات خاصة لركاب VIP. جميع موظفينا مدربون وملتزمون بتقديم أفضل تجربة سفر لك.'
-                    : 'Nasim Air proudly provides various services including catering, WiFi internet, in-flight entertainment, and special services for VIP passengers. All our staff are trained and committed to providing you with the best travel experience.'}
-                </p>
-              </div>
-              <div>
-                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' ? 'آیا امکان حمل بار اضافی وجود دارد؟' : language === 'ar' ? 'هل يمكن نقل أمتعة إضافية؟' : 'Can I carry extra baggage?'}
-                </h4>
-                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa'
-                    ? 'بله، شما می‌توانید با پرداخت هزینه اضافی، بار اضافی حمل کنید. اطلاعات دقیق در مورد وزن و ابعاد مجاز را می‌توانید در وب‌سایت ما مشاهده کنید. ما به عنوان یک ایرلاین معتبر، تمام قوانین بین‌المللی را رعایت می‌کنیم.'
-                    : language === 'ar'
-                    ? 'نعم، يمكنك نقل أمتعة إضافية مقابل دفع رسوم إضافية. يمكنك الاطلاع على معلومات دقيقة حول الوزن والأبعاد المسموحة على موقعنا. كشركة طيران موثوقة، نلتزم بجميع القوانين الدولية.'
-                    : 'Yes, you can carry extra baggage for an additional fee. You can find detailed information about allowed weight and dimensions on our website. As a trusted airline, we comply with all international regulations.'}
-                </p>
-              </div>
-            </>
-          )}
-
-          {selectedFAQ === 'flight-info' && (
-            <>
-              <div>
-                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' ? 'چگونه می‌توانم وضعیت پرواز خود را بررسی کنم؟' : language === 'ar' ? 'كيف يمكنني التحقق من حالة رحلتي؟' : 'How can I check my flight status?'}
-                </h4>
-                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa'
-                    ? 'شما می‌توانید از طریق وب‌سایت هواپیمایی نسیم، اپلیکیشن موبایل یا با وارد کردن شماره پرواز در بخش "وضعیت پرواز" اطلاعات دقیق پرواز خود را مشاهده کنید. ما به عنوان یک ایرلاین معتبر ایرانی، تمام تلاش خود را برای اطلاع‌رسانی به موقع انجام می‌دهیم.'
-                    : language === 'ar'
-                    ? 'يمكنك الاطلاع على معلومات دقيقة لرحلتك من خلال موقع نسيم إير أو تطبيق الهاتف المحمول أو بإدخال رقم الرحلة في قسم "حالة الرحلة". كشركة طيران إيرانية موثوقة، نبذل قصارى جهدنا لإعلامك في الوقت المناسب.'
-                    : 'You can view detailed information about your flight through the Nasim Air website, mobile app, or by entering the flight number in the "Flight Status" section. As a trusted Iranian airline, we do our best to inform you in a timely manner.'}
-                </p>
-              </div>
-              <div>
-                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' ? 'چه زمانی باید در فرودگاه حاضر شوم؟' : language === 'ar' ? 'متى يجب أن أكون في المطار؟' : 'When should I arrive at the airport?'}
-                </h4>
-                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa'
-                    ? 'برای پروازهای داخلی حداقل 90 دقیقه و برای پروازهای بین‌المللی حداقل 3 ساعت قبل از زمان پرواز در فرودگاه حاضر شوید. هواپیمایی نسیم با رعایت تمام استانداردهای امنیتی و ایمنی، تجربه سفر امنی را برای شما فراهم می‌کند.'
-                    : language === 'ar'
-                    ? 'للرحلات الداخلية، يجب أن تكون في المطار قبل 90 دقيقة على الأقل، وللرحلات الدولية قبل 3 ساعات على الأقل من وقت الرحلة. تلتزم نسيم إير بجميع معايير الأمن والسلامة لتوفير تجربة سفر آمنة لك.'
-                    : 'For domestic flights, arrive at least 90 minutes before, and for international flights, at least 3 hours before the flight time. Nasim Air, complying with all security and safety standards, provides you with a safe travel experience.'}
-                </p>
-              </div>
-            </>
-          )}
-
-          {selectedFAQ === 'support' && (
-            <>
-              <div>
-                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' ? 'چگونه می‌توانم با پشتیبانی هواپیمایی نسیم تماس بگیرم؟' : language === 'ar' ? 'كيف يمكنني الاتصال بدعم نسيم إير؟' : 'How can I contact Nasim Air support?'}
-                </h4>
-                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa'
-                    ? 'شما می‌توانید از طریق شماره تلفن 021-91000000، ایمیل support@nasimair.ir یا چت آنلاین در وب‌سایت با تیم پشتیبانی ما در ارتباط باشید. تیم پشتیبانی هواپیمایی نسیم 24/7 آماده پاسخگویی به سوالات شماست. ما به عنوان یک ایرلاین معتبر ایرانی با نماد اعتماد الکترونیکی، متعهد به ارائه بهترین خدمات به شما هستیم.'
-                    : language === 'ar'
-                    ? 'يمكنك التواصل مع فريق الدعم لدينا عبر الهاتف 021-91000000 أو البريد الإلكتروني support@nasimair.ir أو الدردشة المباشرة على الموقع. فريق دعم نسيم إير جاهز للرد على استفساراتك على مدار الساعة. كشركة طيران إيرانية موثوقة بشارة الثقة الإلكترونية، ملتزمون بتقديم أفضل الخدمات لك.'
-                    : 'You can contact our support team via phone 021-91000000, email support@nasimair.ir, or online chat on the website. Nasim Air support team is available 24/7 to answer your questions. As a trusted Iranian airline with an electronic trust badge, we are committed to providing you with the best services.'}
-                </p>
-              </div>
-              <div>
-                <h4 className={`text-lg font-semibold text-white mb-3 ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa' ? 'آیا هواپیمایی نسیم دارای مجوز و اعتبار است؟' : language === 'ar' ? 'هل تمتلك نسيم إير ترخيصاً ومصداقية؟' : 'Is Nasim Air licensed and credible?'}
-                </h4>
-                <p className={`text-gray-300 leading-relaxed ${fontClass}`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}>
-                  {language === 'fa'
-                    ? 'بله، هواپیمایی نسیم با مجوز رسمی از سازمان هواپیمایی کشوری فعالیت می‌کند و دارای نماد اعتماد الکترونیکی (اینماد) است. ما تمام استانداردهای ایمنی و امنیتی بین‌المللی را رعایت می‌کنیم و به عنوان یک ایرلاین معتبر ایرانی، سال‌هاست که خدمات پروازی ایمن و با کیفیت ارائه می‌دهیم.'
-                    : language === 'ar'
-                    ? 'نعم، تعمل نسيم إير بترخيص رسمي من منظمة الطيران المدني وتحمل شارة الثقة الإلكترونية. نلتزم بجميع معايير الأمن والسلامة الدولية وكشركة طيران إيرانية موثوقة، نقدم منذ سنوات خدمات طيران آمنة وعالية الجودة.'
-                    : 'Yes, Nasim Air operates with an official license from the Civil Aviation Organization and has an electronic trust badge. We comply with all international safety and security standards, and as a trusted Iranian airline, we have been providing safe and quality flight services for years.'}
-                </p>
-              </div>
-            </>
-          )}
+        <div className={`text-gray-300 leading-relaxed whitespace-pre-line ${fontClass}`} style={{
+          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
+        }}>
+          {modalBody || (language === 'fa' ? 'محتوا هنوز در پنل ادمین وارد نشده است.' : language === 'ar' ? 'لم تتم إضافة المحتوى بعد.' : 'Content has not been added in admin yet.')}
         </div>
       </div>
     </div>
   </div>
-)}
+  );
+})()}
+
       {/* Footer - مطابق طرح */}
       <footer className="relative z-10 pt-8 sm:pt-12 pb-0" style={{ backgroundColor: '#1e3a8a', color: '#ffffff', marginTop: '-56px', borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -3125,27 +3069,27 @@ const HomePage: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-8 lg:gap-12 flex-1">
               {/* آدرس ساختمان مرکزی */}
               <div>
-                <h4 className={`text-sm font-normal mb-1 text-white uppercase tracking-wider ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                <h4 className={`text-sm font-normal mb-1 text-white uppercase tracking-wider ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                   {language === 'fa' ? 'آدرس ساختمان مرکزی:' : language === 'ar' ? 'عنوان المبنى المركزي:' : 'Central Building Address:'}
                 </h4>
-                <p className={`text-sm text-white/95 mb-4 ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                <p className={`text-sm text-white/95 mb-4 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                   {language === 'fa' ? 'شریعتی پایین‌تر از بهارشیراز، کوچه عشایر، پلاک ۱۳' : language === 'ar' ? 'شارع شريعتي أسفل بهارشيراز، زقاق العشائر، بلوك ١٣' : 'Shariati St., below Baharshiraz, Ashaier Alley, No. 13'}
                 </p>
                 <ul className="space-y-2">
                   <li>
-                    <a href="tel:7340000" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="tel:7340000" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <PhoneIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'تلفن' : language === 'ar' ? 'هاتف' : 'Phone'}: 7340000
                     </a>
                   </li>
                   <li>
-                    <a href="mailto:info@nasimair.com" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="mailto:info@nasimair.com" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <EnvelopeIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'ایمیل' : language === 'ar' ? 'بريد إلكتروني' : 'Email'}: info@nasimair.com
                     </a>
                   </li>
                   <li>
-                    <a href="https://www.google.com/maps/search/?api=1&query=35.712476,51.437845" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="https://www.google.com/maps/search/?api=1&query=35.712476,51.437845" target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <MapPinIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'لوکیشن' : language === 'ar' ? 'الموقع' : 'Location'}
                     </a>
@@ -3155,24 +3099,24 @@ const HomePage: React.FC = () => {
 
               {/* گزارش ها */}
               <div>
-                <h4 className={`text-sm font-semibold mb-4 text-white uppercase tracking-wider ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                <h4 className={`text-sm font-semibold mb-4 text-white uppercase tracking-wider ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                   {language === 'fa' ? 'گزارش‌ها:' : language === 'ar' ? 'التقارير:' : 'Reports:'}
                 </h4>
                 <ul className="space-y-2">
                   <li>
-                    <a href="/tickets" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="/tickets" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <DocumentTextIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'ثبت شکایت' : language === 'ar' ? 'تسجيل شكوى' : 'Register Complaint'}
                     </a>
                   </li>
                   <li>
-                    <a href="#" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="#" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'گزارش ایمنی پرواز' : language === 'ar' ? 'تقرير سلامة الرحلة' : 'Flight Safety Report'}
                     </a>
                   </li>
                   <li>
-                    <a href="/survey" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="/survey" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <ChartBarIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'نظرسنجی' : language === 'ar' ? 'استطلاع الرأي' : 'Survey'}
                     </a>
@@ -3184,7 +3128,7 @@ const HomePage: React.FC = () => {
             {/* بخش لوگوها: شبکه های اجتماعی بالا، لوگوهای YATA/CAO/... پایین */}
             <div className="flex flex-col gap-4 flex-shrink-0 items-center">
               {/* ارتباط با ما در شبکه های اجتماعی - وسط‌چین */}
-              <div className={`flex flex-wrap items-center justify-center gap-3 ${fontClass}`} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+              <div className={`flex flex-wrap items-center justify-center gap-3 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                 <span className="text-sm font-medium text-white whitespace-nowrap">
                   {t('footer.socialTitle')}
                 </span>
@@ -3229,7 +3173,7 @@ const HomePage: React.FC = () => {
 
           <div className={`border-t mt-8 pt-6 pb-4 ${fontClass}`} style={{
             borderColor: 'rgba(255, 255, 255, 0.2)',
-            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+            fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
           }}>
             <p className={`text-xs text-white/90 text-center ${fontClass}`} style={{ lineHeight: '1.6' }}>
               {t('footer.copyrightFull')}
@@ -3258,7 +3202,7 @@ const HomePage: React.FC = () => {
             <div className="p-6 sm:p-8">
               <div className="relative flex items-center justify-center mb-6">
                 <h3 className={`text-xl sm:text-2xl font-bold text-gray-900 ${fontClass} flex items-center gap-2`} style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}>
                   <CloudIcon className="w-6 h-6 sm:w-7 sm:h-7 text-gray-900" />
                   {language === 'fa' ? 'وضعیت آب و هوا' : language === 'ar' ? 'حالة الطقس' : 'Weather'}

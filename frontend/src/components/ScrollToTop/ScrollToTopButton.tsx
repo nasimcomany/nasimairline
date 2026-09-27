@@ -51,7 +51,7 @@ const ScrollToTopButton: React.FC = () => {
         <span 
           className={`text-[10px] font-medium ${fontClass} hidden sm:block mt-1`}
           style={{
-            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+            fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
           }}
         >
           {t('scrollToTop.title') || 'بازگشت به ابتدای صفحه'}

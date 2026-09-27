@@ -11,19 +11,20 @@ User = get_user_model()
 
 class LimitedAdminSite(AdminSite):
     """
-    Custom Admin Site that limits access to only blog and gallery apps
+    Custom Admin Site for content editors (blog, gallery, support, sms).
+    No access to accounts / wallets / memberships / user management.
     """
-    site_header = 'پنل مدیریت محدود - مقالات، چت، شکایات، گالری، مشتریان و پیامک'
+    site_header = 'پنل مدیریت محدود - مقالات، چت، شکایات، گالری و پیامک'
     site_title = 'پنل محدود'
-    index_title = 'مدیریت مقالات، چت، شکایات، گالری، مشتریان و پیامک'
-    
+    index_title = 'مدیریت مقالات، چت، شکایات، گالری و پیامک'
+
     def has_permission(self, request):
         """
         Check if user has permission to access this admin site
         Only users with is_staff=True can access
         """
         return request.user.is_active and request.user.is_staff
-    
+
     def each_context(self, request):
         """
         Add custom context to admin pages
@@ -31,22 +32,12 @@ class LimitedAdminSite(AdminSite):
         context = super().each_context(request)
         context['is_limited_admin'] = True
         return context
-    
+
     def get_app_list(self, request):
-        """
-        Only show blog and gallery apps
-        """
+        """Only show content apps — never accounts / users / wallets."""
         app_list = super().get_app_list(request)
-        
-        # Filter to only show blog, support (chat), gallery, accounts (customers) and sms apps
-        allowed_apps = ['blog', 'support', 'gallery', 'accounts', 'sms']
-        filtered_app_list = []
-        
-        for app in app_list:
-            if app['app_label'] in allowed_apps:
-                filtered_app_list.append(app)
-        
-        return filtered_app_list
+        allowed_apps = ['blog', 'support', 'gallery', 'sms']
+        return [app for app in app_list if app['app_label'] in allowed_apps]
 
 
 # Create limited admin site instance
@@ -55,8 +46,46 @@ limited_admin_site = LimitedAdminSite(name='limited_admin')
 # Register User model for autocomplete fields (required for autocomplete_fields in other admins)
 from accounts.models import User
 from accounts.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
 
-limited_admin_site.register(User, UserAdmin)
+
+class LimitedUserAdmin(UserAdmin):
+    """
+    Registered only so Article/author autocomplete keeps working.
+    Limited admins must NOT manage user accounts from this panel.
+    """
+    list_display = [
+        'email', 'username', 'first_name', 'last_name',
+        'is_active', 'is_staff', 'date_joined',
+    ]
+    list_filter = ['is_active', 'is_staff', 'account_status', 'membership_level']
+    readonly_fields = [
+        'uuid', 'date_joined', 'last_login', 'created_at', 'updated_at',
+        'is_superuser', 'is_staff', 'is_active', 'account_status',
+    ]
+    search_fields = ['email', 'username', 'first_name', 'last_name', 'phone_number']
+
+    def has_module_permission(self, request):
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        # Autocomplete only (e.g. انتخاب نویسنده مقاله) — not the users list page
+        if request.user.is_superuser:
+            return True
+        match = getattr(request, 'resolver_match', None)
+        return bool(match and match.url_name == 'autocomplete')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+limited_admin_site.register(User, LimitedUserAdmin)
 
 # Register blog models to limited admin site
 from blog.models import (
@@ -111,21 +140,4 @@ from sms.models import SmsLog
 from sms.admin import SmsLogAdmin
 
 limited_admin_site.register(SmsLog, SmsLogAdmin)
-
-# Register accounts membership models to limited admin (لیست مشتریان برنزی/نقره‌ای/طلایی)
-from accounts.models import Wallet, WalletTransaction
-from accounts.admin import (
-    WalletAdmin,
-    WalletTransactionAdmin,
-    MembershipTierConfigAdmin,
-    UserMembershipActivityAdmin,
-    MembershipUpgradeLogAdmin,
-)
-from accounts.membership_models import MembershipTierConfig, UserMembershipActivity, MembershipUpgradeLog
-
-limited_admin_site.register(Wallet, WalletAdmin)
-limited_admin_site.register(WalletTransaction, WalletTransactionAdmin)
-limited_admin_site.register(MembershipTierConfig, MembershipTierConfigAdmin)
-limited_admin_site.register(UserMembershipActivity, UserMembershipActivityAdmin)
-limited_admin_site.register(MembershipUpgradeLog, MembershipUpgradeLogAdmin)
 

@@ -51,6 +51,16 @@ const toPersianDigits = (str: string): string => {
 };
 
 /**
+ * Local calendar date as YYYY-MM-DD (never use toISOString — UTC can shift the day).
+ */
+export const toLocalDateISO = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+/**
  * Gets the current date formatted based on language
  * @param language - Language code ('fa', 'en', 'ar')
  * @returns Formatted current date string

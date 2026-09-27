@@ -98,7 +98,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:border-gray-400'
           }`}
           style={{ 
-            fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+            fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
             direction: 'rtl',
             paddingTop: '0.5rem',
             paddingBottom: '0.5rem',
@@ -131,7 +131,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             dropdownPosition === 'top' ? 'mb-1.5' : 'mt-1.5'
           }`}
           style={{
-            fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+            fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
             direction: 'rtl',
             fontSize: '13px',
             minWidth: '180px',
@@ -152,7 +152,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                   : 'text-gray-900 hover:bg-gray-100'
               }`}
               style={{
-                fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 fontWeight: 'bold'
               }}
             >

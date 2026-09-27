@@ -48,22 +48,30 @@ def generate_meta_description(content, custom_description=None):
     return excerpt
 
 
+def generate_canonical_url(article):
+    """
+    Generate canonical URL for article (public frontend path, absolute).
+    """
+    from .url_helpers import absolute_public_url
+    return absolute_public_url(f'/magazine/{article.slug}/')
+
+
 def generate_og_image_url(article):
     """
     Generate Open Graph image URL for article
     """
+    from .url_helpers import absolute_public_url
     if article.featured_image:
-        return article.featured_image.url
-    # Return default OG image if no featured image
-    return '/static/images/default-og-image.jpg'
-
-
-def generate_canonical_url(article):
-    """
-    Generate canonical URL for article
-    """
-    from django.urls import reverse
-    return reverse('blog:article-detail', kwargs={'slug': article.slug})
+        url = article.featured_image.url
+        if url.startswith('http://') or url.startswith('https://'):
+            return url
+        return absolute_public_url(url)
+    if getattr(article, 'og_image', None):
+        url = article.og_image.url
+        if url.startswith('http://') or url.startswith('https://'):
+            return url
+        return absolute_public_url(url)
+    return absolute_public_url('/images/tstnasim.jpg')
 
 
 def get_related_articles(article, limit=5):

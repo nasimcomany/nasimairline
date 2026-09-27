@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getOriginCities, getDestinations, checkAvailability, FlightAvailability, OriginCity } from '../services/niraApi';
+import { getOriginCities, getDestinations, checkAvailability, FlightAvailability, OriginCity, filterListedNiraFlights, getFlightSaleState, FlightSaleState } from '../services/niraApi';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IranMap } from 'react-iran-map';
 import NeighboringCountryMap from '../components/Maps/NeighboringCountryMap';
-import { formatDateByLanguage, getCurrentDateFormatted } from '../utils/dateFormatter';
+import { formatDateByLanguage, getCurrentDateFormatted, toLocalDateISO } from '../utils/dateFormatter';
 import { 
   MapPinIcon,
   CalendarDaysIcon,
@@ -18,45 +18,46 @@ import {
   TicketIcon
 } from '@heroicons/react/24/outline';
 
-// Coordinates for major Iranian cities on the map
-// Precisely adjusted to match react-iran-map SVG viewBox (0-600)
-// Based on actual geographic positions within their provinces
+// Coordinates match react-iran-map SVG viewBox (0 0 1080 1080)
+// Derived from province path centroids in IranMapWrapper.js
 const cityCoordinates: Record<string, { x: number; y: number }> = {
-  'THR': { x: 248, y: 195 }, // Tehran - Tehran province (north-central)
-  'IKA': { x: 245, y: 200 }, // Tehran Imam Khomeini - slightly south of Tehran
-  'MHD': { x: 430, y: 140 }, // Mashhad - Razavi Khorasan (northeast, more accurate)
-  'IFN': { x: 218, y: 275 }, // Isfahan - Isfahan province (center)
-  'SYZ': { x: 175, y: 385 }, // Shiraz - Fars province (south-central)
-  'TBZ': { x: 138, y: 118 }, // Tabriz - East Azerbaijan (northwest)
-  'AWZ': { x: 108, y: 355 }, // Ahvaz - Khuzestan (southwest)
-  'BND': { x: 228, y: 460 }, // Bandar Abbas - Hormozgan (south)
-  'KIH': { x: 295, y: 495 }, // Kish - Hormozgan (island, more separated from Qeshm)
-  'GSM': { x: 270, y: 525 }, // Qeshm - Hormozgan (island, more separated from Kish)
-  'RAS': { x: 198, y: 162 }, // Rasht - Gilan (north, Caspian coast)
-  'OMH': { x: 98, y: 102 }, // Urmia - West Azerbaijan (northwest)
-  'KER': { x: 188, y: 385 }, // Kerman - Kerman province (southeast)
-  'ZAH': { x: 425, y: 385 }, // Zahedan - Sistan and Baluchestan (east)
-  'XBJ': { x: 385, y: 265 }, // Birjand - South Khorasan (east)
-  'ZBR': { x: 490, y: 460 }, // Chabahar - Sistan and Baluchestan (southeast)
-  'SRY': { x: 272, y: 178 }, // Sari - Mazandaran (north, Caspian coast)
-  'GBT': { x: 262, y: 163 }, // Gorgan - Golestan (north, Caspian coast)
-  'KSH': { x: 152, y: 238 }, // Kermanshah - Kermanshah province (west)
-  'SDG': { x: 162, y: 208 }, // Sanandaj - Kurdistan (west)
-  'ADU': { x: 128, y: 132 }, // Ardabil - Ardabil province (northwest)
-  'IIL': { x: 118, y: 268 }, // Ilam - Ilam province (west)
-  'BUZ': { x: 188, y: 430 }, // Bushehr - Bushehr province (south)
-  'BXR': { x: 268, y: 415 }, // Bam - Kerman (southeast)
-  'LRR': { x: 208, y: 430 }, // Lar - Fars (south)
-  'MRX': { x: 128, y: 370 }, // Mahshahr - Khuzestan (south)
-  'AZD': { x: 238, y: 340 }, // Yazd - Yazd province (center)
-  'NJF': { x: 68, y: 312 }, // Najaf (Iraq) - outside Iran
-  'IST': { x: 48, y: 132 }, // Istanbul - outside Iran
-  'DXB': { x: 372, y: 535 }, // Dubai - outside Iran
-  'MCT': { x: 447, y: 535 }, // Muscat - outside Iran
-  'SHJ': { x: 367, y: 525 }, // Sharjah - outside Iran
-  'TBS': { x: 153, y: 58 }, // Tbilisi - outside Iran
-  'TAS': { x: 522, y: 162 }, // Tashkent - outside Iran
-  'DYU': { x: 522, y: 132 }, // Dushanbe - outside Iran
+  'THR': { x: 411, y: 354 }, // Tehran province centroid
+  'IKA': { x: 405, y: 370 }, // Imam Khomeini — slightly south of Tehran
+  'MHD': { x: 769, y: 337 }, // Razavi Khorasan centroid
+  'IFN': { x: 415, y: 517 }, // Isfahan
+  'SYZ': { x: 465, y: 713 }, // Fars / Shiraz
+  'TBZ': { x: 226, y: 172 }, // East Azerbaijan
+  'AWZ': { x: 282, y: 624 }, // Ahvaz — Khuzestan centroid
+  'BND': { x: 644, y: 873 }, // Bandar Abbas — Hormozgan
+  'KIH': { x: 620, y: 930 }, // Kish (island, south of Hormozgan)
+  'GSM': { x: 660, y: 950 }, // Qeshm
+  'RAS': { x: 164, y: 194 }, // Gilan / Rasht
+  'OMH': { x: 86, y: 220 }, // West Azerbaijan / Urmia
+  'KER': { x: 701, y: 747 }, // Kerman province centroid
+  // Abadan = SW tip of Khuzestan land (inside blue map, not in the gulf)
+  'ABD': { x: 235, y: 653 },
+  'ZAH': { x: 888, y: 828 }, // Sistan & Baluchestan / Zahedan
+  'XBJ': { x: 764, y: 495 }, // South Khorasan / Birjand
+  'ZBR': { x: 900, y: 920 }, // Chabahar
+  'SRY': { x: 300, y: 243 }, // Mazandaran / Sari
+  'GBT': { x: 350, y: 230 }, // Golestan / Gorgan
+  'KSH': { x: 243, y: 301 }, // Kermanshah
+  'SDG': { x: 142, y: 418 }, // Kurdistan / Sanandaj
+  'ADU': { x: 226, y: 150 }, // Ardabil
+  'IIL': { x: 142, y: 418 }, // Ilam (near west border)
+  'BUZ': { x: 395, y: 766 }, // Bushehr
+  'BXR': { x: 750, y: 780 }, // Bam — east Kerman
+  'LRR': { x: 480, y: 780 }, // Lar — south Fars
+  'MRX': { x: 250, y: 640 }, // Mahshahr — Khuzestan coast, on land
+  'AZD': { x: 556, y: 594 }, // Yazd
+  'NJF': { x: 120, y: 560 }, // Najaf (Iraq) — outside
+  'IST': { x: 50, y: 150 },
+  'DXB': { x: 700, y: 980 },
+  'MCT': { x: 820, y: 980 },
+  'SHJ': { x: 690, y: 970 },
+  'TBS': { x: 180, y: 80 },
+  'TAS': { x: 980, y: 200 },
+  'DYU': { x: 980, y: 160 },
 };
 
 interface Flight {
@@ -73,6 +74,8 @@ interface Flight {
   class: 'economy' | 'business' | 'first';
   stops: number;
   originalData: FlightAvailability;
+  saleState: FlightSaleState;
+  canBook: boolean;
 }
 
 // All Iran provinces data for react-iran-map
@@ -126,6 +129,21 @@ const FlightMapPage: React.FC = () => {
   const [loadingCities, setLoadingCities] = useState(true);
   const [showFlights, setShowFlights] = useState(false);
   const [destinationCities, setDestinationCities] = useState<string[]>([]); // Cities with available flights from selected city
+  const [originsWithFlights, setOriginsWithFlights] = useState<string[]>([]);
+  const [scanningOrigins, setScanningOrigins] = useState(false);
+
+  const [mapWidth, setMapWidth] = useState(() =>
+    typeof window !== 'undefined' ? Math.min(600, Math.max(280, window.innerWidth - 48)) : 600
+  );
+
+  useEffect(() => {
+    const updateMapSize = () => {
+      setMapWidth(Math.min(600, Math.max(280, window.innerWidth - 48)));
+    };
+    updateMapSize();
+    window.addEventListener('resize', updateMapSize);
+    return () => window.removeEventListener('resize', updateMapSize);
+  }, []);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -143,226 +161,145 @@ const FlightMapPage: React.FC = () => {
     fetchCities();
   }, []);
 
-  // Force override blue colors in header icons after component mount and map load
+  // فقط شهرهایی که برای تاریخ انتخاب‌شده حداقل یک پرواز دارند
   useEffect(() => {
-    const applyHeaderStyles = () => {
-      const header = document.querySelector('header');
-      if (header) {
-        const blueIcons = header.querySelectorAll('[class*="text-blue"]');
-        blueIcons.forEach((icon) => {
-          if (!icon.closest('.bg-blue-900')) {
-            (icon as HTMLElement).style.color = '#6b7280';
-            (icon as HTMLElement).style.stroke = '#6b7280';
-          }
-        });
-      }
-    };
-
-    // Apply immediately
-    applyHeaderStyles();
-
-    // Also apply after a short delay to catch any dynamic changes
-    const timer = setTimeout(applyHeaderStyles, 100);
-    
-    // Apply whenever loading state changes
-    const observer = new MutationObserver(applyHeaderStyles);
-    const header = document.querySelector('header');
-    if (header) {
-      observer.observe(header, { childList: true, subtree: true, attributes: true });
-    }
-
-    return () => {
-      clearTimeout(timer);
-      observer.disconnect();
-    };
-  }, [loadingCities]);
-
-  const availableCityCodes = React.useMemo(() => 
-    cities.map(c => c.CITY).filter(code => cityCoordinates[code]),
-    [cities]
-  );
-
-  // Update destination cities when date changes
-  useEffect(() => {
-    if (selectedCity) {
-      // Re-fetch flights and destinations when date changes
-      const updateFlights = async () => {
-        const cityCode = selectedCity;
-        setDestinationCities([]);
-        
-        try {
-          const departureDate = selectedDate.toISOString().split('T')[0];
-          const availableDestinations: string[] = [];
-          
-          // First, get valid destinations for this origin city from API
-          let validDestinations: string[] = [];
-          try {
-            const destinations = await getDestinations(cityCode);
-            validDestinations = destinations
-              .map(d => d.CITY)
-              .filter(code => code && code !== cityCode);
-            console.log(`Destinations from API for ${cityCode}:`, validDestinations);
-          } catch (error) {
-            console.error(`Error getting destinations for ${cityCode}:`, error);
-            // If API fails, don't proceed
-            setFlights([]);
-            setShowFlights(false);
-            return;
-          }
-          
-          // Check flights from selected city to valid destinations and collect all flights
-          // Use parallel requests in batches for better performance
-          const allFlights: FlightAvailability[] = [];
-          const BATCH_SIZE = 4; // Process 4 requests at a time
-          
-          for (let i = 0; i < validDestinations.length; i += BATCH_SIZE) {
-            const batch = validDestinations.slice(i, i + BATCH_SIZE);
-            const batchPromises = batch.map(async (destCode) => {
-              try {
-                console.log(`Checking flights from ${cityCode} to ${destCode} on ${departureDate}`);
-                const flights = await checkAvailability({
-                  origin: cityCode,
-                  destination: destCode,
-                  departure_date: departureDate,
-                  round_trip: false,
-                  adult_qty: 1,
-                  child_qty: 0,
-                  infant_qty: 0,
-                });
-                
-                console.log(`Flights from ${cityCode} to ${destCode}:`, flights?.length || 0);
-                return { destCode, flights };
-              } catch (error) {
-                console.error(`Error checking flights from ${cityCode} to ${destCode}:`, error);
-                return { destCode, flights: [] };
-              }
-            });
-            
-            const batchResults = await Promise.all(batchPromises);
-            
-            batchResults.forEach(({ destCode, flights }) => {
-              if (flights && Array.isArray(flights) && flights.length > 0) {
-                availableDestinations.push(destCode);
-                allFlights.push(...flights);
-              }
-            });
-            
-            // Small delay between batches to avoid overwhelming the API
-            if (i + BATCH_SIZE < validDestinations.length) {
-              await new Promise(resolve => setTimeout(resolve, 50));
-            }
-          }
-          
-          console.log(`Total flights collected: ${allFlights.length}`);
-          
-          setDestinationCities(availableDestinations);
-          
-          // Convert all collected flights to Flight format
-          const convertedFlights: Flight[] = allFlights.flatMap((flight, index) => {
-            const departureDateTime = new Date(flight.DepartureDateTime);
-            const arrivalDateTime = new Date(flight.ArrivalDateTime);
-            
-            const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
-            const hours = Math.floor(durationMs / (1000 * 60 * 60));
-            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-            const duration = `${hours}h ${minutes}m`;
-
-            // If ClassStatus is empty, skip this flight (no price available from Nira API)
-            if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
-              console.warn('⚠️ Flight without ClassStatus (no price):', flight.FlightNo);
-              return []; // Don't show flights without price information
-            }
-
-            // If ClassStatus has items, create entries for each class
-            return flight.ClassStatus.map((classStatus, classIndex) => {
-              let flightClass: 'economy' | 'business' | 'first' = 'economy';
-              if (classStatus.CabinClass.toLowerCase().includes('business')) {
-                flightClass = 'business';
-              } else if (classStatus.CabinClass.toLowerCase().includes('first')) {
-                flightClass = 'first';
-              }
-
-              // Show price exactly as Nira API provides (even if 0)
-              console.log('✅ Flight from Nira:', flight.FlightNo, 'TotalPrice:', classStatus.TotalPrice);
-
-              return {
-                id: `${flight.FlightNo}-${index}-${classIndex}`,
-                airline: flight.AirLineCode || 'NSN',
-                flightNumber: flight.FlightNo,
-                origin: flight.Origin,
-                destination: flight.Destination,
-                departureTime: departureDateTime.toLocaleTimeString('en-US', { 
-                  hour: '2-digit', 
-                  minute: '2-digit',
-                  hour12: false 
-                }),
-                arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
-                  hour: '2-digit', 
-                  minute: '2-digit',
-                  hour12: false 
-                }),
-                duration: duration,
-                price: classStatus.TotalPrice, // Use real price from Nira API
-                availableSeats: classStatus.Status === 'C' ? 10 : 0,
-                class: flightClass,
-                stops: 0,
-                originalData: flight,
-              };
-            });
-          });
-
-          setFlights(convertedFlights);
-          setShowFlights(true);
-        } catch (error) {
-          console.error('Error updating flights:', error);
-        }
-      };
-      
-      updateFlights();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, selectedCity, availableCityCodes]);
-
-  const handleCityClick = async (cityCode: string) => {
-    setSelectedCity(cityCode);
-    setShowFlights(false);
-    setFlights([]);
-    setDestinationCities([]);
-    
-    try {
-      setLoading(true);
-      
-      // Use selected city as origin and check available destinations
-      const departureDate = selectedDate.toISOString().split('T')[0];
-      const availableDestinations: string[] = [];
-      
-      // First, get valid destinations for this origin city from API
-      let validDestinations: string[] = [];
-      try {
-        const destinations = await getDestinations(cityCode);
-        validDestinations = destinations
-          .map(d => d.CITY)
-          .filter(code => code && code !== cityCode);
-        console.log(`Destinations from API for ${cityCode}:`, validDestinations);
-      } catch (error) {
-        console.error(`Error getting destinations for ${cityCode}:`, error);
-        // If API fails, don't proceed
-        setFlights([]);
-        setShowFlights(false);
-        setLoading(false);
+    let cancelled = false;
+    const scanOriginsForDate = async () => {
+      if (!cities.length) {
+        setOriginsWithFlights([]);
         return;
       }
-      
-      // Check flights from selected city to valid destinations and collect all flights
-      // Use parallel requests in batches for better performance
-      const allFlights: FlightAvailability[] = [];
-      const BATCH_SIZE = 4; // Process 4 requests at a time
-      
-      for (let i = 0; i < validDestinations.length; i += BATCH_SIZE) {
-        const batch = validDestinations.slice(i, i + BATCH_SIZE);
-        const batchPromises = batch.map(async (destCode) => {
+      setScanningOrigins(true);
+      const dateStr = toLocalDateISO(selectedDate);
+      const active: string[] = [];
+
+      await Promise.all(
+        cities.map(async (city) => {
+          const code = city.CITY;
+          if (!code || !cityCoordinates[code]) return;
           try {
-            console.log(`Checking flights from ${cityCode} to ${destCode} on ${departureDate}`);
+            const destinations = await getDestinations(code);
+            const destCodes = destinations
+              .map((d) => d.CITY)
+              .filter((c) => c && c !== code);
+            for (const dest of destCodes) {
+              if (cancelled) return;
+              const flights = await checkAvailability({
+                origin: code,
+                destination: dest,
+                departure_date: dateStr,
+                round_trip: false,
+                adult_qty: 1,
+                child_qty: 0,
+                infant_qty: 0,
+              });
+              if (filterListedNiraFlights(flights).length > 0) {
+                active.push(code);
+                return;
+              }
+            }
+          } catch {
+            /* ignore single-origin failures */
+          }
+        })
+      );
+
+      if (!cancelled) {
+        setOriginsWithFlights(active);
+        setScanningOrigins(false);
+      }
+    };
+
+    scanOriginsForDate();
+    return () => {
+      cancelled = true;
+    };
+  }, [cities, selectedDate]);
+
+  const availableCityCodes = React.useMemo(
+    () => originsWithFlights.filter((code) => cityCoordinates[code]),
+    [originsWithFlights]
+  );
+
+  useEffect(() => {
+    if (scanningOrigins) return;
+    if (selectedCity && originsWithFlights.length > 0 && !originsWithFlights.includes(selectedCity)) {
+      setSelectedCity(null);
+      setFlights([]);
+      setDestinationCities([]);
+      setShowFlights(false);
+    }
+  }, [originsWithFlights, scanningOrigins, selectedCity]);
+
+  const convertFlights = React.useCallback((allFlights: FlightAvailability[]): Flight[] => {
+    const listed = filterListedNiraFlights(allFlights);
+    const cards = listed.flatMap((flight, index) => {
+      const departureDateTime = new Date(flight.DepartureDateTime);
+      const arrivalDateTime = new Date(flight.ArrivalDateTime);
+      const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
+      const hours = Math.floor(durationMs / (1000 * 60 * 60));
+      const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+      const duration = `${hours}h ${minutes}m`;
+      const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+      const classes = Array.isArray(flight.ClassStatus) ? flight.ClassStatus : [];
+
+      const toCard = (classStatus: (typeof classes)[number] | null, classIndex: number): Flight => {
+        const saleState = getFlightSaleState(flight, classStatus);
+        let flightClass: 'economy' | 'business' | 'first' = 'economy';
+        const cabin = (classStatus?.CabinClass || '').toLowerCase();
+        if (cabin.includes('business')) flightClass = 'business';
+        else if (cabin.includes('first')) flightClass = 'first';
+
+        return {
+          id: `${flight.FlightNo}-${index}-${classIndex}`,
+          airline: flight.AirLineCode || 'NSN',
+          flightNumber: flight.FlightNo,
+          origin: flight.Origin,
+          destination: flight.Destination,
+          departureTime: departureDateTime.toLocaleTimeString('en-US', timeOpts),
+          arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', timeOpts),
+          duration,
+          price: Number(classStatus?.TotalPrice ?? 0),
+          availableSeats: saleState === 'bookable' ? 10 : 0,
+          class: flightClass,
+          stops: 0,
+          saleState,
+          canBook: saleState === 'bookable',
+          originalData: flight,
+        };
+      };
+
+      if (classes.length === 0) return [toCard(null, 0)];
+      return classes.map((classStatus, classIndex) => toCard(classStatus, classIndex));
+    });
+
+    const rank = (s: FlightSaleState) => (s === 'bookable' ? 0 : s === 'sale_closed' ? 1 : 2);
+    return cards.sort((a, b) => rank(a.saleState) - rank(b.saleState));
+  }, []);
+
+  const loadRequestId = useRef(0);
+
+  const loadRouteFlights = React.useCallback(async (cityCode: string, date: Date) => {
+    const requestId = ++loadRequestId.current;
+    setLoading(true);
+    setFlights([]);
+    setShowFlights(false);
+
+    try {
+      const departureDate = toLocalDateISO(date);
+      const destinations = await getDestinations(cityCode);
+      if (requestId !== loadRequestId.current) return;
+
+      const validDestinations = destinations
+        .map(d => d.CITY)
+        .filter(code => code && code !== cityCode);
+
+      // فوری مقصدها را روی نقشه نشان بده تا UI سریع حس شود
+      setDestinationCities(validDestinations);
+
+      const results = await Promise.all(
+        validDestinations.map(async (destCode) => {
+          try {
             const flights = await checkAvailability({
               origin: cityCode,
               destination: destCode,
@@ -372,114 +309,48 @@ const FlightMapPage: React.FC = () => {
               child_qty: 0,
               infant_qty: 0,
             });
-            
-            console.log(`Flights from ${cityCode} to ${destCode}:`, flights?.length || 0);
-            return { destCode, flights };
-          } catch (error) {
-            console.error(`Error checking flights from ${cityCode} to ${destCode}:`, error);
-            return { destCode, flights: [] };
+            return { destCode, flights: filterListedNiraFlights(flights || []) };
+          } catch {
+            return { destCode, flights: [] as FlightAvailability[] };
           }
-        });
-        
-        const batchResults = await Promise.all(batchPromises);
-        
-        batchResults.forEach(({ destCode, flights }) => {
-          if (flights && Array.isArray(flights) && flights.length > 0) {
-            availableDestinations.push(destCode);
-            allFlights.push(...flights);
-          }
-        });
-        
-        // Small delay between batches to avoid overwhelming the API
-        if (i + BATCH_SIZE < validDestinations.length) {
-          await new Promise(resolve => setTimeout(resolve, 50));
+        })
+      );
+
+      if (requestId !== loadRequestId.current) return;
+
+      const availableDestinations: string[] = [];
+      const allFlights: FlightAvailability[] = [];
+      results.forEach(({ destCode, flights }) => {
+        if (flights.length > 0) {
+          availableDestinations.push(destCode);
+          allFlights.push(...flights);
         }
-      }
-      
-      console.log(`Total flights collected: ${allFlights.length}`);
-      
-      setDestinationCities(availableDestinations);
-      
-      // Convert all collected flights to Flight format
-      const convertedFlights: Flight[] = allFlights.flatMap((flight, index) => {
-        const departureDateTime = new Date(flight.DepartureDateTime);
-        const arrivalDateTime = new Date(flight.ArrivalDateTime);
-        
-        const durationMs = arrivalDateTime.getTime() - departureDateTime.getTime();
-        const hours = Math.floor(durationMs / (1000 * 60 * 60));
-        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-        const duration = `${hours}h ${minutes}m`;
-
-        // If ClassStatus is empty, create a single flight entry with default values
-        if (!flight.ClassStatus || !Array.isArray(flight.ClassStatus) || flight.ClassStatus.length === 0) {
-          return [{
-            id: `${flight.FlightNo}-${index}-0`,
-            airline: flight.AirLineCode || 'NSN',
-            flightNumber: flight.FlightNo,
-            origin: flight.Origin,
-            destination: flight.Destination,
-            departureTime: departureDateTime.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            }),
-            arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            }),
-            duration: duration,
-            price: 0,
-            availableSeats: 0,
-            class: 'economy' as const,
-            stops: 0,
-            originalData: flight,
-          }];
-        }
-
-        // If ClassStatus has items, create entries for each class
-        return flight.ClassStatus.map((classStatus, classIndex) => {
-          let flightClass: 'economy' | 'business' | 'first' = 'economy';
-          if (classStatus.CabinClass.toLowerCase().includes('business')) {
-            flightClass = 'business';
-          } else if (classStatus.CabinClass.toLowerCase().includes('first')) {
-            flightClass = 'first';
-          }
-
-          return {
-            id: `${flight.FlightNo}-${index}-${classIndex}`,
-            airline: flight.AirLineCode || 'NSN',
-            flightNumber: flight.FlightNo,
-            origin: flight.Origin,
-            destination: flight.Destination,
-            departureTime: departureDateTime.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            }),
-            arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            }),
-            duration: duration,
-            price: classStatus.TotalPrice || 0,
-            availableSeats: classStatus.Status === 'C' ? 10 : 0,
-            class: flightClass,
-            stops: 0,
-            originalData: flight,
-          };
-        });
       });
 
-      setFlights(convertedFlights);
+      setDestinationCities(availableDestinations);
+      setFlights(convertFlights(allFlights));
       setShowFlights(true);
     } catch (error) {
-      console.error('Error fetching flights:', error);
-      setFlights([]);
+      if (requestId === loadRequestId.current) {
+        console.error('Error loading route flights:', error);
+        setFlights([]);
+        setDestinationCities([]);
+      }
     } finally {
-      setLoading(false);
+      if (requestId === loadRequestId.current) {
+        setLoading(false);
+      }
     }
+  }, [convertFlights]);
+
+  useEffect(() => {
+    if (selectedCity) {
+      loadRouteFlights(selectedCity, selectedDate);
+    }
+  }, [selectedCity, selectedDate, loadRouteFlights]);
+
+  const handleCityClick = (cityCode: string) => {
+    setSelectedCity(cityCode);
   };
 
   const getCityName = (cityCode: string) => {
@@ -489,7 +360,7 @@ const FlightMapPage: React.FC = () => {
   };
 
   const getCityCoordinates = (cityCode: string) => {
-    return cityCoordinates[cityCode] || { x: 420, y: 280 };
+    return cityCoordinates[cityCode] || { x: 540, y: 540 };
   };
 
   return (
@@ -520,14 +391,14 @@ const FlightMapPage: React.FC = () => {
       <EmiratesHeader />
 
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 overflow-x-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Calendar Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 sticky top-4">
                 <h3 
                   className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                 >
                   <CalendarDaysIcon className="w-6 h-6 text-blue-900" />
                   {language === 'fa' ? 'انتخاب تاریخ' : 'Select Date'}
@@ -555,13 +426,13 @@ const FlightMapPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span 
                       className="text-sm text-gray-600"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     >
                       {language === 'fa' ? 'تاریخ فردا:' : 'Tomorrow\'s Date:'}
                     </span>
                     <span 
                       className="text-base font-bold text-blue-900"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                     >
                       {formatDateByLanguage(selectedDate, language)}
                     </span>
@@ -578,7 +449,7 @@ const FlightMapPage: React.FC = () => {
                     <div className="flex-1">
                       <p 
                         className="text-sm leading-relaxed text-gray-700"
-                        style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'rtl', textAlign: 'right' }}
+                        style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'rtl', textAlign: 'right' }}
                       >
                         کاربر گرامی، لطفا پس از پیدا کردن مبدا و مقصد مورد نظر چند لحظه صبر کنید تا بلیط های موجود به شما نمایش داده شود و سپس به انتهای صفحه مراجعه فرمایید.
                       </p>
@@ -587,10 +458,10 @@ const FlightMapPage: React.FC = () => {
                 </div>
                 {selectedCity && (
                   <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {language === 'fa' ? 'شهر انتخاب شده:' : 'Selected City:'}
                     </p>
-                    <p className="text-lg font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <p className="text-lg font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                       {getCityName(selectedCity)}
                     </p>
                   </div>
@@ -600,70 +471,78 @@ const FlightMapPage: React.FC = () => {
 
             {/* Map Section */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="relative" style={{ height: '600px', overflow: 'hidden' }}>
-                  {loadingCities ? (
-                    <div className="flex items-center justify-center h-full">
+              <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 overflow-hidden">
+                <div className="relative w-full overflow-hidden rounded-lg" style={{ height: `${Math.min(600, Math.max(280, mapWidth))}px` }}>
+                  {loadingCities || scanningOrigins ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-3">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
+                      <p
+                        className="text-sm text-gray-600"
+                        style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                      >
+                        {language === 'fa'
+                          ? 'در حال پیدا کردن شهرهایی که در این تاریخ پرواز دارند…'
+                          : 'Finding cities with flights on this date…'}
+                      </p>
+                    </div>
+                  ) : availableCityCodes.length === 0 ? (
+                    <div className="flex items-center justify-center h-full px-6">
+                      <p
+                        className="text-center text-gray-600"
+                        style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                      >
+                        {language === 'fa'
+                          ? 'برای این تاریخ پروازی از نیرا پیدا نشد. تاریخ دیگری را امتحان کنید.'
+                          : 'No flights found for this date. Try another date.'}
+                      </p>
                     </div>
                   ) : (
-                    <div className="relative w-full h-full" style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #dbeafe 100%)' }}>
-                      {/* Iran Map using react-iran-map library */}
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div style={{ width: '100%', height: '100%', position: 'relative' }} className="iran-map-container">
+                    <div
+                      className="relative w-full h-full flex items-center justify-center overflow-hidden"
+                      style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #dbeafe 100%)' }}
+                    >
+                      {/* Same square box for IranMap + markers so coords stay aligned (SVG viewBox 1080) */}
+                      <div
+                        className="iran-map-container relative"
+                        style={{ width: mapWidth, height: mapWidth, maxWidth: '100%' }}
+                      >
                           <style>{`
-                            /* Force all provinces to have blue color - ONLY for map, not header */
-                            .iran-map-container svg path[fill] {
+                            .iran-map-container .iran-map-wrapper {
+                              width: 100% !important;
+                              height: 100% !important;
+                            }
+                            .iran-map-container .iran-map-wrapper > svg {
+                              width: 100% !important;
+                              height: 100% !important;
+                              display: block;
+                            }
+                            .iran-map-container .iran-map-wrapper svg path[fill],
+                            .iran-map-container .iran-map-wrapper svg path:not([fill]) {
                               fill: #1e40af !important;
                             }
-                            .iran-map-container svg path:not([fill]) {
-                              fill: #1e40af !important;
-                            }
-                            /* Hide province names on the map - we only want city names */
-                            .iran-map-container svg text {
+                            .iran-map-container .iran-map-wrapper svg text {
                               display: none !important;
-                              visibility: hidden !important;
-                              opacity: 0 !important;
-                            }
-                            /* But keep city names visible in our overlay */
-                            .iran-map-container svg[viewBox="0 0 600 600"] text {
-                              display: block !important;
-                              visibility: visible !important;
-                              opacity: 1 !important;
                             }
                           `}</style>
                           <IranMap
                             data={allProvincesData}
-                            width={600}
+                            width={mapWidth}
                             textColor="#ffffff"
                             deactiveProvinceColor="#1e40af"
                             selectedProvinceColor="#1e40af"
                             defaultSelectedProvince=""
                             colorRange="30, 58, 175"
-                            selectProvinceHandler={(province: string) => {
-                              // Log province name to see all available provinces
-                              console.log('Selected province:', province);
-                            }}
+                            selectProvinceHandler={() => {}}
                           />
                           
-                          {/* City Markers Overlay */}
-                          <div 
-                            className="absolute inset-0 pointer-events-none"
-                            style={{ 
-                              width: '100%', 
-                              height: '100%',
-                              pointerEvents: 'none'
-                            }}
+                          {/* City Markers — same 1080 viewBox as react-iran-map */}
+                          <svg
+                            viewBox="0 0 1080 1080"
+                            className="absolute inset-0"
+                            style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
                           >
-                            <svg
-                              viewBox="0 0 600 600"
-                              className="w-full h-full"
-                              style={{ position: 'absolute', top: 0, left: 0 }}
-                            >
-                              {/* City Markers */}
                               {availableCityCodes.map((cityCode) => {
                                 const coords = getCityCoordinates(cityCode);
-                                // Coordinates are already adjusted for react-iran-map (0-600 range)
                                 const scaledX = coords.x;
                                 const scaledY = coords.y;
                                 const isSelected = selectedCity === cityCode;
@@ -673,32 +552,30 @@ const FlightMapPage: React.FC = () => {
                                     key={cityCode}
                                     style={{ pointerEvents: 'all' }}
                                   >
-                                    {/* City Circle */}
                                     <circle
                                       cx={scaledX}
                                       cy={scaledY}
-                                      r={isSelected ? 8 : 5}
-                                      fill={isSelected ? "#dc2626" : "#1e40af"}
-                                      stroke="white"
-                                      strokeWidth="1.5"
+                                      r={isSelected ? 14 : 9}
+                                      fill={isSelected ? "#dc2626" : "#ffffff"}
+                                      stroke={isSelected ? "#ffffff" : "#1e40af"}
+                                      strokeWidth="3"
                                       className="cursor-pointer hover:opacity-80 transition-all"
                                       onClick={() => handleCityClick(cityCode)}
                                       style={{ pointerEvents: 'all', cursor: 'pointer' }}
                                     />
-                                    {/* City Label - Only city name */}
                                     <text
                                       x={scaledX}
-                                      y={scaledY - 12}
+                                      y={scaledY - 20}
                                       textAnchor="middle"
-                                      className="text-xs font-bold pointer-events-none"
+                                      className="pointer-events-none"
                                       style={{ 
-                                        fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+                                        fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                                         pointerEvents: 'none',
-                                        fontSize: '11px',
+                                        fontSize: '22px',
                                         fontWeight: 'bold',
                                         fill: '#ffffff',
                                         stroke: '#1e40af',
-                                        strokeWidth: '1px',
+                                        strokeWidth: '3px',
                                         paintOrder: 'stroke fill'
                                       }}
                                     >
@@ -708,7 +585,6 @@ const FlightMapPage: React.FC = () => {
                                 );
                               })}
                               
-                              {/* Red lines from selected city to destination cities with available flights */}
                               {selectedCity && destinationCities.length > 0 && destinationCities.map((destCityCode) => {
                                 const selectedCoords = getCityCoordinates(selectedCity);
                                 const destCoords = getCityCoordinates(destCityCode);
@@ -721,16 +597,14 @@ const FlightMapPage: React.FC = () => {
                                     x2={destCoords.x}
                                     y2={destCoords.y}
                                     stroke="#dc2626"
-                                    strokeWidth="2.5"
-                                    strokeDasharray="4,4"
-                                    opacity="0.8"
+                                    strokeWidth="4"
+                                    strokeDasharray="8,6"
+                                    opacity="0.85"
                                     style={{ pointerEvents: 'none' }}
                                   />
                                 );
                               })}
-                            </svg>
-                          </div>
-                        </div>
+                          </svg>
                       </div>
                     </div>
                   )}
@@ -743,13 +617,13 @@ const FlightMapPage: React.FC = () => {
           {/* <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
             <h2 
               className="text-2xl font-bold text-gray-900 mb-6 text-center"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
               {language === 'fa' ? '🗺️ کشورهای همسایه ایران' : language === 'ar' ? '🗺️ دول الجوار الإيرانية' : '🗺️ Iran\'s Neighboring Countries'}
             </h2>
             <p 
               className="text-center text-gray-600 mb-8"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
               {language === 'fa' 
                 ? 'ایران با ۶ کشور همسایه مرز مشترک دارد' 
@@ -770,49 +644,49 @@ const FlightMapPage: React.FC = () => {
             {/* <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
               <h3 
                 className="text-lg font-bold text-gray-900 mb-3"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
               >
                 {language === 'fa' ? '📍 اطلاعات مرزهای ایران' : language === 'ar' ? '📍 معلومات حدود إيران' : '📍 Iran\'s Border Information'}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-start gap-2">
                   <span className="text-2xl">🇹🇷</span>
-                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     <strong>{language === 'fa' ? 'ترکیه' : 'Turkey'}:</strong>
                     <span className="text-gray-600 mr-2">{language === 'fa' ? 'شمال غربی - ۵۰۰ کیلومتر مرز' : 'Northwest - 500 km border'}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-2xl">🇮🇶</span>
-                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     <strong>{language === 'fa' ? 'عراق' : 'Iraq'}:</strong>
                     <span className="text-gray-600 mr-2">{language === 'fa' ? 'غرب - ۱,۴۵۸ کیلومتر مرز' : 'West - 1,458 km border'}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-2xl">🇦🇿</span>
-                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     <strong>{language === 'fa' ? 'آذربایجان' : 'Azerbaijan'}:</strong>
                     <span className="text-gray-600 mr-2">{language === 'fa' ? 'شمال غربی - ۶۱۱ کیلومتر مرز' : 'Northwest - 611 km border'}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-2xl">🇹🇲</span>
-                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     <strong>{language === 'fa' ? 'ترکمنستان' : 'Turkmenistan'}:</strong>
                     <span className="text-gray-600 mr-2">{language === 'fa' ? 'شمال شرقی - ۹۹۲ کیلومتر مرز' : 'Northeast - 992 km border'}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-2xl">🇦🇪</span>
-                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     <strong>{language === 'fa' ? 'امارات' : 'Emirates'}:</strong>
                     <span className="text-gray-600 mr-2">{language === 'fa' ? 'جنوب - ۱,۳۰۰ کیلومتر مرز' : 'South - 1,300 km border'}</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-2xl">🇦🇲</span>
-                  <div style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     <strong>{language === 'fa' ? 'ارمنستان' : 'Armenia'}:</strong>
                     <span className="text-gray-600 mr-2">{language === 'fa' ? 'شمال غربی - ۴۴ کیلومتر مرز' : 'Northwest - 44 km border'}</span>
                   </div>
@@ -827,7 +701,7 @@ const FlightMapPage: React.FC = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 
                   className="text-2xl font-bold text-gray-900 flex items-center gap-2"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                 >
                   <PaperAirplaneIcon className="w-6 h-6 text-blue-900" />
                   {language === 'fa' 
@@ -849,14 +723,14 @@ const FlightMapPage: React.FC = () => {
               {loading ? (
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
-                  <p className="mt-4 text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <p className="mt-4 text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {language === 'fa' ? 'در حال بارگذاری پروازها...' : 'Loading flights...'}
                   </p>
                 </div>
               ) : flights.length === 0 ? (
                 <div className="text-center py-12">
                   <XMarkIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-xl text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <p className="text-xl text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {language === 'fa' ? 'پروازی یافت نشد' : 'No flights found'}
                   </p>
                 </div>
@@ -867,45 +741,45 @@ const FlightMapPage: React.FC = () => {
                       key={flight.id}
                       className="bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-200"
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-4">
                           <div className="w-16 h-16 bg-gradient-to-br from-blue-900 to-blue-700 rounded-lg flex items-center justify-center">
                             <PaperAirplaneIcon className="w-8 h-8 text-white" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                               {flight.airline} {flight.flightNumber}
                             </h3>
-                            <p className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            <p className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                               {flight.origin} → {flight.destination}
                             </p>
                           </div>
                         </div>
                         <div className="text-right" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                          <div className="text-3xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
-                            {language === 'en' 
+                          <div className="text-3xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                            {language === 'en'
                               ? flight.price.toLocaleString('en-US')
                               : language === 'ar'
                               ? flight.price.toLocaleString('ar-SA')
                               : flight.price.toLocaleString('fa-IR')}
                           </div>
-                          <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {t('flights.currency')}
                           </div>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-200">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {flight.departureTime}
                           </div>
-                          <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             {language === 'fa' ? 'خروج' : 'Departure'}
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg text-gray-600 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <div className="text-lg text-gray-600 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {flight.duration}
                           </div>
                           <div className="w-full h-0.5 bg-gray-300 relative">
@@ -913,26 +787,25 @@ const FlightMapPage: React.FC = () => {
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                          <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                             {flight.arrivalTime}
                           </div>
-                          <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          <div className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             {language === 'fa' ? 'ورود' : 'Arrival'}
                           </div>
                         </div>
                       </div>
 
-                      {/* Booking Button */}
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <button
+                          type="button"
                           onClick={() => {
-                            // Navigate to flight results page with search params - same as HomePage
                             navigate('/flights/results', {
                               state: {
                                 searchParams: {
                                   origin: flight.origin,
                                   destination: flight.destination,
-                                  departureDate: selectedDate.toISOString().split('T')[0],
+                                  departureDate: toLocalDateISO(selectedDate),
                                   returnDate: undefined,
                                   passengers: { adults: 1, children: 0, infants: 0 },
                                   class: flight.class,
@@ -942,11 +815,11 @@ const FlightMapPage: React.FC = () => {
                               }
                             });
                           }}
-                          className="w-full bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                          style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                          className="w-full font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white transform hover:scale-105 shadow-lg hover:shadow-xl"
+                          style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                         >
                           <TicketIcon className="w-5 h-5" />
-                          {language === 'fa' ? 'رزرو این پرواز' : 'Book This Flight'}
+                          {language === 'fa' ? 'ادامه رزرو' : 'Continue booking'}
                         </button>
                       </div>
                     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, memo, useRef } from 'react';
 import { CloudIcon, SunIcon, BoltIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import api from '../../services/api';
 
 interface WeatherData {
   city: string;
@@ -44,71 +45,26 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
     Isfahan: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
   };
 
-  // City ID برای یک درخواست گروهی (سریع‌تر از ۵ درخواست جدا)
-  const cityToId: Record<string, number> = {
-    Tehran: 112931,
-    Mashhad: 124665,
-    Kish: 126909,
-    Abadan: 144446,
-    Isfahan: 418863,
-  };
-
   useEffect(() => {
     const citiesString = JSON.stringify(cities);
     if (hasFetchedRef.current && citiesString === JSON.stringify(citiesRef.current)) return;
     citiesRef.current = cities;
     hasFetchedRef.current = true;
 
-    const API_KEY = process.env.REACT_APP_WEATHER_API_KEY || '';
-    if (!API_KEY) {
-      setWeatherData(cities.map(city => ({
-        city,
-        temperature: 0,
-        description: '',
-        icon: '',
-        humidity: 0,
-        windSpeed: 0,
-        loading: false,
-        error: 'API Key تنظیم نشده',
-      })));
-      return;
-    }
+    const lang = language === 'fa' ? 'fa' : language === 'ar' ? 'ar' : 'en';
 
-    const ids = cities.map(c => cityToId[c] || 112931).filter((v, i, a) => a.indexOf(v) === i);
-    const url = `https://api.openweathermap.org/data/2.5/group?id=${ids.join(',')}&units=metric&lang=${language === 'fa' ? 'fa' : language === 'ar' ? 'ar' : 'en'}&appid=${API_KEY}`;
-
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 12000);
-
-    fetch(url, { signal: controller.signal })
+    api
+      .get('/support/weather/', { params: { cities: cities.join(','), lang }, timeout: 15000 })
       .then(res => {
-        clearTimeout(t);
-        if (!res.ok) throw new Error('خطا در دریافت');
-        return res.json();
-      })
-      .then((data: { list?: Array<{ id: number; main: { temp: number; humidity: number }; weather: Array<{ description: string; icon: string }>; wind: { speed: number } }> }) => {
-        const byId = new Map<number, { id: number; main: { temp: number; humidity: number }; weather: Array<{ description: string; icon: string }>; wind: { speed: number } }>();
-        (data.list ?? []).forEach((item) => byId.set(item.id, item));
-        setWeatherData(cities.map(city => {
-          const id = cityToId[city];
-          const item = id != null ? byId.get(id) : null;
-          if (!item) {
-            return { city, temperature: 0, description: '', icon: '', humidity: 0, windSpeed: 0, loading: false, error: 'یافت نشد' };
-          }
-          return {
-            city,
-            temperature: Math.round(item.main.temp),
-            description: item.weather[0]?.description || '',
-            icon: item.weather[0]?.icon || '01d',
-            humidity: item.main.humidity || 0,
-            windSpeed: Math.round((item.wind?.speed || 0) * 3.6),
+        const data = (res.data?.data || res.data) as Array<{ city: string; temperature: number; description: string; icon: string; humidity: number; windSpeed: number; error: string | null }>;
+        setWeatherData(
+          (data || []).map(item => ({
+            ...item,
             loading: false,
-            error: null,
-          };
-        }));
+          }))
+        );
       })
       .catch(() => {
-        clearTimeout(t);
         setWeatherData(cities.map(city => ({
           city,
           temperature: 0,
@@ -197,25 +153,6 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
           ))}
         </div>
         
-        {!process.env.REACT_APP_WEATHER_API_KEY && (
-          <div className="mt-6 text-center">
-            <p className={`text-sm text-gray-500 ${fontClass}`}>
-              {language === 'fa' 
-                ? 'برای دریافت اطلاعات واقعی آب و هوا، لطفاً API Key را در فایل .env تنظیم کنید' 
-                : language === 'ar'
-                ? 'للحصول على معلومات الطقس الفعلية، يرجى تعيين مفتاح API في ملف .env'
-                : 'To get real weather data, please set API_KEY in .env file'}
-            </p>
-            <a 
-              href="https://openweathermap.org/api" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
-            >
-              {language === 'fa' ? 'دریافت API Key رایگان' : language === 'ar' ? 'احصل على مفتاح API مجاني' : 'Get Free API Key'}
-            </a>
-          </div>
-        )}
       </div>
     </div>
   );

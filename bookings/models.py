@@ -145,6 +145,49 @@ class Booking(models.Model):
         blank=True,
         help_text=_('اطلاعات اضافی رزرو به صورت JSON'),
     )
+    hold_expires_at = models.DateTimeField(
+        _('انقضای رزرو موقت'),
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text=_('تا این زمان صندلی به‌صورت soft-hold قفل است'),
+    )
+    idempotency_key = models.CharField(
+        _('کلید تکرارناپذیر'),
+        max_length=64,
+        null=True,
+        blank=True,
+        unique=True,
+        db_index=True,
+        help_text=_('جلوگیری از دوبار ساختن رزرو با دابل‌کلیک'),
+    )
+    # Nira / airline ticketing (filled after Nira payment callback)
+    nira_pnr = models.CharField(
+        _('PNR نیرا'),
+        max_length=32,
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    nira_ticket_numbers = models.JSONField(
+        _('شماره بلیط‌های نیرا'),
+        default=list,
+        blank=True,
+        help_text=_('لیست شماره بلیط الکترونیک پس از صدور'),
+    )
+    nira_session_id = models.CharField(
+        _('Session نیرا'),
+        max_length=128,
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    ticket_issued_at = models.DateTimeField(
+        _('زمان صدور بلیط'),
+        null=True,
+        blank=True,
+        db_index=True,
+    )
     cancellation_reason = models.TextField(
         _('دلیل لغو'),
         null=True,

@@ -263,7 +263,7 @@ class NiraAPIViewSet(viewsets.ViewSet):
                 datetime.min.time()
             )
         
-        # Call Nira API
+        # Call Nira API (cached short-TTL inside client)
         result = self.nira_client.check_availability(
             origin=validated_data['origin'],
             destination=validated_data['destination'],
@@ -274,47 +274,29 @@ class NiraAPIViewSet(viewsets.ViewSet):
             child_qty=validated_data.get('child_qty', 0),
             infant_qty=validated_data.get('infant_qty', 0)
         )
-        
-        # اگر پاسخ موفقیت آمیز بود، داده های لحظه ای را اضافه میکنیم
+
+        # Do NOT call FlightStatusService inline (was causing multi-second hangs / worker stalls).
+        # Warm status cache in background for a few flights; search response stays fast.
         if result.get('success') and result.get('data', {}).get('AvailableFlights'):
-            status_service = FlightStatusService()
-            available_flights = result['data']['AvailableFlights']
-            
-            for flight in available_flights:
-                try:
-                    # تبدیل تاریخ و زمان به datetime object
-                    departure_datetime_str = flight.get('DepartureDateTime')
-                    if departure_datetime_str:
-                        departure_datetime = datetime.strptime(
-                            departure_datetime_str,
-                            '%Y-%m-%dT%H:%M:%S'
-                        )
-                        # اگر naive است، timezone aware می‌کنیم
-                        if timezone.is_naive(departure_datetime):
-                            departure_datetime = timezone.make_aware(departure_datetime)
-                        
-                        # دریافت اطلاعات لحظه ای
-                        realtime_data = status_service.get_flight_status(
-                            flight_number=flight.get('FlightNumber'),
-                            origin=validated_data['origin'],
-                            destination=validated_data['destination'],
-                            scheduled_departure=departure_datetime
-                        )
-                        
-                        # اگر اطلاعات لحظه ای دریافت شد به پرواز اضافه میکنیم
-                        if realtime_data:
-                            flight['realtime_status'] = {
-                                'actual_departure_time': realtime_data.get('actual_departure_time'),
-                                'actual_arrival_time': realtime_data.get('actual_arrival_time'),
-                                'delay_minutes': realtime_data.get('delay_minutes'),
-                                'gate': realtime_data.get('gate'),
-                                'arrival_gate': realtime_data.get('arrival_gate'),
-                                'status': realtime_data.get('status')
-                            }
-                except (ValueError, KeyError, Exception) as e:
-                    # اگر خطایی در دریافت اطلاعات لحظه ای رخ داد، ادامه می‌دهیم
-                    # بدون اینکه کل پاسخ را خراب کنیم
-                    continue
+            try:
+                from django.conf import settings as dj_settings
+                from nasim.async_utils import enqueue
+                from flights.tasks import enrich_flight_status_task
+
+                if getattr(dj_settings, 'NIRA_ENRICH_STATUS_ASYNC', True):
+                    for flight in (result['data']['AvailableFlights'] or [])[:6]:
+                        dep = flight.get('DepartureDateTime')
+                        fn = flight.get('FlightNumber')
+                        if dep and fn:
+                            enqueue(
+                                enrich_flight_status_task,
+                                str(fn),
+                                validated_data['origin'],
+                                validated_data['destination'],
+                                str(dep),
+                            )
+            except Exception:
+                pass
         
         if result['success']:
             return Response(result, status=status.HTTP_200_OK)

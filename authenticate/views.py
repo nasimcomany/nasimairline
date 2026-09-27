@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django.core.mail import send_mail
 from django.conf import settings
 from datetime import timedelta
 from .models import PasswordResetCode
@@ -36,14 +35,15 @@ class UserRegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         
-        # ارسال پیامک خوش‌آمدگویی اگر شماره تلفن دارد
+        # ارسال پیامک خوش‌آمدگویی در صف sms (بلاک‌کنندهٔ HTTP نیست)
         if getattr(user, 'phone_number', None):
             try:
-                from sms.services import send_registration_welcome_sms
-                send_registration_welcome_sms(user)
+                from nasim.async_utils import enqueue
+                from sms.tasks import send_registration_welcome_task
+                enqueue(send_registration_welcome_task, user.id)
             except Exception as e:
                 import logging
-                logging.getLogger(__name__).warning(f"Registration welcome SMS failed: {e}")
+                logging.getLogger(__name__).warning(f"Registration welcome SMS enqueue failed: {e}")
         
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
@@ -238,12 +238,15 @@ def request_password_reset(request):
 نسیم ایر'''
     
     try:
-        send_mail(
+        from nasim.async_utils import enqueue
+        from notifications.tasks import send_email_task
+        enqueue(
+            send_email_task,
             subject,
             message,
-            getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@nasimair.com'),
             [email],
-            fail_silently=False,
+            getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@nasimair.com'),
+            False,
         )
     except Exception as e:
         code.delete()

@@ -101,6 +101,16 @@ class UserAdmin(BaseUserAdmin):
     
     filter_horizontal = ['groups', 'user_permissions']
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        # Staff (non-superuser) = limited content editor → grant blog/gallery category perms
+        if obj.is_staff and not obj.is_superuser:
+            from accounts.limited_admin_perms import grant_limited_editor_access
+            grant_limited_editor_access(obj)
+        elif not obj.is_staff:
+            # Optional: leave group in place even if staff removed (harmless without is_staff login)
+            pass
+
 
 @admin.register(Wallet)
 class WalletAdmin(admin.ModelAdmin):

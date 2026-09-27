@@ -6,10 +6,13 @@ import api from './api';
 export interface HomePageSectionItem {
   id: number;
   uuid?: string;
-  section_type: 'SPECIAL_SERVICE' | 'EXPERIENCE';
+  section_type: 'SPECIAL_SERVICE' | 'EXPERIENCE' | 'SURVEY' | 'FAQ' | 'POPULAR_ROUTES' | string;
   title_fa: string;
   title_ar: string;
   title_en: string;
+  description_fa?: string;
+  description_ar?: string;
+  description_en?: string;
   image_url: string | null;
   link_url: string;
   order: number;
@@ -52,34 +55,48 @@ export interface HeroSlider {
  */
 export const getHeroSliders = async (): Promise<HeroSlider[]> => {
   try {
-    console.log('Calling API: /gallery/hero-sliders/active/');
     const response = await api.get<HeroSlider[]>('/gallery/hero-sliders/active/');
-    console.log('API Response:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('Error fetching hero sliders:', error);
-    console.error('Error details:', error.response?.data);
-    console.error('Status:', error.response?.status);
-    // Return empty array on error to prevent breaking the homepage
     return [];
   }
 };
 
 /**
- * Get homepage section items (Special Services + Experience)
+ * Get homepage section items grouped by section
  */
 export const getHomePageSectionItems = async (): Promise<{
   special_services: HomePageSectionItem[];
   experience: HomePageSectionItem[];
+  survey: HomePageSectionItem[];
+  faq: HomePageSectionItem[];
+  popular_routes: HomePageSectionItem[];
 }> => {
   try {
-    const response = await api.get<{ special_services: HomePageSectionItem[]; experience: HomePageSectionItem[] }>(
-      '/gallery/homepage-section-items/all/'
-    );
-    return response.data;
+    const response = await api.get<{
+      special_services: HomePageSectionItem[];
+      experience: HomePageSectionItem[];
+      survey?: HomePageSectionItem[];
+      faq?: HomePageSectionItem[];
+      popular_routes?: HomePageSectionItem[];
+    }>('/gallery/homepage-section-items/all/');
+    return {
+      special_services: response.data.special_services || [],
+      experience: response.data.experience || [],
+      survey: response.data.survey || [],
+      faq: response.data.faq || [],
+      popular_routes: response.data.popular_routes || [],
+    };
   } catch (error) {
     console.error('Error fetching homepage section items:', error);
-    return { special_services: [], experience: [] };
+    return {
+      special_services: [],
+      experience: [],
+      survey: [],
+      faq: [],
+      popular_routes: [],
+    };
   }
 };
 

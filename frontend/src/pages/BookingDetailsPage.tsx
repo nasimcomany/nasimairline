@@ -6,6 +6,7 @@ import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cities } from '../data/cities';
 import bookingService from '../services/bookingService';
+import { getFlightSaleState, getFlightSaleCopy, FlightSaleState } from '../services/niraApi';
 import {
   PaperAirplaneIcon,
   ClockIcon,
@@ -59,6 +60,7 @@ const BookingDetailsPage: React.FC = () => {
   
   // Errors
   const [errors, setErrors] = useState<string[]>([]);
+  const [saleBlockNotice, setSaleBlockNotice] = useState(false);
 
   // Get flight data - try from state first, fallback to mock
   const flightFromState = (location.state as any)?.flight;
@@ -112,6 +114,19 @@ const BookingDetailsPage: React.FC = () => {
     }),
     basePrice: getBasePrice()
   };
+
+  // Re-check sale state so deep-link / stale state cannot reach payment
+  const resolvedSaleState: FlightSaleState = (() => {
+    if (flightFromState?.saleState) return flightFromState.saleState as FlightSaleState;
+    if (flightFromState?.originalData) {
+      return getFlightSaleState(flightFromState.originalData);
+    }
+    if (flightFromState?.canBook === false) return 'sale_closed';
+    if (Number(flightFromState?.price || 0) <= 0) return 'sale_closed';
+    return 'bookable';
+  })();
+  const canBookFlight = resolvedSaleState === 'bookable' && Number(flight.basePrice?.adult || 0) > 0;
+  const saleCopy = getFlightSaleCopy(resolvedSaleState, language);
 
   // Initialize passengers based on search params
   useEffect(() => {
@@ -257,7 +272,15 @@ const BookingDetailsPage: React.FC = () => {
 
   const handlePayment = async () => {
     setErrors([]);
+    setSaleBlockNotice(false);
     const newErrors: string[] = [];
+
+    // Final gate: explain in plain language when online sale is not open
+    if (!canBookFlight) {
+      setSaleBlockNotice(true);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      return;
+    }
 
     // Validate terms
     if (!acceptedTerms) {
@@ -296,14 +319,33 @@ const BookingDetailsPage: React.FC = () => {
     }
 
     try {
-      // Persist booking/payment intent immediately when user clicks pay
+      const idempotencyKey =
+        (typeof crypto !== 'undefined' && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : `hold-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
       const initiated = await bookingService.initiatePayment({
         flight_data: flight,
         passengers,
         contact_info: contactInfo,
         total_amount: calculateTotalPrice(),
         cabin_class: String(flight.class || 'economy').toUpperCase(),
+        idempotency_key: idempotencyKey,
       });
+
+      // If airline configured Nira-hosted payment UI, go there directly
+      if (initiated.payment_mode === 'nira_redirect' && initiated.payment_url) {
+        sessionStorage.setItem('pendingBooking', JSON.stringify({
+          flight,
+          passengers,
+          contactInfo,
+          totalPrice: calculateTotalPrice(),
+          bookingDraft: initiated,
+          paymentMode: 'nira_redirect',
+        }));
+        window.location.href = initiated.payment_url;
+        return;
+      }
 
       navigate('/payment', {
         state: {
@@ -318,8 +360,13 @@ const BookingDetailsPage: React.FC = () => {
       const apiMessage =
         err?.response?.data?.error ||
         err?.response?.data?.detail ||
-        'خطا در ثبت رزرو اولیه. لطفا دوباره تلاش کنید.';
-      setErrors([apiMessage]);
+        'خطا در رزرو موقت. لطفا دوباره تلاش کنید.';
+      const code = err?.response?.data?.code;
+      const friendly =
+        code === 'sold_out' || code === 'flight_gone' || code === 'local_hold_full'
+          ? apiMessage
+          : apiMessage;
+      setErrors([friendly]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -338,10 +385,10 @@ const BookingDetailsPage: React.FC = () => {
               <div className="flex items-start gap-2">
                 <ExclamationCircleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-red-800 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <h4 className="font-bold text-red-800 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('booking.formErrors')}
                   </h4>
-                  <ul className="text-sm text-red-700 space-y-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                  <ul className="text-sm text-red-700 space-y-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                     {errors.map((err, idx) => (
                       <li key={idx}>• {err}</li>
                     ))}
@@ -359,13 +406,13 @@ const BookingDetailsPage: React.FC = () => {
                 <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                   <div className="flex items-center gap-2 sm:gap-3">
                     <UserIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                    <h2 className="text-lg sm:text-xl font-bold text-white" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <h2 className="text-lg sm:text-xl font-bold text-white" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.passengerInfo')}
                     </h2>
                   </div>
                   <div className="flex items-center gap-2 bg-white/20 px-2 sm:px-3 py-1 rounded-lg">
                     <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    <span className="text-white font-bold text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <span className="text-white font-bold text-sm sm:text-base" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                       {formatTime(timeLeft)}
                     </span>
                   </div>
@@ -378,15 +425,15 @@ const BookingDetailsPage: React.FC = () => {
                       <div className="flex items-center justify-between mb-3 sm:mb-4">
                         <div className="flex items-center gap-2 sm:gap-3">
                           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-900 font-bold text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            <span className="text-blue-900 font-bold text-sm sm:text-base" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                               {index + 1}
                             </span>
                           </div>
                           <div>
-                            <h3 className="font-bold text-gray-900 text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                            <h3 className="font-bold text-gray-900 text-sm sm:text-base" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                               {getPassengerTypeLabel(passenger.type)}
                             </h3>
-                            <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <p className="text-xs text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {t('booking.passengerNumber')} {index + 1}
                             </p>
                           </div>
@@ -403,7 +450,7 @@ const BookingDetailsPage: React.FC = () => {
                             onChange={() => updatePassenger(index, 'gender', 'male')}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                           />
-                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.male')}</span>
+                          <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.male')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -413,7 +460,7 @@ const BookingDetailsPage: React.FC = () => {
                             onChange={() => updatePassenger(index, 'gender', 'female')}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                           />
-                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.female')}</span>
+                          <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.female')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer mr-auto">
                           <input
@@ -422,14 +469,14 @@ const BookingDetailsPage: React.FC = () => {
                             onChange={(e) => updatePassenger(index, 'isForeign', e.target.checked)}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900 rounded"
                           />
-                          <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.foreignNational')}</span>
+                          <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.foreignNational')}</span>
                         </label>
                       </div>
 
                       {/* Personal Info */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                          <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             {t('booking.firstNameEnglish')} *
                           </label>
                           <input
@@ -437,14 +484,14 @@ const BookingDetailsPage: React.FC = () => {
                             value={passenger.firstName}
                             onChange={(e) => updatePassenger(index, 'firstName', e.target.value)}
                             className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                            style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'left' }}
+                            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                             placeholder="First Name"
                             required
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             {t('booking.lastNameEnglish')} *
                           </label>
                           <input
@@ -452,7 +499,7 @@ const BookingDetailsPage: React.FC = () => {
                             value={passenger.lastName}
                             onChange={(e) => updatePassenger(index, 'lastName', e.target.value)}
                             className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                            style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'left' }}
+                            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                             placeholder="Last Name"
                             required
                           />
@@ -460,7 +507,7 @@ const BookingDetailsPage: React.FC = () => {
 
                         {!passenger.isForeign && (
                           <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {t('booking.nationalId')} *
                               {index === 0 && isAuthenticated && passenger.nationalId && (
                                 <span className="text-xs text-green-600 mr-2">({t('booking.fromYourProfile') || 'از پروفایل شما'})</span>
@@ -474,7 +521,7 @@ const BookingDetailsPage: React.FC = () => {
                               className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
                                 index === 0 && isAuthenticated && passenger.nationalId ? 'bg-gray-100 cursor-not-allowed' : ''
                               }`}
-                              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
+                              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'right' }}
                               placeholder={t('booking.nationalId10Digits')}
                               maxLength={10}
                               required
@@ -484,7 +531,7 @@ const BookingDetailsPage: React.FC = () => {
 
                         {passenger.isForeign && (
                           <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {t('booking.passportNumber')} *
                             </label>
                             <input
@@ -492,7 +539,7 @@ const BookingDetailsPage: React.FC = () => {
                               value={passenger.passportNumber || ''}
                               onChange={(e) => updatePassenger(index, 'passportNumber', e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'left' }}
+                              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                               placeholder="Passport Number"
                               required
                             />
@@ -500,7 +547,7 @@ const BookingDetailsPage: React.FC = () => {
                         )}
 
                         <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                          <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             {t('booking.birthDate')} *
                           </label>
                           <div className="relative">
@@ -511,7 +558,7 @@ const BookingDetailsPage: React.FC = () => {
                               onChange={(e) => updatePassenger(index, 'birthDate', e.target.value)}
                               max={new Date().toISOString().split('T')[0]}
                               className="w-full pr-10 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                               required
                             />
                           </div>
@@ -527,7 +574,7 @@ const BookingDetailsPage: React.FC = () => {
                 <button
                   onClick={() => setShowDiscountInput(true)}
                   className="text-blue-900 hover:text-blue-800 text-xs sm:text-sm font-bold"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                 >
                   {t('booking.haveDiscountCode')} {t('booking.enterDiscountCode')}
                 </button>
@@ -539,13 +586,13 @@ const BookingDetailsPage: React.FC = () => {
                       value={discountCode}
                       onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                       className="flex-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'left' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                       placeholder="Discount Code"
                     />
                     <button
                       type="button"
                       className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 sm:px-6 py-2 rounded-lg transition-colors text-sm sm:text-base"
-                      style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     >
                       {t('booking.apply')}
                     </button>
@@ -556,7 +603,7 @@ const BookingDetailsPage: React.FC = () => {
               {/* Contact Information */}
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-3 sm:p-4">
-                  <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     <PhoneIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                     {t('booking.contactInfo')}
                   </h2>
@@ -564,20 +611,20 @@ const BookingDetailsPage: React.FC = () => {
 
                 <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                   <div>
-                    <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.passengerPhone')} *
                     </label>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <div className="flex items-center gap-2 px-2 sm:px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg">
                         <span className="text-xl sm:text-2xl">🇮🇷</span>
-                        <span className="font-bold text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>+98</span>
+                        <span className="font-bold text-sm sm:text-base" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>+98</span>
                       </div>
                       <input
                         type="tel"
                         value={contactInfo.phone}
                         onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                         className="flex-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                        style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
+                        style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'right' }}
                         placeholder="9123456789"
                         maxLength={10}
                         required
@@ -586,7 +633,7 @@ const BookingDetailsPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.emailAddress')} *
                     </label>
                     <div className="relative">
@@ -596,7 +643,7 @@ const BookingDetailsPage: React.FC = () => {
                         value={contactInfo.email}
                         onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
                         className="w-full pr-8 sm:pr-10 pl-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                        style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'left' }}
+                        style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                         placeholder="email@example.com"
                         required
                       />
@@ -611,17 +658,17 @@ const BookingDetailsPage: React.FC = () => {
               {/* Flight Info */}
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-3 sm:p-4">
-                  <h3 className="font-bold text-white text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <h3 className="font-bold text-white text-sm sm:text-base" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('booking.flightInfo')}
                   </h3>
                 </div>
                 <div className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <div className="text-center flex-1">
-                      <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                         {flight.departureTime}
                       </div>
-                      <div className="text-xs sm:text-sm text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <div className="text-xs sm:text-sm text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {getCityName(flight.origin)}
                       </div>
                     </div>
@@ -629,26 +676,26 @@ const BookingDetailsPage: React.FC = () => {
                       <PaperAirplaneIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-900 rotate-90" />
                     </div>
                     <div className="text-center flex-1">
-                      <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                      <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                         {flight.arrivalTime}
                       </div>
-                      <div className="text-xs sm:text-sm text-gray-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <div className="text-xs sm:text-sm text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {getCityName(flight.destination)}
                       </div>
                     </div>
                   </div>
-                  <div className="text-center text-xs sm:text-sm text-gray-500 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div className="text-center text-xs sm:text-sm text-gray-500 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {flight.date}
                   </div>
                   <div className="text-center">
-                    <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-xs font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                    <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-900 rounded-full text-xs font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                       {flight.flightNumber}
                     </span>
                   </div>
                   <button
                     onClick={() => navigate('/flights/results')}
                     className="w-full mt-2 sm:mt-3 text-red-600 hover:text-red-700 text-xs sm:text-sm font-bold"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                   >
                     {t('booking.changeFlight')}
                   </button>
@@ -658,7 +705,7 @@ const BookingDetailsPage: React.FC = () => {
               {/* Invoice */}
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-3 sm:p-4">
-                  <h3 className="font-bold text-white text-sm sm:text-base" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <h3 className="font-bold text-white text-sm sm:text-base" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('booking.invoice')}
                   </h3>
                 </div>
@@ -666,10 +713,10 @@ const BookingDetailsPage: React.FC = () => {
                   {/* Price Breakdown */}
                   {passengers.filter(p => p.type === 'adult').length > 0 && (
                     <div className="flex justify-between text-xs sm:text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {t('passengers.adult')} ({passengers.filter(p => p.type === 'adult').length}):
                       </span>
-                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span className="font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
                           ? ((flight.basePrice?.adult || 0) * passengers.filter(p => p.type === 'adult').length).toLocaleString('en-US')
                           : language === 'ar'
@@ -680,10 +727,10 @@ const BookingDetailsPage: React.FC = () => {
                   )}
                   {passengers.filter(p => p.type === 'child').length > 0 && (
                     <div className="flex justify-between text-xs sm:text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {t('passengers.child')} ({passengers.filter(p => p.type === 'child').length}):
                       </span>
-                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span className="font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
                           ? ((flight.basePrice?.child || 0) * passengers.filter(p => p.type === 'child').length).toLocaleString('en-US')
                           : language === 'ar'
@@ -694,10 +741,10 @@ const BookingDetailsPage: React.FC = () => {
                   )}
                   {passengers.filter(p => p.type === 'infant').length > 0 && (
                     <div className="flex justify-between text-xs sm:text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {t('passengers.infant')} ({passengers.filter(p => p.type === 'infant').length}):
                       </span>
-                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span className="font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
                           ? ((flight.basePrice?.infant || 0) * passengers.filter(p => p.type === 'infant').length).toLocaleString('en-US')
                           : language === 'ar'
@@ -709,14 +756,14 @@ const BookingDetailsPage: React.FC = () => {
 
                   <div className="border-t pt-2 sm:pt-3 space-y-2">
                     <div className="flex justify-between text-xs sm:text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.discountAmount')}</span>
-                      <span className="font-bold text-green-600" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.discountAmount')}</span>
+                      <span className="font-bold text-green-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         0 {t('flights.currency')}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs sm:text-sm">
-                      <span style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.extraCost')}</span>
-                      <span className="font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.extraCost')}</span>
+                      <span className="font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         0 {t('flights.currency')}
                       </span>
                     </div>
@@ -724,10 +771,10 @@ const BookingDetailsPage: React.FC = () => {
 
                   <div className="border-t pt-2 sm:pt-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-base sm:text-lg font-bold" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span className="text-base sm:text-lg font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {t('booking.payableAmount')}
                       </span>
-                      <span className="text-xl sm:text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <span className="text-xl sm:text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                         {language === 'en' 
                           ? totalPrice.toLocaleString('en-US')
                           : language === 'ar'
@@ -745,17 +792,37 @@ const BookingDetailsPage: React.FC = () => {
                       onChange={(e) => setAcceptedTerms(e.target.checked)}
                       className="w-4 h-4 text-blue-900 focus:ring-blue-900 rounded mt-0.5 sm:mt-1 flex-shrink-0"
                     />
-                    <span className="text-xs text-gray-700" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <span className="text-xs text-gray-700" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.acceptTerms')}
                     </span>
                   </label>
 
-                  {/* Payment Button */}
+                  {saleBlockNotice && !canBookFlight ? (
+                    <div
+                      className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-3 py-3 text-sm text-amber-950 leading-relaxed"
+                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                      role="alert"
+                    >
+                      <span
+                        className={`inline-block mb-2 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                          resolvedSaleState === 'sale_closed'
+                            ? 'bg-amber-100 text-amber-900'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        {saleCopy.badge}
+                      </span>
+                      <p className="font-semibold mb-1">{saleCopy.cta}</p>
+                      <p>{saleCopy.notice}</p>
+                    </div>
+                  ) : null}
+
+                  {/* Payment Button — always clickable; sale status explained after click */}
                   <button
                     onClick={handlePayment}
                     disabled={!acceptedTerms}
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 sm:py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                   >
                     {t('booking.payment')}
                   </button>
@@ -767,10 +834,10 @@ const BookingDetailsPage: React.FC = () => {
                 <div className="flex gap-2 sm:gap-3">
                   <InformationCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-blue-900 mb-1 sm:mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <h4 className="text-xs sm:text-sm font-bold text-blue-900 mb-1 sm:mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.importantNotes')}
                     </h4>
-                    <ul className="text-xs text-blue-800 space-y-1" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <ul className="text-xs text-blue-800 space-y-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       <li>• {t('booking.note1')}</li>
                       <li>• {t('booking.note2')}</li>
                       <li>• {t('booking.note3')}</li>

@@ -283,3 +283,61 @@ http://127.0.0.1:8000/admin/support/chatmessage/{chat_message.id}/change/"""
     
     return send_whatsapp_message(admin_whatsapp_number, whatsapp_message)
 
+
+def send_chat_notification_email(chat_message):
+    """
+    Send email notification to admin when a new user/guest chat message arrives.
+    """
+    if chat_message.is_staff:
+        return False
+
+    from nasim.email_recipients import merge_notification_emails
+
+    recipients = merge_notification_emails(
+        getattr(settings, 'CHAT_NOTIFICATION_EMAILS', []),
+    )
+    if not recipients:
+        logger.warning('No CHAT_NOTIFICATION_EMAILS / ALWAYS_NOTIFY_EMAILS configured.')
+        return False
+
+    sender_name = chat_message.get_sender_name()
+    sender_email = chat_message.get_sender_email() or '—'
+    message_preview = chat_message.message
+    admin_base_url = getattr(settings, 'ADMIN_BASE_URL', 'http://127.0.0.1:8000')
+    chat_admin_path = getattr(settings, 'CHAT_ADMIN_PATH', 'limited-admin')
+    admin_url = f"{admin_base_url}/{chat_admin_path.rstrip('/')}/support/chatmessage/{chat_message.id}/change/"
+
+    metadata = getattr(chat_message, 'metadata', None) or {}
+    request_type = metadata.get('request_type') if isinstance(metadata, dict) else None
+    request_label = 'پیگیری چمدان' if request_type == 'luggage_tracking' else 'چت آنلاین'
+
+    subject = f'پیام جدید ({request_label}) — {sender_name}'
+    body = f"""پیام جدید از ویجت چت سایت
+
+نوع: {request_label}
+فرستنده: {sender_name}
+ایمیل فرستنده: {sender_email}
+
+پیام:
+{message_preview}
+
+برای مشاهده و پاسخ:
+{admin_url}
+"""
+    try:
+        from django.core.mail import send_mail
+        from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=from_email,
+            recipient_list=recipients,
+            fail_silently=False,
+        )
+        logger.info('Chat email notification sent to %s', recipients)
+        return True
+    except Exception as e:
+        logger.error('Failed to send chat email notification: %s', e, exc_info=True)
+        return False
+
+

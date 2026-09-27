@@ -110,7 +110,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
 
   return (
     <div ref={dropdownRef} className="relative">
-      <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+      <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
         {label}
       </label>
       
@@ -121,7 +121,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all bg-white text-right flex items-center justify-between hover:border-gray-400"
         style={{
-          fontFamily: 'DigiHamisheBold, Arial, sans-serif',
+          fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
           direction: 'rtl',
           minHeight: '48px',
           height: '48px'
@@ -149,7 +149,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
           <div className="p-3">
           {/* Adults */}
           <div className="flex items-center justify-between py-3 px-2 border-b border-gray-100 last:border-b-0">
-            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
               <div className="text-sm font-bold text-gray-900">{t('passengers.adult')}</div>
             </div>
             <div className="flex items-center gap-1">
@@ -161,7 +161,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
               >
                 <MinusIcon className="w-2.5 h-2.5" />
               </button>
-              <span className="w-5 text-center text-xs font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <span className="w-5 text-center text-xs font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {value.adults}
               </span>
               <button
@@ -177,7 +177,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
 
           {/* Children */}
           <div className="flex items-center justify-between py-3 px-2 border-b border-gray-100">
-            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
               <div className="text-sm font-bold text-gray-900">{t('passengers.child')}</div>
             </div>
             <div className="flex items-center gap-1">
@@ -189,7 +189,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
               >
                 <MinusIcon className="w-2.5 h-2.5" />
               </button>
-              <span className="w-5 text-center text-xs font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <span className="w-5 text-center text-xs font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {value.children}
               </span>
               <button
@@ -205,7 +205,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
 
           {/* Infants */}
           <div className="flex items-center justify-between py-3 px-2">
-            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <div className={`${language === 'en' ? 'text-left' : 'text-right'} flex-1`} style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
               <div className="text-sm font-bold text-gray-900">{t('passengers.infant')}</div>
             </div>
             <div className="flex items-center gap-1">
@@ -217,7 +217,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
               >
                 <MinusIcon className="w-2.5 h-2.5" />
               </button>
-              <span className="w-5 text-center text-xs font-bold text-gray-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+              <span className="w-5 text-center text-xs font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {value.infants}
               </span>
               <button
@@ -236,7 +236,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
             type="button"
             onClick={() => setIsOpen(false)}
             className="w-full mt-3 bg-blue-900 hover:bg-blue-800 text-white text-sm font-bold py-3 rounded-lg transition-colors"
-            style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
           >
             تایید
           </button>

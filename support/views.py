@@ -9,6 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
+from nasim.email_recipients import merge_notification_emails
 from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage, ComplaintForm, SurveyForm, CabinSafetyReportForm, SafetyHazardReportForm
 from .permissions import IsTicketOwnerOrStaff
 from .serializers import (
@@ -308,7 +309,8 @@ def submit_complaint_form(request):
     Submit complaint/suggestion form - no auth required
     Saves to ComplaintForm and emails all COMPLAINT_NOTIFICATION_EMAILS
     """
-    from django.core.mail import send_mail
+    from nasim.async_utils import enqueue
+    from notifications.tasks import send_email_task
     from django.conf import settings
     
     data = request.data
@@ -351,7 +353,10 @@ def submit_complaint_form(request):
     from .email_i18n import get_labels
     L = get_labels(lang, 'complaint')
 
-    recipient_list = list(getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])) + ['publicrelation@nasimair.com']
+    recipient_list = merge_notification_emails(
+        getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', []),
+        'publicrelation@nasimair.com',
+    )
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -381,13 +386,7 @@ def submit_complaint_form(request):
 ---
 {L['submitted_at']} {complaint.created_at}
 """
-            send_mail(
-                subject=f"{L['subject_prefix']} {complaint.complaint_type[:50]}",
-                message=email_body,
-                from_email=from_email,
-                recipient_list=list(recipient_list),
-                fail_silently=True,
-            )
+            enqueue(send_email_task, f"{L['subject_prefix']} {complaint.complaint_type[:50]}", email_body, list(recipient_list), from_email, True)
         except Exception:
             pass  # شکایت ذخیره شده؛ عدم ارسال ایمیل باعث خطا نشود
     
@@ -405,7 +404,8 @@ def submit_survey_form(request):
     Submit survey form - no auth required
     Saves to SurveyForm and emails SURVEY_NOTIFICATION_EMAILS (or COMPLAINT_NOTIFICATION_EMAILS)
     """
-    from django.core.mail import send_mail
+    from nasim.async_utils import enqueue
+    from notifications.tasks import send_email_task
 
     data = request.data
     required = ['full_name', 'flight_number', 'contact_number']
@@ -458,8 +458,8 @@ def submit_survey_form(request):
     def lbl(v):
         return get_survey_label(v, lang)
 
-    base_list = getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
-    recipient_list = list(base_list) + ['publicrelation@nasimair.com']
+    base_list = getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', [])
+    recipient_list = merge_notification_emails(base_list, 'publicrelation@nasimair.com')
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -504,13 +504,7 @@ def submit_survey_form(request):
 ---
 {L['submitted_at']} {survey.created_at}
 """
-            send_mail(
-                subject=f"{L['subject_prefix']} {survey.full_name} - {survey.flight_number}",
-                message=email_body,
-                from_email=from_email,
-                recipient_list=list(recipient_list),
-                fail_silently=True,
-            )
+            enqueue(send_email_task, f"{L['subject_prefix']} {survey.full_name} - {survey.flight_number}", email_body, list(recipient_list), from_email, True)
         except Exception:
             pass
 
@@ -527,7 +521,8 @@ def submit_cabin_safety_form(request):
     """
     گزارش اجباری ایمنی کابین - فقط برای پرسنل (is_staff)
     """
-    from django.core.mail import send_mail
+    from nasim.async_utils import enqueue
+    from notifications.tasks import send_email_task
 
     if not request.user.is_staff:
         return Response({'error': 'فقط پرسنل مجاز به ثبت این فرم هستند.'}, status=status.HTTP_403_FORBIDDEN)
@@ -584,8 +579,8 @@ def submit_cabin_safety_form(request):
     def fmt_list(lst):
         return ', '.join(lst) if lst else '—'
 
-    base_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['info@nasimair.com'])
-    recipient_list = list(base_list) + ['safety@nasimair.com']
+    base_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', [])
+    recipient_list = merge_notification_emails(base_list, 'safety@nasimair.com')
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -627,13 +622,7 @@ def submit_cabin_safety_form(request):
 ---
 {L['submitted_at']} {report.created_at}
 """
-            send_mail(
-                subject=f"{L['subject_prefix']} {report.reporter_name} {report.reporter_family} - {report.flight_number or '—'}",
-                message=email_body,
-                from_email=from_email,
-                recipient_list=list(recipient_list),
-                fail_silently=True,
-            )
+            enqueue(send_email_task, f"{L['subject_prefix']} {report.reporter_name} {report.reporter_family} - {report.flight_number or '—'}", email_body, list(recipient_list), from_email, True)
         except Exception:
             pass
 
@@ -650,7 +639,8 @@ def submit_safety_hazard_form(request):
     """
     گزارش مخاطرات ایمنی (SHOR) - فقط برای پرسنل (is_staff)
     """
-    from django.core.mail import send_mail
+    from nasim.async_utils import enqueue
+    from notifications.tasks import send_email_task
 
     if not request.user.is_staff:
         return Response({'error': 'فقط پرسنل مجاز به ثبت این فرم هستند.'}, status=status.HTTP_403_FORBIDDEN)
@@ -693,8 +683,8 @@ def submit_safety_hazard_form(request):
     from .email_i18n import get_labels
     L = get_labels(lang, 'safety_hazard')
 
-    base_list = getattr(settings, 'SAFETY_HAZARD_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', ['Safety@nasimair.com'])
-    recipient_list = list(base_list) + ['safety@nasimair.com']
+    base_list = getattr(settings, 'SAFETY_HAZARD_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', [])
+    recipient_list = merge_notification_emails(base_list, 'safety@nasimair.com')
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -729,13 +719,7 @@ def submit_safety_hazard_form(request):
 ---
 {L['submitted_at']} {report.created_at}
 """
-            send_mail(
-                subject=f"{L['subject_prefix']} {report.reporter_name[:50]}",
-                message=email_body,
-                from_email=from_email,
-                recipient_list=list(recipient_list),
-                fail_silently=True,
-            )
+            enqueue(send_email_task, f"{L['subject_prefix']} {report.reporter_name[:50]}", email_body, list(recipient_list), from_email, True)
         except Exception:
             pass
 
@@ -759,6 +743,48 @@ def security_contact_info(request):
         'department': 'حراست',
         'message': 'برای ارتباط با حراست با شماره بالا تماس بگیرید.'
     })
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def weather_proxy(request):
+    """
+    پروکسی آب و هوا - درخواست از سرور به OpenWeatherMap (بدون CORS)
+    Query params: cities=Tehran,Mashhad,Kish (comma-separated), lang=fa|en|ar
+    """
+    import requests
+    api_key = getattr(settings, 'WEATHER_API_KEY', '')
+    if not api_key:
+        return Response({'error': 'API Key تنظیم نشده'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    cities_param = request.query_params.get('cities', 'Tehran,Mashhad,Kish,Abadan,Isfahan')
+    cities = [c.strip() for c in cities_param.split(',') if c.strip()]
+    lang = request.query_params.get('lang', 'fa')
+    if lang not in ('fa', 'en', 'ar'):
+        lang = 'en'
+
+    results = []
+    for city in cities:
+        try:
+            url = f'https://api.openweathermap.org/data/2.5/weather?q={city},IR&units=metric&lang={lang}&appid={api_key}'
+            r = requests.get(url, timeout=8)
+            if r.status_code != 200:
+                results.append({'city': city, 'error': 'خطا در دریافت', 'temperature': 0, 'description': '', 'icon': '', 'humidity': 0, 'windSpeed': 0})
+                continue
+            data = r.json()
+            results.append({
+                'city': city,
+                'temperature': round(data.get('main', {}).get('temp', 0)),
+                'description': data.get('weather', [{}])[0].get('description', ''),
+                'icon': data.get('weather', [{}])[0].get('icon', '01d'),
+                'humidity': data.get('main', {}).get('humidity', 0),
+                'windSpeed': round(data.get('wind', {}).get('speed', 0) * 3.6),
+                'error': None,
+            })
+        except Exception:
+            results.append({'city': city, 'error': 'خطا در دریافت', 'temperature': 0, 'description': '', 'icon': '', 'humidity': 0, 'windSpeed': 0})
+
+    return Response({'data': results})
 
 
 class ChatMessageViewSet(viewsets.ModelViewSet):

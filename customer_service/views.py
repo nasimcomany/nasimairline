@@ -348,6 +348,40 @@ class FlightMealFeedbackViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
+        # Email notification to admins
+        try:
+            from django.conf import settings
+            from nasim.async_utils import enqueue
+            from nasim.email_recipients import merge_notification_emails
+            from notifications.tasks import send_email_task
+
+            feedback = serializer.instance
+            recipients = merge_notification_emails(
+                getattr(settings, 'MEAL_FEEDBACK_NOTIFICATION_EMAILS', []),
+            )
+            if recipients:
+                from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
+                body = (
+                    f"بازخورد وعده غذایی جدید\n\n"
+                    f"پرواز: {getattr(feedback, 'flight_number', None) or '—'}\n"
+                    f"نام: {getattr(feedback, 'first_name', None) or ''} {getattr(feedback, 'last_name', None) or ''}\n"
+                    f"کیفیت غذا: {getattr(feedback, 'food_quality', None) or '—'}\n"
+                    f"دما: {getattr(feedback, 'food_temperature', None) or '—'}\n"
+                    f"طعم: {getattr(feedback, 'food_taste', None) or '—'}\n"
+                    f"نظر: {getattr(feedback, 'comments', None) or '—'}\n"
+                )
+                enqueue(
+                    send_email_task,
+                    'بازخورد وعده غذایی جدید',
+                    body,
+                    list(recipients),
+                    from_email,
+                    True,
+                )
+        except Exception:
+            pass
+
         headers = self.get_success_headers(serializer.data)
         return Response(
             {

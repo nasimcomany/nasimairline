@@ -185,6 +185,9 @@ class HomePageSectionItemViewSet(viewsets.ReadOnlyModelViewSet):
         data = {
             'special_services': [i for i in serializer.data if i['section_type'] == 'SPECIAL_SERVICE'],
             'experience': [i for i in serializer.data if i['section_type'] == 'EXPERIENCE'],
+            'survey': [i for i in serializer.data if i['section_type'] == 'SURVEY'],
+            'faq': [i for i in serializer.data if i['section_type'] == 'FAQ'],
+            'popular_routes': [i for i in serializer.data if i['section_type'] == 'POPULAR_ROUTES'],
         }
         return Response(data)
 

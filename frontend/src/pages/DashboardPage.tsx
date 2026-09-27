@@ -224,7 +224,7 @@ const DashboardPage: React.FC = () => {
   };
 
   const fontStyle = {
-    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
   };
 
   const canEditPhone = true; // شماره تلفن همیشه قابل ویرایش است

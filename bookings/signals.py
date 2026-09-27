@@ -41,35 +41,53 @@ def calculate_total(sender, instance, **kwargs):
 @receiver(post_save, sender=Booking)
 def update_flight_availability(sender, instance, created, **kwargs):
     """
-    Update flight seat availability when booking is created or cancelled
+    Local shadow-flight counters — only on final CONFIRMED (after pay),
+    never on HELD soft-hold create (passengers may not exist yet anyway).
     """
-    if created and instance.status == 'CONFIRMED':
-        # Decrease available seats
+    if instance.status == 'CONFIRMED' and created is False:
+        # handled below via status transition detection is hard without previous;
+        # keep simple: only adjust when explicitly confirmed and passengers exist
+        pass
+
+    if instance.status == 'CONFIRMED':
         flight = instance.flight
-        cabin_class = instance.cabin_class.lower()
+        cabin_class = (instance.cabin_class or 'economy').lower()
         available_field = f'{cabin_class}_available'
-        
-        current_available = getattr(flight, available_field, 0)
-        passenger_count = instance.passengers.count()
-        
+        if not hasattr(flight, available_field):
+            return
+        passenger_count = instance.passengers.exclude(passenger_type='INFANT').count()
+        if passenger_count <= 0:
+            return
+        # Avoid double-decrement: only if metadata flag not set
+        meta = instance.metadata or {}
+        if meta.get('local_seats_decremented'):
+            return
+        current_available = getattr(flight, available_field, 0) or 0
         setattr(flight, available_field, max(0, current_available - passenger_count))
         flight.save(update_fields=[available_field])
-    
-    elif instance.status == 'CANCELLED':
-        # Increase available seats
+        meta['local_seats_decremented'] = True
+        Booking.objects.filter(pk=instance.pk).update(metadata=meta)
+
+    elif instance.status in ('CANCELLED', 'EXPIRED'):
         flight = instance.flight
-        cabin_class = instance.cabin_class.lower()
+        cabin_class = (instance.cabin_class or 'economy').lower()
         available_field = f'{cabin_class}_available'
-        
-        current_available = getattr(flight, available_field, 0)
-        passenger_count = instance.passengers.count()
-        
-        # Get total seats for this cabin class
+        if not hasattr(flight, available_field):
+            return
+        meta = instance.metadata or {}
+        if not meta.get('local_seats_decremented'):
+            return
+        passenger_count = instance.passengers.exclude(passenger_type='INFANT').count()
+        current_available = getattr(flight, available_field, 0) or 0
         total_field = f'{cabin_class}_seats'
-        total_seats = getattr(flight.aircraft, total_field, 0)
-        
-        setattr(flight, available_field, min(total_seats, current_available + passenger_count))
+        total_seats = getattr(getattr(flight, 'aircraft', None), total_field, None)
+        new_val = current_available + passenger_count
+        if total_seats is not None:
+            new_val = min(total_seats, new_val)
+        setattr(flight, available_field, new_val)
         flight.save(update_fields=[available_field])
+        meta['local_seats_decremented'] = False
+        Booking.objects.filter(pk=instance.pk).update(metadata=meta)
 
 
 @receiver(post_save, sender=Passenger)

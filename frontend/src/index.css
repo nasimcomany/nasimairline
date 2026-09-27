@@ -2,10 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Estedad:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 
 /* Persian Calligraphy Font (Nastaliq) - Real Nastaliq Font */
 /* Download IranNastaliq font from fontchi.com or fontiran.com and place in public/fonts folder */
@@ -14,6 +12,16 @@
   src: url('./fonts/IranNastaliq.woff2') format('woff2'),
        url('./fonts/IranNastaliq.woff') format('woff');
   font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* DigiHamishe Regular */
+@font-face {
+  font-family: 'DigiHamishe';
+  src: url('./fonts/DigiHamisheRegular.otf') format('opentype'),
+       url('./fonts/DigiHamisheRegular.ttf') format('truetype');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -28,8 +36,14 @@
   font-display: swap;
 }
 
-/* Using Google Fonts Nastaliq alternative - Amiri for calligraphy style */
-@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@font-face {
+  font-family: 'DigiHamishe';
+  src: url('./fonts/DigiHamisheBold.otf') format('opentype'),
+       url('./fonts/DigiHamisheBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 * {
   margin: 0;
@@ -38,8 +52,138 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'DigiHamishe', 'DigiHamisheBold', sans-serif;
   direction: rtl;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+#root,
+.App {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Homepage survey / loyalty banner */
+.loyalty-survey-banner {
+  min-height: clamp(460px, 58vh, 640px);
+}
+
+.loyalty-survey-banner__media {
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* Show plane + tail (top of photo), not cropped at the top */
+  background-position: center 28%;
+}
+
+.loyalty-survey-banner__inner {
+  min-height: clamp(460px, 58vh, 640px);
+  padding-top: clamp(3rem, 6vw, 5.5rem);
+  padding-bottom: clamp(3rem, 6vw, 5.5rem);
+}
+
+.loyalty-survey-banner__title {
+  font-size: clamp(1.75rem, 3.6vw, 3rem);
+  line-height: 1.3;
+  margin-bottom: clamp(0.85rem, 2vw, 1.25rem);
+}
+
+.loyalty-survey-banner__desc {
+  font-size: clamp(1rem, 1.85vw, 1.35rem);
+  line-height: 1.85;
+  margin-bottom: clamp(1.35rem, 2.5vw, 2rem);
+  max-width: 36em;
+}
+
+.loyalty-survey-banner__btn {
+  font-size: clamp(0.95rem, 1.4vw, 1.125rem);
+  padding: clamp(0.85rem, 1.4vw, 1.05rem) clamp(1.5rem, 2.8vw, 2.25rem);
+}
+
+@media (min-width: 1024px) {
+  .loyalty-banner-copy {
+    max-width: min(42rem, 56%);
+    margin-left: auto;
+    margin-right: 0;
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .loyalty-survey-banner,
+  .loyalty-survey-banner__inner {
+    min-height: clamp(420px, 55vh, 560px);
+  }
+
+  .loyalty-survey-banner__media {
+    background-position: center 22%;
+  }
+
+  .loyalty-banner-copy {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-inline: 0.35rem !important;
+  }
+
+  .loyalty-survey-banner__desc {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 639px) {
+  .loyalty-survey-banner,
+  .loyalty-survey-banner__inner {
+    min-height: clamp(380px, 62vh, 480px);
+  }
+
+  .loyalty-survey-banner__media {
+    background-position: 62% 18%;
+  }
+
+  .loyalty-survey-banner__title {
+    font-size: clamp(1.45rem, 6.5vw, 1.85rem);
+  }
+
+  .loyalty-survey-banner__desc {
+    font-size: clamp(0.95rem, 3.8vw, 1.05rem);
+    line-height: 1.75;
+  }
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent fixed-width UI from escaping viewport on phones */
+@media (max-width: 767px) {
+  .mobile-stack {
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+  }
+
+  .mobile-full {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex-basis: 100% !important;
+  }
+}
+
+body.english-font {
+  font-family: 'Inter', sans-serif;
+}
+
+body.arabic-font {
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-feature-settings: 'kern' 1;
 }
 
 /* Language-specific styles */
@@ -75,7 +219,7 @@ body[dir="rtl"] {
 
 /* Arabic font */
 .arabic-font {
-  font-family: 'Noto Sans Arabic', 'Amiri', sans-serif;
+  font-family: 'Noto Sans Arabic', sans-serif;
   font-feature-settings: 'kern' 1;
 }
 
@@ -88,13 +232,14 @@ body[dir="rtl"] {
   font-family: 'IRANSans', sans-serif;
 }
 
-/* Persian Font Classes */
-.persian-font-vazir {
-  font-family: 'Vazirmatn', sans-serif;
+/* Persian Font Classes — unified brand font (DigiHamishe) */
+.persian-font-vazir,
+.persian-font-digi {
+  font-family: 'DigiHamishe', 'DigiHamisheBold', sans-serif;
 }
 
 .persian-font-estedad {
-  font-family: 'Estedad', sans-serif;
+  font-family: 'DigiHamishe', 'DigiHamisheBold', sans-serif;
 }
 
 /* 3D Text Effects */
@@ -212,17 +357,15 @@ body[dir="rtl"] {
   animation: airplane 8s ease-in-out infinite;
 }
 
-/* Force DigiHamisheBold font for select and options */
+/* Force DigiHamishe font for select and options */
 select.persian-select,
 select.persian-select * {
-  font-family: 'DigiHamisheBold', Arial, sans-serif !important;
-  font-weight: bold !important;
+  font-family: 'DigiHamishe', 'DigiHamisheBold', sans-serif !important;
 }
 
 select.persian-select option,
 select option {
-  font-family: 'DigiHamisheBold', Arial, sans-serif !important;
-  font-weight: bold !important;
+  font-family: 'DigiHamishe', 'DigiHamisheBold', sans-serif !important;
   direction: rtl !important;
   padding: 8px 12px !important;
 }
@@ -230,12 +373,11 @@ select option {
 /* Additional specificity for all option elements */
 option,
 select > option {
-  font-family: 'DigiHamisheBold', Arial, sans-serif !important;
-  font-weight: bold !important;
+  font-family: 'DigiHamishe', 'DigiHamisheBold', sans-serif !important;
 }
 
 /* Ensure font is loaded and applied to dropdowns */
-select[style*="DigiHamisheBold"] option {
+select[style*="DigiHamishe"] option {
   font-family: inherit !important;
 }
 
@@ -250,4 +392,83 @@ select[style*="DigiHamisheBold"] option {
 /* Ensure dropdown appears above other elements */
 div[class*="z-[9999]"] {
   z-index: 9999 !important;
+}
+
+/* Nasim magazine article body (CKEditor HTML) */
+.nasim-article-body {
+  color: #1e293b;
+  font-size: 1.05rem;
+  line-height: 2;
+  text-align: justify;
+}
+.nasim-article-body h1,
+.nasim-article-body h2,
+.nasim-article-body h3,
+.nasim-article-body h4 {
+  color: #0b1f4d;
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.85rem;
+  line-height: 1.35;
+  scroll-margin-top: 6rem;
+}
+.nasim-article-body h1 { font-size: 1.75rem; }
+.nasim-article-body h2 { font-size: 1.45rem; }
+.nasim-article-body h3 { font-size: 1.25rem; }
+.nasim-article-body h4 { font-size: 1.1rem; }
+.nasim-article-body p {
+  margin-bottom: 1.1rem;
+}
+.nasim-article-body a {
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.nasim-article-body ul,
+.nasim-article-body ol {
+  margin: 0.75rem 0 1.25rem;
+  padding-inline-start: 1.5rem;
+}
+.nasim-article-body li {
+  margin-bottom: 0.4rem;
+}
+.nasim-article-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.25rem 0;
+}
+.nasim-article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.95rem;
+}
+.nasim-article-body th,
+.nasim-article-body td {
+  border: 1px solid #cbd5e1;
+  padding: 0.65rem 0.85rem;
+}
+.nasim-article-body th {
+  background: #eff6ff;
+  color: #0b1f4d;
+  font-weight: 700;
+}
+.nasim-article-body blockquote {
+  border-inline-start: 4px solid #1e3a8a;
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0;
+  background: #f8fafc;
+  color: #334155;
+}
+.nasim-article-body .nasim-key-points {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.nasim-article-body .nasim-highlight {
+  background: #dbeafe;
+  padding: 0 4px;
 }

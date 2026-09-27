@@ -537,13 +537,18 @@ class GalleryImage(models.Model):
 SECTION_TYPE_CHOICES = [
     ('SPECIAL_SERVICE', _('خدمات ویژه')),
     ('EXPERIENCE', _('پرواز با هواپیمایی نسیم')),
+    ('HERO', _('متن هیرو (بالای صفحه)')),
+    ('QUOTE', _('نقل‌قول زیر هیرو')),
+    ('MEMBERSHIP', _('بنر عضویت')),
+    ('SURVEY', _('بنر نظرسنجی / تصویر بزرگ')),
+    ('FAQ', _('سوالات متداول')),
+    ('POPULAR_ROUTES', _('مسیرهای پرطرفدار')),
 ]
 
 
 class HomePageSectionItem(models.Model):
     """
-    Model for homepage section items - Special Services and Experience sections.
-    Admin can edit: image, title (fa/ar/en), link_url.
+    Homepage section items (images + titles + optional body text + link).
     Both main admin and limited admin can manage these.
     """
     uuid = models.UUIDField(
@@ -559,7 +564,9 @@ class HomePageSectionItem(models.Model):
         max_length=20,
         choices=SECTION_TYPE_CHOICES,
         db_index=True,
-        help_text=_('SPECIAL_SERVICE: خدمات ویژه | EXPERIENCE: پرواز با هواپیمایی نسیم'),
+        help_text=_(
+            'SPECIAL_SERVICE / EXPERIENCE / SURVEY (تصویر بنر) / FAQ / POPULAR_ROUTES'
+        ),
     )
     
     title_fa = models.CharField(
@@ -576,6 +583,20 @@ class HomePageSectionItem(models.Model):
     title_en = models.CharField(
         _('عنوان انگلیسی'),
         max_length=200,
+        blank=True,
+    )
+
+    description_fa = models.TextField(
+        _('متن / توضیح فارسی'),
+        blank=True,
+        help_text=_('متن بدنه، قیمت کارت مسیر، یا محتوای مودال FAQ'),
+    )
+    description_ar = models.TextField(
+        _('متن / توضیح عربی'),
+        blank=True,
+    )
+    description_en = models.TextField(
+        _('متن / توضیح انگلیسی'),
         blank=True,
     )
     
@@ -637,8 +658,10 @@ class HomePageSectionItem(models.Model):
 
 class HomePageSectionConfig(models.Model):
     """
-    Section-level config: titles for Special Services and Experience sections.
-    Admin can edit section titles (multilingual).
+    Section-level titles/copy for homepage blocks (multilingual).
+    HERO: title1=headline, title2=subtitle
+    SURVEY/MEMBERSHIP: title1=heading, title2=body, title3=button label
+    FAQ/QUOTE/POPULAR_ROUTES/SPECIAL_SERVICE/EXPERIENCE: section headings
     """
     uuid = models.UUIDField(
         _('شناسه یکتا'),
@@ -656,13 +679,12 @@ class HomePageSectionConfig(models.Model):
         db_index=True,
     )
     
-    # Special Services: 1 title. Experience: 3 title lines
     title1_fa = models.CharField(_('عنوان خط ۱ (فارسی)'), max_length=300, blank=True)
     title1_ar = models.CharField(_('عنوان خط ۱ (عربی)'), max_length=300, blank=True)
     title1_en = models.CharField(_('عنوان خط ۱ (انگلیسی)'), max_length=300, blank=True)
-    title2_fa = models.CharField(_('عنوان خط ۲ (فارسی)'), max_length=300, blank=True)
-    title2_ar = models.CharField(_('عنوان خط ۲ (عربی)'), max_length=300, blank=True)
-    title2_en = models.CharField(_('عنوان خط ۲ (انگلیسی)'), max_length=300, blank=True)
+    title2_fa = models.CharField(_('عنوان خط ۲ (فارسی)'), max_length=500, blank=True)
+    title2_ar = models.CharField(_('عنوان خط ۲ (عربی)'), max_length=500, blank=True)
+    title2_en = models.CharField(_('عنوان خط ۲ (انگلیسی)'), max_length=500, blank=True)
     title3_fa = models.CharField(_('عنوان خط ۳ (فارسی)'), max_length=300, blank=True)
     title3_ar = models.CharField(_('عنوان خط ۳ (عربی)'), max_length=300, blank=True)
     title3_en = models.CharField(_('عنوان خط ۳ (انگلیسی)'), max_length=300, blank=True)

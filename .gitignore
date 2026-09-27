@@ -1,0 +1,79 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtualenvs
+venv/
+.venv/
+env/
+ENV/
+
+# Secrets & local env (NEVER commit)
+.env
+.env.*
+!.env.example
+!.env*.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+**/credentials*.json
+secrets/
+.secret
+*_secret*
+!**/test_*credentials*.py
+
+# Node
+frontend/node_modules/
+node_modules/
+npm-debug.log*
+yarn-error.log*
+frontend/build/
+# Keep ability to commit build only if needed; Railway rebuilds — ignore by default
+# (uncomment next line if you do not want local build in git)
+# frontend/build/
+
+# Django artifacts
+staticfiles/
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Media uploads (user content)
+media/**
+!media/.gitkeep
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tooling / deploy noise
+.railway/
+.nixpacks/
+dump.rdb
+celerybeat-schedule
+celerybeat-schedule.*
+*.pid
+
+# Local one-off audit / scan scripts (never ship)
+_scan_*.py
+_classstatus_audit.json
+_nira_*.json
+_nira_*.py

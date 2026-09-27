@@ -232,7 +232,7 @@ class GalleryImageAdmin(admin.ModelAdmin):
 @admin.register(HomePageSectionItem)
 class HomePageSectionItemAdmin(admin.ModelAdmin):
     """
-    Admin for homepage section items - Special Services and Experience.
+    Admin for homepage section items (services, experience, survey image, FAQ, routes).
     Both main admin and limited admin can manage.
     """
     list_display = [
@@ -240,13 +240,24 @@ class HomePageSectionItemAdmin(admin.ModelAdmin):
         'created_by', 'created_at'
     ]
     list_filter = ['section_type', 'is_active', 'created_at']
-    search_fields = ['title_fa', 'title_ar', 'title_en', 'link_url']
+    search_fields = ['title_fa', 'title_ar', 'title_en', 'description_fa', 'link_url']
     list_editable = ['order', 'is_active']
     readonly_fields = ['uuid', 'created_at', 'updated_at', 'item_image_display']
     
     fieldsets = (
         ('اطلاعات اصلی', {
-            'fields': ('section_type', 'title_fa', 'title_ar', 'title_en', 'image', 'item_image_display', 'link_url')
+            'fields': (
+                'section_type',
+                'title_fa', 'title_ar', 'title_en',
+                'description_fa', 'description_ar', 'description_en',
+                'image', 'item_image_display', 'link_url',
+            ),
+            'description': (
+                'SPECIAL_SERVICE / EXPERIENCE: تصویر + عنوان + لینک. '
+                'SURVEY: یک آیتم با تصویر پس‌زمینه بنر و لینک دکمه. '
+                'FAQ: عنوان زیر دایره + متن مودال در فیلد توضیح. '
+                'POPULAR_ROUTES: عنوان مسیر، توضیح (قیمت/تاریخ)، تصویر کارت.'
+            ),
         }),
         ('تنظیمات نمایش', {
             'fields': ('order', 'is_active')
@@ -286,7 +297,7 @@ class HomePageSectionItemAdmin(admin.ModelAdmin):
 @admin.register(HomePageSectionConfig)
 class HomePageSectionConfigAdmin(admin.ModelAdmin):
     """
-    Admin for section titles - both main and limited admin can manage.
+    Admin for section titles/copy - both main and limited admin can manage.
     """
     list_display = ['section_type', 'title1_fa', 'updated_at']
     list_filter = ['section_type']
@@ -295,15 +306,21 @@ class HomePageSectionConfigAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('بخش', {
-            'fields': ('section_type',)
+            'fields': ('section_type',),
+            'description': (
+                'HERO: خط۱ عنوان اصلی، خط۲ زیرعنوان. '
+                'QUOTE: خط۱ متن فارسی/عربی، خط۲ متن انگلیسی کنار آن. '
+                'MEMBERSHIP / SURVEY: خط۱ عنوان، خط۲ توضیح، خط۳ متن دکمه. '
+                'FAQ / POPULAR_ROUTES / SPECIAL_SERVICE / EXPERIENCE: عناوین بخش.'
+            ),
         }),
         ('عنوان خط ۱', {
             'fields': ('title1_fa', 'title1_ar', 'title1_en')
         }),
-        ('عنوان خط ۲ (فقط برای بخش «پرواز با هواپیمایی نسیم»)', {
+        ('عنوان خط ۲', {
             'fields': ('title2_fa', 'title2_ar', 'title2_en')
         }),
-        ('عنوان خط ۳', {
+        ('عنوان خط ۳ (متن دکمه یا خط سوم)', {
             'fields': ('title3_fa', 'title3_ar', 'title3_en')
         }),
         ('اطلاعات', {

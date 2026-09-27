@@ -39,17 +39,18 @@ class BookingAdmin(admin.ModelAdmin):
     Admin configuration for Booking model
     """
     list_display = [
-        'uuid', 'booking_reference', 'user', 'flight',
+        'uuid', 'booking_reference', 'nira_pnr', 'user', 'flight',
         'booking_type', 'cabin_class', 'status',
-        'total_amount', 'booking_ip', 'created_at'
+        'total_amount', 'ticket_issued_at', 'created_at'
     ]
     list_filter = [
         'status', 'booking_type', 'cabin_class',
-        'booking_source', 'booking_ip', 'created_at', 'cancelled_at'
+        'booking_source', 'booking_ip', 'created_at', 'cancelled_at', 'ticket_issued_at'
     ]
     search_fields = [
-        'uuid', 'booking_reference', 'user__email', 'user__first_name',
-        'user__last_name', 'flight__flight_number', 'booking_ip'
+        'uuid', 'booking_reference', 'nira_pnr', 'nira_session_id',
+        'user__email', 'user__first_name', 'user__last_name',
+        'flight__flight_number', 'booking_ip'
     ]
     list_editable = ['status']
     list_per_page = 25
@@ -69,6 +70,12 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': (
                 'base_price', 'extras_price', 'taxes', 'total_amount'
             )
+        }),
+        (_('بلیط نیرا / PNR'), {
+            'fields': (
+                'nira_pnr', 'nira_ticket_numbers', 'nira_session_id',
+                'ticket_issued_at', 'hold_expires_at', 'idempotency_key',
+            ),
         }),
         (_('اطلاعات اضافی'), {
             'fields': ('booking_source', 'special_requests'),
@@ -90,7 +97,8 @@ class BookingAdmin(admin.ModelAdmin):
     
     readonly_fields = [
         'uuid', 'booking_reference', 'created_at', 'updated_at',
-        'cancelled_at'
+        'cancelled_at', 'ticket_issued_at', 'nira_pnr',
+        'nira_ticket_numbers', 'nira_session_id', 'hold_expires_at',
     ]
     
     autocomplete_fields = ['user', 'flight']

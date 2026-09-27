@@ -4,18 +4,33 @@ Constants and choices for bookings app
 
 # Booking Status
 BOOKING_PENDING = 'PENDING'
+BOOKING_HELD = 'HELD'  # soft-hold after Nira revalidation; awaiting payment
 BOOKING_CONFIRMED = 'CONFIRMED'
 BOOKING_CANCELLED = 'CANCELLED'
 BOOKING_COMPLETED = 'COMPLETED'
 BOOKING_REFUNDED = 'REFUNDED'
+BOOKING_EXPIRED = 'EXPIRED'  # hold timed out without payment
 
 BOOKING_STATUS_CHOICES = [
     (BOOKING_PENDING, 'در انتظار'),
+    (BOOKING_HELD, 'رزرو موقت'),
     (BOOKING_CONFIRMED, 'تأیید شده'),
     (BOOKING_CANCELLED, 'لغو شده'),
     (BOOKING_COMPLETED, 'تکمیل شده'),
     (BOOKING_REFUNDED, 'بازپرداخت شده'),
+    (BOOKING_EXPIRED, 'منقضی شده'),
 ]
+
+# Soft-hold window (minutes) — release if payment not completed
+BOOKING_HOLD_MINUTES = 15
+
+# Statuses that consume inventory (local soft-hold + sold)
+BOOKING_INVENTORY_LOCK_STATUSES = (
+    BOOKING_HELD,
+    BOOKING_PENDING,
+    BOOKING_CONFIRMED,
+    BOOKING_COMPLETED,
+)
 
 # Booking Type
 BOOKING_TYPE_ONE_WAY = 'ONE_WAY'

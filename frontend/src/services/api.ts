@@ -2,18 +2,7 @@
  * API Service for connecting frontend to backend
  */
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
-
-// API Base URL
-// In production, use relative URL. In development, use full URL
-const getApiBaseUrl = () => {
-  // Check if we're in production (served from Django)
-  if (window.location.origin.includes('127.0.0.1') || window.location.origin.includes('localhost')) {
-    // Development mode
-    return process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
-  }
-  // Production mode - use relative URL
-  return window.location.origin + '/api';
-};
+import { getApiBaseUrl } from '../utils/apiBase';
 
 const API_BASE_URL = getApiBaseUrl();
 

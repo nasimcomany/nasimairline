@@ -1,484 +1,309 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import SeoHead from '../components/SEO/SeoHead';
+import AirplanePagination from '../components/Magazine/AirplanePagination';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import {
-  NewspaperIcon,
-  CalendarDaysIcon,
-  ClockIcon,
-  UserIcon,
-  TagIcon,
-  ArrowRightIcon,
   MagnifyingGlassIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EyeIcon
+  PaperAirplaneIcon,
+  NewspaperIcon,
+  ClockIcon,
+  EyeIcon,
+  ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
 
+const PAGE_SIZE = 9;
+
 interface Article {
-  id: number;
+  id?: number;
   title: string;
   excerpt: string;
-  content: string;
-  author: {
-    id: number;
-    username: string;
-    first_name?: string;
-    last_name?: string;
-  };
-  category: {
-    id: number;
-    name: string;
-    slug: string;
-  };
-  tags: Array<{
-    id: number;
-    name: string;
-    slug: string;
-  }>;
+  slug: string;
   featured_image?: string;
   published_at: string;
   reading_time: number;
   view_count: number;
-  is_featured: boolean;
+  is_featured?: boolean;
+  category?: { id: number; name: string; slug: string; image?: string };
+}
+
+interface Category {
+  id: number;
+  name: string;
   slug: string;
+  description?: string;
+  image?: string;
+  article_count?: number;
 }
 
 const MagazinePage: React.FC = () => {
-  const { t, fontClass, language } = useLanguage();
-  const navigate = useNavigate();
+  const { fontClass, language } = useLanguage();
   const [articles, setArticles] = useState<Article[]>([]);
-  const [featuredArticles, setFeaturedArticles] = useState<Article[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Array<{ id: number; name: string; slug: string }>>([]);
+  const [searchInput, setSearchInput] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const listRef = useRef<HTMLElement>(null);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   useEffect(() => {
-    fetchArticles();
-    fetchFeaturedArticles();
-    fetchCategories();
-  }, [currentPage, selectedCategory, searchQuery]);
+    api.get('/blog/categories/').then((catRes) => {
+      setCategories(catRes.data.results || catRes.data || []);
+    }).catch(console.error);
+  }, []);
 
-  const fetchArticles = async () => {
-    try {
-      setLoading(true);
-      const params: any = {
-        page: currentPage,
-        page_size: 12,
-      };
-      
-      if (selectedCategory) {
-        params.category = selectedCategory;
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const params: Record<string, string | number> = {
+          page,
+          page_size: PAGE_SIZE,
+          ordering: '-published_at',
+        };
+        if (searchQuery.trim()) {
+          params.search = searchQuery.trim();
+        }
+        const artRes = await api.get('/blog/articles/', { params });
+        setArticles(artRes.data.results || artRes.data || []);
+        setTotalCount(
+          typeof artRes.data.count === 'number'
+            ? artRes.data.count
+            : (artRes.data.results || artRes.data || []).length
+        );
+      } catch (e) {
+        console.error(e);
+        setArticles([]);
+        setTotalCount(0);
+      } finally {
+        setLoading(false);
       }
-      
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
+    };
+    load();
+  }, [page, searchQuery]);
 
-      const response = await api.get('/blog/articles/', { params });
-      
-      if (response.data.results) {
-        setArticles(response.data.results);
-        setTotalPages(Math.ceil(response.data.count / 12));
-      } else {
-        setArticles(response.data);
-      }
-      setError(null);
-    } catch (err: any) {
-      console.error('Error fetching articles:', err);
-      setError(err.response?.data?.detail || 'خطا در دریافت مقالات');
-    } finally {
-      setLoading(false);
-    }
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    setSearchQuery(searchInput);
   };
 
-  const fetchFeaturedArticles = async () => {
-    try {
-      const response = await api.get('/blog/articles/featured/');
-      if (response.data.results) {
-        setFeaturedArticles(response.data.results.slice(0, 3));
-      } else {
-        setFeaturedArticles(response.data.slice(0, 3));
-      }
-    } catch (err) {
-      console.error('Error fetching featured articles:', err);
-    }
+  const handlePageChange = (next: number) => {
+    setPage(next);
+    listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/blog/categories/');
-      if (response.data.results) {
-        setCategories(response.data.results);
-      } else {
-        setCategories(response.data);
-      }
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    if (language === 'fa') {
-      return new Intl.DateTimeFormat('fa-IR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
-    } else if (language === 'ar') {
-      return new Intl.DateTimeFormat('ar-SA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
-    } else {
-      return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
-    }
-  };
-
-  const getDefaultImage = (index: number) => {
-    const defaultImages = [
-      '/images/airport-plane-photo_991869-62.jpg',
-      '/images/airplane-clouds-night_864588-19786.jpg',
-      '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
-      '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg',
-      '/images/360_F_600352190_78zb8hHbSeQdHtfGQliVRtHXEEXcvtHf.jpg',
-      '/images/1697200583302.jpg'
-    ];
-    return defaultImages[index % defaultImages.length];
-  };
+  const dir = language === 'en' ? 'ltr' : 'rtl';
+  const font =
+    language === 'fa'
+      ? 'DigiHamishe, DigiHamisheBold, sans-serif'
+      : language === 'ar'
+      ? "'Noto Sans Arabic', sans-serif"
+      : 'Inter, sans-serif';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-[#eef3f9]" style={{ direction: dir }}>
+      <SeoHead
+        title={language === 'fa' ? 'مجله هواپیمایی نسیم' : 'Nasim Air Magazine'}
+        description={
+          language === 'fa'
+            ? 'مقالات سفر، مقصدها و راهنمای پرواز با هواپیمایی نسیم'
+            : 'Travel stories, destinations and flight guides from Nasim Air'
+        }
+        canonical={typeof window !== 'undefined' ? `${window.location.origin}/magazine` : undefined}
+      />
       <EmiratesHeader />
-      
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <NewspaperIcon className="w-16 h-16 sm:w-20 sm:h-20 text-blue-300" />
-            </div>
-            <h1
-              className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 ${fontClass}`}
-              style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                direction: language === 'en' ? 'ltr' : 'rtl'
-              }}
-            >
-              {language === 'fa' ? 'مجله هواپیمایی نسیم' : language === 'ar' ? 'مجلة نسيم إير' : 'Nasim Air Magazine'}
-            </h1>
-            <p
-              className={`text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto ${fontClass}`}
-              style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                direction: language === 'en' ? 'ltr' : 'rtl'
-              }}
-            >
-              {language === 'fa' 
-                ? 'مقالات، اخبار و داستان‌های سفر از سراسر جهان' 
-                : language === 'ar' 
-                ? 'مقالات وأخبار وقصص السفر من جميع أنحاء العالم' 
-                : 'Articles, news and travel stories from around the world'}
-            </p>
+
+      <section
+        className="relative overflow-hidden text-white"
+        style={{
+          background:
+            'linear-gradient(135deg, #071530 0%, #0b1f4d 40%, #1e3a8a 75%, #2563eb 100%)',
+          paddingTop: 'clamp(2.5rem, 6vw, 4.5rem)',
+          paddingBottom: 'clamp(2.25rem, 5vw, 3.75rem)',
+        }}
+      >
+        <div
+          className="absolute inset-0 opacity-30 pointer-events-none"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 15% 25%, rgba(147,197,253,0.55) 0%, transparent 42%), radial-gradient(circle at 85% 70%, rgba(96,165,250,0.35) 0%, transparent 40%)',
+          }}
+        />
+        <div className="relative max-w-5xl mx-auto px-4 text-center">
+          <p className={`text-sky-200/90 text-sm sm:text-base mb-2 ${fontClass}`} style={{ fontFamily: font }}>
+            {language === 'fa' ? 'مجله هواپیمایی نسیم' : 'Nasim Air Magazine'}
+          </p>
+          <h1
+            className={`text-3xl sm:text-5xl font-bold mb-6 ${fontClass}`}
+            style={{ fontFamily: font, lineHeight: 1.25 }}
+          >
+            {language === 'fa' ? 'آسمان، مقصد و داستان سفر' : 'Sky, destinations & travel stories'}
+          </h1>
+
+          <form onSubmit={handleSearchSubmit} className="max-w-xl mx-auto relative mb-10">
+            <MagnifyingGlassIcon className="w-5 h-5 text-slate-400 absolute top-1/2 -translate-y-1/2 right-4" />
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder={language === 'fa' ? 'جستجو در مجله...' : 'Search magazine...'}
+              className={`w-full rounded-full bg-white text-slate-800 py-3.5 pr-12 pl-5 shadow-xl outline-none focus:ring-2 focus:ring-sky-300 ${fontClass}`}
+              style={{ fontFamily: font }}
+            />
+          </form>
+
+          <div className="flex flex-wrap justify-center gap-5 sm:gap-8">
+            <button type="button" className="flex flex-col items-center gap-2">
+              <span className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center bg-white/10 border-2 border-amber-300 ring-2 ring-amber-200/40 backdrop-blur-sm">
+                <NewspaperIcon className="w-7 h-7 text-white" />
+              </span>
+              <span className={`text-xs sm:text-sm text-white ${fontClass}`} style={{ fontFamily: font }}>
+                {language === 'fa' ? 'همه نوشته‌ها' : 'All posts'}
+              </span>
+            </button>
+            {categories.map((cat) => (
+              <Link key={cat.id} to={`/magazine/category/${cat.slug}`} className="flex flex-col items-center gap-2 group">
+                <span className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 flex items-center justify-center bg-white/10 border-white/25 group-hover:border-sky-200">
+                  {cat.image ? (
+                    <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <PaperAirplaneIcon className="w-7 h-7 text-white rotate-[-45deg]" />
+                  )}
+                </span>
+                <span className={`text-xs sm:text-sm text-white ${fontClass}`} style={{ fontFamily: font }}>
+                  {cat.name}
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Search and Filter Section */}
-      <section className="py-8 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md w-full">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" style={{ [language === 'en' ? 'left' : 'right']: '0.75rem' }} />
-              <input
-                type="text"
-                placeholder={language === 'fa' ? 'جستجوی مقالات...' : language === 'ar' ? 'البحث عن المقالات...' : 'Search articles...'}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${fontClass}`}
-                style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                  direction: language === 'en' ? 'ltr' : 'rtl',
-                  paddingLeft: language === 'en' ? '2.5rem' : '1rem',
-                  paddingRight: language === 'en' ? '1rem' : '2.5rem'
-                }}
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setCurrentPage(1);
-                }}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  selectedCategory === null
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } ${fontClass}`}
-                style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}
-              >
-                {language === 'fa' ? 'همه' : language === 'ar' ? 'الكل' : 'All'}
-              </button>
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    setSelectedCategory(category.id.toString());
-                    setCurrentPage(1);
-                  }}
-                  className={`px-4 py-2 rounded-lg transition-all ${
-                    selectedCategory === category.id.toString()
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  } ${fontClass}`}
-                  style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                  }}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Articles */}
-      {featuredArticles.length > 0 && (
-        <section className="py-12 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2
-              className={`text-2xl sm:text-3xl font-bold mb-8 text-gray-900 ${fontClass}`}
-              style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                direction: language === 'en' ? 'ltr' : 'rtl'
-              }}
-            >
-              {language === 'fa' ? 'مقالات ویژه' : language === 'ar' ? 'مقالات مميزة' : 'Featured Articles'}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {featuredArticles.map((article, index) => (
+      <section ref={listRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        {loading ? (
+          <p className={`text-center text-slate-500 ${fontClass}`} style={{ fontFamily: font }}>
+            {language === 'fa' ? 'در حال بارگذاری...' : 'Loading...'}
+          </p>
+        ) : articles.length === 0 ? (
+          <p className={`text-center text-slate-500 ${fontClass}`} style={{ fontFamily: font }}>
+            {language === 'fa' ? 'مقاله‌ای پیدا نشد.' : 'No articles found.'}
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+              {articles.map((article) => (
                 <Link
-                  key={article.id}
-                  to={`/magazine/${article.slug || article.id}`}
-                  className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  key={article.slug}
+                  to={`/magazine/${article.slug}`}
+                  className="group relative overflow-hidden rounded-3xl bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)] hover:shadow-[0_24px_60px_rgba(15,23,42,0.18)] transition-all duration-300 hover:-translate-y-1.5"
                 >
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={article.featured_image || getDefaultImage(index)}
-                      alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = getDefaultImage(index);
-                      }}
-                    />
-                    <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                      {language === 'fa' ? 'ویژه' : language === 'ar' ? 'مميز' : 'Featured'}
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                      <TagIcon className="w-4 h-4" />
-                      <span>{article.category.name}</span>
-                    </div>
-                    <h3
-                      className={`text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2 ${fontClass}`}
-                      style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                        direction: language === 'en' ? 'ltr' : 'rtl'
-                      }}
-                    >
-                      {article.title}
-                    </h3>
-                    <p
-                      className={`text-gray-600 mb-4 line-clamp-3 ${fontClass}`}
-                      style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                        direction: language === 'en' ? 'ltr' : 'rtl'
-                      }}
-                    >
-                      {article.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <CalendarDaysIcon className="w-4 h-4" />
-                        <span>{formatDate(article.published_at)}</span>
+                  <div className="relative aspect-[4/5] overflow-hidden">
+                    {article.featured_image ? (
+                      <img
+                        src={article.featured_image}
+                        alt={article.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#0b1f4d] to-[#1d4ed8] flex items-center justify-center">
+                        <PaperAirplaneIcon className="w-16 h-16 text-white/50 rotate-[-40deg]" />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <ClockIcon className="w-4 h-4" />
-                        <span>{article.reading_time} {language === 'fa' ? 'دقیقه' : language === 'ar' ? 'دقيقة' : 'min'}</span>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#071530]/95 via-[#0b1f4d]/45 to-transparent" />
+
+                    <div className="absolute top-4 right-4">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium bg-white/95 text-[#0b1f4d] shadow ${fontClass}`}
+                        style={{ fontFamily: font }}
+                      >
+                        {article.category?.name || (language === 'fa' ? 'مجله نسیم' : 'Nasim Magazine')}
+                      </span>
+                    </div>
+
+                    <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 text-white">
+                      <h2
+                        className={`text-xl sm:text-2xl font-bold leading-snug mb-3 line-clamp-3 ${fontClass}`}
+                        style={{ fontFamily: font }}
+                      >
+                        {article.title}
+                      </h2>
+                      {article.excerpt ? (
+                        <p className={`text-sm text-white/80 line-clamp-2 mb-4 ${fontClass}`} style={{ fontFamily: font }}>
+                          {article.excerpt}
+                        </p>
+                      ) : null}
+                      <div className={`flex items-center justify-between text-xs text-white/75 ${fontClass}`} style={{ fontFamily: font }}>
+                        <span className="inline-flex items-center gap-3">
+                          <span className="inline-flex items-center gap-1">
+                            <ClockIcon className="w-3.5 h-3.5" />
+                            {article.reading_time || 1} {language === 'fa' ? 'دقیقه' : 'min'}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <EyeIcon className="w-3.5 h-3.5" />
+                            {article.view_count || 0}
+                          </span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-sky-200 group-hover:text-white transition-colors">
+                          {language === 'fa' ? 'ادامه مطلب' : 'Read'}
+                          <ArrowLeftIcon className="w-3.5 h-3.5" style={{ transform: language === 'en' ? 'scaleX(-1)' : undefined }} />
+                        </span>
                       </div>
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
+
+            <AirplanePagination
+              page={page}
+              totalPages={totalPages}
+              onChange={handlePageChange}
+              language={language}
+              fontFamily={font}
+              alwaysShow
+            />
+          </>
+        )}
+
+        {categories.length > 0 && (
+          <div className="mt-16">
+            <h3 className={`text-xl sm:text-2xl font-bold text-[#0b1f4d] mb-6 ${fontClass}`} style={{ fontFamily: font }}>
+              {language === 'fa' ? 'دسته‌بندی‌های مجله' : 'Magazine categories'}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={`/magazine/category/${cat.slug}`}
+                  className="group relative overflow-hidden rounded-3xl min-h-[180px] shadow-lg"
+                >
+                  {cat.image ? (
+                    <img src={cat.image} alt={cat.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#0b1f4d] to-[#1e40af]" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-l from-[#071530]/90 via-[#0b1f4d]/70 to-[#0b1f4d]/40" />
+                  <div className="relative z-10 p-6 sm:p-8 text-white h-full flex flex-col justify-end">
+                    <h4 className={`text-xl font-bold mb-2 ${fontClass}`} style={{ fontFamily: font }}>
+                      {cat.name}
+                    </h4>
+                    <p className={`text-sm text-white/85 line-clamp-2 ${fontClass}`} style={{ fontFamily: font }}>
+                      {cat.description || (language === 'fa' ? 'مشاهده مقالات این دسته' : 'View articles')}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </section>
-      )}
-
-      {/* All Articles */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              <p
-                className={`mt-4 text-gray-600 ${fontClass}`}
-                style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}
-              >
-                {language === 'fa' ? 'در حال بارگذاری...' : language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
-              </p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-20">
-              <p
-                className={`text-red-600 ${fontClass}`}
-                style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}
-              >
-                {error}
-              </p>
-            </div>
-          ) : articles.length === 0 ? (
-            <div className="text-center py-20">
-              <NewspaperIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p
-                className={`text-gray-600 ${fontClass}`}
-                style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                }}
-              >
-                {language === 'fa' ? 'مقاله‌ای یافت نشد' : language === 'ar' ? 'لم يتم العثور على مقالات' : 'No articles found'}
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {articles.map((article, index) => (
-                  <Link
-                    key={article.id}
-                    to={`/magazine/${article.slug || article.id}`}
-                    className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
-                  >
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={article.featured_image || getDefaultImage(index)}
-                        alt={article.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = getDefaultImage(index);
-                        }}
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                        <TagIcon className="w-4 h-4" />
-                        <span>{article.category.name}</span>
-                      </div>
-                      <h3
-                        className={`text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2 ${fontClass}`}
-                        style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                          direction: language === 'en' ? 'ltr' : 'rtl'
-                        }}
-                      >
-                        {article.title}
-                      </h3>
-                      <p
-                        className={`text-gray-600 mb-4 line-clamp-3 ${fontClass}`}
-                        style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
-                          direction: language === 'en' ? 'ltr' : 'rtl'
-                        }}
-                      >
-                        {article.excerpt}
-                      </p>
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                        <div className="flex items-center gap-2">
-                          <UserIcon className="w-4 h-4" />
-                          <span>
-                            {article.author.first_name && article.author.last_name
-                              ? `${article.author.first_name} ${article.author.last_name}`
-                              : article.author.username}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <EyeIcon className="w-4 h-4" />
-                          <span>{article.view_count}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <div className="flex items-center gap-2">
-                          <CalendarDaysIcon className="w-4 h-4" />
-                          <span>{formatDate(article.published_at)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <ClockIcon className="w-4 h-4" />
-                          <span>{article.reading_time} {language === 'fa' ? 'دقیقه' : language === 'ar' ? 'دقيقة' : 'min'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-12">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                    className="p-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  >
-                    <ChevronLeftIcon className="w-5 h-5" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
-                  </button>
-                  <span
-                    className={`px-4 py-2 ${fontClass}`}
-                    style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                    }}
-                  >
-                    {language === 'fa' ? `صفحه ${currentPage} از ${totalPages}` : language === 'ar' ? `صفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  >
-                    <ChevronRightIcon className="w-5 h-5" style={{ transform: language === 'en' ? 'none' : 'scaleX(-1)' }} />
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        )}
       </section>
     </div>
   );
 };
 
 export default MagazinePage;
-

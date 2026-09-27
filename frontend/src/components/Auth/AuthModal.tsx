@@ -274,7 +274,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-6 rounded-t-2xl">
           <h2 
             className="text-2xl font-bold text-white text-center"
-            style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
           >
             {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
           </h2>
@@ -284,12 +284,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         <div className="p-6">
           {/* Error/Success Messages */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
               {error}
             </div>
           )}
           {success && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
               {success}
             </div>
           )}
@@ -299,7 +299,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
             <form onSubmit={handleLogin} className="space-y-4">
               {/* نام کاربری: کد ملی / پاسپورت / یا ایمیل (برای کسانی که ایمیلشون رو عوض کردن) */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.nationalId')}
                   <span className="block text-xs font-normal text-gray-500 mt-1" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('auth.foreignNationalMessage')}
@@ -322,7 +322,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     }
                   }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr', textAlign: 'right' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'right' }}
                   placeholder={t('auth.nationalIdOrPassportPlaceholder')}
                   maxLength={100}
                   required
@@ -331,7 +331,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.password')}
                 </label>
                 <div className="relative">
@@ -340,7 +340,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     value={loginForm.password}
                     onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     placeholder={t('auth.passwordPlaceholder')}
                     required
                   />
@@ -356,12 +356,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Captcha */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.captcha')}
                 </label>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr' }}>
+                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr' }}>
                       ? = {captcha.num1} {captcha.operator} {captcha.num2}
                     </span>
                   </div>
@@ -369,7 +369,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     type="button"
                     onClick={generateCaptcha}
                     className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                   >
                     {t('auth.captchaChange')}
                   </button>
@@ -379,7 +379,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   value={loginForm.captcha}
                   onChange={(e) => setLoginForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                   placeholder={t('auth.captchaPlaceholder')}
                   required
                 />
@@ -391,7 +391,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   to="/forgot-password"
                   onClick={onClose}
                   className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   {t('auth.forgotPassword')}
                 </Link>
@@ -401,7 +401,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
               <button
                 type="submit"
                 className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition-colors"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
               >
                 {t('auth.loginButton')}
               </button>
@@ -413,7 +413,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
             <form onSubmit={handleRegister} className="space-y-4">
               {/* Nationality */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.nationality')}
                 </label>
                 <CustomSelect
@@ -431,7 +431,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* National ID / Passport Number */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {registerForm.nationality === 'iranian' 
                     ? t('auth.nationalIdRegister') 
                     : t('auth.passportNumber')}
@@ -449,7 +449,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     }
                   }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: registerForm.nationality === 'iranian' ? 'ltr' : 'ltr', textAlign: 'right' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: registerForm.nationality === 'iranian' ? 'ltr' : 'ltr', textAlign: 'right' }}
                   placeholder={
                     registerForm.nationality === 'iranian' 
                       ? t('auth.nationalIdPlaceholder') 
@@ -462,7 +462,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Birth Date */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.birthDate')}
                 </label>
                 <input
@@ -471,14 +471,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, birthDate: e.target.value }))}
                   max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                   required
                 />
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.password')}
                 </label>
                 <div className="relative">
@@ -487,7 +487,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     value={registerForm.password}
                     onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     placeholder={t('auth.passwordPlaceholder')}
                     minLength={8}
                     required
@@ -504,7 +504,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.confirmPassword')}
                 </label>
                 <div className="relative">
@@ -513,7 +513,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     value={registerForm.confirmPassword}
                     onChange={(e) => setRegisterForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                     placeholder={t('auth.confirmPasswordPlaceholder')}
                     required
                   />
@@ -529,12 +529,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
               {/* Captcha */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                   {t('auth.captcha')}
                 </label>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: 'ltr' }}>
+                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr' }}>
                       ? = {captcha.num1} {captcha.operator} {captcha.num2}
                     </span>
                   </div>
@@ -542,7 +542,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     type="button"
                     onClick={generateCaptcha}
                     className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
-                    style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                   >
                     {t('auth.captchaChange')}
                   </button>
@@ -552,7 +552,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   value={registerForm.captcha}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                   placeholder={t('auth.captchaPlaceholder')}
                   required
                 />
@@ -562,7 +562,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
               <button
                 type="submit"
                 className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition-colors"
-                style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
               >
                 {t('auth.registerButton')}
               </button>
@@ -578,7 +578,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 setSuccess('');
               }}
               className="text-blue-900 hover:text-blue-800 font-bold text-sm"
-              style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+              style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
             >
               {mode === 'login' ? t('auth.noAccount') : t('auth.haveAccount')}
             </button>
@@ -610,16 +610,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h2 className="text-xl font-bold text-gray-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <h2 className="text-xl font-bold text-gray-800" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   شرایط برنامه وفاداری هواپیمایی نسیم
                 </h2>
               </div>
               
               <div className="mb-6 max-h-60 overflow-y-auto pr-2">
-                <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <p className="text-sm text-gray-700 leading-relaxed" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   با ثبت‌نام در برنامه وفاداری «هواپیمایی نسیم»، شما موافقت می‌کنید که:
                 </p>
-                <ul className="mt-3 space-y-2 pr-3 text-sm text-gray-800" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <ul className="mt-3 space-y-2 pr-3 text-sm text-gray-800" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   <li className="flex items-start">
                     <span className="text-blue-600 ml-2 mt-1">•</span>
                     <span>اطلاعات پروازهای شما جهت محاسبه و اهدای امتیاز وفاداری توسط شرکت هواپیمایی هواپیمایی نسیم جمع‌آوری گردد.</span>
@@ -637,7 +637,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                     <span>عدم پذیرش این شرایط، امکان عضویت در برنامه وفاداری را منتفی می‌سازد.</span>
                   </li>
                 </ul>
-                <p className="mt-4 text-xs text-gray-500 italic" style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}>
+                <p className="mt-4 text-xs text-gray-500 italic" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   این موارد مطابق با قوانین هواپیمایی جمهوری اسلامی ایران و مقررات بین‌المللی حفظ حریم خصوصی تنظیم شده است.
                 </p>
               </div>
@@ -647,7 +647,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   type="button"
                   onClick={handleCancelTerms}
                   className="flex-1 py-2.5 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200"
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   انصراف
                 </button>
@@ -660,7 +660,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                       ? 'bg-gray-400 cursor-not-allowed' 
                       : 'bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 shadow-lg hover:shadow-xl'
                   }`}
-                  style={{ fontFamily: 'DigiHamisheBold, Arial, sans-serif' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 >
                   {error ? 'در حال پردازش...' : 'موافقم و ادامه می‌دهم'}
                 </button>

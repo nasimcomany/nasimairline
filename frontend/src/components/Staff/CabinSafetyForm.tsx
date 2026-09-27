@@ -84,7 +84,7 @@ interface CabinSafetyFormProps {
 const CabinSafetyForm: React.FC<CabinSafetyFormProps> = ({ onSuccess, onCancel }) => {
   const { fontClass, language, t } = useLanguage();
   const dir = language === 'en' ? 'ltr' : language === 'ar' ? 'rtl' : 'rtl';
-  const fontStyle = { fontFamily: 'DigiHamisheBold, Arial, sans-serif' };
+  const fontStyle = { fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' };
   const getLabel = (opt: { labelKey?: string; labelFa?: string }) => {
     if (opt.labelKey && t(opt.labelKey) !== opt.labelKey) return t(opt.labelKey);
     return (opt as any).labelFa || opt.labelKey || '';

@@ -8,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.utils import timezone
 from django.db import transaction
+from django.conf import settings
 from datetime import timedelta, date
 from decimal import Decimal
 from .models import Booking, Passenger, BookingExtra
@@ -200,34 +201,136 @@ class BookingViewSet(viewsets.ModelViewSet):
     )
     def initiate_payment(self, request):
         """
-        Save booking/payment intent immediately on pay-click.
-        This guarantees records are visible in admin right away.
+        Soft-hold + payment intent.
+
+        Flow (based on Nira APIs available today = Availability only):
+        1) idempotency_key → return existing hold if replay
+        2) live revalidate Availability (no cache) + AllowReservation
+        3) create Booking as HELD with TTL (not CONFIRMED)
+        4) create Payment PENDING
+        5) if Nira payment redirect configured → return that URL; else local gateways
+
+        Real Nira Reserve/PNR is attempted via client.create_reservation();
+        until airline docs exist it returns unsupported and we use soft-hold.
         """
         from .utils import generate_booking_reference
+        from .constants import BOOKING_HELD
+        from .inventory import (
+            build_inventory_key,
+            count_locked_seats,
+            extract_flight_identity,
+            hold_minutes,
+            revalidate_with_nira,
+        )
         from payments.models import Payment
+        from flights.nira_client import NiraClient
 
         flight_data = request.data.get('flight_data')
         passengers_data = request.data.get('passengers', [])
         contact_info = request.data.get('contact_info', {})
         total_amount = request.data.get('total_amount', 0)
         cabin_class = request.data.get('cabin_class', 'ECONOMY')
+        idempotency_key = (request.data.get('idempotency_key') or '').strip() or None
 
         if not isinstance(flight_data, dict):
-            return Response({'error': 'flight_data is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'flight_data is required', 'code': 'missing_flight'}, status=status.HTTP_400_BAD_REQUEST)
         if not isinstance(passengers_data, list) or len(passengers_data) == 0:
-            return Response({'error': 'At least one passenger is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'At least one passenger is required', 'code': 'missing_passengers'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if idempotency_key:
+            existing = Booking.objects.filter(user=request.user, idempotency_key=idempotency_key).first()
+            if existing:
+                payment = Payment.objects.filter(booking=existing).order_by('-created_at').first()
+                return Response({
+                    'success': True,
+                    'replay': True,
+                    'booking': {
+                        'id': existing.id,
+                        'uuid': str(existing.uuid),
+                        'booking_reference': existing.booking_reference,
+                        'status': existing.status,
+                        'hold_expires_at': existing.hold_expires_at.isoformat() if existing.hold_expires_at else None,
+                    },
+                    'payment': {
+                        'id': payment.id if payment else None,
+                        'uuid': str(payment.uuid) if payment else None,
+                        'transaction_id': payment.transaction_id if payment else None,
+                        'status': payment.status if payment else None,
+                    },
+                    'payment_mode': (existing.metadata or {}).get('payment_mode', 'local'),
+                    'payment_url': (existing.metadata or {}).get('payment_url'),
+                }, status=status.HTTP_200_OK)
+
+        adults = sum(1 for p in passengers_data if str(p.get('type', 'adult')).lower() == 'adult')
+        children = sum(1 for p in passengers_data if str(p.get('type', '')).lower() == 'child')
+        infants = sum(1 for p in passengers_data if str(p.get('type', '')).lower() == 'infant')
+        if adults < 1:
+            adults = 1
+
+        ok, details = revalidate_with_nira(flight_data, adults, children, infants)
+        if not ok:
+            return Response({
+                'success': False,
+                'code': details.get('error', 'unavailable'),
+                'error': details.get('message', 'پرواز در دسترس نیست.'),
+            }, status=status.HTTP_409_CONFLICT)
+
+        identity = details['identity']
+        seats_needed = details['seats_needed']
+        inventory_key = build_inventory_key(
+            identity['flight_number'],
+            identity['origin'],
+            identity['destination'],
+            identity['departure_iso'],
+            cabin_class or identity['cabin_class'],
+        )
 
         passenger_type_map = {'adult': 'ADULT', 'child': 'CHILD', 'infant': 'INFANT'}
+        nira_client = NiraClient()
+        nira_reserve = nira_client.create_reservation({
+            'flight': details.get('nira_flight'),
+            'passengers': passengers_data,
+            'contact': contact_info,
+        })
 
         try:
             with transaction.atomic():
                 shadow_flight = self._resolve_or_create_shadow_flight(flight_data, total_amount)
+                # Lock shadow flight row to serialize concurrent holds on same local inventory
+                from flights.models import Flight
+                Flight.objects.select_for_update().filter(pk=shadow_flight.pk).first()
+
+                locked = count_locked_seats(inventory_key)
+                # Soft cap: if Nira Status was numeric we could use it; otherwise block absurd pile-up
+                soft_cap = int(getattr(settings, 'BOOKING_SOFT_HOLD_CAP', 9))
+                if locked + seats_needed > soft_cap:
+                    return Response({
+                        'success': False,
+                        'code': 'local_hold_full',
+                        'error': 'ظرفیت موقت این پرواز در حال حاضر تکمیل است. لطفاً لحظاتی بعد دوباره تلاش کنید.',
+                    }, status=status.HTTP_409_CONFLICT)
+
+                hold_until = timezone.now() + timedelta(minutes=hold_minutes())
+                meta = {
+                    'contact_phone': contact_info.get('phone', ''),
+                    'contact_email': contact_info.get('email', ''),
+                    'flight_data': flight_data,
+                    'created_from': 'booking_details_pay_click',
+                    'inventory_key': inventory_key,
+                    'nira_revalidated': True,
+                    'nira_reserve': {
+                        'supported': nira_reserve.get('supported'),
+                        'code': nira_reserve.get('code'),
+                        'ref': nira_reserve.get('pnr') or nira_reserve.get('reservation_ref'),
+                    },
+                    'payment_mode': 'local',
+                }
 
                 booking = Booking.objects.create(
                     user=request.user,
                     flight=shadow_flight,
                     booking_reference=generate_booking_reference(),
-                    status='CONFIRMED',  # requested: update membership right after pay click
+                    status=BOOKING_HELD,
                     booking_type='ONE_WAY',
                     cabin_class=(cabin_class or 'ECONOMY').upper(),
                     base_price=Decimal(str(total_amount or 0)),
@@ -235,12 +338,9 @@ class BookingViewSet(viewsets.ModelViewSet):
                     taxes=Decimal('0'),
                     total_amount=Decimal(str(total_amount or 0)),
                     booking_source='WEB',
-                    metadata={
-                        'contact_phone': contact_info.get('phone', ''),
-                        'contact_email': contact_info.get('email', ''),
-                        'flight_data': flight_data,
-                        'created_from': 'booking_details_pay_click',
-                    },
+                    hold_expires_at=hold_until,
+                    idempotency_key=idempotency_key,
+                    metadata=meta,
                 )
 
                 for passenger_data in passengers_data:
@@ -272,26 +372,57 @@ class BookingViewSet(viewsets.ModelViewSet):
                     status='PENDING',
                 )
 
+                payment_mode = 'local'
+                payment_url = None
+                # Airline pattern: soft-hold → Nira-hosted payment UI → callback + return
+                callback_url = request.build_absolute_uri('/api/payments/nira/callback/')
+                return_url = request.build_absolute_uri(
+                    f'/payment/verify?ref={booking.booking_reference}&provider=nira'
+                )
+                nira_pay = nira_client.get_payment_redirect(
+                    reservation_ref=booking.booking_reference,
+                    callback_url=callback_url,
+                    return_url=return_url,
+                )
+                if nira_pay.get('success') and nira_pay.get('payment_url'):
+                    payment_mode = 'nira_redirect'
+                    payment_url = nira_pay['payment_url']
+                    payment.gateway = 'NIRA'
+                    payment.save(update_fields=['gateway'])
+                    meta['payment_mode'] = payment_mode
+                    meta['payment_url'] = payment_url
+                    meta['nira_payment_ref'] = booking.booking_reference
+                    meta['nira_callback_url'] = callback_url
+                    meta['nira_return_url'] = return_url
+                    booking.metadata = meta
+                    booking.save(update_fields=['metadata', 'updated_at'])
+
             return Response({
                 'success': True,
                 'booking': {
                     'id': booking.id,
                     'uuid': str(booking.uuid),
                     'booking_reference': booking.booking_reference,
-                    'status': booking.status
+                    'status': booking.status,
+                    'hold_expires_at': hold_until.isoformat(),
                 },
                 'payment': {
                     'id': payment.id,
                     'uuid': str(payment.uuid),
                     'transaction_id': payment.transaction_id,
-                    'status': payment.status
-                }
+                    'status': payment.status,
+                },
+                'payment_mode': payment_mode,
+                'payment_url': payment_url,
+                'nira_reserve_supported': bool(nira_reserve.get('supported')),
+                'message': 'رزرو موقت ایجاد شد. لطفاً قبل از انقضا پرداخت را تکمیل کنید.',
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({
                 'success': False,
-                'error': str(e)
+                'error': str(e),
+                'code': 'hold_failed',
             }, status=status.HTTP_400_BAD_REQUEST)
 
 

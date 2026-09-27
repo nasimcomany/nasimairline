@@ -105,8 +105,8 @@ class Category(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        """Get absolute URL for category"""
-        return reverse('blog:category-detail', kwargs={'slug': self.slug})
+        """Public SPA path for this category"""
+        return f'/magazine/category/{self.slug}/'
 
 
 class Tag(models.Model):
@@ -157,8 +157,8 @@ class Tag(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        """Get absolute URL for tag"""
-        return reverse('blog:tag-detail', kwargs={'slug': self.slug})
+        """Public SPA path for this tag (magazine filter)"""
+        return f'/magazine/?tag={self.slug}'
 
 
 class Article(models.Model):
@@ -189,7 +189,13 @@ class Article(models.Model):
         max_length=500,
         help_text=_('خلاصه مقاله (حداکثر 500 کاراکتر)'),
     )
-    content = RichTextUploadingField(_('محتوای کامل'), help_text=_('محتوای کامل مقاله با ویرایشگر پیشرفته - می‌توانید تصاویر را آپلود کنید'))
+    content = RichTextUploadingField(
+        _('محتوای کامل'),
+        config_name='seo_optimized',
+        help_text=_(
+            'ویرایشگر حرفه‌ای SEO: H1–H6، Justify، لینک داخلی/خارجی، تصویر، جدول، لیست، راست‌چین RTL'
+        ),
+    )
     
     # Heading Structure for SEO
     h1_title = models.CharField(
@@ -451,14 +457,15 @@ class Article(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        """Get absolute URL for article"""
-        return reverse('blog:article-detail', kwargs={'slug': self.slug})
+        """Public SPA path for magazine article"""
+        return f'/magazine/{self.slug}/'
     
     def get_canonical_url(self):
-        """Get canonical URL"""
+        """Get canonical URL (absolute when possible)"""
+        from .url_helpers import absolute_public_url
         if self.canonical_url:
             return self.canonical_url
-        return self.get_absolute_url()
+        return absolute_public_url(self.get_absolute_url())
     
     def get_og_image_url(self):
         """Get Open Graph image URL"""
@@ -970,8 +977,8 @@ class IranCity(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        """Get absolute URL for city"""
-        return reverse('blog:city-detail', kwargs={'slug': self.slug})
+        """Public SPA path for Iran city page"""
+        return f'/iranology/{self.slug}/'
     
     def increment_view(self):
         """Increment view count"""
@@ -1015,7 +1022,11 @@ class IranologyArticle(models.Model):
         max_length=500,
         help_text=_('خلاصه مقاله (حداکثر 500 کاراکتر)'),
     )
-    content = RichTextUploadingField(_('محتوای کامل'), help_text=_('محتوای کامل مقاله با ویرایشگر پیشرفته'))
+    content = RichTextUploadingField(
+        _('محتوای کامل'),
+        config_name='seo_optimized',
+        help_text=_('محتوای کامل مقاله با ویرایشگر حرفه‌ای SEO'),
+    )
     
     # Author
     author = models.ForeignKey(
@@ -1133,8 +1144,8 @@ class IranologyArticle(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        """Get absolute URL for article"""
-        return reverse('blog:iranology-article-detail', kwargs={'city_slug': self.city.slug, 'slug': self.slug})
+        """Public SPA path for Iranology article"""
+        return f'/iranology/{self.city.slug}/{self.slug}/'
     
     def increment_view(self):
         """Increment view count"""

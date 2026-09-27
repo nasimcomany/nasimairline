@@ -15,7 +15,7 @@ from .constants import (
     MESSAGE_TYPE_CUSTOMER,
     TICKET_CATEGORY_SECURITY,  # حراست - فقط شماره تماس
 )
-from .utils import send_chat_notification_whatsapp, send_chat_notification_telegram
+from .utils import send_chat_notification_whatsapp, send_chat_notification_telegram, send_chat_notification_email
 
 
 @receiver(pre_save, sender=Ticket)
@@ -102,12 +102,15 @@ def _send_ticket_email_async(ticket_id, category, reference, title, user_full_na
 {admin_url}
 """
         
+        from nasim.email_recipients import merge_notification_emails
+        recipients = merge_notification_emails(recipient_email)
+
         # ارسال ایمیل
         send_mail(
             subject=subject,
             message=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[recipient_email],
+            recipient_list=recipients,
             fail_silently=False,
         )
     except Exception as e:
@@ -170,25 +173,30 @@ def sync_ticket_with_nira(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ChatMessage)
 def send_whatsapp_notification_on_chat_message(sender, instance, created, **kwargs):
     """
-    Send WhatsApp and Telegram notifications to admin when a new chat message is received from user/guest
-    Uses threading for async notification to improve response time
+    Send WhatsApp, Telegram and Email notifications to admin when a new chat message
+    is received from user/guest. Uses threading for async notification.
     """
     if created and not instance.is_staff:
-        # ارسال واتساپ به صورت async برای بهبود سرعت
         whatsapp_thread = threading.Thread(
             target=send_chat_notification_whatsapp,
             args=(instance,),
             daemon=True
         )
         whatsapp_thread.start()
-        
-        # ارسال تلگرام به صورت async
+
         telegram_thread = threading.Thread(
             target=send_chat_notification_telegram,
             args=(instance,),
             daemon=True
         )
         telegram_thread.start()
+
+        email_thread = threading.Thread(
+            target=send_chat_notification_email,
+            args=(instance,),
+            daemon=True
+        )
+        email_thread.start()
 
 
 def cleanup_expired_chat_messages():

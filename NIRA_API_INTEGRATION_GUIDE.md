@@ -236,6 +236,31 @@ curl "http://localhost:8000/api/flights/nira/routes/destinations/?origin=THR"
 
 ---
 
+## 🚨 محدوده واقعی API نیرا در این پروژه (مهم)
+
+| عملیات | وضعیت |
+|--------|--------|
+| موجودی پرواز (Availability) | ✅ |
+| مسیرها / مبدا و مقصد (RoutesApp) | ✅ |
+| Soft-hold محلی (HELD + TTL) | ✅ |
+| ریدایرکت به صفحه پرداخت نیرا | ✅ وقتی `NIRA_PAYMENT_REDIRECT_URL` ست شود |
+| Callback سرور + Return مرورگر | ✅ `/api/payments/nira/callback/` و `/api/payments/nira/return/` |
+| ذخیره PNR / بلیط در Admin | ✅ فیلدهای `nira_pnr`, `nira_ticket_numbers` |
+| Reserve رسمی نیرا | ⏳ وابسته به `NIRA_RESERVE_URL` + مستند شریک |
+| Lookup بعد از پرداخت | ⏳ وابسته به `NIRA_RESERVATION_LOOKUP_URL` |
+
+**جریان ایرلاین (همان الگوی رایج Nira IBE):**
+1. قبل از پرداخت، موجودی **بدون کش** دوباره چک می‌شود
+2. Booking با وضعیت `HELD` و مهلت (`BOOKING_HOLD_MINUTES`) ساخته می‌شود
+3. کاربر به UI پرداخت نیرا ریدایرکت می‌شود (یا درگاه محلی اگر URL نیرا نباشد)
+4. Callback نیرا → Payment COMPLETED + Booking CONFIRMED + PNR/بلیط
+5. Return مرورگر → صفحه `/payment/verify?provider=nira` وضعیت را نشان می‌دهد
+6. Hold منقضی → `EXPIRED` (Celery beat)
+
+جزئیات env و تست: فایل `NIRA_PARTNER_CHECKLIST.md`
+
+---
+
 ## ❓ سوالات متداول
 
 ### **سوال:** چرا تاریخ شمسی استفاده می‌شه؟

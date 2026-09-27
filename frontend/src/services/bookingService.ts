@@ -9,15 +9,19 @@ export interface InitiatePaymentRequest {
   };
   total_amount: number;
   cabin_class?: string;
+  /** Prevents duplicate holds on double-click */
+  idempotency_key?: string;
 }
 
 export interface InitiatePaymentResponse {
   success: boolean;
+  replay?: boolean;
   booking: {
     id: number;
     uuid: string;
     booking_reference: string;
     status: string;
+    hold_expires_at?: string | null;
   };
   payment: {
     id: number;
@@ -25,11 +29,18 @@ export interface InitiatePaymentResponse {
     transaction_id: string;
     status: string;
   };
+  /** local = our gateways; nira_redirect = airline/Nira payment UI */
+  payment_mode?: 'local' | 'nira_redirect';
+  payment_url?: string | null;
+  nira_reserve_supported?: boolean;
+  message?: string;
+  error?: string;
+  code?: string;
 }
 
 class BookingService {
   /**
-   * Create booking/payment intent immediately on pay click
+   * Soft-hold seats (revalidate Nira Availability) + create payment intent
    */
   async initiatePayment(data: InitiatePaymentRequest): Promise<InitiatePaymentResponse> {
     const response = await api.post('/bookings/bookings/initiate-payment/', data);

@@ -227,7 +227,7 @@ const GalleryPage: React.FC = () => {
             <h1
               className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 ${fontClass}`}
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
@@ -236,7 +236,7 @@ const GalleryPage: React.FC = () => {
             <p
               className={`text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto ${fontClass}`}
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
@@ -267,7 +267,7 @@ const GalleryPage: React.FC = () => {
                 }}
                 className={`w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   direction: language === 'en' ? 'ltr' : 'rtl',
                   paddingLeft: language === 'en' ? '2.5rem' : '1rem',
                   paddingRight: language === 'en' ? '1rem' : '2.5rem'
@@ -288,7 +288,7 @@ const GalleryPage: React.FC = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 } ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {language === 'fa' ? 'همه' : language === 'ar' ? 'الكل' : 'All'}
@@ -306,7 +306,7 @@ const GalleryPage: React.FC = () => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   } ${fontClass}`}
                   style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                   }}
                 >
                   {category.name}
@@ -324,7 +324,7 @@ const GalleryPage: React.FC = () => {
             <h2
               className={`text-2xl sm:text-3xl font-bold mb-8 text-gray-900 ${fontClass}`}
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
@@ -365,7 +365,7 @@ const GalleryPage: React.FC = () => {
                     <h3
                       className={`text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 ${fontClass}`}
                       style={{
-                        fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                         direction: language === 'en' ? 'ltr' : 'rtl'
                       }}
                     >
@@ -375,7 +375,7 @@ const GalleryPage: React.FC = () => {
                       <p
                         className={`text-gray-600 mb-4 line-clamp-2 ${fontClass}`}
                         style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                           direction: language === 'en' ? 'ltr' : 'rtl'
                         }}
                       >
@@ -409,7 +409,7 @@ const GalleryPage: React.FC = () => {
               <p
                 className={`mt-4 text-gray-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {language === 'fa' ? 'در حال بارگذاری...' : language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
@@ -420,7 +420,7 @@ const GalleryPage: React.FC = () => {
               <p
                 className={`text-red-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {error}
@@ -432,7 +432,7 @@ const GalleryPage: React.FC = () => {
               <p
                 className={`text-gray-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {language === 'fa' ? 'تصویری یافت نشد' : language === 'ar' ? 'لم يتم العثور على صور' : 'No images found'}
@@ -472,7 +472,7 @@ const GalleryPage: React.FC = () => {
                       <h3
                         className={`text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 ${fontClass}`}
                         style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                           direction: language === 'en' ? 'ltr' : 'rtl'
                         }}
                       >
@@ -482,7 +482,7 @@ const GalleryPage: React.FC = () => {
                         <p
                           className={`text-gray-600 mb-4 line-clamp-2 ${fontClass}`}
                           style={{
-                            fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                            fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                             direction: language === 'en' ? 'ltr' : 'rtl'
                           }}
                         >
@@ -517,7 +517,7 @@ const GalleryPage: React.FC = () => {
                   <span
                     className={`px-4 py-2 ${fontClass}`}
                     style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                     }}
                   >
                     {language === 'fa' ? `صفحه ${currentPage} از ${totalPages}` : language === 'ar' ? `صفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
@@ -581,7 +581,7 @@ const GalleryPage: React.FC = () => {
               <h2
                 className={`text-2xl font-bold text-gray-900 mb-4 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                   direction: language === 'en' ? 'ltr' : 'rtl'
                 }}
               >
@@ -591,7 +591,7 @@ const GalleryPage: React.FC = () => {
                 <p
                   className={`text-gray-600 mb-6 ${fontClass}`}
                   style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     direction: language === 'en' ? 'ltr' : 'rtl'
                   }}
                 >
@@ -635,7 +635,7 @@ const GalleryPage: React.FC = () => {
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <ArrowDownTrayIcon className="w-5 h-5" />
-                  <span className={fontClass} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                  <span className={fontClass} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                     {language === 'fa' ? 'دانلود' : language === 'ar' ? 'تحميل' : 'Download'}
                   </span>
                 </button>
@@ -644,7 +644,7 @@ const GalleryPage: React.FC = () => {
                   className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   <ShareIcon className="w-5 h-5" />
-                  <span className={fontClass} style={{ fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                  <span className={fontClass} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                     {language === 'fa' ? 'اشتراک‌گذاری' : language === 'ar' ? 'مشاركة' : 'Share'}
                   </span>
                 </button>

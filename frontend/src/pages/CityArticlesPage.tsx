@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import SeoHead from '../components/SEO/SeoHead';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import {
@@ -26,6 +27,9 @@ interface City {
   description?: string;
   featured_image?: string;
   featured_image_url?: string;
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
   article_count: number;
   view_count: number;
 }
@@ -139,7 +143,7 @@ const CityArticlesPage: React.FC = () => {
           <p
             className={`text-red-600 ${fontClass}`}
             style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+              fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
             }}
           >
             {error}
@@ -151,6 +155,14 @@ const CityArticlesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <SeoHead
+        title={city?.meta_title || (city ? `${city.name} | ایران‌شناسی` : 'ایران‌شناسی')}
+        description={city?.meta_description || city?.description || ''}
+        keywords={city?.meta_keywords}
+        canonical={typeof window !== 'undefined' ? window.location.href : undefined}
+        image={city?.featured_image_url}
+        type="website"
+      />
       <EmiratesHeader />
       
       {/* City Header */}
@@ -161,7 +173,7 @@ const CityArticlesPage: React.FC = () => {
               onClick={() => navigate('/iranology')}
               className={`mb-6 flex items-center gap-2 text-green-200 hover:text-white transition-colors ${fontClass}`}
               style={{
-                fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
@@ -187,7 +199,7 @@ const CityArticlesPage: React.FC = () => {
                 <h1
                   className={`text-4xl sm:text-5xl font-bold mb-4 ${fontClass}`}
                   style={{
-                    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                     direction: language === 'en' ? 'ltr' : 'rtl'
                   }}
                 >
@@ -197,7 +209,7 @@ const CityArticlesPage: React.FC = () => {
                   <p
                     className={`text-lg text-green-100 mb-4 ${fontClass}`}
                     style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                      fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                       direction: language === 'en' ? 'ltr' : 'rtl'
                     }}
                   >
@@ -228,7 +240,7 @@ const CityArticlesPage: React.FC = () => {
           <h2
             className={`text-3xl font-bold mb-8 text-gray-900 ${fontClass}`}
             style={{
-              fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+              fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
               direction: language === 'en' ? 'ltr' : 'rtl'
             }}
           >
@@ -241,7 +253,7 @@ const CityArticlesPage: React.FC = () => {
               <p
                 className={`mt-4 text-gray-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {language === 'fa' ? 'در حال بارگذاری...' : language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
@@ -252,7 +264,7 @@ const CityArticlesPage: React.FC = () => {
               <p
                 className={`text-red-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {error}
@@ -264,7 +276,7 @@ const CityArticlesPage: React.FC = () => {
               <p
                 className={`text-gray-600 ${fontClass}`}
                 style={{
-                  fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                 }}
               >
                 {language === 'fa' ? 'مقاله‌ای یافت نشد' : language === 'ar' ? 'لم يتم العثور على مقالات' : 'No articles found'}
@@ -298,7 +310,7 @@ const CityArticlesPage: React.FC = () => {
                       <h3
                         className={`text-xl font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors line-clamp-2 ${fontClass}`}
                         style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                           direction: language === 'en' ? 'ltr' : 'rtl'
                         }}
                       >
@@ -307,7 +319,7 @@ const CityArticlesPage: React.FC = () => {
                       <p
                         className={`text-gray-600 mb-4 line-clamp-3 ${fontClass}`}
                         style={{
-                          fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                           direction: language === 'en' ? 'ltr' : 'rtl'
                         }}
                       >
@@ -351,7 +363,7 @@ const CityArticlesPage: React.FC = () => {
                   <span
                     className={`px-4 py-2 ${fontClass}`}
                     style={{
-                      fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                      fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
                     }}
                   >
                     {language === 'fa' ? `صفحه ${currentPage} از ${totalPages}` : language === 'ar' ? `صفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}

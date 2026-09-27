@@ -17,7 +17,7 @@ const ForgotPasswordPage: React.FC = () => {
   const [success, setSuccess] = useState('');
   const { t, fontClass, language } = useLanguage();
   const fontStyle = {
-    fontFamily: language === 'fa' ? "'Vazirmatn', sans-serif" : language === 'en' ? 'Arial, sans-serif' : "'Noto Sans Arabic', sans-serif",
+    fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
   };
 
   const handleRequestCode = async (e: React.FormEvent) => {
