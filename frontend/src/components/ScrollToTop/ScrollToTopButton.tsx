@@ -37,11 +37,11 @@ const ScrollToTopButton: React.FC = () => {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed right-6 bottom-24 z-40 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg p-3 shadow-lg transition-all duration-300 hover:shadow-xl group border border-gray-300/50"
+      className="fixed z-40 safe-fab-br-up left-auto sm:right-6 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg p-2.5 sm:p-3 shadow-lg transition-all duration-300 hover:shadow-xl group border border-gray-300/50"
       style={{
         backdropFilter: 'blur(10px)',
-        minWidth: '56px',
-        minHeight: '56px'
+        minWidth: '48px',
+        minHeight: '48px'
       }}
       aria-label={t('scrollToTop.title') || 'بازگشت به ابتدای صفحه'}
       title={t('scrollToTop.title') || 'بازگشت به ابتدای صفحه'}

@@ -334,7 +334,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       {/* Chat Button - Fixed Position */}
       <button
         onClick={handleToggleChat}
-        className={`fixed bottom-6 right-6 z-50 bg-blue-900 hover:bg-blue-800 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110 ${
+        className={`fixed z-50 safe-fab-br bg-blue-900 hover:bg-blue-800 text-white rounded-full p-3.5 sm:p-4 shadow-lg transition-all duration-300 hover:scale-110 ${
           isOpen ? 'hidden' : 'block'
         }`}
         aria-label="Open Chat"
@@ -346,7 +346,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       {isOpen && (
         <div
           ref={chatContainerRef}
-          className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] bg-white rounded-lg shadow-2xl flex flex-col border border-gray-200 overflow-hidden"
+          className="fixed z-50 left-3 right-3 sm:left-auto sm:right-6 bottom-[max(0.75rem,env(safe-area-inset-bottom))] sm:bottom-6 w-auto sm:w-96 max-w-[calc(100vw-1.5rem)] h-[min(600px,calc(100dvh-1.5rem))] max-h-[calc(100dvh-1.5rem)] bg-white rounded-lg shadow-2xl flex flex-col border border-gray-200 overflow-hidden"
         >
           {/* Chat Header */}
           <div className="bg-blue-900 text-white p-4 rounded-t-lg flex items-center justify-between">

@@ -180,29 +180,29 @@ const PaymentPage: React.FC = () => {
                   {t('payment.bookingSummary')}
                 </h3>
                 <div className="space-y-2 text-xs sm:text-sm">
-                  <div className="flex justify-between">
-                    <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.flightNumber')}</span>
-                    <span className="font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 min-w-0">
+                    <span className="shrink-0" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.flightNumber')}</span>
+                    <span className="font-bold break-words" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {flight.flightNumber}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.route')}</span>
-                    <span className="font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 min-w-0">
+                    <span className="shrink-0" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.route')}</span>
+                    <span className="font-bold break-words text-left sm:text-right min-w-0" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {getCityName(flight.origin)} → {getCityName(flight.destination)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.passengerCount')}</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 min-w-0">
+                    <span className="shrink-0" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('payment.passengerCount')}</span>
                     <span className="font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {passengers.length} {t('payment.person')}
                     </span>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-blue-300">
-                    <span className="text-base sm:text-lg font-bold" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 pt-2 border-t border-blue-300 min-w-0">
+                    <span className="text-base sm:text-lg font-bold shrink-0" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.payableAmount')}
                     </span>
-                    <span className="text-lg sm:text-xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    <span className="text-lg sm:text-xl font-bold text-blue-900 break-words" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {language === 'en' 
                         ? totalPrice.toLocaleString('en-US')
                         : language === 'ar'

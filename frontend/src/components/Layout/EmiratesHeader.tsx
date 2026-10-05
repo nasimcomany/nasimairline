@@ -1119,23 +1119,44 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             </div>
           </nav>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 text-black hover:text-gray-700"
-            >
-              {isMenuOpen ? (
-                <XMarkIcon className="w-6 h-6" />
-              ) : (
-                <Bars3Icon className="w-6 h-6" />
-              )}
-            </button>
+            {/* Mobile brand + menu */}
+            <div className="lg:hidden flex items-center justify-between w-full gap-2 min-w-0">
+              <Link to="/" className="flex items-center gap-2 min-w-0 shrink">
+                <div className="bg-blue-900 rounded-b-xl px-2.5 py-1.5 shadow-md">
+                  <img src="/images/nasim0.png" alt="Nasim" className="h-8 w-auto max-w-[7rem] object-contain" />
+                </div>
+                <span className={`text-sm font-bold text-black truncate ${fontClass}`}>
+                  {language === 'fa' ? 'نسیم ایر' : language === 'ar' ? 'نسيم إير' : 'Nasim Air'}
+                </span>
+              </Link>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setLanguage(language === 'fa' ? 'en' : language === 'en' ? 'ar' : 'fa')}
+                  className={`p-2 text-xs font-bold text-black uppercase ${fontClass}`}
+                  aria-label="Language"
+                >
+                  {language === 'fa' ? 'FA' : language === 'ar' ? 'AR' : 'EN'}
+                </button>
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="p-2 text-black hover:text-gray-700"
+                  aria-label="Menu"
+                >
+                  {isMenuOpen ? (
+                    <XMarkIcon className="w-6 h-6" />
+                  ) : (
+                    <Bars3Icon className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t border-gray-700 py-4 bg-gray-900">
+          <div className="lg:hidden border-t border-gray-700 py-4 bg-gray-900 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain">
             <div className="px-4">
               <nav className="space-y-2">
                 {menuItems.map((item) => (

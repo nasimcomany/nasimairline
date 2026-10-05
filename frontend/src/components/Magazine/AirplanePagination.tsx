@@ -100,12 +100,12 @@ const AirplanePagination: React.FC<AirplanePaginationProps> = ({
       className="mt-14 mb-6 flex flex-col items-center gap-4"
       aria-label={language === 'fa' ? 'صفحه‌بندی مقالات' : 'Article pagination'}
     >
-      <div className="flex items-center justify-center gap-8 sm:gap-12">
+      <div className="flex items-center justify-center gap-4 sm:gap-12">
         {prevBtn}
         {nextBtn}
       </div>
 
-      <div className="flex items-center justify-center gap-2 sm:gap-2.5 flex-wrap">
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 flex-wrap max-w-full px-2">
         {pages.map((p, idx) =>
           p === '…' ? (
             <span key={`e-${idx}`} className="px-1 text-slate-400 text-sm">
@@ -116,7 +116,7 @@ const AirplanePagination: React.FC<AirplanePaginationProps> = ({
               key={p}
               type="button"
               onClick={() => goToPage(p)}
-              className={`min-w-[2.5rem] sm:min-w-[2.75rem] h-10 sm:h-11 rounded-full text-sm font-semibold transition ${
+              className={`min-w-[2.25rem] sm:min-w-[2.75rem] h-9 sm:h-11 rounded-full text-sm font-semibold transition ${
                 p === page
                   ? 'bg-[#0b1f4d] text-white shadow-md shadow-blue-900/25 ring-2 ring-sky-300/70 ring-offset-2'
                   : 'bg-white text-[#0b1f4d] border border-slate-200 hover:border-[#1e3a8a]/40 hover:bg-blue-50'

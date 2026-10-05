@@ -262,14 +262,18 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
         ` : ''}
         .react-datepicker-popper {
           z-index: 9999 !important;
+          max-width: calc(100vw - 0.75rem) !important;
+        }
+        .react-datepicker {
+          max-width: calc(100vw - 1rem) !important;
         }
       `}</style>
-      <div className="rounded-3xl shadow-2xl overflow-visible">
+      <div className="rounded-3xl shadow-2xl overflow-visible max-w-full">
       {/* Tabs */}
-      <div className="flex border-b border-gray-300/30 overflow-x-auto bg-gray-400/30 backdrop-blur-xl rounded-t-3xl scrollbar-thin">
+      <div className="flex border-b border-gray-300/30 overflow-x-auto overscroll-x-contain bg-gray-400/30 backdrop-blur-xl rounded-t-3xl scrollbar-thin snap-x">
         <button
           onClick={() => handleTabChange('search')}
-          className={`flex items-center gap-1.5 sm:gap-2.5 px-4 sm:px-8 py-3 sm:py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-3 sm:py-5 font-medium transition-colors whitespace-nowrap shrink-0 snap-start ${
             activeTab === 'search'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
@@ -420,7 +424,8 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                 locale={language === 'fa' ? 'fa' : undefined}
                 className="w-full px-2 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white h-12 box-border"
                 wrapperClassName="w-full"
-                popperPlacement="top-start"
+                withPortal={typeof window !== 'undefined' ? window.innerWidth < 768 : false}
+                popperPlacement="bottom-start"
                 renderCustomHeader={(props) => renderCustomHeader(props, language)}
                 renderDayContents={language === 'fa' ? renderDayContents : undefined}
                 customInput={language === 'fa' ? <JalaliDateInput date={departureDate} size="large" /> : undefined}
@@ -442,7 +447,8 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                   locale={language === 'fa' ? 'fa' : undefined}
                   className="w-full px-2 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white h-12 box-border"
                   wrapperClassName="w-full"
-                  popperPlacement="top-start"
+                  withPortal={typeof window !== 'undefined' ? window.innerWidth < 768 : false}
+                  popperPlacement="bottom-start"
                   renderCustomHeader={(props) => renderCustomHeader(props, language)}
                   renderDayContents={language === 'fa' ? renderDayContents : undefined}
                   customInput={language === 'fa' ? <JalaliDateInput date={returnDate} size="large" /> : undefined}
@@ -613,7 +619,8 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                   locale={language === 'fa' ? 'fa' : undefined}
                   className="w-full text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
                   wrapperClassName="w-full h-full"
-                  popperPlacement="top-start"
+                  withPortal={typeof window !== 'undefined' ? window.innerWidth < 768 : false}
+                  popperPlacement="bottom-start"
                   renderCustomHeader={(props) => renderCustomHeader(props, language)}
                   renderDayContents={language === 'fa' ? renderDayContents : undefined}
                   customInput={language === 'fa' ? <JalaliDateInput date={whatsonDate} size="large" /> : undefined}
@@ -664,7 +671,8 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                   locale={language === 'fa' ? 'fa' : undefined}
                   className="w-full text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
                   wrapperClassName="w-full h-full"
-                  popperPlacement="top-start"
+                  withPortal={typeof window !== 'undefined' ? window.innerWidth < 768 : false}
+                  popperPlacement="bottom-start"
                   renderCustomHeader={(props) => renderCustomHeader(props, language)}
                   renderDayContents={language === 'fa' ? renderDayContents : undefined}
                   customInput={language === 'fa' ? <JalaliDateInput date={statusDate} size="large" /> : undefined}

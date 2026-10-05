@@ -30,13 +30,22 @@ def strip_host(value: str) -> str:
 
 def build_allowed_hosts(base: Iterable[str]) -> List[str]:
     hosts = [strip_host(h) for h in base if h and strip_host(h)]
-    for key in ('RAILWAY_PUBLIC_DOMAIN', 'RAILWAY_STATIC_URL', 'PUBLIC_HOST'):
+    for key in ('RAILWAY_PUBLIC_DOMAIN', 'RAILWAY_STATIC_URL', 'PUBLIC_HOST', 'CLOUDFLARE_HOST'):
         val = os.environ.get(key, '').strip()
         if val:
             hosts.append(strip_host(val))
     # Railway default domains
     if os.environ.get('RAILWAY_ENVIRONMENT') or os.environ.get('RAILWAY_PROJECT_ID'):
         hosts.extend(['.up.railway.app', '.railway.app'])
+    # Official Nasim public domains (Cloudflare / production)
+    hosts.extend([
+        'nasimairlines.com',
+        'www.nasimairlines.com',
+        'nasimairlines.ir',
+        'www.nasimairlines.ir',
+        '.nasimairlines.com',
+        '.nasimairlines.ir',
+    ])
     # de-dupe, preserve order
     seen = set()
     out: List[str] = []

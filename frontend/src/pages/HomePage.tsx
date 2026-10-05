@@ -1223,7 +1223,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Services Grid - Dynamic from API with fallback */}
-          <div className="flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6" style={{ justifyContent: 'center' }}>
+          <div className="flex flex-col md:flex-row md:flex-wrap lg:flex-nowrap items-stretch gap-4 sm:gap-6 max-w-full" style={{ justifyContent: 'center' }}>
             {(
               specialServicesItems.length > 0 ? specialServicesItems : [
                 { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/chair.jpeg', link_url: '/flights/map', order: 1 },
@@ -1246,11 +1246,11 @@ const HomePage: React.FC = () => {
               return (
                 <div 
                   key={item.id || idx}
-                  className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full"
+                  className="special-services-card relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full md:w-[calc(50%-0.75rem)] lg:w-auto min-w-0"
                   style={{ 
                     flexBasis: isExpanded ? '32.5%' : '25%',
                     flexGrow: 0,
-                    flexShrink: 0,
+                    flexShrink: 1,
                     minWidth: 0,
                     transition: 'flex-basis 0.3s ease-out'
                   }}
@@ -1258,7 +1258,7 @@ const HomePage: React.FC = () => {
                   onMouseLeave={() => setHoveredService(null)}
                   onClick={() => handleSectionItemClick(linkUrl)}
                 >
-                  <div className="relative w-full" style={{ height: 'clamp(320px, 40vw, 480px)' }}>
+                  <div className="relative w-full" style={{ height: 'clamp(220px, 40vw, 480px)' }}>
                     <img 
                       src={imgSrc}
                       alt={title}
@@ -1514,7 +1514,7 @@ const HomePage: React.FC = () => {
                   transition: isNewCard || isOutgoing ? 'none' : 'all 0.3s ease-in-out'
                 }}
               >
-              <div className="relative h-[420px] overflow-hidden">
+              <div className="relative h-[240px] sm:h-[320px] lg:h-[420px] overflow-hidden">
               <img
                   src={card.image}
                   alt={card.alt}
@@ -2744,36 +2744,36 @@ const HomePage: React.FC = () => {
 
       {/* Seat Selection Modal */}
       {showSeatModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto overscroll-contain">
           <div 
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowSeatModal(false)}
           ></div>
-          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 rounded-3xl p-8 max-w-4xl w-full mx-4 border border-white/20 shadow-2xl">
+          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 rounded-t-3xl sm:rounded-3xl p-4 sm:p-8 max-w-4xl w-full mx-0 sm:mx-4 border border-white/20 shadow-2xl max-h-[min(92dvh,100%)] overflow-y-auto my-auto">
             <button
               onClick={() => setShowSeatModal(false)}
-              className="absolute top-4 left-4 text-white/70 hover:text-white"
+              className="absolute top-3 left-3 sm:top-4 sm:left-4 text-white/70 hover:text-white z-10"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2 ${fontClass}">انتخاب صندلی</h2>
-              <p className="text-blue-200 text-sm ${fontClass}">صندلی‌های دلخواه خود را انتخاب کنید</p>
+            <div className="text-center mb-4 sm:mb-8 pt-2">
+              <h2 className={`text-xl sm:text-2xl font-bold text-white mb-2 ${fontClass}`}>انتخاب صندلی</h2>
+              <p className={`text-blue-200 text-sm ${fontClass}`}>صندلی‌های دلخواه خود را انتخاب کنید</p>
             </div>
-            <div className="bg-gradient-to-b from-gray-100 to-gray-50 rounded-xl p-4">
-              <div className="max-w-lg mx-auto">
-                <div className="flex justify-center gap-2 mb-2">
-                  <div className="w-8 text-center text-xs font-bold text-gray-700">ردیف</div>
-                  <div className="w-8 text-center text-xs font-bold text-gray-700">A</div>
-                  <div className="w-8 text-center text-xs font-bold text-gray-700">B</div>
-                  <div className="w-6 text-center text-xs font-bold text-gray-700">راهرو</div>
-                  <div className="w-8 text-center text-xs font-bold text-gray-700">C</div>
-                  <div className="w-8 text-center text-xs font-bold text-gray-700">D</div>
+            <div className="bg-gradient-to-b from-gray-100 to-gray-50 rounded-xl p-2 sm:p-4 overflow-x-auto">
+              <div className="max-w-lg mx-auto min-w-[260px]">
+                <div className="flex justify-center gap-1.5 sm:gap-2 mb-2">
+                  <div className="w-7 sm:w-8 text-center text-xs font-bold text-gray-700">ردیف</div>
+                  <div className="w-7 sm:w-8 text-center text-xs font-bold text-gray-700">A</div>
+                  <div className="w-7 sm:w-8 text-center text-xs font-bold text-gray-700">B</div>
+                  <div className="w-5 sm:w-6 text-center text-[10px] sm:text-xs font-bold text-gray-700">راهرو</div>
+                  <div className="w-7 sm:w-8 text-center text-xs font-bold text-gray-700">C</div>
+                  <div className="w-7 sm:w-8 text-center text-xs font-bold text-gray-700">D</div>
                 </div>
                 <div className="space-y-1">
                   {[1,2,3,4,5,6,7,8,9,10].map(row => (
-                    <div key={row} className="flex items-center justify-center gap-2">
-                      <div className="w-8 text-center text-xs font-bold text-gray-600">{row}</div>
+                    <div key={row} className="flex items-center justify-center gap-1.5 sm:gap-2">
+                      <div className="w-7 sm:w-8 text-center text-xs font-bold text-gray-600">{row}</div>
                       {['A', 'B'].map(seat => {
                         const seatId = `${seat}${row}`;
                         const status = getSeatStatus(seatId);
@@ -2782,7 +2782,7 @@ const HomePage: React.FC = () => {
                             key={seatId}
                             onClick={() => handleSeatSelection(seatId)}
                             disabled={status === 'reserved'}
-                            className={`w-8 h-8 rounded text-xs font-bold ${
+                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded text-xs font-bold ${
                               status === 'reserved' ? 'bg-red-500 text-white cursor-not-allowed' :
                               status === 'selected' ? 'bg-blue-600 text-white' :
                               'bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white'
@@ -2792,7 +2792,7 @@ const HomePage: React.FC = () => {
                           </button>
                         );
                       })}
-                      <div className="w-6 h-8 bg-amber-200 rounded"></div>
+                      <div className="w-5 sm:w-6 h-7 sm:h-8 bg-amber-200 rounded"></div>
                       {['C', 'D'].map(seat => {
                         const seatId = `${seat}${row}`;
                         const status = getSeatStatus(seatId);
@@ -2801,7 +2801,7 @@ const HomePage: React.FC = () => {
                             key={seatId}
                             onClick={() => handleSeatSelection(seatId)}
                             disabled={status === 'reserved'}
-                            className={`w-8 h-8 rounded text-xs font-bold ${
+                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded text-xs font-bold ${
                               status === 'reserved' ? 'bg-red-500 text-white cursor-not-allowed' :
                               status === 'selected' ? 'bg-blue-600 text-white' :
                               'bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white'
@@ -2816,9 +2816,9 @@ const HomePage: React.FC = () => {
           </div>
         </div>
             </div>
-            <div className="flex gap-4 justify-center mt-6">
-              <button onClick={() => setShowSeatModal(false)} className="bg-slate-600 text-white px-6 py-3 rounded-lg ${fontClass}">لغو</button>
-              <button onClick={() => setShowSeatModal(false)} className="bg-blue-600 text-white px-6 py-3 rounded-lg ${fontClass}">تأیید</button>
+            <div className="sticky bottom-0 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-4 sm:mt-6 pt-3 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent">
+              <button onClick={() => setShowSeatModal(false)} className={`w-full sm:w-auto bg-slate-600 text-white px-6 py-3 rounded-lg ${fontClass}`}>لغو</button>
+              <button onClick={() => setShowSeatModal(false)} className={`w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg ${fontClass}`}>تأیید</button>
             </div>
           </div>
         </div>
@@ -3129,7 +3129,7 @@ const HomePage: React.FC = () => {
             <div className="flex flex-col gap-4 flex-shrink-0 items-center">
               {/* ارتباط با ما در شبکه های اجتماعی - وسط‌چین */}
               <div className={`flex flex-wrap items-center justify-center gap-3 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
-                <span className="text-sm font-medium text-white whitespace-nowrap">
+                <span className="text-sm font-medium text-white text-center sm:whitespace-nowrap">
                   {t('footer.socialTitle')}
                 </span>
                 <div className="flex items-center gap-1.5">
@@ -3151,21 +3151,21 @@ const HomePage: React.FC = () => {
               </div>
 
               {/* لوگوها / نشان‌ها */}
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-              <a href="https://www.iata.org/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
-                <img src="/images/IATA.svg" alt="IATA" className="h-16 sm:h-20 w-auto object-contain" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full max-w-full">
+              <a href="https://www.iata.org/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
+                <img src="/images/IATA.svg" alt="IATA" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
               </a>
-              <a href="https://caa.gov.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
-                <img src="/images/cao.png" alt="CAO" className="h-16 sm:h-20 w-auto object-contain" />
+              <a href="https://caa.gov.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
+                <img src="/images/cao.png" alt="CAO" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
               </a>
-              <a href="/" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
-                <img src="/images/nasim0.png" alt={language === 'fa' ? 'لوگو نسیم' : language === 'ar' ? 'شعار نسيم' : 'Nasim Logo'} className="h-16 sm:h-20 w-auto object-contain" />
+              <a href="/" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
+                <img src="/images/nasim0.png" alt={language === 'fa' ? 'لوگو نسیم' : language === 'ar' ? 'شعار نسيم' : 'Nasim Logo'} className="h-12 sm:h-20 w-auto max-w-full object-contain" />
               </a>
-              <a href="https://www.enamad.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
-                <img src="/images/enamad.png" alt="eNAMAD" className="h-16 sm:h-20 w-auto object-contain" />
+              <a href="https://www.enamad.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
+                <img src="/images/enamad.png" alt="eNAMAD" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
               </a>
-              <a href="https://farasa.cao.ir/sysworkflow/fa/modern/3810212626028ab03488017019616799/6464336316028ab04e3c618028352200.php" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-20 sm:h-24 transition-colors hover:opacity-80">
-                <img src="/images/hmosafer.png" alt={language === 'fa' ? 'حقوق مسافر' : language === 'ar' ? 'حقوق الراكب' : 'Passenger Rights'} className="h-16 sm:h-20 w-auto object-contain" />
+              <a href="https://farasa.cao.ir/sysworkflow/fa/modern/3810212626028ab03488017019616799/6464336316028ab04e3c618028352200.php" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 col-span-2 sm:col-span-1 transition-colors hover:opacity-80">
+                <img src="/images/hmosafer.png" alt={language === 'fa' ? 'حقوق مسافر' : language === 'ar' ? 'حقوق الراكب' : 'Passenger Rights'} className="h-12 sm:h-20 w-auto max-w-full object-contain" />
               </a>
               </div>
             </div>

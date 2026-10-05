@@ -348,13 +348,13 @@ const FlightResultsPage: React.FC = () => {
                       className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-blue-300"
                     >
                       <div className="p-4 sm:p-6">
-                        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-                          <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-900 to-blue-700 rounded-lg flex items-center justify-center">
-                              <PaperAirplaneIcon className="w-8 h-8 text-white" />
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+                          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 shrink-0 bg-gradient-to-br from-blue-900 to-blue-700 rounded-lg flex items-center justify-center">
+                              <PaperAirplaneIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                             </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                            <div className="min-w-0">
+                              <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                                 {flight.airline}
                               </h3>
                               <p className="text-sm text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
@@ -362,8 +362,8 @@ const FlightResultsPage: React.FC = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="text-left" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                            <div className="text-3xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                          <div className="text-right sm:text-left shrink-0" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <div className="text-2xl sm:text-3xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                               {language === 'en'
                                 ? flight.price.toLocaleString('en-US')
                                 : language === 'ar'
@@ -376,63 +376,63 @@ const FlightResultsPage: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
-                          <div className="text-center">
-                            <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                        <div className="grid grid-cols-3 gap-1.5 sm:gap-4 mb-3 sm:mb-4 min-w-0">
+                          <div className="text-center min-w-0 px-0.5">
+                            <div className="text-base sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                               {flight.departureTime}
                             </div>
                             {/* نمایش زمان واقعی اگر تأخیر داشته باشد */}
                             {flight.actualDepartureTime && flight.actualDepartureTime !== flight.departureTime && (
-                              <div className="text-xs text-orange-600 font-bold mt-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                              <div className="text-[10px] sm:text-xs text-orange-600 font-bold mt-1 break-words" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                                 ⏰ واقعی: {flight.actualDepartureTime}
                               </div>
                             )}
                             {/* نمایش تأخیر */}
                             {flight.delayMinutes && flight.delayMinutes > 0 && (
-                              <div className="text-xs text-red-600 font-bold mt-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                              <div className="text-[10px] sm:text-xs text-red-600 font-bold mt-1 break-words" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                                 ⚠️ تأخیر: {flight.delayMinutes} دقیقه
                               </div>
                             )}
                             {/* نمایش گیت پرواز */}
                             {flight.departureGate && (
-                              <div className="text-xs text-blue-600 font-bold mt-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                              <div className="text-[10px] sm:text-xs text-blue-600 font-bold mt-1 break-words" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                                 🚪 گیت: {flight.departureGate}
                               </div>
                             )}
-                            <div className="text-xs sm:text-sm text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <div className="text-[10px] sm:text-sm text-gray-500 break-words leading-snug" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {getCityName(originCity)}
                             </div>
                           </div>
 
-                          <div className="flex flex-col items-center justify-center">
-                            <div className="text-xs sm:text-sm text-gray-500 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                          <div className="flex flex-col items-center justify-center min-w-0 px-0.5">
+                            <div className="text-[10px] sm:text-sm text-gray-500 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                               {flight.duration}
                             </div>
                             <div className="w-full h-0.5 bg-gray-300 relative">
-                              <PaperAirplaneIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-900 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-90" />
+                              <PaperAirplaneIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-blue-900 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-90" />
                             </div>
-                            <div className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <div className="text-[10px] sm:text-xs text-gray-400 mt-1 text-center" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {flight.stops === 0 ? t('flights.noStops') : `${flight.stops} ${t('flights.stopsCount')}`}
                             </div>
                           </div>
 
-                          <div className="text-center">
-                            <div className="text-lg sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                          <div className="text-center min-w-0 px-0.5">
+                            <div className="text-base sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                               {flight.arrivalTime}
                             </div>
                             {/* نمایش زمان واقعی فرود اگر تأخیر داشته باشد */}
                             {flight.actualArrivalTime && flight.actualArrivalTime !== flight.arrivalTime && (
-                              <div className="text-xs text-orange-600 font-bold mt-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                              <div className="text-[10px] sm:text-xs text-orange-600 font-bold mt-1 break-words" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                                 ⏰ واقعی: {flight.actualArrivalTime}
                               </div>
                             )}
                             {/* نمایش گیت فرود */}
                             {flight.arrivalGate && (
-                              <div className="text-xs text-blue-600 font-bold mt-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                              <div className="text-[10px] sm:text-xs text-blue-600 font-bold mt-1 break-words" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                                 🚪 گیت: {flight.arrivalGate}
                               </div>
                             )}
-                            <div className="text-xs sm:text-sm text-gray-500" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                            <div className="text-[10px] sm:text-sm text-gray-500 break-words leading-snug" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {getCityName(destCity)}
                             </div>
                           </div>

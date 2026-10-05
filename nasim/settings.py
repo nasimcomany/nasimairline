@@ -386,10 +386,15 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-# CORS Settings
+# CORS Settings (SPA + API — include production Nasim domains for Cloudflare)
 CORS_ALLOWED_ORIGINS = env_csv(
     'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+    (
+        'http://localhost:3000,http://127.0.0.1:3000,'
+        'http://localhost:8000,http://127.0.0.1:8000,'
+        'https://nasimairlines.com,https://www.nasimairlines.com,'
+        'https://nasimairlines.ir,https://www.nasimairlines.ir'
+    ),
 )
 
 CORS_ALLOW_CREDENTIALS = True
@@ -645,13 +650,15 @@ else:
         }
     }
 
-# Production security (HTTPS behind Railway proxy)
+# Production security (HTTPS behind Railway / Cloudflare proxy)
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', True)
     SECURE_REDIRECT_EXEMPT = [r'^healthz/$', r'^api/health/$']
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = os.environ.get('CSRF_COOKIE_SAMESITE', 'Lax')
+    SESSION_COOKIE_SAMESITE = os.environ.get('SESSION_COOKIE_SAMESITE', 'Lax')
     SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
@@ -660,6 +667,8 @@ if not DEBUG:
     X_FRAME_OPTIONS = 'DENY'
     SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_HTTPONLY = False  # SPA may need to read CSRF token if used
+    # Trust Cloudflare / reverse-proxy forwarded host when enabled
+    USE_X_FORWARDED_HOST = env_bool('USE_X_FORWARDED_HOST', True)
 
 # Logging — visible in Railway deploy logs
 LOGGING = {
