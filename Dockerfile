@@ -1,10 +1,20 @@
 # Build React SPA, then run Django/Gunicorn (Runflare / any Docker host)
 FROM node:20-bookworm AS frontend
 WORKDIR /app/frontend
-COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci --prefer-offline
+
+ENV NODE_OPTIONS=--max-old-space-size=2048 \
+    CI=true \
+    GENERATE_SOURCEMAP=false \
+    npm_config_audit=false \
+    npm_config_fund=false
+
+COPY frontend/package.json frontend/package-lock.json frontend/.npmrc ./
+# npm ci is strict; fall back to npm install if lock/platform mismatch
+RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+
 COPY frontend/ ./
-RUN npm run build
+RUN npm run build \
+    && test -f build/index.html
 
 FROM python:3.12-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -24,7 +34,6 @@ RUN pip install --no-cache-dir --upgrade pip \
 COPY . .
 COPY --from=frontend /app/frontend/build ./frontend/build
 
-# Collect static at image build (dummy secrets; real values come from env at runtime)
 RUN SECRET_KEY=build-only-not-for-runtime \
     DEBUG=False \
     ALLOWED_HOSTS=* \
