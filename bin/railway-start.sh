@@ -5,6 +5,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+echo "==> Ensuring media directories exist"
+mkdir -p "${MEDIA_ROOT:-/data/media}" \
+  "${MEDIA_ROOT:-/data/media}/blog/articles" \
+  "${MEDIA_ROOT:-/data/media}/blog/uploads" \
+  "${MEDIA_ROOT:-/data/media}/homepage_sections" \
+  "${MEDIA_ROOT:-/data/media}/hero_slider" || true
+
 echo "==> Running migrations"
 python manage.py migrate --noinput
 

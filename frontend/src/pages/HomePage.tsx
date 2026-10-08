@@ -1047,11 +1047,11 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-white">
       <EmiratesHeader onWeatherClick={() => setShowWeatherModal(true)} />
 
-      {/* Hero + booking form: form sits on the hero image (desktop & mobile), no giant empty gaps */}
+      {/* Hero + booking form overlaid (fixed heights — safe with desktop-scale viewport) */}
       <section
         id="search-form"
         className="relative z-10 overflow-hidden"
-        style={{ minHeight: 'clamp(520px, 72vh, 780px)' }}
+        style={{ minHeight: 680 }}
       >
         <div
           className="absolute inset-0 overflow-hidden"
@@ -1135,18 +1135,18 @@ const HomePage: React.FC = () => {
 
         <div
           className="relative z-10 flex flex-col justify-between"
-          style={{ minHeight: 'clamp(520px, 72vh, 780px)', pointerEvents: 'none' }}
+          style={{ minHeight: 680, pointerEvents: 'none' }}
         >
           <div
-            className="flex items-start justify-center pt-8 sm:pt-12 px-4"
-            style={{ pointerEvents: 'auto' }}
+            className="flex items-start justify-center px-4"
+            style={{ paddingTop: 48, pointerEvents: 'auto' }}
           >
             <div className="text-center max-w-3xl">
               <h1
-                className="text-white mb-2 sm:mb-3"
+                className="text-white mb-3"
                 style={{
                   fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
-                  fontSize: 'clamp(1.55rem, 4.2vw, 3rem)',
+                  fontSize: '2.5rem',
                   fontWeight: 'bold',
                   lineHeight: '1.25',
                   textShadow: '2px 2px 8px rgba(0,0,0,0.5)',
@@ -1159,7 +1159,7 @@ const HomePage: React.FC = () => {
                 className="text-white"
                 style={{
                   fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
-                  fontSize: 'clamp(0.9rem, 2vw, 1.2rem)',
+                  fontSize: '1.15rem',
                   fontWeight: 500,
                   lineHeight: 1.5,
                   textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
@@ -1172,7 +1172,7 @@ const HomePage: React.FC = () => {
           </div>
 
           <div
-            className="max-w-7xl mx-auto w-full px-3 sm:px-6 md:px-8 pb-5 sm:pb-8"
+            className="max-w-7xl mx-auto w-full px-6 md:px-8 pb-8"
             style={{ pointerEvents: 'auto' }}
           >
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
@@ -1739,7 +1739,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Layout: 4 کارت کوچک + ۱ کارت بزرگ — ارتفاع برابر و وسط‌چین */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
+          <div className="grid grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
             {(() => {
               const defaultExp: HomePageSectionItem[] = [
                 { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
@@ -1767,7 +1767,7 @@ const HomePage: React.FC = () => {
               const largeItem = items[4];
               return (
                 <>
-                  <div className="lg:col-span-3 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 w-full min-w-0 self-stretch" style={{ minHeight: 'clamp(240px, 42vw, 500px)' }}>
+                  <div className="col-span-3 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 w-full min-w-0 self-stretch" style={{ minHeight: 420 }}>
                     {smallItems.map((item, idx) => {
                       const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
                       const imgSrc = item.image_url || fallbackImgs[idx];
@@ -1808,12 +1808,12 @@ const HomePage: React.FC = () => {
                   </div>
                   {largeItem && (
                     <div
-                      className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 w-full min-w-0 self-stretch"
+                      className="col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 w-full min-w-0 self-stretch"
                       style={{
                         borderRadius: '16px',
                         border: '0.5px solid #d1d5db',
                         boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                        minHeight: 'clamp(200px, 36vw, 500px)',
+                        minHeight: 420,
                       }}
                       onClick={() => handleSectionItemClick(largeItem.link_url || '')}
                       onMouseEnter={(e) => {

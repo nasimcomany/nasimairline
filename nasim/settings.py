@@ -224,8 +224,12 @@ SERVE_MEDIA = env_bool('SERVE_MEDIA', True)
 CKEDITOR_UPLOAD_PATH = 'blog/uploads/'
 CKEDITOR_IMAGE_BACKEND = 'pillow'
 CKEDITOR_ALLOW_NONIMAGE_FILES = False
-CKEDITOR_RESTRICT_BY_USER = True
+# False: limited-admin / shared editors can browse/upload without per-user folder failures
+CKEDITOR_RESTRICT_BY_USER = False
 CKEDITOR_BROWSE_SHOW_DIRS = True
+# Allow larger magazine / featured images from admin
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('DATA_UPLOAD_MAX_MEMORY_SIZE', str(25 * 1024 * 1024)))
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('FILE_UPLOAD_MAX_MEMORY_SIZE', str(25 * 1024 * 1024)))
 CKEDITOR_CONFIGS = {
     'default': {
         'language': 'fa',

@@ -270,63 +270,63 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
       `}</style>
       <div className="rounded-3xl shadow-2xl overflow-visible max-w-full">
       {/* Tabs */}
-      <div className="flex border-b border-gray-300/30 overflow-x-auto overscroll-x-contain bg-gray-400/30 backdrop-blur-xl rounded-t-3xl scrollbar-thin">
+      <div className="flex border-b border-gray-300/30 bg-gray-400/30 backdrop-blur-xl rounded-t-3xl">
         <button
           onClick={() => handleTabChange('search')}
-          className={`flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'search'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: 'clamp(14px, 2.4vw, 17px)' }}
+          style={{ fontSize: '17px' }}
         >
           <PaperAirplaneIcon className={`w-5 h-5 ${activeTab === 'search' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.bookFlight')}
         </button>
         <button
           onClick={() => handleTabChange('manage')}
-          className={`flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'manage'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: 'clamp(14px, 2.4vw, 17px)' }}
+          style={{ fontSize: '17px' }}
         >
           <TagIcon className={`w-5 h-5 ${activeTab === 'manage' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.manageBooking')}
         </button>
         <button
           onClick={() => handleTabChange('services')}
-          className={`flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'services'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: 'clamp(14px, 2.4vw, 17px)' }}
+          style={{ fontSize: '17px' }}
         >
           <MapPinIcon className={`w-5 h-5 ${activeTab === 'services' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.specialServices')}
         </button>
         <button
           onClick={() => handleTabChange('whatson')}
-          className={`flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'whatson'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: 'clamp(14px, 2.4vw, 17px)' }}
+          style={{ fontSize: '17px' }}
         >
           <PaperAirplaneIcon className={`w-5 h-5 ${activeTab === 'whatson' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightFacilities')}
         </button>
         <button
           onClick={() => handleTabChange('status')}
-          className={`flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'status'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: 'clamp(14px, 2.4vw, 17px)' }}
+          style={{ fontSize: '17px' }}
         >
           <ClockIcon className={`w-5 h-5 ${activeTab === 'status' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightStatus')}
@@ -336,13 +336,13 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
       {/* Tab Content */}
       <div className="bg-gray-200 overflow-visible rounded-b-3xl" style={{ minHeight: '220px' }}>
       {activeTab === 'search' && (
-        <form onSubmit={handleSearch} className="p-4 sm:p-6 lg:p-8">
+        <form onSubmit={handleSearch} className="p-8">
           {/* Trip Type Selector */}
-          <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-5">
+          <div className="flex flex-wrap gap-3 mb-5">
             <button
               type="button"
               onClick={() => setTripType('roundtrip')}
-              className={`flex-1 sm:flex-none px-5 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-bold transition-all ${
+              className={`px-8 py-4 rounded-lg text-lg font-bold transition-all ${
                 tripType === 'roundtrip'
                   ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -354,7 +354,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             <button
               type="button"
               onClick={() => setTripType('oneway')}
-              className={`flex-1 sm:flex-none px-5 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-bold transition-all ${
+              className={`px-8 py-4 rounded-lg text-lg font-bold transition-all ${
                 tripType === 'oneway'
                   ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -365,12 +365,12 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </button>
           </div>
 
-          {/* Fields: stacked on phone, desktop single-row from xl */}
+          {/* Desktop single-row fields (phones use desktop-scale viewport) */}
           <div
-            className={`grid gap-3 items-end w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${
+            className={`grid gap-3 items-end w-full ${
               tripType === 'roundtrip'
-                ? 'xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
-                : 'xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
+                ? 'grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
+                : 'grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
             }`}
           >
             {/* Origin */}
@@ -385,16 +385,16 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               <button
                 type="button"
                 onClick={swapCities}
-                className="absolute z-20 w-8 h-8 bg-blue-900 hover:bg-blue-800 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 left-1/2 -translate-x-1/2 -bottom-4 sm:left-0 sm:right-auto sm:bottom-auto sm:top-[2.4rem] sm:-translate-x-1/2"
+                className="absolute z-20 w-8 h-8 bg-blue-900 hover:bg-blue-800 text-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 left-0 top-[2.4rem] -translate-x-1/2"
                 title={t('home.flightSearch.swap')}
                 aria-label={t('home.flightSearch.swap')}
               >
-                <ArrowsRightLeftIcon className="w-4 h-4 rotate-90 sm:rotate-0" />
+                <ArrowsRightLeftIcon className="w-4 h-4" />
               </button>
             </div>
 
             {/* Destination */}
-            <div className="min-w-0 w-full pt-5 sm:pt-0 sm:pl-2">
+            <div className="min-w-0 w-full pl-2">
               <CitySelect
                 value={formData.destination}
                 onChange={(value) => setFormData(prev => ({ ...prev, destination: value }))}

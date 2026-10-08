@@ -18,10 +18,10 @@ def validate_slug(slug):
     if len(slug) > 100:
         raise ValidationError(_('اسلاگ نمی‌تواند بیشتر از 100 کاراکتر باشد.'))
     
-    # Check for valid characters (letters, numbers, hyphens, underscores)
+    # Letters (incl. Persian/Arabic), numbers, hyphens, underscores
     import re
-    if not re.match(r'^[a-z0-9_-]+$', slug):
-        raise ValidationError(_('اسلاگ فقط می‌تواند شامل حروف کوچک، اعداد، خط تیره و زیرخط باشد.'))
+    if not re.match(r'^[\w-]+$', slug, re.UNICODE):
+        raise ValidationError(_('اسلاگ فقط می‌تواند شامل حروف، اعداد، خط تیره و زیرخط باشد.'))
 
 
 def validate_meta_description(description):

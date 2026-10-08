@@ -72,9 +72,16 @@ urlpatterns = [
     }),
 ]
 
-# Media: development always; production when SERVE_MEDIA (Railway volume recommended)
+# Media: django.conf.urls.static.static() is a no-op when DEBUG=False, so serve explicitly.
+# Without this, admin/CKEditor uploads succeed on disk but /media/... 404s in production.
 if settings.DEBUG or getattr(settings, 'SERVE_MEDIA', True):
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += [
+        re_path(
+            r'^media/(?P<path>.*)$',
+            serve,
+            {'document_root': settings.MEDIA_ROOT},
+        ),
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
