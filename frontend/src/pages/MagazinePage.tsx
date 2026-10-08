@@ -5,6 +5,7 @@ import SeoHead from '../components/SEO/SeoHead';
 import AirplanePagination from '../components/Magazine/AirplanePagination';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
+import { magazinePublicCover, toSameOriginMediaUrl } from '../utils/mediaUrl';
 import {
   MagnifyingGlassIcon,
   PaperAirplaneIcon,
@@ -203,17 +204,31 @@ const MagazinePage: React.FC = () => {
                   className="group relative overflow-hidden rounded-3xl bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)] hover:shadow-[0_24px_60px_rgba(15,23,42,0.18)] transition-all duration-300 hover:-translate-y-1.5"
                 >
                   <div className="relative aspect-[4/5] overflow-hidden">
-                    {article.featured_image ? (
-                      <img
-                        src={article.featured_image}
-                        alt={article.title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#0b1f4d] to-[#1d4ed8] flex items-center justify-center">
-                        <PaperAirplaneIcon className="w-16 h-16 text-white/50 rotate-[-40deg]" />
-                      </div>
-                    )}
+                    <img
+                      src={toSameOriginMediaUrl(article.featured_image) || magazinePublicCover(article.slug)}
+                      alt={article.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      onError={(e) => {
+                        const el = e.currentTarget;
+                        const fallback = magazinePublicCover(article.slug);
+                        if (el.src.endsWith(fallback) || el.dataset.fallback === '1') {
+                          el.onerror = null;
+                          el.style.display = 'none';
+                          const sib = el.nextElementSibling as HTMLElement | null;
+                          if (sib?.dataset.placeholder) sib.style.display = 'flex';
+                          return;
+                        }
+                        el.dataset.fallback = '1';
+                        el.src = fallback;
+                      }}
+                    />
+                    <div
+                      data-placeholder="1"
+                      className="absolute inset-0 bg-gradient-to-br from-[#0b1f4d] to-[#1d4ed8] items-center justify-center"
+                      style={{ display: 'none' }}
+                    >
+                      <PaperAirplaneIcon className="w-16 h-16 text-white/50 rotate-[-40deg]" />
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-[#071530]/95 via-[#0b1f4d]/45 to-transparent" />
 
                     <div className="absolute top-4 right-4">
@@ -283,10 +298,16 @@ const MagazinePage: React.FC = () => {
                   className="group relative overflow-hidden rounded-3xl min-h-[180px] shadow-lg"
                 >
                   {cat.image ? (
-                    <img src={cat.image} alt={cat.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#0b1f4d] to-[#1e40af]" />
-                  )}
+                    <img
+                      src={toSameOriginMediaUrl(cat.image)}
+                      alt={cat.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#0b1f4d] to-[#1e40af]" />
                   <div className="absolute inset-0 bg-gradient-to-l from-[#071530]/90 via-[#0b1f4d]/70 to-[#0b1f4d]/40" />
                   <div className="relative z-10 p-6 sm:p-8 text-white h-full flex flex-col justify-end">
                     <h4 className={`text-xl font-bold mb-2 ${fontClass}`} style={{ fontFamily: font }}>

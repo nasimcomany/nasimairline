@@ -341,12 +341,21 @@ const ArticleDetailPage: React.FC = () => {
                   </div>
                 )}
 
-                {article.featured_image && (
+                {(article.featured_image || article.slug) && (
                   <div className="rounded-xl overflow-hidden mb-8 border border-slate-100">
                     <img
-                      src={article.featured_image}
+                      src={article.featured_image || `/images/magazine/${article.slug}.png`}
                       alt={article.title}
                       className="w-full max-h-[420px] object-cover"
+                      onError={(e) => {
+                        const el = e.currentTarget;
+                        const fb = `/images/magazine/${article.slug}.png`;
+                        if (!el.src.includes('/images/magazine/')) {
+                          el.src = fb;
+                          return;
+                        }
+                        el.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}

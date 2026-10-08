@@ -1047,15 +1047,15 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-white">
       <EmiratesHeader onWeatherClick={() => setShowWeatherModal(true)} />
 
-      {/* Hero + booking form overlaid (fixed heights — safe with desktop-scale viewport) */}
+      {/* Hero + booking form: form sits partly on the hero image (desktop & mobile) */}
       <section
         id="search-form"
-        className="relative z-10 overflow-hidden"
-        style={{ minHeight: 680 }}
+        className="relative z-10 overflow-visible"
+        style={{ marginBottom: 56 }}
       >
         <div
-          className="absolute inset-0 overflow-hidden"
-          style={{ backgroundColor: 'rgba(15, 23, 42, 0.35)' }}
+          className="absolute inset-x-0 top-0 overflow-hidden"
+          style={{ height: 560, backgroundColor: 'rgba(15, 23, 42, 0.35)' }}
         >
           {heroImages.map((imageUrl, index) => {
             const slider = heroSliders[index];
@@ -1118,7 +1118,8 @@ const HomePage: React.FC = () => {
               (prev) => (prev - 1 + heroImages.length) % heroImages.length
             )
           }
-          className="absolute left-3 sm:left-6 top-[32%] z-[5] -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 transition-all duration-300 group pointer-events-auto"
+          className="absolute left-3 sm:left-6 z-[5] -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 transition-all duration-300 group pointer-events-auto"
+          style={{ top: 280 }}
           aria-label="Previous image"
         >
           <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -1127,15 +1128,16 @@ const HomePage: React.FC = () => {
           onClick={() =>
             setCurrentHeroImageIndex((prev) => (prev + 1) % heroImages.length)
           }
-          className="absolute right-3 sm:right-6 top-[32%] z-[5] -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 transition-all duration-300 group pointer-events-auto"
+          className="absolute right-3 sm:right-6 z-[5] -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 transition-all duration-300 group pointer-events-auto"
+          style={{ top: 280 }}
           aria-label="Next image"
         >
           <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
 
         <div
-          className="relative z-10 flex flex-col justify-between"
-          style={{ minHeight: 680, pointerEvents: 'none' }}
+          className="relative z-10 flex flex-col"
+          style={{ minHeight: 560, pointerEvents: 'none' }}
         >
           <div
             className="flex items-start justify-center px-4"
@@ -1171,17 +1173,24 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
+          {/* Pull form up so the top half sits on the hero image */}
           <div
-            className="max-w-7xl mx-auto w-full px-6 md:px-8 pb-8"
-            style={{ pointerEvents: 'auto' }}
+            className="max-w-7xl mx-auto w-full px-6 md:px-8"
+            style={{
+              marginTop: 'auto',
+              transform: 'translateY(42%)',
+              pointerEvents: 'auto',
+              position: 'relative',
+              zIndex: 30,
+            }}
           >
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
           </div>
         </div>
       </section>
 
-      {/* Elegant Quote Section */}
-      <section className="relative z-10 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50">
+      {/* Elegant Quote Section — extra top pad for overlapping search form */}
+      <section className="relative z-10 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 140 }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 
@@ -1601,20 +1610,31 @@ const HomePage: React.FC = () => {
                       </div>
       </section>
 
-      {/* Loyalty / Survey banner — CMS editable image + copy */}
+      {/* Loyalty / Survey banner — public fallback always visible; CMS image overlays when available */}
       <section
         className="relative z-10 overflow-hidden bg-slate-900 loyalty-survey-banner"
         style={{
           marginTop: '58px',
         }}
       >
-        <div
-          className="loyalty-survey-banner__media absolute inset-0"
-          style={{
-            backgroundImage: `url(${surveyItems[0]?.image_url || '/images/airport-crew.jpg'})`,
-          }}
-          aria-hidden
-        >
+        <div className="loyalty-survey-banner__media absolute inset-0" aria-hidden>
+          <img
+            src="/images/airport-crew.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: 'center 28%' }}
+          />
+          {surveyItems[0]?.image_url ? (
+            <img
+              src={surveyItems[0].image_url}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ objectPosition: 'center 28%' }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-l from-black/75 via-black/50 to-black/20" />
         </div>
 

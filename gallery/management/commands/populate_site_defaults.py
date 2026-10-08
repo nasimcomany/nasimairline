@@ -157,9 +157,33 @@ class Command(BaseCommand):
             img_name = art.get("featured_image")
             if img_name:
                 path = MAG_DIR / img_name
-                if path.exists() and (was_created or force or not obj.featured_image):
+                file_ok = False
+                if obj.featured_image and not force:
+                    try:
+                        file_ok = obj.featured_image.storage.exists(obj.featured_image.name)
+                    except Exception:
+                        file_ok = False
+                if path.exists() and (was_created or force or not file_ok):
                     with path.open("rb") as fh:
                         obj.featured_image.save(path.name, File(fh), save=True)
+                    self.stdout.write(self.style.SUCCESS(f"Article image <- {img_name}"))
+        # Survey banner image (homepage) — only fill when missing/broken; admin can replace
+        survey_src = HOME_DIR / "airport-crew.jpg"
+        if not survey_src.exists():
+            survey_src = ROOT / "frontend" / "public" / "images" / "airport-crew.jpg"
+        if survey_src.exists():
+            survey = HomePageSectionItem.objects.filter(section_type="SURVEY", order=1).first()
+            if survey:
+                ok = False
+                if survey.image and not force:
+                    try:
+                        ok = survey.image.storage.exists(survey.image.name)
+                    except Exception:
+                        ok = False
+                if not ok:
+                    with survey_src.open("rb") as fh:
+                        survey.image.save(survey_src.name, File(fh), save=True)
+                    self.stdout.write(self.style.SUCCESS("SURVEY#1 <- airport-crew.jpg"))
         self.stdout.write(
             self.style.SUCCESS(f"Magazine: created={created} total={Article.objects.count()}")
         )
