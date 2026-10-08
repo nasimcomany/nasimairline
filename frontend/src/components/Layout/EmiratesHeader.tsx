@@ -286,8 +286,15 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   useEffect(() => {
     if (activeDropdown === 'wherewefly' && whereweflyTriggerRef.current) {
       const rect = whereweflyTriggerRef.current.getBoundingClientRect();
-      const dropdownWidth = Math.min(1400, window.innerWidth - 48);
-      const left = Math.max(24, Math.min(window.innerWidth - dropdownWidth - 24, rect.left + rect.width / 2 - dropdownWidth / 2));
+      const margin = window.innerWidth < 768 ? 12 : 24;
+      const dropdownWidth = Math.min(1400, window.innerWidth - margin * 2);
+      const left = Math.max(
+        margin,
+        Math.min(
+          window.innerWidth - dropdownWidth - margin,
+          rect.left + rect.width / 2 - dropdownWidth / 2,
+        ),
+      );
       setWhereweflyDropdownStyle({ top: rect.bottom + 8, left, width: dropdownWidth });
     } else {
       setWhereweflyDropdownStyle(null);

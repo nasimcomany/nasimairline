@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.e9c40a22.css",
-    "main.js": "/static/js/main.a143809b.js",
-    "static/js/447.edb7259a.chunk.js": "/static/js/447.edb7259a.chunk.js",
+    "main.css": "/static/css/main.0ee4ba18.css",
+    "main.js": "/static/js/main.f069cb6d.js",
+    "static/js/447.26bd4d50.chunk.js": "/static/js/447.26bd4d50.chunk.js",
     "static/js/850.32a7317a.chunk.js": "/static/js/850.32a7317a.chunk.js",
     "static/js/519.876e73ce.chunk.js": "/static/js/519.876e73ce.chunk.js",
     "static/css/664.5a5fc4cb.chunk.css": "/static/css/664.5a5fc4cb.chunk.css",
@@ -39,7 +39,7 @@
     "static/js/348.16895931.chunk.js": "/static/js/348.16895931.chunk.js",
     "static/js/10.5544e0ef.chunk.js": "/static/js/10.5544e0ef.chunk.js",
     "static/js/183.6b60eda1.chunk.js": "/static/js/183.6b60eda1.chunk.js",
-    "static/js/779.d74d8926.chunk.js": "/static/js/779.d74d8926.chunk.js",
+    "static/js/779.9030e3be.chunk.js": "/static/js/779.9030e3be.chunk.js",
     "static/media/IranNastaliq.woff": "/static/media/IranNastaliq.983951041160e8e42fbf.woff",
     "static/media/IranNastaliq.woff2": "/static/media/IranNastaliq.8a2ecb0e1cc52ec83d01.woff2",
     "static/media/DigiHamisheRegular.otf": "/static/media/DigiHamisheRegular.3dc63d7f84dc8fb1ec81.otf",
@@ -49,7 +49,7 @@
     "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.e9c40a22.css",
-    "static/js/main.a143809b.js"
+    "static/css/main.0ee4ba18.css",
+    "static/js/main.f069cb6d.js"
   ]
 }

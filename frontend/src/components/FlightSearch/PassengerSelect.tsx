@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { UserGroupIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { clampDropdownToViewport, ClampedDropdown } from '../../utils/viewportDropdown';
 
 interface PassengerCount {
   adults: number;
@@ -21,7 +22,7 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
   label
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownStyle, setDropdownStyle] = useState<{ top?: number; bottom?: number; left: number; width: number } | null>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<ClampedDropdown | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
@@ -64,23 +65,16 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
   const updateDropdownPosition = () => {
     if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      const dropdownHeight = 220;
-      const gap = 6;
-      const spaceAbove = rect.top;
-      const spaceBelow = window.innerHeight - rect.bottom;
-      if (spaceAbove >= dropdownHeight + gap || spaceAbove >= spaceBelow) {
-        setDropdownStyle({
-          bottom: window.innerHeight - rect.top + gap,
-          left: rect.left,
-          width: Math.max(rect.width, 220)
-        });
-      } else {
-        setDropdownStyle({
-          top: rect.bottom + gap,
-          left: rect.left,
-          width: Math.max(rect.width, 220)
-        });
-      }
+      setDropdownStyle(
+        clampDropdownToViewport({
+          trigger: rect,
+          preferredWidth: Math.min(280, window.innerWidth - 16),
+          preferredHeight: 240,
+          preferAbove: true,
+          gap: 6,
+          margin: 8,
+        }),
+      );
     } else {
       setDropdownStyle(null);
     }
@@ -141,9 +135,11 @@ const PassengerSelect: React.FC<PassengerSelectProps> = ({
           style={{
             left: dropdownStyle.left,
             width: dropdownStyle.width,
-            ...(dropdownStyle.bottom !== undefined 
-              ? { bottom: dropdownStyle.bottom } 
-              : { top: dropdownStyle.top })
+            maxHeight: dropdownStyle.maxHeight,
+            overflowY: 'auto',
+            ...(dropdownStyle.bottom !== undefined
+              ? { bottom: dropdownStyle.bottom }
+              : { top: dropdownStyle.top }),
           }}
         >
           <div className="p-3">

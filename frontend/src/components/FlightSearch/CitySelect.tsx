@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { MapPinIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getOriginCities, getDestinations, OriginCity } from '../../services/niraApi';
+import { clampDropdownToViewport, ClampedDropdown } from '../../utils/viewportDropdown';
 
 interface CitySelectProps {
   value: string;
@@ -13,13 +14,6 @@ interface CitySelectProps {
   mode?: 'origin' | 'destination';
   /** Required when mode=destination */
   originCode?: string;
-}
-
-interface DropdownPos {
-  top: number;
-  left: number;
-  width: number;
-  maxHeight: number;
 }
 
 const CitySelect: React.FC<CitySelectProps> = ({
@@ -34,7 +28,7 @@ const CitySelect: React.FC<CitySelectProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [cities, setCities] = useState<OriginCity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dropdownStyle, setDropdownStyle] = useState<DropdownPos | null>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<ClampedDropdown | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
@@ -84,7 +78,7 @@ const CitySelect: React.FC<CitySelectProps> = ({
     city.CITY.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // همیشه بالای فیلد باز شود تا لیست واضح دیده شود
+  // Prefer opening above the field; always clamp inside the viewport
   const updateDropdownPosition = useCallback(() => {
     if (!isOpen || !triggerRef.current) {
       setDropdownStyle(null);
@@ -92,24 +86,16 @@ const CitySelect: React.FC<CitySelectProps> = ({
     }
 
     const rect = triggerRef.current.getBoundingClientRect();
-    const gap = 8;
-    const preferredHeight = 360;
-    const maxHeight = Math.max(200, Math.min(preferredHeight, rect.top - gap - 12));
-    const width = Math.max(rect.width, 280);
-    let left = rect.left;
-
-    // اگر از لبه راست صفحه بیرون زد، جا به جا کن
-    if (left + width > window.innerWidth - 8) {
-      left = Math.max(8, window.innerWidth - width - 8);
-    }
-    if (left < 8) left = 8;
-
-    setDropdownStyle({
-      top: Math.max(8, rect.top - maxHeight - gap),
-      left,
-      width,
-      maxHeight
-    });
+    setDropdownStyle(
+      clampDropdownToViewport({
+        trigger: rect,
+        preferredWidth: Math.min(320, window.innerWidth - 16),
+        preferredHeight: 360,
+        preferAbove: true,
+        gap: 8,
+        margin: 8,
+      }),
+    );
   }, [isOpen]);
 
   useEffect(() => {
@@ -211,14 +197,16 @@ const CitySelect: React.FC<CitySelectProps> = ({
             ref={portalRef}
             className="fixed z-[99999] bg-white border border-gray-300 rounded-xl shadow-2xl"
             style={{
-              top: dropdownStyle.top,
               left: dropdownStyle.left,
-              width: Math.min(dropdownStyle.width, 340),
+              width: dropdownStyle.width,
               maxHeight: dropdownStyle.maxHeight,
-              minHeight: 200,
+              minHeight: Math.min(160, dropdownStyle.maxHeight),
               display: 'flex',
               flexDirection: 'column',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              ...(dropdownStyle.bottom !== undefined
+                ? { bottom: dropdownStyle.bottom }
+                : { top: dropdownStyle.top }),
             }}
           >
             <div className="p-3 border-b border-gray-200 bg-white flex-shrink-0">
