@@ -8,7 +8,7 @@ cd "$ROOT"
 echo "==> Running migrations"
 python manage.py migrate --noinput
 
-echo "==> Seeding homepage + magazine defaults (missing only; admin edits preserved)"
+echo "==> Seeding Special Services defaults + missing magazine articles (hero/experience untouched)"
 python manage.py populate_site_defaults || true
 
 echo "==> Starting gunicorn (config=gunicorn.conf.py)"

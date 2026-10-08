@@ -1047,38 +1047,48 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-white">
       <EmiratesHeader onWeatherClick={() => setShowWeatherModal(true)} />
 
-      {/* Hero Section with Flight Search - Emirates Style - اسلایدر با نسبت ۴:۳ برای کاهش فضای خالی کناره‌ها */}
-      <section id="search-form" className="relative z-10 flex flex-col" style={{ minHeight: 'max(75vh, min(75vw, 85vh) + 280px)' }}>
-        {/* Hero Image Background - Slider Container - نسبت ۴:۳ برای پر کردن عرض و کاهش فضای خالی */}
-        <div 
-          className="absolute inset-x-0 top-0 overflow-hidden"
-          style={{
-            width: '100%',
-            height: 'calc(min(75vw, 85vh) - 0.25cm)',
-            maxHeight: 'calc(85vh - 0.25cm)',
-            backgroundColor: 'rgba(15, 23, 42, 0.3)'
-          }}
+      {/* Hero + booking form: form sits on the hero image (desktop & mobile), no giant empty gaps */}
+      <section
+        id="search-form"
+        className="relative z-10 overflow-hidden"
+        style={{ minHeight: 'clamp(520px, 72vh, 780px)' }}
+      >
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ backgroundColor: 'rgba(15, 23, 42, 0.35)' }}
         >
-          {/* Slider - Dynamic images from API */}
           {heroImages.map((imageUrl, index) => {
             const slider = heroSliders[index];
-            
+            const fallbacks = [
+              '/images/tstnasim.jpg',
+              '/images/tstnasim2.jpg',
+              '/images/tstnasim3.jpg',
+              '/images/tstnasim4.jpg',
+              '/images/tstnasim5.jpg',
+            ];
             const SliderWrapper = slider?.link_url ? 'a' : 'div';
-            const wrapperProps = slider?.link_url ? {
-              href: slider.link_url,
-              target: slider.link_url.startsWith('/') || slider.link_url.includes(window.location.hostname) ? '_self' : '_blank',
-              rel: slider.link_url.startsWith('/') ? undefined : 'noopener noreferrer',
-              title: `کلیک کنید برای مشاهده: ${slider.title}`
-            } : {};
-            
+            const wrapperProps = slider?.link_url
+              ? {
+                  href: slider.link_url,
+                  target:
+                    slider.link_url.startsWith('/') ||
+                    slider.link_url.includes(window.location.hostname)
+                      ? '_self'
+                      : '_blank',
+                  rel: slider.link_url.startsWith('/') ? undefined : 'noopener noreferrer',
+                  title: `کلیک کنید برای مشاهده: ${slider.title}`,
+                }
+              : {};
+
             return (
               <SliderWrapper
                 key={index}
                 {...wrapperProps}
-                className={`absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out block ${slider?.link_url ? 'cursor-pointer' : ''}`}
+                className={`absolute inset-0 h-full w-full transition-transform duration-1000 ease-in-out block ${
+                  slider?.link_url ? 'cursor-pointer' : ''
+                }`}
                 style={{
                   transform: `translateX(${index * 100 - currentHeroImageIndex * 100}%)`,
-                  left: '0%'
                 }}
               >
                 <img
@@ -1087,73 +1097,73 @@ const HomePage: React.FC = () => {
                   loading={index === 0 ? 'eager' : 'lazy'}
                   decoding="async"
                   fetchPriority={index === 0 ? 'high' : 'low'}
-                  className={`w-full h-full object-cover ${slider?.link_url ? 'hover:opacity-95' : ''} transition-opacity`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'center center',
-                    display: 'block',
-                    pointerEvents: 'none'
+                  className={`w-full h-full object-cover ${
+                    slider?.link_url ? 'hover:opacity-95' : ''
+                  } transition-opacity`}
+                  style={{ objectPosition: 'center center', pointerEvents: 'none' }}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = fallbacks[index % fallbacks.length];
                   }}
                 />
-                <div className="absolute inset-0 bg-black/10" style={{ pointerEvents: 'none' }}></div>
+                <div className="absolute inset-0 bg-black/15" style={{ pointerEvents: 'none' }} />
               </SliderWrapper>
             );
           })}
-            </div>
-            
-        {/* Navigation Arrows - Minimal and Elegant */}
+        </div>
+
         <button
-          onClick={() => setCurrentHeroImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
-          className="absolute left-6 top-[28%] sm:top-1/2 transform -translate-y-1/2 z-[5] bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group pointer-events-auto"
-          style={{
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-          }}
+          onClick={() =>
+            setCurrentHeroImageIndex(
+              (prev) => (prev - 1 + heroImages.length) % heroImages.length
+            )
+          }
+          className="absolute left-3 sm:left-6 top-[32%] z-[5] -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 transition-all duration-300 group pointer-events-auto"
           aria-label="Previous image"
         >
-          <ChevronLeftIcon className="w-6 h-6 text-white group-hover:text-white/90 transition-colors" />
+          <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
         <button
-          onClick={() => setCurrentHeroImageIndex((prev) => (prev + 1) % heroImages.length)}
-          className="absolute right-6 top-[28%] sm:top-1/2 transform -translate-y-1/2 z-[5] bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group pointer-events-auto"
-          style={{
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-          }}
+          onClick={() =>
+            setCurrentHeroImageIndex((prev) => (prev + 1) % heroImages.length)
+          }
+          className="absolute right-3 sm:right-6 top-[32%] z-[5] -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 transition-all duration-300 group pointer-events-auto"
           aria-label="Next image"
         >
-          <ChevronRightIcon className="w-6 h-6 text-white group-hover:text-white/90 transition-colors" />
+          <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
 
-        {/* Hero Content */}
-        <div className="relative z-10 flex-1 flex flex-col" style={{ pointerEvents: 'none', minHeight: 'min(75vw, 85vh)' }}>
-          {/* Promotional Text - Centered */}
-          <div className="flex-1 flex items-start justify-center" style={{ paddingTop: 'clamp(24px, 4vw, 48px)', pointerEvents: 'auto' }}>
-            <div className="text-center max-w-3xl px-4 sm:px-6">
-              <h1 
-                className="text-white mb-3"
-                style={{ 
+        <div
+          className="relative z-10 flex flex-col justify-between"
+          style={{ minHeight: 'clamp(520px, 72vh, 780px)', pointerEvents: 'none' }}
+        >
+          <div
+            className="flex items-start justify-center pt-8 sm:pt-12 px-4"
+            style={{ pointerEvents: 'auto' }}
+          >
+            <div className="text-center max-w-3xl">
+              <h1
+                className="text-white mb-2 sm:mb-3"
+                style={{
                   fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
-                  fontSize: 'clamp(1.8rem, 5vw, 3rem)',
+                  fontSize: 'clamp(1.55rem, 4.2vw, 3rem)',
                   fontWeight: 'bold',
-                  lineHeight: '1.2',
+                  lineHeight: '1.25',
                   textShadow: '2px 2px 8px rgba(0,0,0,0.5)',
-                  direction: language === 'en' ? 'ltr' : 'rtl'
+                  direction: language === 'en' ? 'ltr' : 'rtl',
                 }}
               >
                 {pickConfig('HERO', 1, t('home.hero.flyWithNasim'))}
               </h1>
-              <p 
-                className="text-white mb-4"
-                style={{ 
+              <p
+                className="text-white"
+                style={{
                   fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                   fontSize: 'clamp(0.9rem, 2vw, 1.2rem)',
-                  fontWeight: '500',
-                  lineHeight: '1.5',
+                  fontWeight: 500,
+                  lineHeight: 1.5,
                   textShadow: '1px 1px 4px rgba(0,0,0,0.5)',
-                  direction: language === 'en' ? 'ltr' : 'rtl'
+                  direction: language === 'en' ? 'ltr' : 'rtl',
                 }}
               >
                 {pickConfig('HERO', 2, t('home.hero.safeTripDescription'))}
@@ -1161,22 +1171,24 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Flight Search Form at Bottom - سایز بزرگتر؛ 1cm پایین‌تر */}
-          <div className="max-w-7xl mx-auto w-full px-3 sm:px-6 md:px-8 pb-6 sm:pb-10 overflow-x-hidden overflow-y-visible" style={{ marginTop: 'clamp(24px, 5vw, 88px)', paddingTop: 'calc(clamp(16px, 3vw, 48px) + 0.5cm)', pointerEvents: 'auto' }}>
+          <div
+            className="max-w-7xl mx-auto w-full px-3 sm:px-6 md:px-8 pb-5 sm:pb-8"
+            style={{ pointerEvents: 'auto' }}
+          >
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
-              </div>
-            </div>
+          </div>
+        </div>
       </section>
 
       {/* Elegant Quote Section */}
-      <section className="relative z-10 py-6 sm:py-12 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '1.25rem', marginTop: '-28px' }}>
+      <section className="relative z-10 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 
               className="text-gray-500 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3 flex-wrap px-2"
               style={{ 
                 fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
-                fontSize: 'clamp(1rem, 3.2vw, 2.2rem)',
+                fontSize: 'clamp(1.05rem, 3.2vw, 2.1rem)',
                 fontWeight: 'bold',
                 lineHeight: '1.4',
                 letterSpacing: '0.3px'
@@ -1203,10 +1215,10 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Special Services Section */}
-      <section className="relative z-10 py-6 sm:py-12 bg-white" style={{ marginTop: '-32px' }}>
+      <section className="relative z-10 py-5 sm:py-10 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           {/* Section Title */}
-          <div className="text-center mb-5 sm:mb-10">
+          <div className="text-center mb-4 sm:mb-8">
             <h2 
               className="text-gray-900"
               style={{ 
@@ -1227,8 +1239,8 @@ const HomePage: React.FC = () => {
             </h2>
           </div>
 
-          {/* Services Grid - Dynamic from API with fallback */}
-          <div className="flex flex-row flex-nowrap items-stretch gap-4 sm:gap-6 max-w-full" style={{ justifyContent: 'center' }}>
+          {/* Special Services — defaults match localhost; CMS image/title/link win when set */}
+          <div className="flex flex-row flex-nowrap items-stretch gap-3 sm:gap-5 max-w-full overflow-x-auto pb-1" style={{ justifyContent: 'center' }}>
             {(
               (() => {
                 const defaults = [
@@ -1246,9 +1258,9 @@ const HomePage: React.FC = () => {
               })()
             ).map((item, idx) => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
-              const imgSrc = item.image_url || (idx === 0 ? '/images/44.png' : idx === 1 ? '/images/33.png' : idx === 2 ? '/images/22.png' : '/images/11.png');
+              const defaultImgs = ['/images/44.png', '/images/33.png', '/images/22.png', '/images/11.png'];
+              const imgSrc = item.image_url || defaultImgs[idx] || defaultImgs[0];
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
-              // لینک با fallback: شبکه پروازی -> /flights/map، آب و هوا/وضعیت آب و هوا -> weather
               const linkUrl = (() => {
                 const isNetwork = /شبکه پروازی|Flight Network|شبكة الطيران/i.test(title) || item.id === 1;
                 const isWeather = /آب و هوا|وضعیت آب و هوا|Weather|الطقس|حالة الطقس/i.test(title) || item.id === 2;
@@ -1259,29 +1271,29 @@ const HomePage: React.FC = () => {
               return (
                 <div 
                   key={item.id || idx}
-                  className="special-services-card relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-auto min-w-0"
+                  className="special-services-card relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 min-w-[140px] sm:min-w-0"
                   style={{ 
                     flexBasis: isExpanded ? '32.5%' : '25%',
-                    flexGrow: 0,
+                    flexGrow: 1,
                     flexShrink: 1,
-                    minWidth: 0,
                     transition: 'flex-basis 0.3s ease-out'
                   }}
                   onMouseEnter={() => setHoveredService(idx + 1)}
                   onMouseLeave={() => setHoveredService(null)}
                   onClick={() => handleSectionItemClick(linkUrl)}
                 >
-                  <div className="relative w-full" style={{ height: 'clamp(220px, 40vw, 480px)' }}>
+                  <div className="relative w-full" style={{ height: 'clamp(200px, 38vw, 420px)' }}>
                     <img 
                       src={imgSrc}
                       alt={title}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
-                        e.currentTarget.src = '/images/airplane-clouds-night_864588-19786.jpg';
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultImgs[idx] || defaultImgs[0];
                       }}
                     />
-                    <div className="absolute right-0 bottom-0 p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                      <p className="text-black text-right font-semibold mb-2" style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif", fontSize: '1.1rem' }}>
+                    <div className="absolute right-0 bottom-0 p-3 sm:p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                      <p className="text-black text-right font-semibold mb-2" style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif", fontSize: 'clamp(0.95rem, 2.2vw, 1.1rem)' }}>
                         {title}
                       </p>
                       <div className="h-0.5 transition-colors duration-300" style={{ backgroundColor: hoveredService === idx + 1 ? '#1e3a8a' : '#9ca3af' }}></div>
@@ -1295,14 +1307,14 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Elegant Quote Section - Repeated with Airline Logo */}
-      <section className="relative z-10 py-6 sm:py-12 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: '1.25rem', marginTop: '-28px' }}>
+      <section className="relative z-10 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <p 
               className="text-gray-700 flex items-center justify-center gap-2 sm:gap-3 flex-wrap"
               style={{ 
                 fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
-                fontSize: 'clamp(1.55rem, 3.5vw, 2.35rem)',
+                fontSize: 'clamp(1.2rem, 3.2vw, 2.1rem)',
                 fontWeight: 'normal',
                 lineHeight: '1.4',
                 letterSpacing: '0.5px',
@@ -1727,7 +1739,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Layout: 4 کارت کوچک + ۱ کارت بزرگ — ارتفاع برابر و وسط‌چین */}
-          <div className="grid grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
             {(() => {
               const defaultExp: HomePageSectionItem[] = [
                 { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
@@ -1736,22 +1748,29 @@ const HomePage: React.FC = () => {
                 { id: 4, title_fa: 'تصویر ۴', title_ar: 'صورة ٤', title_en: 'Image 4', image_url: '/images/5reza.jpeg', link_url: 'https://ikac.ir/', order: 4, section_type: 'EXPERIENCE', is_active: true },
                 { id: 5, title_fa: 'ایرانولوژی', title_ar: 'إيرانولوجيا', title_en: 'Iranology', image_url: '/images/6reza.jpeg', link_url: '/iranology', order: 5, section_type: 'EXPERIENCE', is_active: true },
               ];
+              const fallbackImgs = ['/images/two.png', '/images/three.png', '/images/4reza.jpeg', '/images/5reza.jpeg', '/images/6reza.jpeg'];
               const items = (experienceItems.length ? experienceItems : defaultExp).map((item, i) => ({
                 ...item,
-                image_url: item.image_url || defaultExp[i]?.image_url || defaultExp[0].image_url,
+                // Prefer CMS URL; if missing use public fallback. Broken CMS URLs handled via onError.
+                image_url: item.image_url || defaultExp[i]?.image_url || fallbackImgs[i],
                 link_url: item.link_url || defaultExp[i]?.link_url || '',
               }));
               while (items.length < 5) {
-                items.push(defaultExp[items.length]);
+                const d = defaultExp[items.length];
+                items.push({
+                  ...d,
+                  image_url: d.image_url || fallbackImgs[items.length] || fallbackImgs[0],
+                  link_url: d.link_url || '',
+                });
               }
               const smallItems = items.slice(0, 4);
               const largeItem = items[4];
               return (
                 <>
-                  <div className="col-span-3 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 w-full min-w-0 self-stretch" style={{ minHeight: 'clamp(280px, 42vw, 500px)' }}>
+                  <div className="lg:col-span-3 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 w-full min-w-0 self-stretch" style={{ minHeight: 'clamp(240px, 42vw, 500px)' }}>
                     {smallItems.map((item, idx) => {
                       const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
-                      const imgSrc = item.image_url || (['/images/two.png', '/images/three.png', '/images/4reza.jpeg', '/images/5reza.jpeg'])[idx];
+                      const imgSrc = item.image_url || fallbackImgs[idx];
                       return (
                         <div
                           key={item.id}
@@ -1771,12 +1790,16 @@ const HomePage: React.FC = () => {
                             e.currentTarget.style.transform = 'translateY(0)';
                           }}
                         >
-                          <div className="relative w-full h-full">
+                          <div className="relative w-full h-full min-h-[120px]">
                             <img
                               src={imgSrc}
                               alt={title}
                               className="absolute inset-0 w-full h-full object-cover"
                               style={{ borderRadius: '16px', objectPosition: 'center' }}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = fallbackImgs[idx];
+                              }}
                             />
                           </div>
                         </div>
@@ -1785,12 +1808,12 @@ const HomePage: React.FC = () => {
                   </div>
                   {largeItem && (
                     <div
-                      className="col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 w-full min-w-0 self-stretch"
+                      className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 w-full min-w-0 self-stretch"
                       style={{
                         borderRadius: '16px',
                         border: '0.5px solid #d1d5db',
                         boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                        minHeight: 'clamp(220px, 36vw, 500px)',
+                        minHeight: 'clamp(200px, 36vw, 500px)',
                       }}
                       onClick={() => handleSectionItemClick(largeItem.link_url || '')}
                       onMouseEnter={(e) => {
@@ -1802,12 +1825,16 @@ const HomePage: React.FC = () => {
                         e.currentTarget.style.transform = 'translateY(0)';
                       }}
                     >
-                      <div className="relative w-full h-full min-h-[220px]">
+                      <div className="relative w-full h-full min-h-[200px]">
                         <img
                           src={largeItem.image_url || '/images/6reza.jpeg'}
                           alt={language === 'fa' ? largeItem.title_fa : language === 'ar' ? largeItem.title_ar : largeItem.title_en}
                           className="absolute inset-0 w-full h-full object-cover"
                           style={{ borderRadius: '16px', objectPosition: 'center' }}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = '/images/6reza.jpeg';
+                          }}
                         />
                       </div>
                     </div>
