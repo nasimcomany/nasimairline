@@ -309,8 +309,13 @@ const HomePage: React.FC = () => {
         
         if (sliders && sliders.length > 0) {
           setHeroSliders(sliders);
-          const imageUrls = sliders.map(slider => slider.image_url);
-          setHeroImages(imageUrls);
+          const imageUrls = sliders
+            .map((slider) => slider.image_url)
+            .filter((url): url is string => Boolean(url && String(url).trim()));
+          // Keep local public defaults when CMS slides have no usable image yet
+          if (imageUrls.length > 0) {
+            setHeroImages(imageUrls);
+          }
         }
       } catch (error) {
         console.error('Error loading hero sliders:', error);
@@ -1101,7 +1106,7 @@ const HomePage: React.FC = () => {
         {/* Navigation Arrows - Minimal and Elegant */}
         <button
           onClick={() => setCurrentHeroImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
-          className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group"
+          className="absolute left-6 top-[28%] sm:top-1/2 transform -translate-y-1/2 z-[5] bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group pointer-events-auto"
           style={{
             backdropFilter: 'blur(8px)',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
@@ -1112,7 +1117,7 @@ const HomePage: React.FC = () => {
         </button>
         <button
           onClick={() => setCurrentHeroImageIndex((prev) => (prev + 1) % heroImages.length)}
-          className="absolute right-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group"
+          className="absolute right-6 top-[28%] sm:top-1/2 transform -translate-y-1/2 z-[5] bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group pointer-events-auto"
           style={{
             backdropFilter: 'blur(8px)',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
@@ -1223,17 +1228,25 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Services Grid - Dynamic from API with fallback */}
-          <div className="flex flex-col md:flex-row md:flex-wrap lg:flex-nowrap items-stretch gap-4 sm:gap-6 max-w-full" style={{ justifyContent: 'center' }}>
+          <div className="flex flex-row flex-nowrap items-stretch gap-4 sm:gap-6 max-w-full" style={{ justifyContent: 'center' }}>
             {(
-              specialServicesItems.length > 0 ? specialServicesItems : [
-                { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/chair.jpeg', link_url: '/flights/map', order: 1 },
-                { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: '/images/overload.jpeg', link_url: 'weather', order: 2 },
-                { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: '/images/TravelingWithPets.jpg', link_url: 'https://fids.airport.ir/', order: 3 },
-                { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: '/images/travelwheelchair.jpeg', link_url: 'https://ikac.ir/', order: 4 },
-              ] as HomePageSectionItem[]
+              (() => {
+                const defaults = [
+                  { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/44.png', link_url: '/flights/map', order: 1 },
+                  { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: '/images/33.png', link_url: 'weather', order: 2 },
+                  { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: '/images/22.png', link_url: 'https://fids.airport.ir/', order: 3 },
+                  { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: '/images/11.png', link_url: 'https://ikac.ir/', order: 4 },
+                ] as HomePageSectionItem[];
+                if (!specialServicesItems.length) return defaults;
+                return specialServicesItems.map((item, i) => ({
+                  ...item,
+                  image_url: item.image_url || defaults[i]?.image_url || defaults[0].image_url,
+                  link_url: item.link_url || defaults[i]?.link_url || '',
+                }));
+              })()
             ).map((item, idx) => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
-              const imgSrc = item.image_url || (idx === 0 ? '/images/chair.jpeg' : idx === 1 ? '/images/overload.jpeg' : idx === 2 ? '/images/TravelingWithPets.jpg' : '/images/travelwheelchair.jpeg');
+              const imgSrc = item.image_url || (idx === 0 ? '/images/44.png' : idx === 1 ? '/images/33.png' : idx === 2 ? '/images/22.png' : '/images/11.png');
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
               // لینک با fallback: شبکه پروازی -> /flights/map، آب و هوا/وضعیت آب و هوا -> weather
               const linkUrl = (() => {
@@ -1246,7 +1259,7 @@ const HomePage: React.FC = () => {
               return (
                 <div 
                   key={item.id || idx}
-                  className="special-services-card relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-full md:w-[calc(50%-0.75rem)] lg:w-auto min-w-0"
+                  className="special-services-card relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 w-auto min-w-0"
                   style={{ 
                     flexBasis: isExpanded ? '32.5%' : '25%',
                     flexGrow: 0,
@@ -1714,7 +1727,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Layout: 4 کارت کوچک + ۱ کارت بزرگ — ارتفاع برابر و وسط‌چین */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
+          <div className="grid grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
             {(() => {
               const defaultExp: HomePageSectionItem[] = [
                 { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
@@ -1723,12 +1736,19 @@ const HomePage: React.FC = () => {
                 { id: 4, title_fa: 'تصویر ۴', title_ar: 'صورة ٤', title_en: 'Image 4', image_url: '/images/5reza.jpeg', link_url: 'https://ikac.ir/', order: 4, section_type: 'EXPERIENCE', is_active: true },
                 { id: 5, title_fa: 'ایرانولوژی', title_ar: 'إيرانولوجيا', title_en: 'Iranology', image_url: '/images/6reza.jpeg', link_url: '/iranology', order: 5, section_type: 'EXPERIENCE', is_active: true },
               ];
-              const items = experienceItems.length >= 5 ? experienceItems : defaultExp;
+              const items = (experienceItems.length ? experienceItems : defaultExp).map((item, i) => ({
+                ...item,
+                image_url: item.image_url || defaultExp[i]?.image_url || defaultExp[0].image_url,
+                link_url: item.link_url || defaultExp[i]?.link_url || '',
+              }));
+              while (items.length < 5) {
+                items.push(defaultExp[items.length]);
+              }
               const smallItems = items.slice(0, 4);
               const largeItem = items[4];
               return (
                 <>
-                  <div className="lg:col-span-3 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 w-full min-w-0 self-stretch" style={{ minHeight: 'clamp(280px, 42vw, 500px)' }}>
+                  <div className="col-span-3 grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 w-full min-w-0 self-stretch" style={{ minHeight: 'clamp(280px, 42vw, 500px)' }}>
                     {smallItems.map((item, idx) => {
                       const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
                       const imgSrc = item.image_url || (['/images/two.png', '/images/three.png', '/images/4reza.jpeg', '/images/5reza.jpeg'])[idx];
@@ -1765,7 +1785,7 @@ const HomePage: React.FC = () => {
                   </div>
                   {largeItem && (
                     <div
-                      className="lg:col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 w-full min-w-0 self-stretch"
+                      className="col-span-2 bg-white overflow-hidden group cursor-pointer transition-all duration-300 w-full min-w-0 self-stretch"
                       style={{
                         borderRadius: '16px',
                         border: '0.5px solid #d1d5db',
