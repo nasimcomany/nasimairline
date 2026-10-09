@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import EmiratesFlightSearchForm from '../components/FlightSearch/EmiratesFlightSearchForm';
@@ -107,6 +107,9 @@ const HomePage: React.FC = () => {
   const [showWeatherModal, setShowWeatherModal] = useState(false);
   const [hoveredService, setHoveredService] = useState<number | null>(null);
   const [activeFlightTab, setActiveFlightTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
+  /** Height of the glass tab bar so its blue bottom edge can sit on the hero bottom */
+  const [flightTabBarHeight, setFlightTabBarHeight] = useState(68);
+  const HERO_SLIDER_HEIGHT = 560;
   const [specialServicesItems, setSpecialServicesItems] = useState<HomePageSectionItem[]>([]);
   const [experienceItems, setExperienceItems] = useState<HomePageSectionItem[]>([]);
   const [surveyItems, setSurveyItems] = useState<HomePageSectionItem[]>([]);
@@ -300,6 +303,19 @@ const HomePage: React.FC = () => {
     if (!flightInfo.to) setFlightInfo(prev => ({ ...prev, to: t('home.flightSearch.defaultTo') }));
     if (!flightInfo.passengers) setFlightInfo(prev => ({ ...prev, passengers: t('home.flightSearch.defaultPassengers') }));
   }, [t]);
+
+  // Keep the glass tab bar's blue bottom edge flush with the hero slider bottom
+  useLayoutEffect(() => {
+    const measure = () => {
+      const tabs = document.getElementById('flight-search-tabs');
+      if (!tabs) return;
+      const h = Math.round(tabs.getBoundingClientRect().height);
+      if (h > 0) setFlightTabBarHeight(h);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [activeFlightTab, language]);
 
   // Fetch Hero Slider images from API
   useEffect(() => {
@@ -1047,15 +1063,15 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-white">
       <EmiratesHeader onWeatherClick={() => setShowWeatherModal(true)} />
 
-      {/* Hero + booking form: form sits partly on the hero image (desktop & mobile) */}
+      {/* Hero + booking: glass tabs on slider; blue tab line aligns with slider bottom edge */}
       <section
         id="search-form"
         className="relative z-20 overflow-visible"
-        style={{ marginBottom: 0, paddingBottom: 200 }}
+        style={{ paddingBottom: 300 }}
       >
         <div
           className="absolute inset-x-0 top-0 overflow-hidden"
-          style={{ height: 560, backgroundColor: 'rgba(15, 23, 42, 0.35)' }}
+          style={{ height: HERO_SLIDER_HEIGHT, backgroundColor: 'rgba(15, 23, 42, 0.35)' }}
         >
           {heroImages.map((imageUrl, index) => {
             const slider = heroSliders[index];
@@ -1119,7 +1135,7 @@ const HomePage: React.FC = () => {
             )
           }
           className="absolute left-3 sm:left-6 z-[5] -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 transition-all duration-300 group pointer-events-auto"
-          style={{ top: 280 }}
+          style={{ top: HERO_SLIDER_HEIGHT / 2 }}
           aria-label="Previous image"
         >
           <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -1129,7 +1145,7 @@ const HomePage: React.FC = () => {
             setCurrentHeroImageIndex((prev) => (prev + 1) % heroImages.length)
           }
           className="absolute right-3 sm:right-6 z-[5] -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 transition-all duration-300 group pointer-events-auto"
-          style={{ top: 280 }}
+          style={{ top: HERO_SLIDER_HEIGHT / 2 }}
           aria-label="Next image"
         >
           <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -1137,7 +1153,7 @@ const HomePage: React.FC = () => {
 
         <div
           className="relative z-10 flex flex-col"
-          style={{ minHeight: 560, pointerEvents: 'none' }}
+          style={{ height: HERO_SLIDER_HEIGHT, pointerEvents: 'none' }}
         >
           <div
             className="flex items-start justify-center px-4"
@@ -1172,25 +1188,27 @@ const HomePage: React.FC = () => {
               </p>
             </div>
           </div>
+        </div>
 
-          {/* Form sits on hero; section paddingBottom keeps full widget visible above next section */}
-          <div
-            className="max-w-7xl mx-auto w-full px-6 md:px-8"
-            style={{
-              marginTop: 'auto',
-              transform: 'translateY(28%)',
-              pointerEvents: 'auto',
-              position: 'relative',
-              zIndex: 30,
-            }}
-          >
+        {/*
+          Glass tab bar sits on the slider; measured height places its blue
+          bottom edge exactly on the hero bottom. White form body hangs below.
+        */}
+        <div
+          className="absolute inset-x-0 z-30 px-6 md:px-8"
+          style={{
+            top: HERO_SLIDER_HEIGHT - flightTabBarHeight,
+            pointerEvents: 'auto',
+          }}
+        >
+          <div className="max-w-7xl mx-auto w-full">
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
           </div>
         </div>
       </section>
 
       {/* Quote below booking — lower z so it never covers the form */}
-      <section className="relative z-0 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 48 }}>
+      <section className="relative z-0 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 24 }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 

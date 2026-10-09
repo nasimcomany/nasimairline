@@ -270,7 +270,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
       `}</style>
       <div className="rounded-3xl shadow-2xl overflow-visible max-w-full">
       {/* Tabs */}
-      <div className="flex border-b border-gray-300/30 bg-gray-400/30 backdrop-blur-xl rounded-t-3xl">
+      <div id="flight-search-tabs" className="flex border-b border-gray-300/30 bg-gray-400/30 backdrop-blur-xl rounded-t-3xl">
         <button
           onClick={() => handleTabChange('search')}
           className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
