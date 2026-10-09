@@ -1050,8 +1050,8 @@ const HomePage: React.FC = () => {
       {/* Hero + booking form: form sits partly on the hero image (desktop & mobile) */}
       <section
         id="search-form"
-        className="relative z-10 overflow-visible"
-        style={{ marginBottom: 56 }}
+        className="relative z-20 overflow-visible"
+        style={{ marginBottom: 0, paddingBottom: 200 }}
       >
         <div
           className="absolute inset-x-0 top-0 overflow-hidden"
@@ -1173,12 +1173,12 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Pull form up so the top half sits on the hero image */}
+          {/* Form sits on hero; section paddingBottom keeps full widget visible above next section */}
           <div
             className="max-w-7xl mx-auto w-full px-6 md:px-8"
             style={{
               marginTop: 'auto',
-              transform: 'translateY(42%)',
+              transform: 'translateY(28%)',
               pointerEvents: 'auto',
               position: 'relative',
               zIndex: 30,
@@ -1189,8 +1189,8 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Elegant Quote Section — extra top pad for overlapping search form */}
-      <section className="relative z-10 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 140 }}>
+      {/* Quote below booking — lower z so it never covers the form */}
+      <section className="relative z-0 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 48 }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 
