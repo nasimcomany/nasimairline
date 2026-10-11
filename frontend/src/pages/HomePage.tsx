@@ -1227,12 +1227,12 @@ const HomePage: React.FC = () => {
           <div className="flex flex-row flex-nowrap items-stretch gap-3 sm:gap-5 max-w-full overflow-x-auto pb-1" style={{ justifyContent: 'center' }}>
             {(
               (() => {
-                const svcBust = 'v=2';
+                const svcBust = 'v=3';
                 const defaults = [
                   { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: `/images/svc-network.jpg?${svcBust}`, link_url: '/flights/map', order: 1 },
-                  { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: `/images/svc-weather.jpg?${svcBust}`, link_url: '/flights/map', order: 2 },
-                  { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: `/images/svc-mehrabad.jpg?${svcBust}`, link_url: '/flights/map', order: 3 },
-                  { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: `/images/svc-ikia.jpg?${svcBust}`, link_url: '/flights/map', order: 4 },
+                  { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: `/images/svc-weather.jpg?${svcBust}`, link_url: 'weather', order: 2 },
+                  { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: `/images/svc-mehrabad.jpg?${svcBust}`, link_url: 'https://fids.airport.ir/', order: 3 },
+                  { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: `/images/svc-ikia.jpg?${svcBust}`, link_url: 'https://ikac.ir/', order: 4 },
                 ] as HomePageSectionItem[];
                 if (!specialServicesItems.length) return defaults;
                 return specialServicesItems.map((item, i) => {
@@ -1244,21 +1244,27 @@ const HomePage: React.FC = () => {
                   return {
                     ...item,
                     image_url,
-                    link_url: '/flights/map',
+                    link_url: item.link_url || defaults[i]?.link_url || '',
                   };
                 });
               })()
             ).map((item, idx) => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
               const defaultImgs = [
-                '/images/svc-network.jpg?v=2',
-                '/images/svc-weather.jpg?v=2',
-                '/images/svc-mehrabad.jpg?v=2',
-                '/images/svc-ikia.jpg?v=2',
+                '/images/svc-network.jpg?v=3',
+                '/images/svc-weather.jpg?v=3',
+                '/images/svc-mehrabad.jpg?v=3',
+                '/images/svc-ikia.jpg?v=3',
               ];
               const imgSrc = item.image_url || defaultImgs[idx] || defaultImgs[0];
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
-              const linkUrl = '/flights/map';
+              const linkUrl = (() => {
+                const isNetwork = /شبکه پروازی|Flight Network|شبكة الطيران/i.test(title) || item.order === 1;
+                const isWeather = /آب و هوا|وضعیت آب و هوا|Weather|الطقس|حالة الطقس/i.test(title) || item.order === 2;
+                if (isNetwork) return '/flights/map';
+                if (isWeather) return 'weather';
+                return item.link_url || '';
+              })();
               return (
                 <div 
                   key={item.id || idx}
@@ -1284,11 +1290,24 @@ const HomePage: React.FC = () => {
                         e.currentTarget.src = defaultImgs[idx] || defaultImgs[0];
                       }}
                     />
-                    <div className="absolute right-0 bottom-0 p-3 sm:p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                      <p className="text-black text-right font-semibold mb-2" style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif", fontSize: 'clamp(0.95rem, 2.2vw, 1.1rem)' }}>
+                    <div
+                      className="absolute inset-x-0 bottom-0 p-3 sm:p-4"
+                      style={{
+                        direction: language === 'en' ? 'ltr' : 'rtl',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0) 100%)',
+                      }}
+                    >
+                      <p
+                        className="text-white text-right font-semibold mb-2"
+                        style={{
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                          fontSize: 'clamp(0.95rem, 2.2vw, 1.1rem)',
+                          textShadow: '0 1px 3px rgba(0,0,0,0.45)',
+                        }}
+                      >
                         {title}
                       </p>
-                      <div className="h-0.5 transition-colors duration-300" style={{ backgroundColor: hoveredService === idx + 1 ? '#1e3a8a' : '#9ca3af' }}></div>
+                      <div className="h-0.5 transition-colors duration-300" style={{ backgroundColor: hoveredService === idx + 1 ? '#fff' : 'rgba(255,255,255,0.75)' }}></div>
                     </div>
                   </div>
                 </div>

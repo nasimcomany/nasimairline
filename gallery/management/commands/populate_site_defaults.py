@@ -27,13 +27,14 @@ HOME_DIR = ROOT / "defaults" / "homepage"
 MAG_DIR = ROOT / "defaults" / "magazine"
 MAG_FIXTURE = ROOT / "blog" / "fixtures" / "magazine_defaults.json"
 
-# Special Services brand images (order matches HomePage.tsx)
-SPECIAL_IMAGES = {
-    1: "svc-network.jpg",
-    2: "svc-weather.jpg",
-    3: "svc-mehrabad.jpg",
-    4: "svc-ikia.jpg",
+# Special Services brand images + original links (order matches HomePage.tsx)
+SPECIAL_SERVICES_BRAND = {
+    1: {"file": "svc-network.jpg", "link_url": "/flights/map"},
+    2: {"file": "svc-weather.jpg", "link_url": "weather"},
+    3: {"file": "svc-mehrabad.jpg", "link_url": "https://fids.airport.ir/"},
+    4: {"file": "svc-ikia.jpg", "link_url": "https://ikac.ir/"},
 }
+SPECIAL_IMAGES = {k: v["file"] for k, v in SPECIAL_SERVICES_BRAND.items()}
 
 # Homepage experience grid (order matches HomePage.tsx)
 EXPERIENCE_BRAND = {
@@ -125,7 +126,7 @@ POPULAR_ROUTES_BRAND = {
     },
 }
 
-BRAND_SEED_MARKER = "homepage_brand_assets_v5.done"
+BRAND_SEED_MARKER = "homepage_brand_assets_v6.done"
 
 
 class Command(BaseCommand):
@@ -172,7 +173,8 @@ class Command(BaseCommand):
         return path
 
     def _seed_special_services(self, force: bool):
-        for order, filename in SPECIAL_IMAGES.items():
+        for order, meta in SPECIAL_SERVICES_BRAND.items():
+            filename = meta["file"]
             path = self._open_home(filename)
             if not path:
                 continue
@@ -181,7 +183,7 @@ class Command(BaseCommand):
             ).first()
             if not item:
                 continue
-            item.link_url = "/flights/map"
+            item.link_url = meta["link_url"]
             item.is_active = True
             file_ok = False
             if item.image and not force:
