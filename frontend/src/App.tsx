@@ -5,6 +5,7 @@ import { store } from './store';
 import { LanguageProvider } from './contexts/LanguageContext';
 import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
+import ScrollToTopOnNavigate from './components/ScrollToTop/ScrollToTopOnNavigate';
 import DisabledRoute from './components/DisabledRoute';
 import { ChatProvider } from './contexts/ChatContext';
 
@@ -53,6 +54,7 @@ function App() {
         <ChatProvider>
           <Router>
             <div className="App">
+              <ScrollToTopOnNavigate />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<HomePage />} />
