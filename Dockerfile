@@ -17,8 +17,11 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY . .
 
-# Frontend must already exist at frontend/build (committed for deploy)
+# Frontend must already exist at frontend/build (committed for deploy).
+# Runflare does NOT run `npm run build` here — only collectstatic from this folder.
+# Fail fast if SPA is missing or still the pre-branding bundle.
 RUN test -f frontend/build/index.html \
+    && grep -R --include='*.js' -l '02173490000' frontend/build/static/js >/dev/null \
     && SECRET_KEY=build-only-not-for-runtime \
        DEBUG=False \
        ALLOWED_HOSTS=* \
