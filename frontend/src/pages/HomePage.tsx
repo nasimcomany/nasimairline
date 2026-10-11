@@ -1227,7 +1227,7 @@ const HomePage: React.FC = () => {
           <div className="flex flex-row flex-nowrap items-stretch gap-3 sm:gap-5 max-w-full overflow-x-auto pb-1" style={{ justifyContent: 'center' }}>
             {(
               (() => {
-                const svcBust = 'v=3';
+                const svcBust = 'v=4';
                 const defaults = [
                   { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: `/images/svc-network.jpg?${svcBust}`, link_url: '/flights/map', order: 1 },
                   { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: `/images/svc-weather.jpg?${svcBust}`, link_url: 'weather', order: 2 },
@@ -1251,10 +1251,10 @@ const HomePage: React.FC = () => {
             ).map((item, idx) => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
               const defaultImgs = [
-                '/images/svc-network.jpg?v=3',
-                '/images/svc-weather.jpg?v=3',
-                '/images/svc-mehrabad.jpg?v=3',
-                '/images/svc-ikia.jpg?v=3',
+                '/images/svc-network.jpg?v=4',
+                '/images/svc-weather.jpg?v=4',
+                '/images/svc-mehrabad.jpg?v=4',
+                '/images/svc-ikia.jpg?v=4',
               ];
               const imgSrc = item.image_url || defaultImgs[idx] || defaultImgs[0];
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
@@ -1291,23 +1291,23 @@ const HomePage: React.FC = () => {
                       }}
                     />
                     <div
-                      className="absolute inset-x-0 bottom-0 p-3 sm:p-4"
-                      style={{
-                        direction: language === 'en' ? 'ltr' : 'rtl',
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0) 100%)',
-                      }}
+                      className="absolute right-0 bottom-0 p-3 sm:p-4"
+                      style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
                     >
                       <p
                         className="text-white text-right font-semibold mb-2"
                         style={{
                           fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
                           fontSize: 'clamp(0.95rem, 2.2vw, 1.1rem)',
-                          textShadow: '0 1px 3px rgba(0,0,0,0.45)',
+                          textShadow: '0 1px 3px rgba(0,0,0,0.55)',
                         }}
                       >
                         {title}
                       </p>
-                      <div className="h-0.5 transition-colors duration-300" style={{ backgroundColor: hoveredService === idx + 1 ? '#fff' : 'rgba(255,255,255,0.75)' }}></div>
+                      <div
+                        className="h-0.5 transition-colors duration-300"
+                        style={{ backgroundColor: hoveredService === idx + 1 ? '#1e3a8a' : '#9ca3af' }}
+                      />
                     </div>
                   </div>
                 </div>
