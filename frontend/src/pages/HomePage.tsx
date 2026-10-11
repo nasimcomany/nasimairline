@@ -1918,7 +1918,7 @@ const HomePage: React.FC = () => {
                           </div>
                           <div style={{ fontSize: 'clamp(28px, 4.2vw, 48px)', fontWeight: 700, lineHeight: 1.2, marginTop: 6 }}>
                             {language === 'fa'
-                              ? '\u0627\u06cc\u0631\u0627\u0646 \u0634\u0646\u0627\u0633\u06cc' /* ایران شناسی */
+                              ? (largeItem.title_fa || '\u0627\u06cc\u0631\u0627\u0646 \u0634\u0646\u0627\u0633\u06cc')
                               : language === 'ar'
                               ? (largeItem.title_ar || 'إيرانولوجيا')
                               : (largeItem.title_en || 'Iranology')}

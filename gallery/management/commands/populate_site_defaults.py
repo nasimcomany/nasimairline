@@ -1,12 +1,16 @@
 """
-Seed ONLY Special Services (homepage section 1) default images + magazine articles.
-Does NOT touch hero / experience / survey / other section images.
+Seed homepage defaults (Special Services + one-time Experience/FAQ brand images) + magazine.
 
   python manage.py populate_site_defaults
   python manage.py populate_site_defaults --force
+  python manage.py populate_site_defaults --force-experience-faq
+
+Experience/FAQ brand images are applied once (marker file) so production gets the new
+assets, then admin can replace them freely without later deploys overwriting.
 """
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.core.management import call_command
@@ -31,15 +35,68 @@ SPECIAL_IMAGES = {
     4: "11.png",
 }
 
+# Homepage experience grid (order matches HomePage.tsx)
+EXPERIENCE_BRAND = {
+    1: {
+        "file": "exp-complaints.jpg",
+        "title_fa": "ثبت شکایات",
+        "title_ar": "تسجيل الشكاوى",
+        "title_en": "Complaints",
+        "link_url": "/survey",
+    },
+    2: {
+        "file": "exp-feedback.jpg",
+        "title_fa": "انتقادات و پیشنهادات",
+        "title_ar": "انتقادات واقتراحات",
+        "title_en": "Feedback",
+        "link_url": "/tickets",
+    },
+    3: {
+        "file": "exp-mehrabad.jpg",
+        "title_fa": "پروازهای فرودگاه مهرآباد",
+        "title_ar": "رحلات مطار مهرآباد",
+        "title_en": "Mehrabad Airport Flights",
+        "link_url": "https://fids.airport.ir/",
+    },
+    4: {
+        "file": "exp-ikia.jpg",
+        "title_fa": "پروازهای فرودگاه امام خمینی (ره)",
+        "title_ar": "رحلات مطار الإمام الخميني",
+        "title_en": "Imam Khomeini Airport Flights",
+        "link_url": "https://ikac.ir/",
+    },
+    5: {
+        "file": "exp-iranology.jpg",
+        "title_fa": "ایران شناسی",
+        "title_ar": "إيرانولوجيا",
+        "title_en": "Iranology",
+        "link_url": "/iranology",
+    },
+}
+
+FAQ_BRAND = {
+    1: "faq-booking.jpg",
+    2: "faq-amenities.jpg",
+    3: "faq-status.jpg",
+    4: "faq-support.jpg",
+}
+
+BRAND_SEED_MARKER = "homepage_brand_assets_v1.done"
+
 
 class Command(BaseCommand):
-    help = "Seed Special Services defaults (+ magazine). Other homepage images are left alone."
+    help = "Seed Special Services + one-time Experience/FAQ brand images (+ magazine)."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--force",
             action="store_true",
             help="Overwrite Special Services images / force magazine content refresh",
+        )
+        parser.add_argument(
+            "--force-experience-faq",
+            action="store_true",
+            help="Force-refresh Experience/FAQ brand images even if already seeded",
         )
         parser.add_argument(
             "--skip-magazine",
@@ -51,11 +108,12 @@ class Command(BaseCommand):
         force = options["force"]
         call_command("populate_homepage_sections")
         self._seed_special_services(force)
+        self._seed_experience_faq(force=options["force_experience_faq"])
         if not options["skip_magazine"]:
             self._seed_magazine(force)
         self.stdout.write(
             self.style.SUCCESS(
-                "Done: Special Services defaults only. Hero/experience/survey images untouched. Admin can edit all fields."
+                "Done: defaults seeded. Admin can still edit all CMS fields/images anytime."
             )
         )
 
@@ -90,6 +148,46 @@ class Command(BaseCommand):
             with path.open("rb") as fh:
                 item.image.save(path.name, File(fh), save=True)
             self.stdout.write(self.style.SUCCESS(f"SPECIAL_SERVICE#{order} <- {filename}"))
+
+    def _brand_marker_path(self) -> Path:
+        media_root = Path(getattr(settings, "MEDIA_ROOT", ROOT / "media"))
+        media_root.mkdir(parents=True, exist_ok=True)
+        return media_root / BRAND_SEED_MARKER
+
+    def _seed_experience_faq(self, force: bool = False):
+        marker = self._brand_marker_path()
+        if marker.exists() and not force:
+            self.stdout.write("Experience/FAQ brand assets already seeded; leave CMS as-is for admin edits.")
+            return
+
+        for order, meta in EXPERIENCE_BRAND.items():
+            path = self._open_home(meta["file"])
+            item = HomePageSectionItem.objects.filter(section_type="EXPERIENCE", order=order).first()
+            if not item or not path:
+                continue
+            item.title_fa = meta["title_fa"]
+            item.title_ar = meta["title_ar"]
+            item.title_en = meta["title_en"]
+            item.link_url = meta["link_url"]
+            item.is_active = True
+            with path.open("rb") as fh:
+                item.image.save(path.name, File(fh), save=False)
+            item.save()
+            self.stdout.write(self.style.SUCCESS(f"EXPERIENCE#{order} <- {meta['file']}"))
+
+        for order, filename in FAQ_BRAND.items():
+            path = self._open_home(filename)
+            item = HomePageSectionItem.objects.filter(section_type="FAQ", order=order).first()
+            if not item or not path:
+                continue
+            with path.open("rb") as fh:
+                item.image.save(path.name, File(fh), save=True)
+            self.stdout.write(self.style.SUCCESS(f"FAQ#{order} <- {filename}"))
+
+        try:
+            marker.write_text("seeded\n", encoding="utf-8")
+        except Exception as exc:
+            self.stdout.write(self.style.WARNING(f"Could not write seed marker: {exc}"))
 
     def _seed_magazine(self, force: bool):
         if not MAG_FIXTURE.exists():

@@ -117,11 +117,11 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f"Created SPECIAL_SERVICE order {item_data['order']}"))
 
         experience_items = [
-            {'order': 1, 'title_fa': 'تصویر ۱', 'title_ar': 'صورة ١', 'title_en': 'Image 1', 'link_url': '/tickets'},
-            {'order': 2, 'title_fa': 'تصویر ۲', 'title_ar': 'صورة ٢', 'title_en': 'Image 2', 'link_url': '/tickets'},
-            {'order': 3, 'title_fa': 'فرودگاه مهرآباد', 'title_ar': 'مطار مهرآباد', 'title_en': 'Mehrabad Airport', 'link_url': 'https://fids.airport.ir/'},
-            {'order': 4, 'title_fa': 'تصویر ۴', 'title_ar': 'صورة ٤', 'title_en': 'Image 4', 'link_url': 'https://ikac.ir/'},
-            {'order': 5, 'title_fa': 'ایرانولوژی', 'title_ar': 'إيرانولوجيا', 'title_en': 'Iranology', 'link_url': '/iranology'},
+            {'order': 1, 'title_fa': 'ثبت شکایات', 'title_ar': 'تسجيل الشكاوى', 'title_en': 'Complaints', 'link_url': '/survey'},
+            {'order': 2, 'title_fa': 'انتقادات و پیشنهادات', 'title_ar': 'انتقادات واقتراحات', 'title_en': 'Feedback', 'link_url': '/tickets'},
+            {'order': 3, 'title_fa': 'پروازهای فرودگاه مهرآباد', 'title_ar': 'رحلات مطار مهرآباد', 'title_en': 'Mehrabad Airport Flights', 'link_url': 'https://fids.airport.ir/'},
+            {'order': 4, 'title_fa': 'پروازهای فرودگاه امام خمینی (ره)', 'title_ar': 'رحلات مطار الإمام الخميني', 'title_en': 'Imam Khomeini Airport Flights', 'link_url': 'https://ikac.ir/'},
+            {'order': 5, 'title_fa': 'ایران شناسی', 'title_ar': 'إيرانولوجيا', 'title_en': 'Iranology', 'link_url': '/iranology'},
         ]
         for item_data in experience_items:
             _, created = HomePageSectionItem.objects.update_or_create(

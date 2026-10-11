@@ -17,7 +17,7 @@ echo "==> MEDIA_ROOT=$MEDIA_ROOT"
 echo "==> Running migrations"
 python manage.py migrate --noinput
 
-echo "==> Seeding Special Services defaults + missing magazine articles (hero/experience untouched)"
+echo "==> Seeding homepage defaults (Special Services + one-time Experience/FAQ brand images)"
 python manage.py populate_site_defaults || true
 
 echo "==> Starting gunicorn (config=gunicorn.conf.py)"
