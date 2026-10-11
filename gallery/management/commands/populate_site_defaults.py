@@ -126,7 +126,7 @@ POPULAR_ROUTES_BRAND = {
     },
 }
 
-BRAND_SEED_MARKER = "homepage_brand_assets_v7.done"
+BRAND_SEED_MARKER = "homepage_brand_assets_v10.done"
 
 
 class Command(BaseCommand):

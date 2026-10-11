@@ -1227,7 +1227,7 @@ const HomePage: React.FC = () => {
           <div className="flex flex-row flex-nowrap items-stretch gap-3 sm:gap-5 max-w-full overflow-x-auto pb-1" style={{ justifyContent: 'center' }}>
             {(
               (() => {
-                const svcBust = 'v=4';
+                const svcBust = 'v=7';
                 const defaults = [
                   { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: `/images/svc-network.jpg?${svcBust}`, link_url: '/flights/map', order: 1 },
                   { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: `/images/svc-weather.jpg?${svcBust}`, link_url: 'weather', order: 2 },
@@ -1251,10 +1251,10 @@ const HomePage: React.FC = () => {
             ).map((item, idx) => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
               const defaultImgs = [
-                '/images/svc-network.jpg?v=4',
-                '/images/svc-weather.jpg?v=4',
-                '/images/svc-mehrabad.jpg?v=4',
-                '/images/svc-ikia.jpg?v=4',
+                '/images/svc-network.jpg?v=7',
+                '/images/svc-weather.jpg?v=7',
+                '/images/svc-mehrabad.jpg?v=7',
+                '/images/svc-ikia.jpg?v=7',
               ];
               const imgSrc = item.image_url || defaultImgs[idx] || defaultImgs[0];
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
