@@ -1779,7 +1779,7 @@ const HomePage: React.FC = () => {
           {/* Layout: 4 کارت کوچک + ۱ کارت بزرگ — ارتفاع برابر و وسط‌چین */}
           <div className="grid grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
             {(() => {
-              const cacheBust = 'v=39';
+              const cacheBust = 'v=40';
               const defaultExp: HomePageSectionItem[] = [
                 { id: 1, title_fa: 'ثبت شکایات', title_ar: 'تسجيل الشكاوى', title_en: 'Complaints', image_url: `/images/exp-complaints.jpg?${cacheBust}`, link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
                 { id: 2, title_fa: 'انتقادات و پیشنهادات', title_ar: 'انتقادات واقتراحات', title_en: 'Feedback', image_url: `/images/exp-feedback.jpg?${cacheBust}`, link_url: '/tickets', order: 2, section_type: 'EXPERIENCE', is_active: true },

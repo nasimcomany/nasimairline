@@ -81,7 +81,7 @@ FAQ_BRAND = {
     4: "faq-support.jpg",
 }
 
-BRAND_SEED_MARKER = "homepage_brand_assets_v1.done"
+BRAND_SEED_MARKER = "homepage_brand_assets_v2.done"
 
 
 class Command(BaseCommand):
