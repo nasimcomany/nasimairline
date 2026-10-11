@@ -136,107 +136,59 @@ const HomePage: React.FC = () => {
     linkUrl?: string;
   }
 
+  const routeImageBust = 'v=1';
+  const brandedRouteImages = [
+    `/images/route-mashhad.jpg?${routeImageBust}`,
+    `/images/route-kish.jpg?${routeImageBust}`,
+    `/images/route-shiraz.jpg?${routeImageBust}`,
+    `/images/route-isfahan.jpg?${routeImageBust}`,
+  ];
+
   const defaultOfferCards: OfferCard[] = [
     {
       id: 1,
-      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'دبی', ar: 'دبي', en: 'Dubai' },
-      price: { fa: '۱۵,۸۰۰,۰۰۰ تومان', ar: '۱۵,۸۰۰,۰۰۰ ريال', en: '15,800,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۰۵', ar: '۱۴۰۴/۱۰/۰۵', en: '2025/12/26' },
-      image: '/images/tehran.jpg',
-      alt: 'تهران - دبی',
-      fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
+      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
+      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
+      price: { fa: '۸,۵۰۰,۰۰۰ تومان', ar: '۸,۵۰۰,۰۰۰ ريال', en: '8,500,000 Toman' },
+      date: { fa: '', ar: '', en: '' },
+      image: brandedRouteImages[0],
+      alt: 'مشهد - تهران',
+      fallbackImage: brandedRouteImages[0],
+      linkUrl: '/tickets',
     },
     {
       id: 2,
-      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      to: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
-      price: { fa: '۹,۵۰۰,۰۰۰ تومان', ar: '۹,۵۰۰,۰۰۰ ريال', en: '9,500,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۰۸', ar: '۱۴۰۴/۱۰/۰۸', en: '2025/12/29' },
-      image: '/images/mashhad.jpeg',
-      alt: 'مشهد - کیش',
-      fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
+      from: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
+      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
+      price: { fa: '۷,۲۰۰,۰۰۰ تومان', ar: '۷,۲۰۰,۰۰۰ ريال', en: '7,200,000 Toman' },
+      date: { fa: '', ar: '', en: '' },
+      image: brandedRouteImages[1],
+      alt: 'کیش - تهران',
+      fallbackImage: brandedRouteImages[1],
+      linkUrl: '/tickets',
     },
     {
       id: 3,
-      from: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
-      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      price: { fa: '۶,۲۰۰,۰۰۰ تومان', ar: '۶,۲۰۰,۰۰۰ ريال', en: '6,200,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۱۰', ar: '۱۴۰۴/۱۰/۱۰', en: '2025/12/31' },
-      image: '/images/isfahan.jpg',
-      alt: 'اصفهان - تهران',
-      fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
+      from: { fa: 'شیراز', ar: 'شيراز', en: 'Shiraz' },
+      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
+      price: { fa: '۶,۹۰۰,۰۰۰ تومان', ar: '۶,۹۰۰,۰۰۰ ريال', en: '6,900,000 Toman' },
+      date: { fa: '', ar: '', en: '' },
+      image: brandedRouteImages[2],
+      alt: 'شیراز - مشهد',
+      fallbackImage: brandedRouteImages[2],
+      linkUrl: '/tickets',
     },
     {
       id: 4,
-      from: { fa: 'تبریز', ar: 'تبريز', en: 'Tabriz' },
-      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۸,۹۰۰,۰۰۰ تومان', ar: '۸,۹۰۰,۰۰۰ ريال', en: '8,900,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۱۲', ar: '۱۴۰۴/۱۰/۱۲', en: '2026/01/02' },
-      image: '/images/tabriz.jpg',
-      alt: 'تبریز - مشهد',
-      fallbackImage: '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg'
-    },
-    {
-      id: 5,
-      from: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
+      from: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
       to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      price: { fa: '۱۰,۳۰۰,۰۰۰ تومان', ar: '۱۰,۳۰۰,۰۰۰ ريال', en: '10,300,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۱۵', ar: '۱۴۰۴/۱۰/۱۵', en: '2026/01/05' },
-      image: '/images/kish.jpg',
-      alt: 'کیش - تهران',
-      fallbackImage: '/images/airport-crew.jpg'
+      price: { fa: '۵,۸۰۰,۰۰۰ تومان', ar: '۵,۸۰۰,۰۰۰ ريال', en: '5,800,000 Toman' },
+      date: { fa: '', ar: '', en: '' },
+      image: brandedRouteImages[3],
+      alt: 'اصفهان - تهران',
+      fallbackImage: brandedRouteImages[3],
+      linkUrl: '/tickets',
     },
-    {
-      id: 6,
-      from: { fa: 'آبادان', ar: 'أبادان', en: 'Abadan' },
-      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۱۱,۷۰۰,۰۰۰ تومان', ar: '۱۱,۷۰۰,۰۰۰ ريال', en: '11,700,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۱۸', ar: '۱۴۰۴/۱۰/۱۸', en: '2026/01/08' },
-      image: '/images/abadan.jpeg',
-      alt: 'آبادان - مشهد',
-      fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
-    },
-    {
-      id: 7,
-      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
-      price: { fa: '۷,۴۰۰,۰۰۰ تومان', ar: '۷,۴۰۰,۰۰۰ ريال', en: '7,400,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۲۰', ar: '۱۴۰۴/۱۰/۲۰', en: '2026/01/10' },
-      image: '/images/tehran.jpg',
-      alt: 'تهران - اصفهان',
-      fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
-    },
-    {
-      id: 8,
-      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      to: { fa: 'تبریز', ar: 'تبريز', en: 'Tabriz' },
-      price: { fa: '۹,۸۰۰,۰۰۰ تومان', ar: '۹,۸۰۰,۰۰۰ ريال', en: '9,800,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۲۲', ar: '۱۴۰۴/۱۰/۲۲', en: '2026/01/12' },
-      image: '/images/mashhad.jpeg',
-      alt: 'مشهد - تبریز',
-      fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
-    },
-    {
-      id: 9,
-      from: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
-      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۱۲,۱۰۰,۰۰۰ تومان', ar: '۱۲,۱۰۰,۰۰۰ ريال', en: '12,100,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۲۵', ar: '۱۴۰۴/۱۰/۲۵', en: '2026/01/15' },
-      image: '/images/kish.jpg',
-      alt: 'کیش - مشهد',
-      fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
-    },
-    {
-      id: 10,
-      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
-      price: { fa: '۸,۶۰۰,۰۰۰ تومان', ar: '۸,۶۰۰,۰۰۰ ريال', en: '8,600,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۲۸', ar: '۱۴۰۴/۱۰/۲۸', en: '2026/01/18' },
-      image: '/images/tehran.jpg',
-      alt: 'تهران - کیش',
-      fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
-    }
   ];
 
   const splitRouteTitle = (title: string) => {
@@ -249,10 +201,15 @@ const HomePage: React.FC = () => {
 
   const activeOfferCards: OfferCard[] = useMemo(() => {
     if (!popularRouteItems.length) return defaultOfferCards;
-    return popularRouteItems.map((item) => {
+    return popularRouteItems.map((item, index) => {
       const fa = splitRouteTitle(item.title_fa || '');
       const ar = splitRouteTitle(item.title_ar || item.title_fa || '');
       const en = splitRouteTitle(item.title_en || item.title_fa || '');
+      const branded = brandedRouteImages[index % brandedRouteImages.length];
+      const cmsUrl = item.image_url || '';
+      const image = cmsUrl
+        ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}${routeImageBust}`
+        : branded;
       return {
         id: item.id,
         from: { fa: fa.from, ar: ar.from, en: en.from },
@@ -263,9 +220,9 @@ const HomePage: React.FC = () => {
           en: item.description_en || '',
         },
         date: { fa: '', ar: '', en: '' },
-        image: item.image_url || '/images/tehran.jpg',
+        image,
         alt: item.title_fa,
-        fallbackImage: '/images/airport-plane-photo_991869-62.jpg',
+        fallbackImage: branded,
         linkUrl: item.link_url || '/tickets',
       };
     });
@@ -273,7 +230,7 @@ const HomePage: React.FC = () => {
 
   // State for managing visible cards and queue
   const [visibleCardIds, setVisibleCardIds] = useState<number[]>([1, 2, 3, 4]);
-  const [queueCardIds, setQueueCardIds] = useState<number[]>([5, 6, 7, 8, 9, 10]);
+  const [queueCardIds, setQueueCardIds] = useState<number[]>([]);
   const [newCardId, setNewCardId] = useState<number | null>(null);
   const [removingCard, setRemovingCard] = useState<OfferCard | null>(null);
   
@@ -1571,7 +1528,9 @@ const HomePage: React.FC = () => {
                   src={card.image}
                   alt={card.alt}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  style={{ objectPosition: 'center center' }}
                   onError={(e) => {
+                    e.currentTarget.onerror = null;
                     e.currentTarget.src = card.fallbackImage;
                   }}
                 />

@@ -81,11 +81,55 @@ FAQ_BRAND = {
     4: "faq-support.jpg",
 }
 
-BRAND_SEED_MARKER = "homepage_brand_assets_v3.done"
+# Popular routes cards (destination imagery; order matches homepage section)
+POPULAR_ROUTES_BRAND = {
+    1: {
+        "file": "route-mashhad.jpg",
+        "title_fa": "مشهد - تهران",
+        "title_ar": "مشهد - طهران",
+        "title_en": "Mashhad - Tehran",
+        "description_fa": "از ۸,۵۰۰,۰۰۰ تومان",
+        "description_ar": "من ۸,۵۰۰,۰۰۰ تومان",
+        "description_en": "From 8,500,000 Toman",
+        "link_url": "/tickets",
+    },
+    2: {
+        "file": "route-kish.jpg",
+        "title_fa": "کیش - تهران",
+        "title_ar": "كيش - طهران",
+        "title_en": "Kish - Tehran",
+        "description_fa": "از ۷,۲۰۰,۰۰۰ تومان",
+        "description_ar": "من ۷,۲۰۰,۰۰۰ تومان",
+        "description_en": "From 7,200,000 Toman",
+        "link_url": "/tickets",
+    },
+    3: {
+        "file": "route-shiraz.jpg",
+        "title_fa": "شیراز - مشهد",
+        "title_ar": "شيراز - مشهد",
+        "title_en": "Shiraz - Mashhad",
+        "description_fa": "از ۶,۹۰۰,۰۰۰ تومان",
+        "description_ar": "من ۶,۹۰۰,۰۰۰ تومان",
+        "description_en": "From 6,900,000 Toman",
+        "link_url": "/tickets",
+    },
+    4: {
+        "file": "route-isfahan.jpg",
+        "title_fa": "اصفهان - تهران",
+        "title_ar": "أصفهان - طهران",
+        "title_en": "Isfahan - Tehran",
+        "description_fa": "از ۵,۸۰۰,۰۰۰ تومان",
+        "description_ar": "من ۵,۸۰۰,۰۰۰ تومان",
+        "description_en": "From 5,800,000 Toman",
+        "link_url": "/tickets",
+    },
+}
+
+BRAND_SEED_MARKER = "homepage_brand_assets_v4.done"
 
 
 class Command(BaseCommand):
-    help = "Seed Special Services + one-time Experience/FAQ brand images (+ magazine)."
+    help = "Seed Special Services + one-time Experience/FAQ/Popular Routes brand images (+ magazine)."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -183,6 +227,32 @@ class Command(BaseCommand):
             with path.open("rb") as fh:
                 item.image.save(path.name, File(fh), save=True)
             self.stdout.write(self.style.SUCCESS(f"FAQ#{order} <- {filename}"))
+
+        for order, meta in POPULAR_ROUTES_BRAND.items():
+            path = self._open_home(meta["file"])
+            item = HomePageSectionItem.objects.filter(
+                section_type="POPULAR_ROUTES", order=order
+            ).first()
+            if not item:
+                item = HomePageSectionItem(
+                    section_type="POPULAR_ROUTES",
+                    order=order,
+                    is_active=True,
+                )
+            if not path:
+                continue
+            item.title_fa = meta["title_fa"]
+            item.title_ar = meta["title_ar"]
+            item.title_en = meta["title_en"]
+            item.description_fa = meta["description_fa"]
+            item.description_ar = meta["description_ar"]
+            item.description_en = meta["description_en"]
+            item.link_url = meta["link_url"]
+            item.is_active = True
+            with path.open("rb") as fh:
+                item.image.save(path.name, File(fh), save=False)
+            item.save()
+            self.stdout.write(self.style.SUCCESS(f"POPULAR_ROUTES#{order} <- {meta['file']}"))
 
         try:
             marker.write_text("seeded\n", encoding="utf-8")
