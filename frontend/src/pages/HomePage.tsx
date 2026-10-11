@@ -1725,7 +1725,7 @@ const HomePage: React.FC = () => {
                 marginBottom: '6px',
                 color: '#000000',
                 opacity: 1,
-                fontFamily: "'IranNastaliq', 'Nastaliq', 'Al Qalam Taj Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif",
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 fontStyle: 'normal',
                 fontVariant: 'normal',
                 textDecoration: 'none'
@@ -1779,20 +1779,34 @@ const HomePage: React.FC = () => {
           {/* Layout: 4 کارت کوچک + ۱ کارت بزرگ — ارتفاع برابر و وسط‌چین */}
           <div className="grid grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
             {(() => {
+              const cacheBust = 'v=39';
               const defaultExp: HomePageSectionItem[] = [
-                { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
-                { id: 2, title_fa: 'تصویر ۲', title_ar: 'صورة ٢', title_en: 'Image 2', image_url: '/images/three.png', link_url: '/tickets', order: 2, section_type: 'EXPERIENCE', is_active: true },
-                { id: 3, title_fa: 'فرودگاه مهرآباد', title_ar: 'مطار مهرآباد', title_en: 'Mehrabad Airport', image_url: '/images/4reza.jpeg', link_url: 'https://fids.airport.ir/', order: 3, section_type: 'EXPERIENCE', is_active: true },
-                { id: 4, title_fa: 'تصویر ۴', title_ar: 'صورة ٤', title_en: 'Image 4', image_url: '/images/5reza.jpeg', link_url: 'https://ikac.ir/', order: 4, section_type: 'EXPERIENCE', is_active: true },
-                { id: 5, title_fa: 'ایرانولوژی', title_ar: 'إيرانولوجيا', title_en: 'Iranology', image_url: '/images/6reza.jpeg', link_url: '/iranology', order: 5, section_type: 'EXPERIENCE', is_active: true },
+                { id: 1, title_fa: 'ثبت شکایات', title_ar: 'تسجيل الشكاوى', title_en: 'Complaints', image_url: `/images/exp-complaints.jpg?${cacheBust}`, link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
+                { id: 2, title_fa: 'انتقادات و پیشنهادات', title_ar: 'انتقادات واقتراحات', title_en: 'Feedback', image_url: `/images/exp-feedback.jpg?${cacheBust}`, link_url: '/tickets', order: 2, section_type: 'EXPERIENCE', is_active: true },
+                { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: `/images/exp-mehrabad.jpg?${cacheBust}`, link_url: 'https://fids.airport.ir/', order: 3, section_type: 'EXPERIENCE', is_active: true },
+                { id: 4, title_fa: 'پروازهای فرودگاه امام خمینی (ره)', title_ar: 'رحلات مطار الإمام الخميني', title_en: 'Imam Khomeini Airport Flights', image_url: `/images/exp-ikia.jpg?${cacheBust}`, link_url: 'https://ikac.ir/', order: 4, section_type: 'EXPERIENCE', is_active: true },
+                { id: 5, title_fa: 'ایران شناسی', title_ar: 'إيرانولوجيا', title_en: 'Iranology', image_url: `/images/exp-iranology.jpg?${cacheBust}`, link_url: '/iranology', order: 5, section_type: 'EXPERIENCE', is_active: true },
               ];
-              const fallbackImgs = ['/images/two.png', '/images/three.png', '/images/4reza.jpeg', '/images/5reza.jpeg', '/images/6reza.jpeg'];
-              const items = (experienceItems.length ? experienceItems : defaultExp).map((item, i) => ({
-                ...item,
-                // Prefer CMS URL; if missing use public fallback. Broken CMS URLs handled via onError.
-                image_url: item.image_url || defaultExp[i]?.image_url || fallbackImgs[i],
-                link_url: item.link_url || defaultExp[i]?.link_url || '',
-              }));
+              const fallbackImgs = [
+                `/images/exp-complaints.jpg?${cacheBust}`,
+                `/images/exp-feedback.jpg?${cacheBust}`,
+                `/images/exp-mehrabad.jpg?${cacheBust}`,
+                `/images/exp-ikia.jpg?${cacheBust}`,
+                `/images/exp-iranology.jpg?${cacheBust}`,
+              ];
+              // Prefer CMS uploads so admin can always replace images/text; local paths are fallback only.
+              const items = (experienceItems.length ? experienceItems : defaultExp).map((item, i) => {
+                const link = item.link_url || defaultExp[i]?.link_url || '';
+                const cmsUrl = item.image_url || '';
+                const image_url = cmsUrl
+                  ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}${cacheBust}`
+                  : (defaultExp[i]?.image_url || fallbackImgs[i]);
+                return {
+                  ...item,
+                  image_url,
+                  link_url: link,
+                };
+              });
               while (items.length < 5) {
                 const d = defaultExp[items.length];
                 items.push({
@@ -1833,7 +1847,10 @@ const HomePage: React.FC = () => {
                               src={imgSrc}
                               alt={title}
                               className="absolute inset-0 w-full h-full object-cover"
-                              style={{ borderRadius: '16px', objectPosition: 'center' }}
+                              style={{
+                                borderRadius: '16px',
+                                objectPosition: 'center',
+                              }}
                               onError={(e) => {
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = fallbackImgs[idx];
@@ -1865,15 +1882,57 @@ const HomePage: React.FC = () => {
                     >
                       <div className="relative w-full h-full min-h-[200px]">
                         <img
-                          src={largeItem.image_url || '/images/6reza.jpeg'}
+                          src={largeItem.image_url || `/images/exp-iranology.jpg?${cacheBust}`}
                           alt={language === 'fa' ? largeItem.title_fa : language === 'ar' ? largeItem.title_ar : largeItem.title_en}
                           className="absolute inset-0 w-full h-full object-cover"
-                          style={{ borderRadius: '16px', objectPosition: 'center' }}
+                          style={{ borderRadius: '16px', objectPosition: 'center center' }}
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = '/images/6reza.jpeg';
+                            e.currentTarget.src = `/images/exp-iranology.jpg?${cacheBust}`;
                           }}
                         />
+                        <div
+                          className="absolute inset-x-0 top-0 z-[2] flex flex-col items-center pointer-events-none"
+                          dir={language === 'en' ? 'ltr' : 'rtl'}
+                          style={{
+                            paddingTop: '8%',
+                            paddingLeft: '8%',
+                            paddingRight: '8%',
+                            textAlign: 'center',
+                            color: '#fff',
+                            textShadow: '0 3px 10px rgba(0,0,0,0.55)',
+                            // Same stack as page headings — DigiHamisheBold alone can hide ی in هواپیمایی
+                            fontFamily: language === 'fa'
+                              ? "'DigiHamishe', 'DigiHamisheBold', Tahoma, sans-serif"
+                              : language === 'ar'
+                              ? "'Noto Sans Arabic', Tahoma, sans-serif"
+                              : 'Tahoma, sans-serif',
+                          }}
+                        >
+                          <div style={{ fontSize: 'clamp(15px, 2.2vw, 24px)', fontWeight: 700, lineHeight: 1.35 }}>
+                            {language === 'fa'
+                              ? '\u0647\u0648\u0627\u067e\u06cc\u0645\u0627\u06cc\u06cc \u0646\u0633\u06cc\u0645' /* هواپیمایی نسیم */
+                              : language === 'ar'
+                              ? 'طيران نسيم'
+                              : 'Nasim Air'}
+                          </div>
+                          <div style={{ fontSize: 'clamp(28px, 4.2vw, 48px)', fontWeight: 700, lineHeight: 1.2, marginTop: 6 }}>
+                            {language === 'fa'
+                              ? '\u0627\u06cc\u0631\u0627\u0646 \u0634\u0646\u0627\u0633\u06cc' /* ایران شناسی */
+                              : language === 'ar'
+                              ? (largeItem.title_ar || 'إيرانولوجيا')
+                              : (largeItem.title_en || 'Iranology')}
+                          </div>
+                          <div
+                            style={{
+                              width: 'clamp(48px, 8vw, 88px)',
+                              height: 3,
+                              background: '#fff',
+                              marginTop: 10,
+                              borderRadius: 2,
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
@@ -3023,16 +3082,36 @@ const HomePage: React.FC = () => {
   </div>
 
   <div className="flex justify-center items-center flex-wrap gap-4 sm:gap-8 md:gap-[42px] px-2 py-4 sm:py-5">
-    {(faqItems.length > 0
-      ? faqItems
-      : [
-          { id: 1, title_fa: 'راهنمای رزرو و خرید بلیط', title_ar: 'دليل الحجز وشراء التذاكر', title_en: 'Booking guide', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 1, is_active: true, section_type: 'FAQ' },
-          { id: 2, title_fa: 'امکانات و خدمات در پرواز', title_ar: 'المرافق والخدمات', title_en: 'Flight amenities', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 2, is_active: true, section_type: 'FAQ' },
-          { id: 3, title_fa: 'وضعیت پرواز و جزئیات', title_ar: 'حالة الرحلة والتفاصيل', title_en: 'Flight status', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 3, is_active: true, section_type: 'FAQ' },
-          { id: 4, title_fa: 'راه‌های ارتباط با پشتیبانی', title_ar: 'طرق الاتصال بالدعم', title_en: 'Contact support', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 4, is_active: true, section_type: 'FAQ' },
-        ] as HomePageSectionItem[]
-    ).map((faq) => {
+    {(() => {
+      const faqCacheBust = 'v=2';
+      const faqFallbackImgs = [
+        `/images/faq-booking.jpg?${faqCacheBust}`,
+        `/images/faq-amenities.jpg?${faqCacheBust}`,
+        `/images/faq-status.jpg?${faqCacheBust}`,
+        `/images/faq-support.jpg?${faqCacheBust}`,
+      ];
+      const defaultFaqs: HomePageSectionItem[] = [
+        { id: 1, title_fa: 'راهنمای رزرو و خرید بلیط', title_ar: 'دليل الحجز وشراء التذاكر', title_en: 'Booking guide', description_fa: '', description_ar: '', description_en: '', image_url: faqFallbackImgs[0], link_url: '', order: 1, is_active: true, section_type: 'FAQ' },
+        { id: 2, title_fa: 'امکانات و خدمات در پرواز', title_ar: 'المرافق والخدمات', title_en: 'Flight amenities', description_fa: '', description_ar: '', description_en: '', image_url: faqFallbackImgs[1], link_url: '', order: 2, is_active: true, section_type: 'FAQ' },
+        { id: 3, title_fa: 'وضعیت پرواز و جزئیات', title_ar: 'حالة الرحلة والتفاصيل', title_en: 'Flight status', description_fa: '', description_ar: '', description_en: '', image_url: faqFallbackImgs[2], link_url: '', order: 3, is_active: true, section_type: 'FAQ' },
+        { id: 4, title_fa: 'راه‌های ارتباط با پشتیبانی', title_ar: 'طرق الاتصال بالدعم', title_en: 'Contact support', description_fa: '', description_ar: '', description_en: '', image_url: faqFallbackImgs[3], link_url: '', order: 4, is_active: true, section_type: 'FAQ' },
+      ];
+      const list = (faqItems.length > 0 ? faqItems : defaultFaqs).map((faq, i) => {
+        const cmsUrl = faq.image_url || '';
+        const image_url = cmsUrl
+          ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}${faqCacheBust}`
+          : (defaultFaqs[i]?.image_url || faqFallbackImgs[i]);
+        return { ...faq, image_url };
+      });
+      return list;
+    })().map((faq, faqIdx) => {
       const label = pickLang(faq.title_fa, faq.title_ar, faq.title_en);
+      const faqFallbackImgs = [
+        '/images/faq-booking.jpg?v=2',
+        '/images/faq-amenities.jpg?v=2',
+        '/images/faq-status.jpg?v=2',
+        '/images/faq-support.jpg?v=2',
+      ];
       return (
         <div key={faq.id} className="flex flex-col items-center">
           <button
@@ -3048,11 +3127,11 @@ const HomePage: React.FC = () => {
               width: 'clamp(120px, 42vw, 195px)',
               height: 'clamp(120px, 42vw, 195px)',
               borderRadius: '9999px',
-              border: '3px solid #1e40af',
+              border: '3px solid #1e3a8a',
               boxShadow: '0 18px 35px rgba(0,0,0,0.4)',
               transform: 'translateY(0)',
               transition: 'all 0.25s ease',
-              backgroundColor: '#93c5fd',
+              backgroundColor: '#1e3a8a',
               position: 'relative',
               overflow: 'hidden',
               maxWidth: '100%',
@@ -3067,14 +3146,16 @@ const HomePage: React.FC = () => {
               e.currentTarget.style.boxShadow = '0 18px 35px rgba(0,0,0,0.4)';
             }}
           >
-            {faq.image_url ? (
-              <img
-                src={faq.image_url}
-                alt={label}
-                className="w-full h-full object-cover rounded-full absolute inset-0"
-                style={{ zIndex: 1 }}
-              />
-            ) : null}
+            <img
+              src={faq.image_url || faqFallbackImgs[faqIdx] || faqFallbackImgs[0]}
+              alt={label}
+              className="w-full h-full object-cover rounded-full absolute inset-0"
+              style={{ zIndex: 1 }}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = faqFallbackImgs[faqIdx] || faqFallbackImgs[0];
+              }}
+            />
           </button>
           <span
             className={`text-xs text-center mt-3 ${fontClass}`}
@@ -3162,9 +3243,9 @@ const HomePage: React.FC = () => {
                 </p>
                 <ul className="space-y-2">
                   <li>
-                    <a href="tel:7340000" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="tel:02173490000" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <PhoneIcon className="w-4 h-4 flex-shrink-0" />
-                      {language === 'fa' ? 'تلفن' : language === 'ar' ? 'هاتف' : 'Phone'}: 7340000
+                      {language === 'fa' ? 'تلفن' : language === 'ar' ? 'هاتف' : 'Phone'}: 02173490000
                     </a>
                   </li>
                   <li>
@@ -3195,7 +3276,7 @@ const HomePage: React.FC = () => {
                     </a>
                   </li>
                   <li>
-                    <a href="#" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="/safety-report/safety" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'گزارش ایمنی پرواز' : language === 'ar' ? 'تقرير سلامة الرحلة' : 'Flight Safety Report'}
                     </a>
@@ -3210,48 +3291,135 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* بخش لوگوها: شبکه های اجتماعی بالا، لوگوهای YATA/CAO/... پایین */}
-            <div className="flex flex-col gap-4 flex-shrink-0 items-center">
+            {/* بخش لوگوها: شبکه های اجتماعی بالا، لوگوهای IATA/CAO/... پایین */}
+            <div className="flex flex-col gap-5 flex-shrink-0 items-center w-full lg:w-auto lg:min-w-[640px] overflow-visible">
               {/* ارتباط با ما در شبکه های اجتماعی - وسط‌چین */}
-              <div className={`flex flex-wrap items-center justify-center gap-3 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+              <div
+                className={`flex flex-wrap items-center justify-center ${fontClass}`}
+                style={{
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  gap: 8,
+                }}
+              >
                 <span className="text-sm font-medium text-white text-center sm:whitespace-nowrap">
                   {t('footer.socialTitle')}
                 </span>
-                <div className="flex items-center gap-1.5">
-                  <a href="https://www.instagram.com/flynasim" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 transition-colors hover:opacity-80" title="Instagram" aria-label="Instagram">
-                    <img src="/images/instagram.svg" alt="Instagram" className="w-6 h-6 object-contain" />
-                  </a>
-                  <a href="https://wa.me/989124268358" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 transition-colors hover:opacity-80" title="WhatsApp" aria-label="WhatsApp">
-                    <svg className="w-6 h-6" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
-                  </a>
-                  <a href="https://www.linkedin.com/company/flynasim" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 transition-colors hover:opacity-80" title="LinkedIn" aria-label="LinkedIn">
-                    <svg className="w-6 h-6" fill="#0A66C2" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                    </svg>
-                  </a>
-                  <a href="https://www.aparat.com/nasimair" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 transition-colors hover:opacity-80" title="آپارات" aria-label="Aparat">
-                    <img src="https://cdn.simpleicons.org/aparat/ea1d5d" alt="آپارات" className="w-6 h-6 object-contain" />
-                  </a>
+                <div className="flex items-center overflow-visible" style={{ gap: 8 }}>
+                  {([
+                    {
+                      href: 'https://www.instagram.com/flynasim',
+                      title: 'Instagram',
+                      node: <img src="/images/instagram.svg?v=4" alt="Instagram" style={{ width: 16, height: 16, objectFit: 'contain', display: 'block' }} />,
+                    },
+                    {
+                      href: 'https://wa.me/989124268358',
+                      title: 'WhatsApp',
+                      node: (
+                        <svg style={{ width: 16, height: 16, display: 'block' }} fill="#ffffff" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      href: 'https://www.linkedin.com/company/flynasim',
+                      title: 'LinkedIn',
+                      node: (
+                        <svg style={{ width: 16, height: 16, display: 'block' }} fill="#ffffff" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      href: 'https://www.aparat.com/nasimair',
+                      title: 'آپارات',
+                      node: <img src="/images/aparat.svg?v=4" alt="آپارات" style={{ width: 16, height: 16, objectFit: 'contain', display: 'block' }} />,
+                    },
+                    {
+                      href: 'https://ble.ir/09124268358',
+                      title: 'بله',
+                      node: (
+                        <img
+                          src="/images/bale.svg?v=4"
+                          alt="بله"
+                          style={{
+                            width: 16,
+                            height: 16,
+                            objectFit: 'contain',
+                            objectPosition: 'center',
+                            display: 'block',
+                          }}
+                        />
+                      ),
+                    },
+                  ] as const).map((item) => (
+                    <a
+                      key={item.title}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={item.title}
+                      aria-label={item.title}
+                      className="inline-flex items-center justify-center transition-opacity hover:opacity-80 overflow-visible"
+                      style={{ width: 28, height: 28, flex: '0 0 28px' }}
+                    >
+                      {item.node}
+                    </a>
+                  ))}
                 </div>
               </div>
 
-              {/* لوگوها / نشان‌ها */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full max-w-full">
-              <a href="https://www.iata.org/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
-                <img src="/images/IATA.svg" alt="IATA" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
-              <a href="https://caa.gov.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
-                <img src="/images/cao.png" alt="CAO" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
-              <a href="/" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
-                <img src="/images/nasim0.png" alt={language === 'fa' ? 'لوگو نسیم' : language === 'ar' ? 'شعار نسيم' : 'Nasim Logo'} className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
-              <a href="https://www.enamad.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
-                <img src="/images/enamad.png" alt="eNAMAD" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
-              <a href="https://farasa.cao.ir/sysworkflow/fa/modern/3810212626028ab03488017019616799/6464336316028ab04e3c618028352200.php" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 col-span-2 sm:col-span-1 transition-colors hover:opacity-80">
-                <img src="/images/hmosafer.png" alt={language === 'fa' ? 'حقوق مسافر' : language === 'ar' ? 'حقوق الراكب' : 'Passenger Rights'} className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
+              {/* لوگوها / نشان‌ها — تراز عمودی یکسان؛ IATA/CAO/حقوق مسافر کمی بزرگ‌تر برای وزن بصری برابر */}
+              <div
+                className="flex w-full items-center justify-center overflow-visible flex-wrap"
+                style={{ gap: 16, minHeight: 68 }}
+              >
+                {([
+                  { href: 'https://www.iata.org/', src: '/images/IATA.svg', alt: 'IATA', external: true, height: 60, maxWidth: 130, nudgeY: -4 },
+                  { href: 'https://caa.gov.ir/', src: '/images/cao.png?v=8', alt: 'CAO', external: true, height: 58, maxWidth: 140, nudgeY: 5 },
+                  { href: '/', src: '/images/nasim-footer.png?v=8', alt: language === 'fa' ? 'لوگو نسیم' : language === 'ar' ? 'شعار نسيم' : 'Nasim Logo', external: false, height: 50, maxWidth: 120, nudgeY: 0 },
+                  { href: 'https://www.enamad.ir/', src: '/images/enamad.png?v=7', alt: 'eNAMAD', external: true, height: 50, maxWidth: 110, nudgeY: 0 },
+                  {
+                    href: 'https://farasa.cao.ir/sysworkflow/fa/modern/3810212626028ab03488017019616799/6464336316028ab04e3c618028352200.php',
+                    src: '/images/hmosafer.png?v=8',
+                    alt: language === 'fa' ? 'حقوق مسافر' : language === 'ar' ? 'حقوق الراكب' : 'Passenger Rights',
+                    external: true,
+                    height: 60,
+                    maxWidth: 120,
+                    nudgeY: 0,
+                  },
+                ] as const).map((logo) => (
+                  <a
+                    key={logo.src}
+                    href={logo.href}
+                    {...(logo.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="inline-flex items-center justify-center transition-opacity hover:opacity-80 overflow-visible"
+                    style={{
+                      height: 68,
+                      width: 'auto',
+                      flex: '0 0 auto',
+                      padding: 0,
+                      boxSizing: 'border-box',
+                    }}
+                    title={logo.alt}
+                    aria-label={logo.alt}
+                  >
+                    <img
+                      src={logo.src}
+                      alt={logo.alt}
+                      className="block"
+                      style={{
+                        height: logo.height,
+                        width: 'auto',
+                        maxWidth: logo.maxWidth,
+                        objectFit: 'contain',
+                        objectPosition: 'center',
+                        filter: 'brightness(0) invert(1)',
+                        display: 'block',
+                        transform: logo.nudgeY ? `translateY(${logo.nudgeY}px)` : undefined,
+                      }}
+                    />
+                  </a>
+                ))}
               </div>
             </div>
           </div>

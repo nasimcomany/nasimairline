@@ -335,7 +335,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <img 
-                  src="/images/nasim0.png" 
+                  src="/images/nasim0.png?v=8" 
                   alt="هواپیمایی نسیم" 
                   className="object-contain"
                   style={{ 
@@ -861,7 +861,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <button 
-                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`} 
+                  className={`px-4 py-2 font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`} 
                   style={{ 
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
@@ -947,7 +947,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <button
-                  className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                  className={`px-3 py-2 font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                   style={{ 
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -1019,7 +1019,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   }}
                 >
                   <button
-                    className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
+                    className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                     style={{ 
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
@@ -1073,7 +1073,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     setAuthModalMode('register');
                     setIsAuthModalOpen(true);
                   }}
-                  className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
+                  className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                   style={{ 
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
@@ -1104,7 +1104,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               }}
             >
               <button 
-                className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
+                className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                 style={{ borderBottom: '2px solid transparent', textTransform: 'uppercase', letterSpacing: '0.5px' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = '#000'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = 'transparent'; }}
@@ -1130,7 +1130,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             <div className="lg:hidden flex items-center justify-between w-full gap-2 min-w-0">
               <Link to="/" className="flex items-center gap-2 min-w-0 shrink">
                 <div className="bg-blue-900 rounded-b-xl px-2.5 py-1.5 shadow-md">
-                  <img src="/images/nasim0.png" alt="Nasim" className="h-8 w-auto max-w-[7rem] object-contain" />
+                  <img src="/images/nasim0.png?v=8" alt="Nasim" className="h-8 w-auto max-w-[7rem] object-contain" />
                 </div>
                 <span className={`text-sm font-bold text-black truncate ${fontClass}`}>
                   {language === 'fa' ? 'نسیم ایر' : language === 'ar' ? 'نسيم إير' : 'Nasim Air'}
@@ -1219,7 +1219,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                         handleLogout();
                         setIsMenuOpen(false);
                       }}
-                      className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                     >
                       {t('nav.logout')}
                     </button>
@@ -1231,7 +1231,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                           setIsAuthModalOpen(true);
                           setIsMenuOpen(false);
                         }}
-                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginUsers')}
                       </button>
@@ -1240,7 +1240,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                           setIsStaffLoginModalOpen(true);
                           setIsMenuOpen(false);
                         }}
-                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
                         {t('nav.loginStaff')}
                       </button>
@@ -1250,7 +1250,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                           setIsAuthModalOpen(true);
                           setIsMenuOpen(false);
                         }}
-                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                       >
                         {t('nav.register')}
                       </button>
@@ -1408,7 +1408,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               <div className={`space-y-3 mb-6 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                 <div className="flex items-center gap-3 text-white/95">
                   <PhoneIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
-                  <span><strong>{t('contact.phone')}:</strong> 7340000</span>
+                  <span><strong>{t('contact.phone')}:</strong> 02173490000</span>
                 </div>
                 <div className="flex items-center gap-3 text-white/95">
                   <DocumentTextIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
