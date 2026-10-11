@@ -27,12 +27,12 @@ HOME_DIR = ROOT / "defaults" / "homepage"
 MAG_DIR = ROOT / "defaults" / "magazine"
 MAG_FIXTURE = ROOT / "blog" / "fixtures" / "magazine_defaults.json"
 
-# Same images as localhost Special Services (section 1)
+# Special Services brand images (order matches HomePage.tsx)
 SPECIAL_IMAGES = {
-    1: "44.png",
-    2: "33.png",
-    3: "22.png",
-    4: "11.png",
+    1: "svc-network.jpg",
+    2: "svc-weather.jpg",
+    3: "svc-mehrabad.jpg",
+    4: "svc-ikia.jpg",
 }
 
 # Homepage experience grid (order matches HomePage.tsx)
@@ -91,7 +91,7 @@ POPULAR_ROUTES_BRAND = {
         "description_fa": "از ۸,۵۰۰,۰۰۰ تومان",
         "description_ar": "من ۸,۵۰۰,۰۰۰ تومان",
         "description_en": "From 8,500,000 Toman",
-        "link_url": "/tickets",
+        "link_url": "/flights/map",
     },
     2: {
         "file": "route-kish.jpg",
@@ -101,7 +101,7 @@ POPULAR_ROUTES_BRAND = {
         "description_fa": "از ۷,۲۰۰,۰۰۰ تومان",
         "description_ar": "من ۷,۲۰۰,۰۰۰ تومان",
         "description_en": "From 7,200,000 Toman",
-        "link_url": "/tickets",
+        "link_url": "/flights/map",
     },
     3: {
         "file": "route-shiraz.jpg",
@@ -111,7 +111,7 @@ POPULAR_ROUTES_BRAND = {
         "description_fa": "از ۶,۹۰۰,۰۰۰ تومان",
         "description_ar": "من ۶,۹۰۰,۰۰۰ تومان",
         "description_en": "From 6,900,000 Toman",
-        "link_url": "/tickets",
+        "link_url": "/flights/map",
     },
     4: {
         "file": "route-isfahan.jpg",
@@ -121,11 +121,11 @@ POPULAR_ROUTES_BRAND = {
         "description_fa": "از ۵,۸۰۰,۰۰۰ تومان",
         "description_ar": "من ۵,۸۰۰,۰۰۰ تومان",
         "description_en": "From 5,800,000 Toman",
-        "link_url": "/tickets",
+        "link_url": "/flights/map",
     },
 }
 
-BRAND_SEED_MARKER = "homepage_brand_assets_v4.done"
+BRAND_SEED_MARKER = "homepage_brand_assets_v5.done"
 
 
 class Command(BaseCommand):
@@ -181,16 +181,30 @@ class Command(BaseCommand):
             ).first()
             if not item:
                 continue
+            item.link_url = "/flights/map"
+            item.is_active = True
             file_ok = False
             if item.image and not force:
                 try:
                     file_ok = item.image.storage.exists(item.image.name)
+                    # Refresh if still using legacy 11/22/33/44 assets
+                    if file_ok and Path(item.image.name).name in {
+                        "11.png",
+                        "22.png",
+                        "33.png",
+                        "44.png",
+                    }:
+                        file_ok = False
+                    if file_ok and not Path(item.image.name).name.startswith("svc-"):
+                        file_ok = False
                 except Exception:
                     file_ok = False
                 if file_ok:
+                    item.save(update_fields=["link_url", "is_active"])
                     continue
             with path.open("rb") as fh:
-                item.image.save(path.name, File(fh), save=True)
+                item.image.save(path.name, File(fh), save=False)
+            item.save()
             self.stdout.write(self.style.SUCCESS(f"SPECIAL_SERVICE#{order} <- {filename}"))
 
     def _brand_marker_path(self) -> Path:

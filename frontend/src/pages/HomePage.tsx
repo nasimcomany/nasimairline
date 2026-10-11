@@ -154,7 +154,7 @@ const HomePage: React.FC = () => {
       image: brandedRouteImages[0],
       alt: 'مشهد - تهران',
       fallbackImage: brandedRouteImages[0],
-      linkUrl: '/tickets',
+      linkUrl: '/flights/map',
     },
     {
       id: 2,
@@ -165,7 +165,7 @@ const HomePage: React.FC = () => {
       image: brandedRouteImages[1],
       alt: 'کیش - تهران',
       fallbackImage: brandedRouteImages[1],
-      linkUrl: '/tickets',
+      linkUrl: '/flights/map',
     },
     {
       id: 3,
@@ -176,7 +176,7 @@ const HomePage: React.FC = () => {
       image: brandedRouteImages[2],
       alt: 'شیراز - مشهد',
       fallbackImage: brandedRouteImages[2],
-      linkUrl: '/tickets',
+      linkUrl: '/flights/map',
     },
     {
       id: 4,
@@ -187,7 +187,7 @@ const HomePage: React.FC = () => {
       image: brandedRouteImages[3],
       alt: 'اصفهان - تهران',
       fallbackImage: brandedRouteImages[3],
-      linkUrl: '/tickets',
+      linkUrl: '/flights/map',
     },
   ];
 
@@ -223,7 +223,7 @@ const HomePage: React.FC = () => {
         image,
         alt: item.title_fa,
         fallbackImage: branded,
-        linkUrl: item.link_url || '/tickets',
+        linkUrl: '/flights/map',
       };
     });
   }, [popularRouteItems]);
@@ -1227,31 +1227,38 @@ const HomePage: React.FC = () => {
           <div className="flex flex-row flex-nowrap items-stretch gap-3 sm:gap-5 max-w-full overflow-x-auto pb-1" style={{ justifyContent: 'center' }}>
             {(
               (() => {
+                const svcBust = 'v=2';
                 const defaults = [
-                  { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/44.png', link_url: '/flights/map', order: 1 },
-                  { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: '/images/33.png', link_url: 'weather', order: 2 },
-                  { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: '/images/22.png', link_url: 'https://fids.airport.ir/', order: 3 },
-                  { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: '/images/11.png', link_url: 'https://ikac.ir/', order: 4 },
+                  { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: `/images/svc-network.jpg?${svcBust}`, link_url: '/flights/map', order: 1 },
+                  { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: `/images/svc-weather.jpg?${svcBust}`, link_url: '/flights/map', order: 2 },
+                  { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: `/images/svc-mehrabad.jpg?${svcBust}`, link_url: '/flights/map', order: 3 },
+                  { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: `/images/svc-ikia.jpg?${svcBust}`, link_url: '/flights/map', order: 4 },
                 ] as HomePageSectionItem[];
                 if (!specialServicesItems.length) return defaults;
-                return specialServicesItems.map((item, i) => ({
-                  ...item,
-                  image_url: item.image_url || defaults[i]?.image_url || defaults[0].image_url,
-                  link_url: item.link_url || defaults[i]?.link_url || '',
-                }));
+                return specialServicesItems.map((item, i) => {
+                  const branded = defaults[i]?.image_url || defaults[0].image_url;
+                  const cmsUrl = item.image_url || '';
+                  const image_url = cmsUrl
+                    ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}${svcBust}`
+                    : branded;
+                  return {
+                    ...item,
+                    image_url,
+                    link_url: '/flights/map',
+                  };
+                });
               })()
             ).map((item, idx) => {
               const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
-              const defaultImgs = ['/images/44.png', '/images/33.png', '/images/22.png', '/images/11.png'];
+              const defaultImgs = [
+                '/images/svc-network.jpg?v=2',
+                '/images/svc-weather.jpg?v=2',
+                '/images/svc-mehrabad.jpg?v=2',
+                '/images/svc-ikia.jpg?v=2',
+              ];
               const imgSrc = item.image_url || defaultImgs[idx] || defaultImgs[0];
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
-              const linkUrl = (() => {
-                const isNetwork = /شبکه پروازی|Flight Network|شبكة الطيران/i.test(title) || item.id === 1;
-                const isWeather = /آب و هوا|وضعیت آب و هوا|Weather|الطقس|حالة الطقس/i.test(title) || item.id === 2;
-                if (isNetwork) return '/flights/map';
-                if (isWeather) return 'weather';
-                return item.link_url || '';
-              })();
+              const linkUrl = '/flights/map';
               return (
                 <div 
                   key={item.id || idx}
@@ -1271,6 +1278,7 @@ const HomePage: React.FC = () => {
                       src={imgSrc}
                       alt={title}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      style={{ objectPosition: 'center center' }}
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = defaultImgs[idx] || defaultImgs[0];

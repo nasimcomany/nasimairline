@@ -97,9 +97,9 @@ class Command(BaseCommand):
 
         special_services = [
             {'order': 1, 'title_fa': 'شبکه پروازی', 'title_ar': 'شبكة الطيران', 'title_en': 'Flight Network', 'link_url': '/flights/map'},
-            {'order': 2, 'title_fa': 'آب و هوا', 'title_ar': 'الطقس', 'title_en': 'Weather', 'link_url': 'weather'},
-            {'order': 3, 'title_fa': 'پروازهای فرودگاه مهرآباد', 'title_ar': 'رحلات مطار مهرآباد', 'title_en': 'Mehrabad Airport Flights', 'link_url': 'https://fids.airport.ir/'},
-            {'order': 4, 'title_fa': 'پروازهای فرودگاه امام', 'title_ar': 'رحلات مطار الإمام', 'title_en': 'Imam Airport Flights', 'link_url': 'https://ikac.ir/'},
+            {'order': 2, 'title_fa': 'آب و هوا', 'title_ar': 'الطقس', 'title_en': 'Weather', 'link_url': '/flights/map'},
+            {'order': 3, 'title_fa': 'پروازهای فرودگاه مهرآباد', 'title_ar': 'رحلات مطار مهرآباد', 'title_en': 'Mehrabad Airport Flights', 'link_url': '/flights/map'},
+            {'order': 4, 'title_fa': 'پروازهای فرودگاه امام', 'title_ar': 'رحلات مطار الإمام', 'title_en': 'Imam Airport Flights', 'link_url': '/flights/map'},
         ]
         for item_data in special_services:
             _, created = HomePageSectionItem.objects.update_or_create(
@@ -235,7 +235,7 @@ class Command(BaseCommand):
                 'description_fa': 'از ۸,۵۰۰,۰۰۰ تومان',
                 'description_ar': 'من ۸,۵۰۰,۰۰۰ تومان',
                 'description_en': 'From 8,500,000 Toman',
-                'link_url': '/tickets',
+                'link_url': '/flights/map',
             },
             {
                 'order': 2,
@@ -245,7 +245,7 @@ class Command(BaseCommand):
                 'description_fa': 'از ۷,۲۰۰,۰۰۰ تومان',
                 'description_ar': 'من ۷,۲۰۰,۰۰۰ تومان',
                 'description_en': 'From 7,200,000 Toman',
-                'link_url': '/tickets',
+                'link_url': '/flights/map',
             },
             {
                 'order': 3,
@@ -255,7 +255,7 @@ class Command(BaseCommand):
                 'description_fa': 'از ۶,۹۰۰,۰۰۰ تومان',
                 'description_ar': 'من ۶,۹۰۰,۰۰۰ تومان',
                 'description_en': 'From 6,900,000 Toman',
-                'link_url': '/tickets',
+                'link_url': '/flights/map',
             },
             {
                 'order': 4,
@@ -265,7 +265,7 @@ class Command(BaseCommand):
                 'description_fa': 'از ۵,۸۰۰,۰۰۰ تومان',
                 'description_ar': 'من ۵,۸۰۰,۰۰۰ تومان',
                 'description_en': 'From 5,800,000 Toman',
-                'link_url': '/tickets',
+                'link_url': '/flights/map',
             },
         ]
         for item_data in popular_routes:
