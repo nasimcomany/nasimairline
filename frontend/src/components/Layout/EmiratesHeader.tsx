@@ -72,6 +72,17 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const navigate = useNavigate();
   const { language, t, fontClass, setLanguage } = useLanguage();
 
+  // DigiHamisheBold is a separate family — font-bold alone often looks regular on FA.
+  const navBoldStyle: React.CSSProperties =
+    language === 'fa'
+      ? {
+          fontFamily: "'DigiHamisheBold', 'DigiHamishe', Tahoma, sans-serif",
+          fontWeight: 700,
+        }
+      : language === 'ar'
+      ? { fontFamily: "'Noto Sans Arabic', sans-serif", fontWeight: 700 }
+      : { fontFamily: 'Inter, sans-serif', fontWeight: 700 };
+
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
@@ -363,6 +374,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   to={item.path}
                   className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                   style={{ 
+                    ...navBoldStyle,
                     borderBottom: activeDropdown === item.key ? '2px solid #000' : '2px solid transparent',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -863,6 +875,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 <button 
                   className={`px-4 py-2 font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`} 
                   style={{ 
+                    ...navBoldStyle,
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -949,6 +962,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 <button
                   className={`px-3 py-2 font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                   style={{ 
+                    ...navBoldStyle,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
                   }}
@@ -1021,6 +1035,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   <button
                     className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                     style={{ 
+                      ...navBoldStyle,
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
                     }}
@@ -1075,6 +1090,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   }}
                   className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                   style={{ 
+                    ...navBoldStyle,
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -1105,7 +1121,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             >
               <button 
                 className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
-                style={{ borderBottom: '2px solid transparent', textTransform: 'uppercase', letterSpacing: '0.5px' }}
+                style={{ ...navBoldStyle, borderBottom: '2px solid transparent', textTransform: 'uppercase', letterSpacing: '0.5px' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = '#000'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = 'transparent'; }}
               >

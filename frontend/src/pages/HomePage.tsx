@@ -1779,7 +1779,7 @@ const HomePage: React.FC = () => {
           {/* Layout: 4 کارت کوچک + ۱ کارت بزرگ — ارتفاع برابر و وسط‌چین */}
           <div className="grid grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
             {(() => {
-              const cacheBust = 'v=40';
+              const cacheBust = 'v=41';
               const defaultExp: HomePageSectionItem[] = [
                 { id: 1, title_fa: 'ثبت شکایات', title_ar: 'تسجيل الشكاوى', title_en: 'Complaints', image_url: `/images/exp-complaints.jpg?${cacheBust}`, link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
                 { id: 2, title_fa: 'انتقادات و پیشنهادات', title_ar: 'انتقادات واقتراحات', title_en: 'Feedback', image_url: `/images/exp-feedback.jpg?${cacheBust}`, link_url: '/tickets', order: 2, section_type: 'EXPERIENCE', is_active: true },
@@ -1892,16 +1892,20 @@ const HomePage: React.FC = () => {
                           }}
                         />
                         <div
-                          className="absolute inset-x-0 top-0 z-[2] flex flex-col items-center pointer-events-none"
+                          className="absolute inset-x-0 top-0 z-[3] flex flex-col items-center pointer-events-none"
                           dir={language === 'en' ? 'ltr' : 'rtl'}
                           style={{
-                            paddingTop: '8%',
+                            paddingTop: '7%',
+                            paddingBottom: '18%',
                             paddingLeft: '8%',
                             paddingRight: '8%',
                             textAlign: 'center',
                             color: '#fff',
-                            textShadow: '0 3px 10px rgba(0,0,0,0.55)',
-                            // Same stack as page headings — DigiHamisheBold alone can hide ی in هواپیمایی
+                            background:
+                              'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.28) 55%, rgba(0,0,0,0) 100%)',
+                            textShadow:
+                              '0 1px 0 rgba(0,0,0,0.85), 0 2px 8px rgba(0,0,0,0.75), 0 0 2px rgba(0,0,0,0.9)',
+                            // DigiHamishe first so ی in هواپیمایی stays visible; bold via weight
                             fontFamily: language === 'fa'
                               ? "'DigiHamishe', 'DigiHamisheBold', Tahoma, sans-serif"
                               : language === 'ar'
@@ -1909,27 +1913,28 @@ const HomePage: React.FC = () => {
                               : 'Tahoma, sans-serif',
                           }}
                         >
-                          <div style={{ fontSize: 'clamp(15px, 2.2vw, 24px)', fontWeight: 700, lineHeight: 1.35 }}>
+                          <div style={{ fontSize: 'clamp(16px, 2.3vw, 26px)', fontWeight: 700, lineHeight: 1.35 }}>
                             {language === 'fa'
                               ? '\u0647\u0648\u0627\u067e\u06cc\u0645\u0627\u06cc\u06cc \u0646\u0633\u06cc\u0645' /* هواپیمایی نسیم */
                               : language === 'ar'
                               ? 'طيران نسيم'
                               : 'Nasim Air'}
                           </div>
-                          <div style={{ fontSize: 'clamp(28px, 4.2vw, 48px)', fontWeight: 700, lineHeight: 1.2, marginTop: 6 }}>
+                          <div style={{ fontSize: 'clamp(30px, 4.4vw, 52px)', fontWeight: 700, lineHeight: 1.2, marginTop: 8 }}>
                             {language === 'fa'
-                              ? (largeItem.title_fa || '\u0627\u06cc\u0631\u0627\u0646 \u0634\u0646\u0627\u0633\u06cc')
+                              ? ((largeItem.title_fa || '').trim() || '\u0627\u06cc\u0631\u0627\u0646 \u0634\u0646\u0627\u0633\u06cc')
                               : language === 'ar'
-                              ? (largeItem.title_ar || 'إيرانولوجيا')
-                              : (largeItem.title_en || 'Iranology')}
+                              ? ((largeItem.title_ar || '').trim() || 'إيرانولوجيا')
+                              : ((largeItem.title_en || '').trim() || 'Iranology')}
                           </div>
                           <div
                             style={{
-                              width: 'clamp(48px, 8vw, 88px)',
+                              width: 'clamp(56px, 9vw, 96px)',
                               height: 3,
                               background: '#fff',
-                              marginTop: 10,
+                              marginTop: 12,
                               borderRadius: 2,
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.45)',
                             }}
                           />
                         </div>
