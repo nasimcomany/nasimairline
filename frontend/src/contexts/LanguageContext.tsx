@@ -360,8 +360,8 @@ const translations = {
     'forgotPassword.backToLogin': 'بازگشت به ورود',
     
     // Homepage
-    'home.hero.flyWithNasim': 'پرواز با هواپیمایی نسیم',
-    'home.hero.safeTripDescription': 'سفری امن، راحت و به‌یادماندنی به مقاصد داخلی و بین‌المللی',
+    'home.hero.flyWithNasim': 'با نسیم ایرلاین پرواز کنید',
+    'home.hero.safeTripDescription': 'سفری امن و راحت در انتظار شماست',
     'home.hero.safeComfortable': 'سفری امن، راحت و به یادماندنی',
     'home.hero.comfortable': 'راحت',
     'home.services.specialTitle': 'خدمات ویژه هواپیمایی نسیم',
@@ -1320,8 +1320,8 @@ const translations = {
     'forgotPassword.backToLogin': 'العودة لتسجيل الدخول',
     
     // Homepage
-    'home.hero.flyWithNasim': 'الطيران مع نسيم إير',
-    'home.hero.safeTripDescription': 'رحلة آمنة ومريحة لا تُنسى إلى الوجهات الداخلية والدولية',
+    'home.hero.flyWithNasim': 'حلّق مع نسيم إيرلاين',
+    'home.hero.safeTripDescription': 'رحلة آمنة ومريحة بانتظارك',
     'home.hero.safeComfortable': 'رحلة آمنة ومريحة لا تُنسى',
     'home.hero.comfortable': 'مريحة',
     'home.services.specialTitle': 'خدمات نسيم إير الخاصة',
@@ -2377,8 +2377,8 @@ const translations = {
     'payment.searchAgain': 'Search for Flights Again',
     
     // Homepage
-    'home.hero.flyWithNasim': 'Fly with Nasim Air',
-    'home.hero.safeTripDescription': 'A safe, comfortable and memorable journey to domestic and international destinations',
+    'home.hero.flyWithNasim': 'Fly with Nasim Airline',
+    'home.hero.safeTripDescription': 'A safe and comfortable journey awaits you',
     'home.hero.safeComfortable': 'A safe, comfortable and memorable journey',
     'home.hero.comfortable': 'comfortable',
     'home.services.specialTitle': 'Nasim Air Special Services',

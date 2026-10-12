@@ -31,9 +31,9 @@ class Command(BaseCommand):
             },
             {
                 'section_type': 'HERO',
-                'title1_fa': 'با نسیم پرواز کنید',
-                'title1_ar': 'حلّق مع نسيم',
-                'title1_en': 'Fly with Nasim',
+                'title1_fa': 'با نسیم ایرلاین پرواز کنید',
+                'title1_ar': 'حلّق مع نسيم إيرلاين',
+                'title1_en': 'Fly with Nasim Airline',
                 'title2_fa': 'سفری امن و راحت در انتظار شماست',
                 'title2_ar': 'رحلة آمنة ومريحة بانتظارك',
                 'title2_en': 'A safe and comfortable journey awaits you',
@@ -87,13 +87,17 @@ class Command(BaseCommand):
                 'title1_en': 'Popular Routes',
             },
         ]
+        # Create missing section titles only — never overwrite admin/CMS edits on deploy.
         for data in configs_data:
-            obj, created = HomePageSectionConfig.objects.update_or_create(
+            defaults = {k: v for k, v in data.items() if k != 'section_type'}
+            obj, created = HomePageSectionConfig.objects.get_or_create(
                 section_type=data['section_type'],
-                defaults={k: v for k, v in data.items() if k != 'section_type'}
+                defaults=defaults,
             )
-            action = 'Created' if created else 'Updated'
-            self.stdout.write(self.style.SUCCESS(f"{action} config: {data['section_type']}"))
+            if created:
+                self.stdout.write(self.style.SUCCESS(f"Created config: {data['section_type']}"))
+            else:
+                self.stdout.write(f"Kept CMS config (admin-owned): {data['section_type']}")
 
         special_services = [
             {'order': 1, 'title_fa': 'شبکه پروازی', 'title_ar': 'شبكة الطيران', 'title_en': 'Flight Network', 'link_url': '/flights/map'},

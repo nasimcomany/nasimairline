@@ -47,6 +47,55 @@ import {
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 
+const DEFAULT_HERO_IMAGES = [
+  '/images/tstnasim.jpg',
+  '/images/tstnasim2.jpg',
+  '/images/tstnasim3.jpg',
+  '/images/tstnasim4.jpg',
+  '/images/tstnasim5.jpg',
+];
+
+/** Persist last good hero so the next visit paints CMS copy/images immediately. */
+const HERO_BOOTSTRAP_KEY = 'nasim.heroBootstrap.v2';
+
+type HeroBootstrap = {
+  images: string[];
+  hero?: HomePageSectionConfig;
+};
+
+function readHeroBootstrap(): HeroBootstrap | null {
+  try {
+    const raw = localStorage.getItem(HERO_BOOTSTRAP_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as HeroBootstrap;
+    if (!Array.isArray(parsed?.images) || parsed.images.length === 0) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeHeroBootstrap(data: HeroBootstrap) {
+  try {
+    localStorage.setItem(HERO_BOOTSTRAP_KEY, JSON.stringify(data));
+  } catch {
+    /* quota / private mode — ignore */
+  }
+}
+
+function preloadImage(url: string): Promise<void> {
+  return new Promise((resolve) => {
+    if (!url) {
+      resolve();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = url;
+  });
+}
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,16 +104,12 @@ const HomePage: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('general');
   
-  // Hero Slider state
-  // تصاویر از API دریافت می‌شوند و هر 12 ثانیه به صورت افقی تغییر می‌کنند
+  // Hero Slider state — hydrate from last successful CMS payload when available
   const [heroSliders, setHeroSliders] = useState<HeroSlider[]>([]);
-  const [heroImages, setHeroImages] = useState<string[]>([
-    '/images/tstnasim.jpg',
-    '/images/tstnasim2.jpg',
-    '/images/tstnasim3.jpg',
-    '/images/tstnasim4.jpg',
-    '/images/tstnasim5.jpg'
-  ]);
+  const [heroImages, setHeroImages] = useState<string[]>(() => {
+    const cached = readHeroBootstrap();
+    return cached?.images?.length ? cached.images : [...DEFAULT_HERO_IMAGES];
+  });
   const [currentHeroImageIndex, setCurrentHeroImageIndex] = useState(0);
 
   // Flight Search state
@@ -115,7 +160,11 @@ const HomePage: React.FC = () => {
   const [surveyItems, setSurveyItems] = useState<HomePageSectionItem[]>([]);
   const [faqItems, setFaqItems] = useState<HomePageSectionItem[]>([]);
   const [popularRouteItems, setPopularRouteItems] = useState<HomePageSectionItem[]>([]);
-  const [sectionConfigs, setSectionConfigs] = useState<Record<string, HomePageSectionConfig>>({});
+  const [sectionConfigs, setSectionConfigs] = useState<Record<string, HomePageSectionConfig>>(() => {
+    const cached = readHeroBootstrap();
+    if (cached?.hero) return { HERO: cached.hero };
+    return {} as Record<string, HomePageSectionConfig>;
+  });
   const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
 
   const reservedSeats = ['A1', 'B2', 'C3', 'D4', 'A5', 'B6'];
@@ -274,38 +323,49 @@ const HomePage: React.FC = () => {
     return () => window.removeEventListener('resize', measure);
   }, [activeFlightTab, language]);
 
-  // Fetch Hero Slider images from API
+  // Fetch Hero Slider images from API (preload first frame before swapping URLs)
   useEffect(() => {
+    let cancelled = false;
     const fetchHeroSliders = async () => {
       try {
         const sliders = await galleryService.getHeroSliders();
-        
-        if (sliders && sliders.length > 0) {
-          setHeroSliders(sliders);
-          const imageUrls = sliders
-            .map((slider) => slider.image_url)
-            .filter((url): url is string => Boolean(url && String(url).trim()));
-          // Keep local public defaults when CMS slides have no usable image yet
-          if (imageUrls.length > 0) {
-            setHeroImages(imageUrls);
-          }
-        }
+        if (cancelled || !sliders?.length) return;
+
+        setHeroSliders(sliders);
+        const imageUrls = sliders
+          .map((slider) => slider.image_url)
+          .filter((url): url is string => Boolean(url && String(url).trim()));
+        if (!imageUrls.length) return;
+
+        const sameAsCurrent =
+          imageUrls.length === heroImages.length &&
+          imageUrls.every((url, i) => url === heroImages[i]);
+        if (sameAsCurrent) return;
+
+        await preloadImage(imageUrls[0]);
+        if (!cancelled) setHeroImages(imageUrls);
       } catch (error) {
         console.error('Error loading hero sliders:', error);
       }
     };
 
     fetchHeroSliders();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- bootstrap once on mount
   }, []);
 
   // Fetch Homepage section items + titles from CMS
   useEffect(() => {
+    let cancelled = false;
     const fetchSections = async () => {
       try {
         const [items, configs] = await Promise.all([
           galleryService.getHomePageSectionItems(),
           galleryService.getHomePageSectionConfigs(),
         ]);
+        if (cancelled) return;
         setSpecialServicesItems(items.special_services);
         setExperienceItems(items.experience);
         setSurveyItems(items.survey);
@@ -322,7 +382,26 @@ const HomePage: React.FC = () => {
       }
     };
     fetchSections();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  // Persist last good hero snapshot for instant correct first paint next visit.
+  // Only lock images after CMS sliders arrive so we don't cache local placeholders.
+  useEffect(() => {
+    const hero = sectionConfigs.HERO;
+    if (!hero) return;
+    const prev = readHeroBootstrap();
+    const images =
+      heroSliders.length > 0 && heroImages.length > 0
+        ? heroImages
+        : prev?.images?.length
+          ? prev.images
+          : heroImages;
+    if (!images.length) return;
+    writeHeroBootstrap({ images, hero });
+  }, [sectionConfigs, heroImages, heroSliders]);
 
   const pickLang = (fa?: string, ar?: string, en?: string, fallback = '') => {
     const value = language === 'fa' ? fa : language === 'ar' ? ar : en;
@@ -1028,17 +1107,18 @@ const HomePage: React.FC = () => {
       >
         <div
           className="absolute inset-x-0 top-0 overflow-hidden"
-          style={{ height: HERO_SLIDER_HEIGHT, backgroundColor: 'rgba(15, 23, 42, 0.35)' }}
+          style={{
+            height: HERO_SLIDER_HEIGHT,
+            backgroundColor: 'rgba(15, 23, 42, 0.35)',
+            // Cover paint before <img> finishes — avoids gray + alt-text flash
+            backgroundImage: heroImages[0] ? `url(${heroImages[0]})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+          }}
         >
           {heroImages.map((imageUrl, index) => {
             const slider = heroSliders[index];
-            const fallbacks = [
-              '/images/tstnasim.jpg',
-              '/images/tstnasim2.jpg',
-              '/images/tstnasim3.jpg',
-              '/images/tstnasim4.jpg',
-              '/images/tstnasim5.jpg',
-            ];
+            const fallbacks = DEFAULT_HERO_IMAGES;
             const SliderWrapper = slider?.link_url ? 'a' : 'div';
             const wrapperProps = slider?.link_url
               ? {
@@ -1066,9 +1146,9 @@ const HomePage: React.FC = () => {
               >
                 <img
                   src={imageUrl}
-                  alt={slider?.alt_text || `Hero image ${index + 1}`}
+                  alt={slider?.alt_text || ''}
                   loading={index === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
+                  decoding={index === 0 ? 'sync' : 'async'}
                   fetchPriority={index === 0 ? 'high' : 'low'}
                   className={`w-full h-full object-cover ${
                     slider?.link_url ? 'hover:opacity-95' : ''
