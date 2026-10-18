@@ -3,10 +3,43 @@ Views for serving React frontend and ops health checks
 """
 from django.views.generic import View
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse, Http404
 from django.db import connection
+import mimetypes
 import os
 import urllib.request
+
+
+class SpaRootAssetView(View):
+    """
+    Serve root SPA assets (favicon, manifest, logos) from frontend/build
+    with fallback to staticfiles/. Avoids Google/browsers hitting a broken
+    /favicon.ico when the STATIC_ROOT catch-all misses the file.
+    """
+
+    def get(self, request, path='', *args, **kwargs):
+        name = (path or '').lstrip('/').replace('\\', '/')
+        if not name or '/' in name or name.startswith('.'):
+            raise Http404()
+
+        candidates = [
+            os.path.join(getattr(settings, 'FRONTEND_BUILD_DIR', ''), name),
+            os.path.join(settings.STATIC_ROOT, name),
+            os.path.join(settings.BASE_DIR, 'frontend', 'public', name),
+        ]
+        for full in candidates:
+            if full and os.path.isfile(full):
+                content_type, _ = mimetypes.guess_type(full)
+                if name.endswith('.ico'):
+                    content_type = 'image/x-icon'
+                elif name.endswith('.json'):
+                    content_type = 'application/manifest+json'
+                response = FileResponse(open(full, 'rb'), content_type=content_type or 'application/octet-stream')
+                # Short browser cache; Google re-fetches /favicon.ico periodically
+                response['Cache-Control'] = 'public, max-age=86400'
+                return response
+        raise Http404()
+
 
 
 class HealthCheckView(View):

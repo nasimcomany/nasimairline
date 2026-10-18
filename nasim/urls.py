@@ -17,7 +17,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 from .admin_site import limited_admin_site
-from .views import ReactAppView, HealthCheckView
+from .views import ReactAppView, HealthCheckView, SpaRootAssetView
 from blog.sitemap_views import sitemap_xml, robots_txt
 
 # API Router for API root view
@@ -31,6 +31,14 @@ urlpatterns = [
     # SEO: robots + sitemap (must be before SPA catch-all)
     path('robots.txt', robots_txt, name='robots_txt'),
     path('sitemap.xml', sitemap_xml, name='sitemap_xml'),
+
+    # Favicon / PWA icons — explicit (Google brand SERPs use /favicon.ico)
+    re_path(
+        r'^(?P<path>(favicon\.ico|favicon-\d+\.png|apple-touch-icon\.png|logo192\.png|logo512\.png|manifest\.json))$',
+        SpaRootAssetView.as_view(),
+        name='spa-root-asset',
+    ),
+
 
     # Admin
     path('admin/', admin.site.urls),

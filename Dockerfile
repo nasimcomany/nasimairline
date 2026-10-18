@@ -28,6 +28,11 @@ RUN test -f frontend/build/index.html \
        DB_SSL_REQUIRE=False \
        CELERY_TASK_ALWAYS_EAGER=True \
        python manage.py collectstatic --noinput \
+    && mkdir -p staticfiles \
+    && for f in favicon.ico favicon-16.png favicon-32.png favicon-48.png favicon-64.png \
+         apple-touch-icon.png logo192.png logo512.png manifest.json index.html; do \
+         if [ -f "frontend/build/$f" ]; then cp -f "frontend/build/$f" "staticfiles/$f"; fi; \
+       done \
     && mkdir -p /data/media
 
 EXPOSE 8000
