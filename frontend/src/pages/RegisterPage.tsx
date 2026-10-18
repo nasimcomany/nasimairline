@@ -47,8 +47,33 @@ const RegisterPage: React.FC = () => {
     }
   };
 
+  const normalizePhone = (raw: string) => {
+    let phone = raw.replace(/[\s\-]/g, '');
+    if (phone.startsWith('+98')) phone = `0${phone.slice(3)}`;
+    else if (phone.startsWith('0098')) phone = `0${phone.slice(4)}`;
+    else if (phone.startsWith('98') && phone.length === 12) phone = `0${phone.slice(2)}`;
+    return phone;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.firstName.trim().length < 2) {
+      alert(t('auth.firstNameRequired'));
+      return;
+    }
+    if (formData.lastName.trim().length < 2) {
+      alert(t('auth.lastNameRequired'));
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      alert(t('auth.invalidEmail'));
+      return;
+    }
+    if (!/^09\d{9}$/.test(normalizePhone(formData.phone))) {
+      alert(t('auth.invalidPhone'));
+      return;
+    }
     
     if (formData.password !== formData.confirmPassword) {
       alert(t('auth.passwordMismatch'));
@@ -75,18 +100,18 @@ const RegisterPage: React.FC = () => {
     
     try {
       await dispatch(registerUser({
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        phone_number: formData.phone,
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone_number: normalizePhone(formData.phone),
         password: formData.password,
-        password_confirm: formData.password,
-        captcha: captchaAnswer, // ✨ جدید: ارسال کپچا به سرور
+        password_confirm: formData.confirmPassword,
+        captcha: captchaAnswer,
       })).unwrap();
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Registration error details:', error);
-      alert(error?.message || 'خطا در ثبت‌نام');
+      alert(typeof error === 'string' ? error : (error?.message || t('auth.registerError')));
     }
   };
 

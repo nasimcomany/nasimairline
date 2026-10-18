@@ -1,11 +1,24 @@
 """
 Serializers for authentication app
 """
+import re
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from accounts.models import User
+from accounts.validators import validate_iranian_phone_number
+
+
+def _normalize_iranian_phone(value: str) -> str:
+    phone = re.sub(r'[\s\-]', '', str(value or '').strip())
+    if phone.startswith('+98'):
+        phone = '0' + phone[3:]
+    elif phone.startswith('0098'):
+        phone = '0' + phone[4:]
+    elif phone.startswith('98') and len(phone) == 12:
+        phone = '0' + phone[2:]
+    return phone
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -37,8 +50,37 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'email': {'required': True},
             'first_name': {'required': True},
             'last_name': {'required': True},
-            'phone_number': {'required': False},
+            'phone_number': {'required': True, 'allow_blank': False, 'allow_null': False},
         }
+
+    def validate_first_name(self, value):
+        name = str(value or '').strip()
+        if len(name) < 2:
+            raise serializers.ValidationError('نام مسافر الزامی است و باید حداقل ۲ حرف باشد.')
+        return name
+
+    def validate_last_name(self, value):
+        name = str(value or '').strip()
+        if len(name) < 2:
+            raise serializers.ValidationError('نام خانوادگی مسافر الزامی است و باید حداقل ۲ حرف باشد.')
+        return name
+
+    def validate_email(self, value):
+        email = str(value or '').strip().lower()
+        if not email or '@' not in email or '.' not in email.split('@')[-1]:
+            raise serializers.ValidationError('ایمیل معتبر وارد کنید.')
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError('این ایمیل قبلاً ثبت شده است.')
+        return email
+
+    def validate_phone_number(self, value):
+        phone = _normalize_iranian_phone(value)
+        if not phone:
+            raise serializers.ValidationError('شماره تماس الزامی است.')
+        validate_iranian_phone_number(phone)
+        if User.objects.filter(phone_number=phone).exists():
+            raise serializers.ValidationError('این شماره تماس قبلاً ثبت شده است.')
+        return phone
     
     def validate(self, attrs):
         """Validate password confirmation"""
@@ -58,10 +100,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if request:
             validated_data['registration_ip'] = self._get_client_ip(request)
         
-        user = User.objects.create_user(**validated_data)
-        user.set_password(password)
-        user.save()
-        
+        user = User.objects.create_user(password=password, **validated_data)
         return user
     
     def _get_client_ip(self, request):

@@ -31,15 +31,32 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     captcha: ''
   });
 
-  // Register form
+  // Register form — passenger identity + contact required at signup
   const [registerForm, setRegisterForm] = useState({
     nationality: 'iranian',
     nationalId: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
     birthDate: '',
     password: '',
     confirmPassword: '',
     captcha: ''
   });
+
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  const normalizePhone = (raw: string) => {
+    let phone = raw.replace(/[\s\-]/g, '');
+    if (phone.startsWith('+98')) phone = `0${phone.slice(3)}`;
+    else if (phone.startsWith('0098')) phone = `0${phone.slice(4)}`;
+    else if (phone.startsWith('98') && phone.length === 12) phone = `0${phone.slice(2)}`;
+    return phone;
+  };
+
+  const isValidIranPhone = (raw: string) => /^09\d{9}$/.test(normalizePhone(raw));
 
   // Captcha — non-negative, Persian-digit safe
   const [captcha, setCaptcha] = useState<MathCaptchaChallenge>(() => generateMathCaptcha());
@@ -158,6 +175,23 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       return;
     }
 
+    if (registerForm.firstName.trim().length < 2) {
+      setError(t('auth.firstNameRequired'));
+      return;
+    }
+    if (registerForm.lastName.trim().length < 2) {
+      setError(t('auth.lastNameRequired'));
+      return;
+    }
+    if (!isValidEmail(registerForm.email)) {
+      setError(t('auth.invalidEmail'));
+      return;
+    }
+    if (!isValidIranPhone(registerForm.phone)) {
+      setError(t('auth.invalidPhone'));
+      return;
+    }
+
     // Validate national ID (only for Iranian nationality)
     if (registerForm.nationality === 'iranian' && !validateNationalId(registerForm.nationalId)) {
       setError(t('auth.invalidNationalId'));
@@ -201,16 +235,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     setError('');
 
     try {
+      const email = registerForm.email.trim().toLowerCase();
+      const phone = normalizePhone(registerForm.phone);
       const registerData: any = {
-        email: `${registerForm.nationalId}@nasimair.com`,
+        email,
         password: registerForm.password,
         password_confirm: registerForm.confirmPassword,
-        first_name: registerForm.nationalId,
-        last_name: registerForm.nationality,
-        phone_number: '', // ✨ خالی چون در فرم نیست
+        first_name: registerForm.firstName.trim(),
+        last_name: registerForm.lastName.trim(),
+        phone_number: phone,
         date_of_birth: registerForm.birthDate,
         nationality: registerForm.nationality,
-        captcha: registerForm.captcha // ✨ ارسال به سرور (در بک‌اند حذف می‌شه)
+        captcha: registerForm.captcha,
       };
       
       // اگر ملیت ایرانی بود، national_id بفرست، در غیر این صورت passport_number
@@ -224,18 +260,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
       setSuccess(t('auth.registerSuccess'));
       
-      // Auto login after registration
-      setTimeout(async () => {
-        await dispatch(loginUser({
-          email: `${registerForm.nationalId}@nasimair.com`,
-          password: registerForm.password
-        })).unwrap();
+      // Already authenticated by register response; go to panel
+      setTimeout(() => {
         onClose();
         navigate('/dashboard');
-      }, 1500);
+      }, 800);
     } catch (err: any) {
-      setError(err.message || t('auth.registerError'));
+      setError(typeof err === 'string' ? err : (err?.message || t('auth.registerError')));
       generateCaptcha();
+      setRegisterForm((prev) => ({ ...prev, captcha: '' }));
     }
   };
 
@@ -455,6 +488,79 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                       : t('auth.passportPlaceholder')
                   }
                   maxLength={registerForm.nationality === 'iranian' ? 10 : 20}
+                  required
+                />
+              </div>
+
+              {/* Passenger first / last name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('auth.firstName')}
+                  </label>
+                  <input
+                    type="text"
+                    value={registerForm.firstName}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                    placeholder={t('auth.firstNamePlaceholder')}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('auth.lastName')}
+                  </label>
+                  <input
+                    type="text"
+                    value={registerForm.lastName}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                    placeholder={t('auth.lastNamePlaceholder')}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Email — required */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.email')}
+                </label>
+                <input
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={registerForm.email}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                  dir="ltr"
+                  placeholder={t('auth.emailPlaceholder')}
+                  required
+                />
+              </div>
+
+              {/* Phone — required */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.phone')}
+                </label>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  value={registerForm.phone}
+                  onChange={(e) => setRegisterForm(prev => ({
+                    ...prev,
+                    phone: e.target.value.replace(/[^\d+]/g, '').slice(0, 14),
+                  }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                  dir="ltr"
+                  placeholder={t('auth.phonePlaceholder')}
                   required
                 />
               </div>

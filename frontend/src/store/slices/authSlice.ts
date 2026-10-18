@@ -69,6 +69,26 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+const extractApiError = (data: any, fallback: string): string => {
+  if (!data) return fallback;
+  if (typeof data === 'string') return data;
+  if (Array.isArray(data)) return String(data[0] || fallback);
+  if (typeof data.detail === 'string') return data.detail;
+  if (Array.isArray(data.detail)) return String(data.detail[0] || fallback);
+  for (const key of [
+    'email', 'phone_number', 'first_name', 'last_name',
+    'password', 'password_confirm', 'national_id', 'non_field_errors',
+  ]) {
+    const val = data[key];
+    if (typeof val === 'string') return val;
+    if (Array.isArray(val) && val[0]) return String(val[0]);
+  }
+  const first = Object.values(data).find((v) => typeof v === 'string' || Array.isArray(v));
+  if (typeof first === 'string') return first;
+  if (Array.isArray(first) && first[0]) return String(first[0]);
+  return fallback;
+};
+
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData: RegisterData, { rejectWithValue }) => {
@@ -80,7 +100,7 @@ export const registerUser = createAsyncThunk(
       localStorage.setItem('user', JSON.stringify(data.user));
       return data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'ثبت‌نام ناموفق بود');
+      return rejectWithValue(extractApiError(error.response?.data, 'ثبت‌نام ناموفق بود'));
     }
   }
 );

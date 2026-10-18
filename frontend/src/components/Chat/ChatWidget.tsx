@@ -247,21 +247,47 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     }
   };
   
+  const isValidGuestEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
+  const extractChatError = (data: any): string => {
+    if (!data) return 'خطا در ارسال پیام';
+    if (typeof data === 'string') return data;
+    if (typeof data.detail === 'string') return data.detail;
+    if (Array.isArray(data.detail)) return String(data.detail[0] || 'خطا در ارسال پیام');
+    for (const key of ['guest_email', 'guest_name', 'message', 'non_field_errors']) {
+      const val = data[key];
+      if (typeof val === 'string') return val;
+      if (Array.isArray(val) && val[0]) return String(val[0]);
+    }
+    return 'خطا در ارسال پیام';
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!newMessage.trim()) return;
+
+    const name = guestName.trim();
+    const email = guestEmail.trim();
     
-    // For guest users, check if name/email is provided
-    if (!isAuthenticated && !guestName && !guestEmail) {
-      alert('لطفاً نام یا ایمیل خود را وارد کنید');
-      return;
+    // Guests: name OR a valid email (invalid email must not be sent to API)
+    if (!isAuthenticated) {
+      if (!name && !email) {
+        alert('لطفاً نام یا ایمیل خود را وارد کنید');
+        return;
+      }
+      if (email && !isValidGuestEmail(email)) {
+        alert('ایمیل واردشده معتبر نیست. یا ایمیل درست بنویسید یا فقط نام را پر کنید.');
+        return;
+      }
     }
 
     // Ask captcha only until passed once this session
     if (!captchaPassed) {
       if (!showCaptcha) {
         setShowCaptcha(true);
+        setCaptchaError('لطفاً کد امنیتی را وارد کنید و دوباره ارسال را بزنید.');
         return;
       }
       if (!checkMathCaptcha(captchaInput, captcha.answer)) {
@@ -276,14 +302,19 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     
     try {
       setIsLoading(true);
+      const activeSessionId =
+        sessionId || (!isAuthenticated ? sessionStorage.getItem(storageKey) || '' : '');
       const payload: any = {
-        message: newMessage,
-        session_id: sessionId,
+        message: newMessage.trim(),
+        session_id: activeSessionId,
       };
       
       if (!isAuthenticated) {
-        if (guestName) payload.guest_name = guestName;
-        if (guestEmail) payload.guest_email = guestEmail;
+        if (name) payload.guest_name = name;
+        // Only send email when valid — invalid EmailField was causing 400 for guests
+        if (email && isValidGuestEmail(email)) {
+          payload.guest_email = email;
+        }
       }
       
       if (chatMode === 'luggage_tracking') {
@@ -295,7 +326,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       // استخراج session_id از response (اگر backend برگرداند)
       const responseData = response.data;
       if (responseData && responseData.session_id) {
-        if (responseData.session_id !== sessionId) {
+        if (responseData.session_id !== activeSessionId) {
           setSessionId(responseData.session_id);
           if (!isAuthenticated) sessionStorage.setItem(storageKey, responseData.session_id);
         }
@@ -306,7 +337,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       await loadMessages();
     } catch (error: any) {
       console.error('Error sending message:', error);
-      alert(error.response?.data?.detail || 'خطا در ارسال پیام');
+      alert(extractChatError(error.response?.data));
     } finally {
       setIsLoading(false);
     }

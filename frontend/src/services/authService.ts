@@ -14,7 +14,7 @@ export interface RegisterData {
   password_confirm: string;
   first_name: string;
   last_name: string;
-  phone_number?: string; // ✨ اختیاری
+  phone_number: string; // required at registration
   captcha?: string;
   date_of_birth?: string;
   gender?: string;
@@ -43,15 +43,14 @@ export const authService = {
    * Register new user
    */
   register: async (data: RegisterData): Promise<AuthResponse> => {
-    // ✨ حذف فیلدهای captcha و phone_number (اگر خالی هستند)
-    const { captcha, phone_number, ...payload } = data;
-    
-    // ✨ اگر شماره تلفن وجود دارد، اضافه کن
-    const finalPayload = phone_number 
-      ? { ...payload, phone_number }
-      : payload;
-    
-    const response = await api.post<AuthResponse>('/auth/register/', finalPayload);
+    const { captcha: _captcha, ...payload } = data;
+    const response = await api.post<AuthResponse>('/auth/register/', {
+      ...payload,
+      email: payload.email.trim().toLowerCase(),
+      first_name: payload.first_name.trim(),
+      last_name: payload.last_name.trim(),
+      phone_number: payload.phone_number.trim(),
+    });
     return response.data;
   },
 

@@ -248,6 +248,13 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
     """
     session_id = serializers.CharField(required=False, allow_blank=True)
     metadata = serializers.JSONField(required=False, default=dict)
+    guest_name = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    guest_email = serializers.EmailField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        error_messages={'invalid': 'ایمیل مهمان معتبر نیست.'},
+    )
     
     class Meta:
         model = ChatMessage
@@ -258,6 +265,11 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
             'session_id',
             'metadata',
         ]
+
+    def validate_guest_email(self, value):
+        email = (value or '').strip()
+        # Empty / whitespace → treat as not provided (name alone is enough)
+        return email or None
     
     def validate(self, attrs):
         """Validate that either user is authenticated or guest info is provided"""
@@ -266,12 +278,17 @@ class ChatMessageCreateSerializer(serializers.ModelSerializer):
         # اگر کاربر لاگین باشد، نیازی به guest_name و guest_email نیست
         if request and request.user.is_authenticated:
             return attrs
+
+        name = (attrs.get('guest_name') or '').strip()
+        email = attrs.get('guest_email')
+        if name:
+            attrs['guest_name'] = name
         
         # اگر کاربر لاگین نباشد، باید guest_name یا guest_email داشته باشد
-        if not attrs.get('guest_name') and not attrs.get('guest_email'):
-            raise serializers.ValidationError(
-                "برای کاربران مهمان، لطفاً نام یا ایمیل را وارد کنید."
-            )
+        if not name and not email:
+            raise serializers.ValidationError({
+                'non_field_errors': ['برای کاربران مهمان، لطفاً نام یا ایمیل معتبر وارد کنید.']
+            })
         
         return attrs
 
