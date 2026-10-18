@@ -14,7 +14,6 @@ import {
   SparklesIcon,
   MapPinIcon,
   BuildingOfficeIcon,
-  QuestionMarkCircleIcon,
   PaperAirplaneIcon,
   CalendarDaysIcon,
   GiftIcon,
@@ -39,6 +38,7 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import galleryService from '../../services/galleryService';
 import AuthModal from '../Auth/AuthModal';
 import StaffLoginModal from '../Auth/StaffLoginModal';
 
@@ -53,6 +53,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [hoveredSubItem, setHoveredSubItem] = useState<{key: string, index: number} | null>(null);
   const [hoveredNestedPath, setHoveredNestedPath] = useState<number[]>([]); // e.g. [2] for مسافرین ویژه, [2,1] for درخواست ولیچر
+  const [cmsMenuImages, setCmsMenuImages] = useState<Record<string, string>>({});
   const [selectedDestinationIndex, setSelectedDestinationIndex] = useState<number | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
@@ -119,42 +120,73 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return null; // index 1 (fleet) and 5 (magazine) navigate, no modal
   };
 
-  // Get default image for each menu category
-  const getDefaultImage = (key: string, subItemIndex?: number) => {
+  // CMS overrides for header menu photos (admin → HeaderMenuImage)
+  useEffect(() => {
+    let cancelled = false;
+    galleryService.getHeaderMenuImages().then((map) => {
+      if (!cancelled) setCmsMenuImages(map || {});
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const resolveMenuImage = (menuKey: string, itemKey: string, fallback: string) => {
+    const cms = cmsMenuImages[`${menuKey}:${itemKey}`];
+    return cms || fallback;
+  };
+
+  // Built-in defaults — used when CMS has no uploaded image for that slot
+  const getDefaultImage = (key: string, itemKey?: string) => {
     const images: Record<string, string[]> = {
-      'flyWithNasim': [
+      flyWithNasim: [
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-crew.jpg',
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
-        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
+        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg',
+        '/images/airport-plane-photo_991869-62.jpg',
       ],
-      'wherewefly': [
+      wherewefly: [
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-crew.jpg',
-        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
+        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg',
       ],
-      'about': [
+      about: [
         '/images/airport-crew.jpg',
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-plane-photo_991869-62.jpg',
-        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
-      ],
-      'safetyReport': [
-        '/images/airplane-clouds-night_864588-19786.jpg'
-      ],
-      'help': [
-        '/images/airplane-clouds-night_864588-19786.jpg',
-        '/images/airport-crew.jpg',
+        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg',
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
-        '/images/airport-plane-photo_991869-62.jpg'
-      ]
+        '/images/airport-crew.jpg',
+        '/images/airplane-clouds-night_864588-19786.jpg',
+      ],
     };
-    
-    if (subItemIndex !== undefined && images[key] && images[key][subItemIndex]) {
-      return images[key][subItemIndex];
+
+    const topIndex = itemKey ? parseInt(String(itemKey).split('.')[0], 10) : 0;
+    const list = images[key] || [];
+    const fallback =
+      list[Number.isFinite(topIndex) ? topIndex % list.length : 0] ||
+      list[0] ||
+      '/images/airplane-clouds-night_864588-19786.jpg';
+
+    if (itemKey !== undefined && itemKey !== null && itemKey !== '') {
+      return resolveMenuImage(key, String(itemKey), fallback);
     }
-    return images[key]?.[0] || '/images/airplane-clouds-night_864588-19786.jpg';
+    return resolveMenuImage(key, '0', fallback);
+  };
+
+  const getActiveMenuItemKey = (menuKey: string) => {
+    if (menuKey === 'flyWithNasim' && hoveredNestedPath.length >= 2) {
+      return `${hoveredNestedPath[0]}.${hoveredNestedPath[1]}`;
+    }
+    if (menuKey === 'flyWithNasim' && hoveredNestedPath.length === 1) {
+      return `${hoveredNestedPath[0]}`;
+    }
+    if (hoveredSubItem && hoveredSubItem.key === menuKey) {
+      return String(hoveredSubItem.index);
+    }
+    return '0';
   };
 
   // Get multiple destination images with names for wherewefly dropdown
@@ -187,7 +219,15 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     };
     
     const index = subItemIndex !== undefined ? subItemIndex : 0;
-    return destinationData[index] || destinationData[0];
+    const base = destinationData[index] || destinationData[0];
+    return base.map((destination, cellIdx) => ({
+      ...destination,
+      image: resolveMenuImage(
+        'wherewefly',
+        `dest.${index}.${cellIdx}`,
+        destination.image,
+      ),
+    }));
   };
 
   type DropdownSubItem = { label: string; path: string; children?: DropdownSubItem[] };
@@ -232,7 +272,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     },
     {
       key: 'about',
-      label: t('nav.about') || 'کمک',
+      label: t('nav.about') || 'ارتباط با ما',
       path: '#',
       dropdown: [
         { label: t('nav.nasimHistory') || 'تاریخچه نسیم', path: '#' },
@@ -392,7 +432,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 >
                   {item.key === 'flyWithNasim' && <CalendarDaysIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
                   {item.key === 'wherewefly' && <MapPinIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
-                  {item.key === 'about' && <QuestionMarkCircleIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
+                  {item.key === 'about' && <PhoneIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
                   {item.label}
                 </Link>
                 
@@ -567,7 +607,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                       <div
                                         key={childIdx}
                                         className={`flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-gray-300 rounded-lg transition-all ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${childHovered ? 'bg-gray-300' : ''}`}
-                                        onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
+                                        onMouseEnter={() => {
+                                          setHoveredNestedPath([hoveredNestedPath[0], childIdx]);
+                                          setHoveredSubItem({ key: item.key, index: hoveredNestedPath[0] });
+                                        }}
                                       >
                                         <span className="font-medium">{child.label}</span>
                                         <ChevronDownIcon className="w-4 h-4 flex-shrink-0" style={{ transform: language === 'fa' || language === 'ar' ? 'rotate(-90deg)' : 'rotate(90deg)' }} />
@@ -587,7 +630,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                             }
                                           }
                                         }}
-                                        onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
+                                        onMouseEnter={() => {
+                                          setHoveredNestedPath([hoveredNestedPath[0], childIdx]);
+                                          setHoveredSubItem({ key: item.key, index: hoveredNestedPath[0] });
+                                        }}
                                       >
                                         <span className="font-medium">{child.label}</span>
                                       </Link>
@@ -735,10 +781,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                         // Single image for other menus
                         <div className="w-80 h-[400px] bg-gray-100 flex-shrink-0 relative overflow-hidden m-4 rounded-2xl">
                           <img 
-                            src={hoveredSubItem && hoveredSubItem.key === item.key 
-                              ? getDefaultImage(item.key, hoveredSubItem.index)
-                              : getDefaultImage(item.key, 0)
-                            }
+                            src={getDefaultImage(item.key, getActiveMenuItemKey(item.key))}
                             alt={item.label}
                             className="w-full h-full object-cover transition-opacity duration-300 rounded-2xl"
                           />

@@ -115,10 +115,24 @@ export const getHomePageSectionConfigs = async (): Promise<Record<string, HomePa
   }
 };
 
+/**
+ * Active header mega-menu image overrides keyed as "menuKey:itemKey"
+ */
+export const getHeaderMenuImages = async (): Promise<Record<string, string>> => {
+  try {
+    const response = await api.get<Record<string, string>>('/gallery/header-menu-images/map/');
+    return response.data || {};
+  } catch (error) {
+    console.error('Error fetching header menu images:', error);
+    return {};
+  }
+};
+
 const galleryService = {
   getHeroSliders,
   getHomePageSectionItems,
   getHomePageSectionConfigs,
+  getHeaderMenuImages,
 };
 
 export default galleryService;

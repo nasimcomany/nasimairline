@@ -5,7 +5,15 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
+from .models import (
+    GalleryCategory,
+    GalleryAlbum,
+    GalleryImage,
+    HeroSlider,
+    HomePageSectionItem,
+    HomePageSectionConfig,
+    HeaderMenuImage,
+)
 
 User = get_user_model()
 
@@ -408,3 +416,58 @@ class HeroSliderAdmin(admin.ModelAdmin):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} اسلایدر غیرفعال شد.')
     deactivate_sliders.short_description = 'غیرفعال کردن اسلایدرهای انتخاب شده'
+
+
+@admin.register(HeaderMenuImage)
+class HeaderMenuImageAdmin(admin.ModelAdmin):
+    """
+    Admin for header mega-menu images (top-level, nested, destination grid).
+    Upload an image to override the site default for that menu option.
+    """
+    list_display = [
+        'preview', 'menu_key', 'label_fa', 'item_key', 'order', 'is_active', 'updated_at',
+    ]
+    list_filter = ['menu_key', 'is_active']
+    search_fields = ['label_fa', 'label_en', 'item_key']
+    list_editable = ['order', 'is_active']
+    readonly_fields = ['uuid', 'updated_at', 'image_display']
+    ordering = ['menu_key', 'order', 'item_key']
+
+    fieldsets = (
+        ('گزینه منو', {
+            'fields': ('menu_key', 'item_key', 'label_fa', 'label_en'),
+            'description': (
+                'هر ردیف یک گزینه یا زیرگزینه منوی هدر است. '
+                'فقط فیلد تصویر را عوض کنید؛ کلیدها را تغییر ندهید. '
+                'کلید dest.X.Y برای سلول‌های گرید مقاصد است.'
+            ),
+        }),
+        ('تصویر', {
+            'fields': ('image', 'image_display'),
+        }),
+        ('نمایش', {
+            'fields': ('order', 'is_active'),
+        }),
+        ('اطلاعات', {
+            'fields': ('uuid', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+
+    def preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="width:72px;height:48px;object-fit:cover;border-radius:4px;" />',
+                obj.image.url,
+            )
+        return format_html('<span style="color:#888">پیش‌فرض سایت</span>')
+    preview.short_description = 'تصویر'
+
+    def image_display(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width:420px;max-height:280px;border-radius:8px;" />',
+                obj.image.url,
+            )
+        return 'هنوز تصویری آپلود نشده — سایت تصویر پیش‌فرض را نشان می‌دهد'
+    image_display.short_description = 'پیش‌نمایش'

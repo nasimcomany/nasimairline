@@ -152,6 +152,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         force = options["force"]
         call_command("populate_homepage_sections")
+        call_command("seed_header_menu_images")
         self._seed_special_services(force)
         self._seed_experience_faq(force=options["force_experience_faq"])
         if not options["skip_magazine"]:

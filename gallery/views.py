@@ -6,7 +6,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
+from .models import (
+    GalleryCategory,
+    GalleryAlbum,
+    GalleryImage,
+    HeroSlider,
+    HomePageSectionItem,
+    HomePageSectionConfig,
+    HeaderMenuImage,
+)
 from .serializers import (
     GalleryCategorySerializer,
     GalleryCategoryDetailSerializer,
@@ -17,6 +25,7 @@ from .serializers import (
     HeroSliderSerializer,
     HomePageSectionItemSerializer,
     HomePageSectionConfigSerializer,
+    HeaderMenuImageSerializer,
 )
 
 
@@ -204,4 +213,26 @@ class HomePageSectionConfigViewSet(viewsets.ReadOnlyModelViewSet):
         configs = self.get_queryset()
         serializer = self.get_serializer(configs, many=True)
         data = {c['section_type']: c for c in serializer.data}
+        return Response(data)
+
+
+class HeaderMenuImageViewSet(viewsets.ReadOnlyModelViewSet):
+    """Public read API for header mega-menu images."""
+    queryset = HeaderMenuImage.objects.filter(is_active=True).order_by('menu_key', 'order', 'item_key')
+    serializer_class = HeaderMenuImageSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def map(self, request):
+        """
+        Return { \"flyWithNasim:0\": \"https://...\", ... } for active rows that have an image.
+        """
+        data = {}
+        for row in self.get_queryset():
+            if not row.image:
+                continue
+            serializer = self.get_serializer(row)
+            url = serializer.data.get('image_url')
+            if url:
+                data[f'{row.menu_key}:{row.item_key}'] = url
         return Response(data)

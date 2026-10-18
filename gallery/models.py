@@ -784,3 +784,65 @@ class HeroSlider(models.Model):
         if not self.alt_text:
             self.alt_text = self.title
         super().save(*args, **kwargs)
+
+
+HEADER_MENU_KEY_CHOICES = [
+    ('flyWithNasim', _('رزرو / پرواز با نسیم')),
+    ('wherewefly', _('مقاصد')),
+    ('about', _('ارتباط با ما')),
+]
+
+
+class HeaderMenuImage(models.Model):
+    """
+    Editable images for header mega-menu panels (top-level, nested, destination grid).
+    item_key examples:
+      - \"0\", \"1\" … top-level option index
+      - \"2.0\" nested child under option 2
+      - \"dest.0.3\" wherewefly category 0, grid cell 3
+    Empty image → frontend keeps its built-in default photo.
+    """
+    uuid = models.UUIDField(
+        _('شناسه یکتا'),
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        db_index=True,
+    )
+    menu_key = models.CharField(
+        _('منوی هدر'),
+        max_length=40,
+        choices=HEADER_MENU_KEY_CHOICES,
+        db_index=True,
+    )
+    item_key = models.CharField(
+        _('کلید گزینه'),
+        max_length=40,
+        help_text=_('مثل 0 یا 2.1 یا dest.0.3'),
+        db_index=True,
+    )
+    label_fa = models.CharField(_('عنوان فارسی (ادمین)'), max_length=200)
+    label_en = models.CharField(_('عنوان انگلیسی (ادمین)'), max_length=200, blank=True)
+    image = models.ImageField(
+        _('تصویر منو'),
+        upload_to='header_menu/',
+        blank=True,
+        null=True,
+        validators=[validate_image_size, validate_image_format],
+        help_text=_('اگر خالی باشد همان تصویر پیش‌فرض سایت نشان داده می‌شود'),
+    )
+    order = models.PositiveIntegerField(_('ترتیب'), default=0, db_index=True)
+    is_active = models.BooleanField(_('فعال'), default=True, db_index=True)
+    updated_at = models.DateTimeField(_('تاریخ به‌روزرسانی'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('تصویر منوی هدر')
+        verbose_name_plural = _('تصاویر منوی هدر')
+        ordering = ['menu_key', 'order', 'item_key']
+        unique_together = [('menu_key', 'item_key')]
+        indexes = [
+            models.Index(fields=['menu_key', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_menu_key_display()} / {self.label_fa} ({self.item_key})"

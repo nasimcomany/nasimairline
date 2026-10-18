@@ -17,7 +17,7 @@ const translations = {
   fa: {
     // Navigation
     'nav.home': 'خانه',
-    'nav.about': 'کمک',
+    'nav.about': 'ارتباط با ما',
     'nav.flights': 'پروازها',
     'nav.booking': 'رزرو',
     'nav.services': 'خدمات',
@@ -976,7 +976,7 @@ const translations = {
   ar: {
     // Navigation
     'nav.home': 'الرئيسية',
-    'nav.about': 'مساعدة',
+    'nav.about': 'تواصل معنا',
     'nav.flights': 'الرحلات',
     'nav.booking': 'الحجز',
     'nav.services': 'الخدمات',
@@ -1936,7 +1936,7 @@ const translations = {
   en: {
     // Navigation
     'nav.home': 'Home',
-    'nav.about': 'Help',
+    'nav.about': 'Contact Us',
     'nav.flights': 'Flights',
     'nav.booking': 'Booking',
     'nav.services': 'Services',
