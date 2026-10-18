@@ -441,7 +441,7 @@ SUPPORT_EMAIL_MAPPING = {
 }
 
 # Security Contact Information (حراست)
-SECURITY_CONTACT_PHONE = os.environ.get('SECURITY_CONTACT_PHONE', '021123456789')
+SECURITY_CONTACT_PHONE = os.environ.get('SECURITY_CONTACT_PHONE', '02173490318')
 
 # Weather API (OpenWeatherMap) - برای پروکسی آب و هوا
 WEATHER_API_KEY = os.environ.get('REACT_APP_WEATHER_API_KEY', '') or os.environ.get('WEATHER_API_KEY', '')

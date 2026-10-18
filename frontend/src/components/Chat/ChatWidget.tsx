@@ -9,6 +9,12 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import api from '../../services/api';
 import {
+  captchaPrompt,
+  checkMathCaptcha,
+  generateMathCaptcha,
+  normalizeDigits,
+} from '../../utils/mathCaptcha';
+import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
   PaperAirplaneIcon,
@@ -44,32 +50,26 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   const [sessionId, setSessionId] = useState<string>(propSessionId || '');
   const [lastMessageTime, setLastMessageTime] = useState<string>('');
   
-  // Captcha state
-  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+', answer: 0 });
+  // Captcha — once per chat session (not every message)
+  const [captcha, setCaptcha] = useState(() => generateMathCaptcha());
   const [captchaInput, setCaptchaInput] = useState('');
   const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaPassed, setCaptchaPassed] = useState(false);
   const [captchaError, setCaptchaError] = useState('');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Generate new captcha
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 20) + 1;
-    const num2 = Math.floor(Math.random() * 20) + 1;
-    const operators = ['+', '-'];
-    const operator = operators[Math.floor(Math.random() * operators.length)];
-    const answer = operator === '+' ? num1 + num2 : num1 - num2;
-    setCaptcha({ num1, num2, operator, answer });
+  const refreshCaptcha = () => {
+    setCaptcha(generateMathCaptcha());
     setCaptchaInput('');
     setCaptchaError('');
   };
 
-  // Generate captcha when chat opens or when needed
   useEffect(() => {
-    if (isOpen) {
-      generateCaptcha();
+    if (isOpen && !captchaPassed) {
+      refreshCaptcha();
       setShowCaptcha(false);
     }
   }, [isOpen]);
@@ -258,18 +258,20 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       return;
     }
 
-    // Check if captcha needs to be shown/validated
-    if (!showCaptcha) {
-      // Show captcha before sending first message
-      setShowCaptcha(true);
-      return;
-    }
-
-    // Validate captcha
-    if (parseInt(captchaInput) !== captcha.answer) {
-      setCaptchaError('کپچا اشتباه است. لطفاً دوباره تلاش کنید.');
-      generateCaptcha();
-      return;
+    // Ask captcha only until passed once this session
+    if (!captchaPassed) {
+      if (!showCaptcha) {
+        setShowCaptcha(true);
+        return;
+      }
+      if (!checkMathCaptcha(captchaInput, captcha.answer)) {
+        setCaptchaError('کپچا اشتباه است. لطفاً دوباره تلاش کنید.');
+        refreshCaptcha();
+        return;
+      }
+      setCaptchaPassed(true);
+      setShowCaptcha(false);
+      setCaptchaError('');
     }
     
     try {
@@ -300,9 +302,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       }
       
       setNewMessage('');
-      setCaptchaInput('');
-      setShowCaptcha(false);
-      generateCaptcha();
       // Reload messages to get the new one (با session_id جدید)
       await loadMessages();
     } catch (error: any) {
@@ -323,8 +322,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
 
   const handleMessageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
-    // Show captcha when user starts typing
-    if (!showCaptcha && e.target.value.trim().length > 0) {
+    if (!captchaPassed && !showCaptcha && e.target.value.trim().length > 0) {
       setShowCaptcha(true);
     }
   };
@@ -512,30 +510,31 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
                   کپچا
                 </label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-2 text-center">
-                    <span className="text-lg font-bold text-blue-900 persian-font-vazir" style={{ direction: 'ltr' }}>
-                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-2 text-center" dir="ltr">
+                    <span className="text-lg font-bold text-blue-900 persian-font-vazir inline-block">
+                      {captchaPrompt(captcha)}
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={generateCaptcha}
+                    onClick={refreshCaptcha}
                     className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs persian-font-vazir"
                   >
                     تغییر
                   </button>
                 </div>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={captchaInput}
                   onChange={(e) => {
-                    setCaptchaInput(e.target.value);
+                    setCaptchaInput(normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3));
                     setCaptchaError('');
                   }}
                   placeholder="پاسخ را وارد کنید"
                   className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 persian-font-vazir"
                   style={{ direction: 'ltr', textAlign: 'right' }}
-                  required={showCaptcha}
+                  required={showCaptcha && !captchaPassed}
                 />
                 {captchaError && (
                   <p className="text-red-500 text-xs mt-1 persian-font-vazir">{captchaError}</p>
@@ -554,7 +553,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
               />
               <button
                 type="submit"
-                disabled={isLoading || !newMessage.trim() || (showCaptcha && !captchaInput.trim())}
+                disabled={isLoading || !newMessage.trim() || (showCaptcha && !captchaPassed && !captchaInput.trim())}
                 className="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PaperAirplaneIcon className="w-5 h-5" />

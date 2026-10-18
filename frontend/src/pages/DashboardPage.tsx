@@ -6,6 +6,13 @@ import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import { authService } from '../services/authService';
+import {
+  captchaPrompt,
+  checkMathCaptcha,
+  generateMathCaptcha,
+  MathCaptchaChallenge,
+  normalizeDigits,
+} from '../utils/mathCaptcha';
 import { 
   UserIcon, 
   StarIcon,
@@ -18,6 +25,10 @@ import {
   IdentificationIcon,
   CalendarIcon
 } from '@heroicons/react/24/outline';
+
+const dashboardCaptchaKey = (userId?: number | string) =>
+  `nasim_dashboard_captcha_ok_${userId ?? 'anon'}`;
+
 
 interface UserProfile {
   id: number;
@@ -40,8 +51,8 @@ const DashboardPage: React.FC = () => {
   const dispatch = useDispatch();
   const { t, fontClass, language } = useLanguage();
   
-  // Captcha state
-  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+', answer: 0 });
+  // Captcha — once per browser session (not on every panel navigation)
+  const [captcha, setCaptcha] = useState<MathCaptchaChallenge>(() => generateMathCaptcha());
   const [captchaInput, setCaptchaInput] = useState('');
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [captchaError, setCaptchaError] = useState('');
@@ -56,35 +67,31 @@ const DashboardPage: React.FC = () => {
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
 
-  // Generate new captcha
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 20) + 1;
-    const num2 = Math.floor(Math.random() * 20) + 1;
-    const operators = ['+', '-'];
-    const operator = operators[Math.floor(Math.random() * operators.length)];
-    const answer = operator === '+' ? num1 + num2 : num1 - num2;
-    setCaptcha({ num1, num2, operator, answer });
+  const refreshCaptcha = () => {
+    setCaptcha(generateMathCaptcha());
     setCaptchaInput('');
     setCaptchaError('');
   };
 
-  // Generate captcha on mount - ALWAYS require captcha on page load
   useEffect(() => {
-    // Always reset captcha verification on every page load/refresh
-    // This ensures users must solve captcha every time they access the dashboard
-    generateCaptcha();
-    setCaptchaVerified(false);
-    setCaptchaInput('');
-    setCaptchaError('');
-  }, []);
-
-  // Handle captcha verification
-  const handleCaptchaVerify = () => {
-    const answer = parseInt(captchaInput.trim());
-    if (isNaN(answer) || answer !== captcha.answer) {
-      setCaptchaError(language === 'fa' ? 'کد امنیتی اشتباه است' : language === 'ar' ? 'رمز الأمان غير صحيح' : 'Security code is incorrect');
-      generateCaptcha();
+    if (!user?.id) return;
+    const key = dashboardCaptchaKey(user.id);
+    if (sessionStorage.getItem(key) === '1') {
+      setCaptchaVerified(true);
       return;
+    }
+    refreshCaptcha();
+    setCaptchaVerified(false);
+  }, [user?.id]);
+
+  const handleCaptchaVerify = () => {
+    if (!checkMathCaptcha(captchaInput, captcha.answer)) {
+      setCaptchaError(language === 'fa' ? 'کد امنیتی اشتباه است' : language === 'ar' ? 'رمز الأمان غير صحيح' : 'Security code is incorrect');
+      refreshCaptcha();
+      return;
+    }
+    if (user?.id) {
+      sessionStorage.setItem(dashboardCaptchaKey(user.id), '1');
     }
     setCaptchaVerified(true);
     setCaptchaError('');
@@ -260,14 +267,14 @@ const DashboardPage: React.FC = () => {
             {/* Captcha - Compact */}
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-2">
-                <div className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg p-3 text-center">
-                  <span className={`text-xl font-bold text-blue-600 ${fontClass}`} style={{ ...fontStyle, direction: 'ltr' }}>
-                    ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                <div className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg p-3 text-center" dir="ltr">
+                  <span className={`text-xl font-bold text-blue-600 inline-block ${fontClass}`} style={fontStyle}>
+                    {captchaPrompt(captcha)}
                   </span>
                 </div>
                 <button
                   type="button"
-                  onClick={generateCaptcha}
+                  onClick={refreshCaptcha}
                   className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium transition-colors"
                   style={fontStyle}
                 >
@@ -278,7 +285,7 @@ const DashboardPage: React.FC = () => {
                 type="text"
                 value={captchaInput}
                 onChange={(e) => {
-                  setCaptchaInput(e.target.value.replace(/\D/g, ''));
+                  setCaptchaInput(normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3));
                   setCaptchaError('');
                 }}
                 onKeyPress={(e) => {

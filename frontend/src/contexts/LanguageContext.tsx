@@ -835,7 +835,7 @@ const translations = {
     'footer.contact.phone': 'تلفن',
     'footer.contact.email': 'ایمیل',
     'footer.contact.address': 'آدرس',
-    'footer.contact.phoneValue': '021-12345678',
+    'footer.contact.phoneValue': '02173490318',
     'footer.contact.emailValue': 'info@nasimbehesht.com',
     'footer.contact.addressValue': 'تهران، خیابان ولیعصر',
     'footer.copyright': 'تمام حقوق محفوظ است',
@@ -971,7 +971,7 @@ const translations = {
     'support.immediate': 'فوری',
     'support.within2Hours': 'کمتر از ۲ ساعت',
     'support.online': 'آنلاین',
-    'support.phoneNumber': '۰۲۱-۱۲۳۴۵۶۷۸',
+    'support.phoneNumber': '02173490318',
   },
   ar: {
     // Navigation
@@ -1755,7 +1755,7 @@ const translations = {
     'footer.contact.phone': 'هاتف',
     'footer.contact.email': 'بريد إلكتروني',
     'footer.contact.address': 'عنوان',
-    'footer.contact.phoneValue': '021-12345678',
+    'footer.contact.phoneValue': '02173490318',
     'footer.contact.emailValue': 'info@nasimbehesht.com',
     'footer.contact.addressValue': 'طهران، شارع ولي عصر',
     'footer.copyright': 'جميع الحقوق محفوظة',
@@ -1891,7 +1891,7 @@ const translations = {
     'support.immediate': 'فوري',
     'support.within2Hours': 'أقل من ساعتين',
     'support.online': 'عبر الإنترنت',
-    'support.phoneNumber': '021-12345678',
+    'support.phoneNumber': '02173490318',
     
     // Support FAQ Categories
     'support.faqCategories.general': 'عام',
@@ -2711,7 +2711,7 @@ const translations = {
     'footer.contact.phone': 'Phone',
     'footer.contact.email': 'Email',
     'footer.contact.address': 'Address',
-    'footer.contact.phoneValue': '021-12345678',
+    'footer.contact.phoneValue': '02173490318',
     'footer.contact.emailValue': 'info@nasimbehesht.com',
     'footer.contact.addressValue': 'Tehran, Valiasr Street',
     'footer.copyright': 'All Rights Reserved',
@@ -2847,7 +2847,7 @@ const translations = {
     'support.immediate': 'Immediate',
     'support.within2Hours': 'Within 2 Hours',
     'support.online': 'Online',
-    'support.phoneNumber': '021-12345678',
+    'support.phoneNumber': '02173490318',
     
     // Support FAQ Categories
     'support.faqCategories.general': 'General',

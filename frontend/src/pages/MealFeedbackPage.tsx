@@ -8,6 +8,12 @@ import {
   XCircleIcon,
 } from '@heroicons/react/24/solid';
 import api from '../services/api';
+import {
+  checkMathCaptcha,
+  generateMathCaptcha,
+  captchaPrompt,
+  normalizeDigits,
+} from '../utils/mathCaptcha';
 
 interface FeedbackData {
   flight_number: string;
@@ -31,7 +37,7 @@ const MealFeedbackPage: React.FC = () => {
   const { t, fontClass, language } = useLanguage();
   
   // Captcha state
-  const [captchaValue, setCaptchaValue] = useState('');
+  const [captcha, setCaptcha] = useState(() => generateMathCaptcha());
   const [captchaInput, setCaptchaInput] = useState('');
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
   const [captchaError, setCaptchaError] = useState(false);
@@ -58,32 +64,23 @@ const MealFeedbackPage: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
   
-  // Generate captcha on mount
   React.useEffect(() => {
-    generateCaptcha();
+    setCaptcha(generateMathCaptcha());
   }, []);
   
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
-    const answer = num1 + num2;
-    setCaptchaValue(`? = ${num1} + ${num2}`);
-    // Store answer in a way that can be verified
-    (window as any).__captchaAnswer = answer;
+  const refreshCaptcha = () => {
+    setCaptcha(generateMathCaptcha());
     setCaptchaInput('');
     setCaptchaError(false);
   };
   
   const verifyCaptcha = () => {
-    const userAnswer = parseInt(captchaInput);
-    const correctAnswer = (window as any).__captchaAnswer;
-    
-    if (userAnswer === correctAnswer) {
+    if (checkMathCaptcha(captchaInput, captcha.answer)) {
       setIsCaptchaVerified(true);
       setCaptchaError(false);
     } else {
       setCaptchaError(true);
-      generateCaptcha();
+      refreshCaptcha();
     }
   };
   
@@ -251,20 +248,21 @@ const MealFeedbackPage: React.FC = () => {
                   <p className="text-xs text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                     {language === 'fa' ? 'حاصل این عمل را وارد کنید:' : 'Solve this:'}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">{captchaValue}</p>
+                  <p className="text-2xl font-bold text-gray-900" dir="ltr">{captchaPrompt(captcha)}</p>
                 </div>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={captchaInput}
-                  onChange={(e) => setCaptchaInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && verifyCaptcha()}
+                  onChange={(e) => setCaptchaInput(normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3))}
+                  onKeyDown={(e) => e.key === 'Enter' && verifyCaptcha()}
                   placeholder={language === 'fa' ? 'جواب' : 'Answer'}
                   className="w-full px-3 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none mb-3 text-center text-lg"
                   style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                 />
                 {captchaError && (
                   <p className="text-red-600 text-xs mb-3 text-center" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
-                    {language === 'fa' ? '❌ پاسخ اشتباه است' : '❌ Wrong answer'}
+                    {language === 'fa' ? 'پاسخ اشتباه است' : 'Wrong answer'}
                   </p>
                 )}
                 <div className="flex gap-2">
@@ -278,11 +276,11 @@ const MealFeedbackPage: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={generateCaptcha}
+                    onClick={refreshCaptcha}
                     className="px-4 py-2.5 border-2 border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition-all text-sm"
                     style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                   >
-                    🔄
+                    ↻
                   </button>
                 </div>
               </div>

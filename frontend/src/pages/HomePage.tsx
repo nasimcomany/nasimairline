@@ -3314,9 +3314,9 @@ const HomePage: React.FC = () => {
                 </p>
                 <ul className="space-y-2">
                   <li>
-                    <a href="tel:02173490000" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="tel:02173490318" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <PhoneIcon className="w-4 h-4 flex-shrink-0" />
-                      {language === 'fa' ? 'تلفن' : language === 'ar' ? 'هاتف' : 'Phone'}: 02173490000
+                      {language === 'fa' ? 'تلفن' : language === 'ar' ? 'هاتف' : 'Phone'}: 02173490318
                     </a>
                   </li>
                   <li>

@@ -7,6 +7,7 @@ import { loginUser, registerUser } from '../../store/slices/authSlice';
 import { AppDispatch } from '../../store';
 import CustomSelect from '../CustomSelect/CustomSelect';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { captchaPrompt, checkMathCaptcha, generateMathCaptcha, MathCaptchaChallenge, normalizeDigits } from '../../utils/mathCaptcha';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -40,19 +41,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     captcha: ''
   });
 
-  // Captcha
-  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+', answer: 0 });
+  // Captcha — non-negative, Persian-digit safe
+  const [captcha, setCaptcha] = useState<MathCaptchaChallenge>(() => generateMathCaptcha());
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Generate new captcha
   const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 20) + 1;
-    const num2 = Math.floor(Math.random() * 20) + 1;
-    const operators = ['+', '-'];
-    const operator = operators[Math.floor(Math.random() * operators.length)];
-    const answer = operator === '+' ? num1 + num2 : num1 - num2;
-    setCaptcha({ num1, num2, operator, answer });
+    setCaptcha(generateMathCaptcha());
   };
 
   useEffect(() => {
@@ -60,6 +55,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       generateCaptcha();
       setError('');
       setSuccess('');
+      setLoginForm((prev) => ({ ...prev, captcha: '' }));
+      setRegisterForm((prev) => ({ ...prev, captcha: '' }));
     }
   }, [isOpen]);
 
@@ -82,9 +79,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     e.preventDefault();
     setError('');
 
-    // Validate captcha
-    const captchaAnswer = parseInt(loginForm.captcha.trim());
-    if (isNaN(captchaAnswer) || captchaAnswer !== captcha.answer) {
+    // Validate captcha (instant, local — no network)
+    if (!checkMathCaptcha(loginForm.captcha, captcha.answer)) {
       setError(t('auth.captchaError'));
       generateCaptcha();
       setLoginForm(prev => ({ ...prev, captcha: '' }));
@@ -155,9 +151,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     e.preventDefault();
     setError('');
 
-    // Validate captcha
-    const captchaAnswer = parseInt(registerForm.captcha.trim());
-    if (isNaN(captchaAnswer) || captchaAnswer !== captcha.answer) {
+    if (!checkMathCaptcha(registerForm.captcha, captcha.answer)) {
       setError(t('auth.captchaError'));
       generateCaptcha();
       setRegisterForm(prev => ({ ...prev, captcha: '' }));
@@ -360,9 +354,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   {t('auth.captcha')}
                 </label>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr' }}>
-                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center" dir="ltr">
+                    <span className="text-2xl font-bold text-blue-900 inline-block" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                      {captchaPrompt(captcha)}
                     </span>
                   </div>
                   <button
@@ -376,10 +370,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 </div>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={loginForm.captcha}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
+                  onChange={(e) => setLoginForm(prev => ({
+                    ...prev,
+                    captcha: normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3),
+                  }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                  dir="ltr"
                   placeholder={t('auth.captchaPlaceholder')}
                   required
                 />
@@ -533,9 +532,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   {t('auth.captcha')}
                 </label>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr' }}>
-                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center" dir="ltr">
+                    <span className="text-2xl font-bold text-blue-900 inline-block" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                      {captchaPrompt(captcha)}
                     </span>
                   </div>
                   <button
@@ -549,10 +548,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 </div>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={registerForm.captcha}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
+                  onChange={(e) => setRegisterForm(prev => ({
+                    ...prev,
+                    captcha: normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3),
+                  }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                  dir="ltr"
                   placeholder={t('auth.captchaPlaceholder')}
                   required
                 />
