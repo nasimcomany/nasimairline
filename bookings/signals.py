@@ -105,35 +105,41 @@ def update_booking_on_passenger_change(sender, instance, created, **kwargs):
 def update_membership_on_booking_completion(sender, instance, created, **kwargs):
     """
     Update user membership activity when booking is completed/confirmed
-    and check for tier upgrade
+    and check for tier upgrade.
+
+    Temporarily also refreshes on HELD (pay-click soft hold) when
+    MEMBERSHIP_COUNT_HELD_BOOKINGS is enabled — until real payment is live.
     """
-    # وقتی که booking به CONFIRMED یا COMPLETED تغییر پیدا می‌کنه
-    if instance.status in ['CONFIRMED', 'COMPLETED'] and instance.user:
-        from accounts.membership_models import UserMembershipActivity
-        from accounts.membership_service import MembershipTierService
-        import logging
-        
-        logger = logging.getLogger(__name__)
-        
-        try:
-            # بروزرسانی آمار کاربر
-            activity, created_activity = UserMembershipActivity.objects.get_or_create(
-                user=instance.user
+    if not instance.user:
+        return
+
+    from accounts.membership_booking_query import membership_relevant_statuses
+    if instance.status not in membership_relevant_statuses():
+        return
+
+    from accounts.membership_models import UserMembershipActivity
+    from accounts.membership_service import MembershipTierService
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    try:
+        activity, _created_activity = UserMembershipActivity.objects.get_or_create(
+            user=instance.user
+        )
+        activity.update_statistics()
+
+        upgraded, new_tier, old_tier = MembershipTierService.check_and_upgrade_user_tier(
+            instance.user
+        )
+
+        if upgraded:
+            logger.info(
+                f"✨ User {instance.user.email} upgraded from {old_tier} to {new_tier} "
+                f"after booking {instance.booking_reference} (status={instance.status})"
             )
-            activity.update_statistics()
-            
-            # چک کردن و ارتقا tier
-            upgraded, new_tier, old_tier = MembershipTierService.check_and_upgrade_user_tier(
-                instance.user
-            )
-            
-            if upgraded:
-                logger.info(
-                    f"✨ User {instance.user.email} upgraded from {old_tier} to {new_tier} "
-                    f"after booking {instance.booking_reference}"
-                )
-        except Exception as e:
-            logger.error(
-                f"Error updating membership for booking {instance.booking_reference}: {str(e)}"
-            )
+    except Exception as e:
+        logger.error(
+            f"Error updating membership for booking {instance.booking_reference}: {str(e)}"
+        )
 

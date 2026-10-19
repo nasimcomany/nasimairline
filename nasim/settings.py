@@ -613,6 +613,10 @@ CELERY_BEAT_SCHEDULE = {
 BOOKING_HOLD_MINUTES = int(os.environ.get('BOOKING_HOLD_MINUTES', '15'))
 BOOKING_SOFT_HOLD_CAP = int(os.environ.get('BOOKING_SOFT_HOLD_CAP', '9'))
 
+# Temporary: count non-expired HELD bookings for باشگاه مشتریان until real payment is live.
+# Set MEMBERSHIP_COUNT_HELD_BOOKINGS=0 (or false) when payment confirmation is reliable.
+MEMBERSHIP_COUNT_HELD_BOOKINGS = env_bool('MEMBERSHIP_COUNT_HELD_BOOKINGS', True)
+
 # Nira IBE payment bridge (same pattern as other Nira airlines)
 # Template placeholders: {ref} {callback} {return_url} {amount}
 NIRA_PAYMENT_REDIRECT_URL = os.environ.get('NIRA_PAYMENT_REDIRECT_URL', '').strip()

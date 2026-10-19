@@ -204,12 +204,13 @@ def export_full_daily_membership_behavior_csv(day=None):
         .annotate(c=Count('id'))
         .values_list('user_id', 'c')
     )
+    from accounts.membership_booking_query import membership_booking_q
     bookings_confirmed_today = dict(
         Booking.objects.filter(
             created_at__gte=start,
             created_at__lt=end,
-            status__in=['CONFIRMED', 'COMPLETED'],
         )
+        .filter(membership_booking_q())
         .values('user_id')
         .annotate(c=Count('id'))
         .values_list('user_id', 'c')
@@ -377,9 +378,12 @@ def export_daily_club_summary_csv(day=None):
     logins_today = members.filter(last_login__gte=start, last_login__lt=end).count()
     new_members = members.filter(date_joined__gte=start, date_joined__lt=end).count()
     bookings = Booking.objects.filter(created_at__gte=start, created_at__lt=end).count()
-    bookings_ok = Booking.objects.filter(
-        created_at__gte=start, created_at__lt=end, status__in=['CONFIRMED', 'COMPLETED']
-    ).count()
+    from accounts.membership_booking_query import membership_booking_q
+    bookings_ok = (
+        Booking.objects.filter(created_at__gte=start, created_at__lt=end)
+        .filter(membership_booking_q())
+        .count()
+    )
     payments = Payment.objects.filter(created_at__gte=start, created_at__lt=end).aggregate(
         c=Count('id'), total=Sum('amount')
     )

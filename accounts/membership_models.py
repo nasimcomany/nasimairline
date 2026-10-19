@@ -254,50 +254,51 @@ class UserMembershipActivity(models.Model):
     def update_statistics(self):
         """بروزرسانی آمارها"""
         from bookings.models import Booking
-        from django.db.models import Count, Q
         from django.db.models.functions import TruncMonth
         from datetime import timedelta
+        from accounts.membership_booking_query import membership_booking_q
         
         now = timezone.now()
         
-        # تعداد کل رزروهای تکمیل شده یا تایید شده
-        completed_bookings = Booking.objects.filter(
-            user=self.user,
-            status__in=['CONFIRMED', 'COMPLETED']
-        )
-        self.total_bookings = completed_bookings.count()
+        # رزروهای قابل‌شمارش برای باشگاه:
+        # همیشه تأیید/تکمیل‌شده؛ موقتاً رزرو موقت منقضی‌نشده هم (تا وقتی پرداخت واقعی فعال شود)
+        counted_bookings = Booking.objects.filter(user=self.user).filter(membership_booking_q())
+        self.total_bookings = counted_bookings.count()
         # در این سرویس فعلاً معیار "پروازهای انجام‌شده" را معادل رزروهای معتبر می‌گیریم
         # تا قوانین ارتقا که ادمین تعریف کرده قابل محاسبه و قابل نمایش باشند.
         self.total_completed_flights = self.total_bookings
         
         # تاریخ اولین و آخرین رزرو
         if self.total_bookings > 0:
-            first_booking = completed_bookings.order_by('created_at').first()
-            last_booking = completed_bookings.order_by('-created_at').first()
+            first_booking = counted_bookings.order_by('created_at').first()
+            last_booking = counted_bookings.order_by('-created_at').first()
             if first_booking:
                 self.first_booking_date = first_booking.created_at
             if last_booking:
                 self.last_booking_date = last_booking.created_at
+        else:
+            self.first_booking_date = None
+            self.last_booking_date = None
         
         # رزروهای اخیر
-        self.bookings_last_7_days = completed_bookings.filter(
+        self.bookings_last_7_days = counted_bookings.filter(
             created_at__gte=now - timedelta(days=7)
         ).count()
         
-        self.bookings_last_30_days = completed_bookings.filter(
+        self.bookings_last_30_days = counted_bookings.filter(
             created_at__gte=now - timedelta(days=30)
         ).count()
         
-        self.bookings_last_90_days = completed_bookings.filter(
+        self.bookings_last_90_days = counted_bookings.filter(
             created_at__gte=now - timedelta(days=90)
         ).count()
         
         # محاسبه ماه‌های فعال
         # ماه‌هایی که کاربر حداقل 1 رزرو داشته
         bookings_by_month = 0
-        if completed_bookings.exists():
+        if counted_bookings.exists():
             bookings_by_month = (
-                completed_bookings
+                counted_bookings
                 .annotate(month=TruncMonth('created_at'))
                 .values('month')
                 .distinct()
