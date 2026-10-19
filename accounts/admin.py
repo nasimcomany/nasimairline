@@ -12,11 +12,14 @@ from .membership_models import (
     MembershipUpgradeLog
 )
 from .membership_service import MembershipTierService
+from django.urls import path
 from .admin_exports import (
     export_tier_configs_csv,
     export_membership_activity_csv,
     export_upgrade_logs_csv,
     export_users_membership_csv,
+    export_full_daily_membership_behavior_csv,
+    export_daily_club_summary_csv,
 )
 
 
@@ -227,6 +230,7 @@ class UserMembershipActivityAdmin(admin.ModelAdmin):
     Admin for UserMembershipActivity model
     نمایش آمار فعالیت‌های کاربران
     """
+    change_list_template = 'admin/accounts/usermembershipactivity/change_list.html'
     list_display = [
         'user', 'total_bookings', 'bookings_last_30_days',
         'active_months_count', 'first_booking_date', 
@@ -274,7 +278,32 @@ class UserMembershipActivityAdmin(admin.ModelAdmin):
         'update_statistics_action',
         'check_tier_upgrade_action',
         'export_members_csv',
+        'export_full_daily_selected_csv',
     ]
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                'export-daily-full/',
+                self.admin_site.admin_view(self.export_daily_full_view),
+                name='accounts_usermembershipactivity_export_daily_full',
+            ),
+            path(
+                'export-daily-summary/',
+                self.admin_site.admin_view(self.export_daily_summary_view),
+                name='accounts_usermembershipactivity_export_daily_summary',
+            ),
+        ]
+        return custom + urls
+
+    def export_daily_full_view(self, request):
+        """دکمه بالای لیست: خروجی کامل روزانه همه اعضا"""
+        return export_full_daily_membership_behavior_csv()
+
+    def export_daily_summary_view(self, request):
+        """دکمه بالای لیست: خلاصه رفتار امروز"""
+        return export_daily_club_summary_csv()
     
     def update_statistics_action(self, request, queryset):
         """بروزرسانی آمار برای کاربران انتخاب شده"""
@@ -300,9 +329,14 @@ class UserMembershipActivityAdmin(admin.ModelAdmin):
         )
     check_tier_upgrade_action.short_description = "✨ بررسی و ارتقا Tier"
 
-    @admin.action(description='📥 خروجی اکسل/CSV گزارش اعضا')
+    @admin.action(description='📥 خروجی گزارش اعضا (انتخاب‌شده‌ها)')
     def export_members_csv(self, request, queryset):
         return export_membership_activity_csv(queryset)
+
+    @admin.action(description='📥 خروجی کامل روزانه همه اعضا (تحلیل رفتار امروز)')
+    def export_full_daily_selected_csv(self, request, queryset):
+        # همه اعضا — مستقل از انتخاب ردیف‌ها
+        return export_full_daily_membership_behavior_csv()
     
     def has_add_permission(self, request):
         """فقط سیستم می‌تونه activity بسازه"""
