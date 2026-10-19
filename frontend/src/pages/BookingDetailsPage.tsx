@@ -426,12 +426,14 @@ const BookingDetailsPage: React.FC = () => {
       return;
     }
 
-    if (!isAuthenticated) {
-      setErrors(['برای ادامه پرداخت ابتدا وارد حساب کاربری خود شوید.']);
-      setAuthModalMode('login');
-      setIsAuthModalOpen(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
+    // فروش فعلاً قفل است — لاگین اجباری نیست؛ فقط پیام قفل، بدون رفتن به درگاه
+    if (!canBookFlight) {
+      setSaleBlockNotice(true);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      // اگر لاگین باشد، رزرو موقت فقط برای آمار باشگاه ثبت می‌شود (بدون ترک صفحه)
+      if (!isAuthenticated) {
+        return;
+      }
     }
 
     try {
@@ -449,8 +451,7 @@ const BookingDetailsPage: React.FC = () => {
         idempotency_key: idempotencyKey,
       });
 
-      // فروش آنلاین فعلاً بسته است: رزرو موقت فقط برای باشگاه ثبت می‌شود،
-      // کاربر به صفحه انتخاب درگاه / پرداخت منتقل نمی‌شود.
+      // فروش آنلاین فعلاً بسته است: رزرو موقت فقط برای باشگاه؛ به درگاه نرو
       if (!canBookFlight) {
         setSaleBlockNotice(true);
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
