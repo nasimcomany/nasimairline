@@ -236,3 +236,24 @@ def count_locked_seats(inventory_key: str) -> int:
 
 def hold_minutes() -> int:
     return int(getattr(settings, 'BOOKING_HOLD_MINUTES', BOOKING_HOLD_MINUTES))
+
+
+def build_membership_test_hold_details(
+    flight_data: dict,
+    adult_qty: int,
+    child_qty: int = 0,
+    infant_qty: int = 0,
+) -> Dict[str, Any]:
+    """
+    Build soft-hold details when Nira sale is closed / price is 0.
+    Only used while MEMBERSHIP_COUNT_HELD_BOOKINGS is enabled (temp testing).
+    """
+    identity = extract_flight_identity(flight_data)
+    seats_needed = max(1, adult_qty) + max(0, child_qty)
+    return {
+        'nira_flight': (flight_data or {}).get('originalData') or {},
+        'identity': identity,
+        'seats_needed': seats_needed,
+        'message': 'membership_test_hold',
+        'membership_test_hold': True,
+    }

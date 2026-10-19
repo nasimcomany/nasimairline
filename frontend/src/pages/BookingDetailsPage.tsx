@@ -396,13 +396,6 @@ const BookingDetailsPage: React.FC = () => {
     setSaleBlockNotice(false);
     const newErrors: string[] = [];
 
-    // Final gate: explain in plain language when online sale is not open
-    if (!canBookFlight) {
-      setSaleBlockNotice(true);
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      return;
-    }
-
     // Validate terms
     if (!acceptedTerms) {
       newErrors.push(t('booking.acceptTermsError'));
@@ -485,11 +478,10 @@ const BookingDetailsPage: React.FC = () => {
         err?.response?.data?.detail ||
         'خطا در رزرو موقت. لطفا دوباره تلاش کنید.';
       const code = err?.response?.data?.code;
-      const friendly =
-        code === 'sold_out' || code === 'flight_gone' || code === 'local_hold_full'
-          ? apiMessage
-          : apiMessage;
-      setErrors([friendly]);
+      if (!canBookFlight || code === 'sold_out' || code === 'flight_gone') {
+        setSaleBlockNotice(true);
+      }
+      setErrors([apiMessage]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
