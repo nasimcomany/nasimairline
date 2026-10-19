@@ -261,7 +261,7 @@ class UserMembershipActivity(models.Model):
         now = timezone.now()
         
         # رزروهای قابل‌شمارش برای باشگاه:
-        # همیشه تأیید/تکمیل‌شده؛ موقتاً رزرو موقت منقضی‌نشده هم (تا وقتی پرداخت واقعی فعال شود)
+        # همیشه تأیید/تکمیل‌شده؛ موقتاً holdهای تست عضویت حتی بعد از انقضای ۱۵ دقیقه
         counted_bookings = Booking.objects.filter(user=self.user).filter(membership_booking_q())
         self.total_bookings = counted_bookings.count()
         # در این سرویس فعلاً معیار "پروازهای انجام‌شده" را معادل رزروهای معتبر می‌گیریم
