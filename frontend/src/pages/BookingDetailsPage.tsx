@@ -449,6 +449,14 @@ const BookingDetailsPage: React.FC = () => {
         idempotency_key: idempotencyKey,
       });
 
+      // فروش آنلاین فعلاً بسته است: رزرو موقت فقط برای باشگاه ثبت می‌شود،
+      // کاربر به صفحه انتخاب درگاه / پرداخت منتقل نمی‌شود.
+      if (!canBookFlight) {
+        setSaleBlockNotice(true);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        return;
+      }
+
       // If airline configured Nira-hosted payment UI, go there directly
       if (initiated.payment_mode === 'nira_redirect' && initiated.payment_url) {
         sessionStorage.setItem('pendingBooking', JSON.stringify({
@@ -480,6 +488,8 @@ const BookingDetailsPage: React.FC = () => {
       const code = err?.response?.data?.code;
       if (!canBookFlight || code === 'sold_out' || code === 'flight_gone') {
         setSaleBlockNotice(true);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        return;
       }
       setErrors([apiMessage]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
