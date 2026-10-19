@@ -320,7 +320,7 @@ const translations = {
     'auth.loginSuccess': 'ورود موفقیت‌آمیز بود',
     'auth.registerSuccess': 'ثبت‌نام با موفقیت انجام شد. در حال ورود...',
     'auth.loginError': 'نام کاربری یا رمز عبور اشتباه است',
-    'auth.registerError': 'خطا در ثبت‌نام. لطفاً دوباره تلاش کنید',
+    'auth.registerError': 'خطا در ثبت‌نام، لطفاً دوباره تلاش کنید',
     'nationality.iranian': 'ایرانی',
     'nationality.afghan': 'افغانستانی',
     'nationality.iraqi': 'عراقی',

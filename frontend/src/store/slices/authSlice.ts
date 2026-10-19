@@ -77,15 +77,18 @@ const extractApiError = (data: any, fallback: string): string => {
   if (Array.isArray(data.detail)) return String(data.detail[0] || fallback);
   for (const key of [
     'email', 'phone_number', 'first_name', 'last_name',
-    'password', 'password_confirm', 'national_id', 'non_field_errors',
+    'password', 'password_confirm', 'national_id', 'passport_number',
+    'username', 'non_field_errors',
   ]) {
     const val = data[key];
     if (typeof val === 'string') return val;
     if (Array.isArray(val) && val[0]) return String(val[0]);
   }
-  const first = Object.values(data).find((v) => typeof v === 'string' || Array.isArray(v));
-  if (typeof first === 'string') return first;
-  if (Array.isArray(first) && first[0]) return String(first[0]);
+  // DRF sometimes returns {field: ["error"]} for other keys
+  for (const val of Object.values(data)) {
+    if (typeof val === 'string' && val.trim()) return val;
+    if (Array.isArray(val) && val[0]) return String(val[0]);
+  }
   return fallback;
 };
 

@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import AuthModal from '../components/Auth/AuthModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cities } from '../data/cities';
 import bookingService from '../services/bookingService';
@@ -19,6 +20,17 @@ import {
   ExclamationCircleIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
+
+const isTenDigitId = (value?: string | null) => /^\d{10}$/.test(String(value || '').trim());
+const isLatinName = (value?: string | null) => /^[A-Za-z][A-Za-z\s\-']{1,49}$/.test(String(value || '').trim());
+
+/** Resolve national ID from profile — new users store it in national_id; legacy used first_name */
+const resolveProfileNationalId = (user: { national_id?: string; first_name?: string } | null | undefined) => {
+  if (!user) return '';
+  if (isTenDigitId(user.national_id)) return String(user.national_id).trim();
+  if (isTenDigitId(user.first_name)) return String(user.first_name).trim();
+  return '';
+};
 
 interface PassengerInfo {
   type: 'adult' | 'child' | 'infant';
@@ -61,6 +73,8 @@ const BookingDetailsPage: React.FC = () => {
   // Errors
   const [errors, setErrors] = useState<string[]>([]);
   const [saleBlockNotice, setSaleBlockNotice] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
 
   // Get flight data - try from state first, fallback to mock
   const flightFromState = (location.state as any)?.flight;
@@ -174,33 +188,51 @@ const BookingDetailsPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Auto-fill first passenger national ID if logged in
-  // Note: first_name contains the national ID (as per registration flow)
+  // After login/register on this page, drop the "please login" banner
   useEffect(() => {
-    console.log('🔍 Full user object:', user);
-    console.log('🔍 Auto-fill check:', {
-      isAuthenticated,
-      hasUser: !!user,
-      firstName: user?.first_name,
-      nationalIdFromProfile: user?.national_id,
-      passengersCount: passengers.length,
-      firstPassengerNationalId: passengers[0]?.nationalId
-    });
-    
-    if (isAuthenticated && user && user.first_name && passengers.length > 0) {
-      const firstPassenger = passengers[0];
-      // Only fill if national ID is empty
-      // Use first_name as national ID (as per registration flow)
-      if (!firstPassenger.nationalId) {
-        console.log('✅ Auto-filling national ID from user first_name:', user.first_name);
-        setPassengers(prev => {
-          const updated = [...prev];
-          updated[0] = { ...updated[0], nationalId: user.first_name || '' };
-          return updated;
-        });
-      }
+    if (isAuthenticated) {
+      setErrors((prev) => prev.filter((e) => !e.includes('وارد حساب')));
+      setIsAuthModalOpen(false);
     }
-  }, [isAuthenticated, user?.first_name, passengers]);
+  }, [isAuthenticated]);
+
+  // Auto-fill first passenger + contact from logged-in profile
+  useEffect(() => {
+    if (!isAuthenticated || !user || passengers.length === 0) return;
+
+    const profileNationalId = resolveProfileNationalId(user);
+    const profileFirst = isLatinName(user.first_name) ? user.first_name.trim() : '';
+    const profileLast = isLatinName(user.last_name) ? user.last_name.trim() : '';
+
+    setPassengers((prev) => {
+      if (prev.length === 0) return prev;
+      const first = prev[0];
+      const next = { ...first };
+      let changed = false;
+
+      if (!first.nationalId && profileNationalId) {
+        next.nationalId = profileNationalId;
+        changed = true;
+      }
+      if (!first.firstName && profileFirst) {
+        next.firstName = profileFirst;
+        changed = true;
+      }
+      if (!first.lastName && profileLast) {
+        next.lastName = profileLast;
+        changed = true;
+      }
+      if (!changed) return prev;
+      const updated = [...prev];
+      updated[0] = next;
+      return updated;
+    });
+
+    setContactInfo((prev) => ({
+      phone: prev.phone || user.phone_number || '',
+      email: prev.email || user.email || '',
+    }));
+  }, [isAuthenticated, user, passengers.length]);
 
   // Timer countdown
   useEffect(() => {
@@ -314,6 +346,8 @@ const BookingDetailsPage: React.FC = () => {
 
     if (!isAuthenticated) {
       setErrors(['برای ادامه پرداخت ابتدا وارد حساب کاربری خود شوید.']);
+      setAuthModalMode('login');
+      setIsAuthModalOpen(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -509,7 +543,7 @@ const BookingDetailsPage: React.FC = () => {
                           <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {t('booking.nationalId')} *
-                              {index === 0 && isAuthenticated && passenger.nationalId && (
+                              {index === 0 && isAuthenticated && isTenDigitId(passenger.nationalId) && (
                                 <span className="text-xs text-green-600 mr-2">({t('booking.fromYourProfile') || 'از پروفایل شما'})</span>
                               )}
                             </label>
@@ -517,9 +551,9 @@ const BookingDetailsPage: React.FC = () => {
                               type="text"
                               value={passenger.nationalId}
                               onChange={(e) => updatePassenger(index, 'nationalId', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                              disabled={index === 0 && isAuthenticated && !!passenger.nationalId}
+                              disabled={index === 0 && isAuthenticated && isTenDigitId(resolveProfileNationalId(user))}
                               className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
-                                index === 0 && isAuthenticated && passenger.nationalId ? 'bg-gray-100 cursor-not-allowed' : ''
+                                index === 0 && isAuthenticated && isTenDigitId(resolveProfileNationalId(user)) ? 'bg-gray-100 cursor-not-allowed' : ''
                               }`}
                               style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'right' }}
                               placeholder={t('booking.nationalId10Digits')}
@@ -849,6 +883,18 @@ const BookingDetailsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          if (isAuthenticated) {
+            setErrors((prev) => prev.filter((e) => !e.includes('وارد حساب')));
+          }
+        }}
+        initialMode={authModalMode}
+        stayOnPage
+      />
     </div>
   );
 };

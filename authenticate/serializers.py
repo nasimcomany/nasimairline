@@ -47,10 +47,28 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'preferred_seat', 'preferred_meal',
         ]
         extra_kwargs = {
-            'email': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-            'phone_number': {'required': True, 'allow_blank': False, 'allow_null': False},
+            'email': {
+                'required': True,
+                'error_messages': {'required': 'ایمیل الزامی است.', 'blank': 'ایمیل الزامی است.'},
+            },
+            'first_name': {
+                'required': True,
+                'error_messages': {'required': 'نام مسافر الزامی است.', 'blank': 'نام مسافر الزامی است.'},
+            },
+            'last_name': {
+                'required': True,
+                'error_messages': {'required': 'نام خانوادگی مسافر الزامی است.', 'blank': 'نام خانوادگی مسافر الزامی است.'},
+            },
+            'phone_number': {
+                'required': True,
+                'allow_blank': False,
+                'allow_null': False,
+                'error_messages': {
+                    'required': 'شماره تماس الزامی است.',
+                    'blank': 'شماره تماس الزامی است.',
+                    'null': 'شماره تماس الزامی است.',
+                },
+            },
         }
 
     def validate_first_name(self, value):
@@ -81,6 +99,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if User.objects.filter(phone_number=phone).exists():
             raise serializers.ValidationError('این شماره تماس قبلاً ثبت شده است.')
         return phone
+
+    def validate_national_id(self, value):
+        nid = str(value or '').strip()
+        if not nid:
+            return nid
+        if User.objects.filter(national_id=nid).exists():
+            raise serializers.ValidationError('این کد ملی قبلاً ثبت شده است.')
+        return nid
     
     def validate(self, attrs):
         """Validate password confirmation"""
@@ -94,6 +120,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """Create user and generate JWT tokens"""
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
+        email = validated_data.get('email')
+        # Keep username aligned with email for admin/search compatibility
+        if email and not validated_data.get('username'):
+            validated_data['username'] = email
         
         # Get IP address from request
         request = self.context.get('request')

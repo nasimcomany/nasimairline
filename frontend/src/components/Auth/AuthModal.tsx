@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { loginUser, registerUser } from '../../store/slices/authSlice';
 import { AppDispatch } from '../../store';
@@ -13,16 +12,23 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'register';
+  /** When true, stay on current page after login/register (e.g. booking checkout) */
+  stayOnPage?: boolean;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login', stayOnPage = false }) => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false); // ✨ نمایش مودال شرایط
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, language } = useLanguage();
+
+  const shouldStayOnPage =
+    stayOnPage ||
+    /\/booking|\/payment/i.test(location.pathname);
 
   // Login form
   const [loginForm, setLoginForm] = useState({
@@ -155,11 +161,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       setSuccess(t('auth.loginSuccess'));
       setTimeout(() => {
         onClose();
-        navigate('/dashboard');
+        if (!shouldStayOnPage) {
+          navigate('/dashboard');
+        }
       }, 1000);
     } catch (err: any) {
-      setError(err.message || t('auth.loginError'));
+      setError(typeof err === 'string' ? err : (err?.message || t('auth.loginError')));
       generateCaptcha();
+      setLoginForm((prev) => ({ ...prev, captcha: '' }));
     }
   };
 
@@ -260,13 +269,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
       setSuccess(t('auth.registerSuccess'));
       
-      // Already authenticated by register response; go to panel
+      // Already authenticated — stay on booking/payment, otherwise go to panel
       setTimeout(() => {
         onClose();
-        navigate('/dashboard');
+        if (!shouldStayOnPage) {
+          navigate('/dashboard');
+        }
       }, 800);
     } catch (err: any) {
-      setError(typeof err === 'string' ? err : (err?.message || t('auth.registerError')));
+      const message =
+        typeof err === 'string'
+          ? err
+          : (err?.message || err?.payload || t('auth.registerError'));
+      setError(typeof message === 'string' ? message : t('auth.registerError'));
       generateCaptcha();
       setRegisterForm((prev) => ({ ...prev, captcha: '' }));
     }
