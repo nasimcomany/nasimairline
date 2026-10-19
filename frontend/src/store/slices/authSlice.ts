@@ -11,6 +11,7 @@ interface User {
   date_of_birth?: string;
   gender?: string;
   nationality?: string;
+  passport_number?: string;
   membership_level: string;
   loyalty_points: number;
   uuid?: string;
@@ -124,6 +125,9 @@ const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;
+      if (action.payload) {
+        localStorage.setItem('user', JSON.stringify(action.payload));
+      }
     },
   },
   extraReducers: (builder) => {
