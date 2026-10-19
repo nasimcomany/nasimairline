@@ -32,11 +32,10 @@ def update_membership_level(sender, instance, **kwargs):
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """
-    Create user profile when a new user is created
-    This can be extended to create related models
+    Create membership activity row when a new user registers
+    so they appear in باشگاه مشتریان from day one.
     """
     if created:
-        # You can create related models here if needed
-        # For example: UserProfile.objects.create(user=instance)
-        pass
+        from .membership_models import UserMembershipActivity
+        UserMembershipActivity.objects.get_or_create(user=instance)
 

@@ -12,6 +12,12 @@ from .membership_models import (
     MembershipUpgradeLog
 )
 from .membership_service import MembershipTierService
+from .admin_exports import (
+    export_tier_configs_csv,
+    export_membership_activity_csv,
+    export_upgrade_logs_csv,
+    export_users_membership_csv,
+)
 
 
 @admin.register(User)
@@ -38,6 +44,11 @@ class UserAdmin(BaseUserAdmin):
     ordering = ['-date_joined']
     list_per_page = 25
     list_max_show_all = 100
+    actions = ['delete_selected', 'export_membership_csv']
+
+    @admin.action(description='📥 خروجی اکسل/CSV باشگاه مشتریان (انتخاب‌شده‌ها)')
+    def export_membership_csv(self, request, queryset):
+        return export_users_membership_csv(queryset.select_related('membership_activity'))
     
     fieldsets = (
         (None, {'fields': ('email', 'username', 'password')}),
@@ -157,6 +168,13 @@ class MembershipTierConfigAdmin(admin.ModelAdmin):
     list_filter = ['tier', 'is_active', 'auto_upgrade']
     search_fields = ['name_fa', 'name_en']
     ordering = ['tier']
+    actions = ['export_tier_rules_csv']
+
+    @admin.action(description='📥 خروجی اکسل/CSV قوانین سطوح (وضعیت فعلی)')
+    def export_tier_rules_csv(self, request, queryset):
+        # Always export all active configs so report matches live rules
+        from .membership_models import MembershipTierConfig
+        return export_tier_configs_csv(MembershipTierConfig.objects.all())
     
     fieldsets = (
         (_('اطلاعات پایه'), {
@@ -252,7 +270,11 @@ class UserMembershipActivityAdmin(admin.ModelAdmin):
         }),
     )
     
-    actions = ['update_statistics_action', 'check_tier_upgrade_action']
+    actions = [
+        'update_statistics_action',
+        'check_tier_upgrade_action',
+        'export_members_csv',
+    ]
     
     def update_statistics_action(self, request, queryset):
         """بروزرسانی آمار برای کاربران انتخاب شده"""
@@ -277,14 +299,18 @@ class UserMembershipActivityAdmin(admin.ModelAdmin):
             f"از {queryset.count()} کاربر، {upgraded_count} نفر ارتقا یافتند."
         )
     check_tier_upgrade_action.short_description = "✨ بررسی و ارتقا Tier"
+
+    @admin.action(description='📥 خروجی اکسل/CSV گزارش اعضا')
+    def export_members_csv(self, request, queryset):
+        return export_membership_activity_csv(queryset)
     
     def has_add_permission(self, request):
         """فقط سیستم می‌تونه activity بسازه"""
         return False
     
     def has_delete_permission(self, request, obj=None):
-        """جلوگیری از حذف activity ها"""
-        return False
+        """سوپریوزر می‌تونه برای تست پاک کند؛ بقیه نه"""
+        return bool(request.user and request.user.is_superuser)
 
 
 @admin.register(MembershipUpgradeLog)
@@ -309,6 +335,11 @@ class MembershipUpgradeLogAdmin(admin.ModelAdmin):
         'total_bookings_at_upgrade', 'membership_days_at_upgrade',
         'is_automatic', 'upgraded_by', 'created_at'
     ]
+    actions = ['export_logs_csv']
+
+    @admin.action(description='📥 خروجی اکسل/CSV لاگ ارتقاها')
+    def export_logs_csv(self, request, queryset):
+        return export_upgrade_logs_csv(queryset)
     
     fieldsets = (
         (_('اطلاعات ارتقا'), {
