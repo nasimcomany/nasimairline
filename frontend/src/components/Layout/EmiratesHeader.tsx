@@ -1467,7 +1467,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               <div className={`space-y-3 mb-6 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                 <div className="flex items-center gap-3 text-white/95">
                   <PhoneIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
-                  <span><strong>{t('contact.phone')}:</strong> 02173490318</span>
+                  <span><strong>{t('contact.phone')}:</strong> 02173490000</span>
                 </div>
                 <div className="flex items-center gap-3 text-white/95">
                   <DocumentTextIcon className="w-5 h-5 flex-shrink-0 text-white/80" />

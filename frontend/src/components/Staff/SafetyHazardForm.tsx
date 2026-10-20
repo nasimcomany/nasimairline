@@ -279,7 +279,7 @@ const SafetyHazardForm: React.FC<SafetyHazardFormProps> = ({ onSuccess, onCancel
       </div>
 
       <div className="text-gray-500 text-xs pt-2" style={fontStyle}>
-        {t('safety.footer')} Safety@nasimair.com | 734900318
+        {t('safety.footer')} Safety@nasimair.com | 02173490318
       </div>
 
       <div className="flex gap-3 pt-4">
