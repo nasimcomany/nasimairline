@@ -16,6 +16,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+import sentry_sdk
 
 from nasim.production import (
     build_allowed_hosts,
@@ -44,6 +45,16 @@ SECRET_KEY = os.environ.get('SECRET_KEY', _DEFAULT_INSECURE_KEY)
 # On Railway default to False unless explicitly set True
 _debug_default = 'False' if IS_RAILWAY else 'True'
 DEBUG = env_bool('DEBUG', _debug_default == 'True')
+
+# Sentry — فقط وقتی SENTRY_DSN تنظیم شده باشد
+_SENTRY_DSN = os.environ.get('SENTRY_DSN', '').strip()
+if _SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        environment='production' if not DEBUG else 'development',
+        send_default_pii=False,
+        traces_sample_rate=0.0,
+    )
 
 ALLOWED_HOSTS = build_allowed_hosts(env_csv('ALLOWED_HOSTS', 'localhost,127.0.0.1'))
 

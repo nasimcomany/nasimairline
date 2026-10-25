@@ -43,3 +43,6 @@ requests==2.31.0
 
 # Persian Date Conversion (for Nira API)
 persiantools==5.5.1
+
+# Sentry DSN
+sentry-sdk==2.73.0
