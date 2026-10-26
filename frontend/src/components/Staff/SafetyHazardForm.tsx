@@ -282,6 +282,7 @@ const SafetyHazardForm: React.FC<SafetyHazardFormProps> = ({ onSuccess, onCancel
         {t('safety.footer')} Safety@nasimair.com | 02173490318
       </div>
 
+
       <div className="flex gap-3 pt-4">
         <button
           type="submit"

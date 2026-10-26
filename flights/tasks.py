@@ -18,12 +18,23 @@ logger = logging.getLogger(__name__)
     ignore_result=True,
 )
 def prefetch_origin_cities_task():
-    """Warm Redis cache for origin cities (beat / manual)."""
+    """Warm Redis cache for origin cities + a few hub destinations (beat / manual)."""
     from flights.nira_client import NiraClient
 
     client = NiraClient()
     result = client.get_origin_cities(force_refresh=True)
-    return {'success': bool(result.get('success'))}
+    warmed = []
+    if result.get('success'):
+        # Prefetch destinations for common hubs so map/search miss Nira less often
+        hubs = ('THR', 'MHD', 'IFN', 'SYZ', 'TBZ', 'AWZ', 'BND', 'KIH')
+        for code in hubs:
+            try:
+                dest = client.get_destinations(origin=code)
+                if dest.get('success'):
+                    warmed.append(code)
+            except Exception as exc:
+                logger.warning('prefetch dest %s failed: %s', code, exc)
+    return {'success': bool(result.get('success')), 'destinations_warmed': warmed}
 
 
 @shared_task(

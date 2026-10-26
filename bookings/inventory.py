@@ -117,10 +117,8 @@ def _class_allows_reservation(class_row: dict) -> bool:
         return False
     status = str(class_row.get('Status', '')).strip().upper()
     # Nira often uses "A" / "AA" / numeric remaining seats
-    if status in ('C', 'CLOSED', 'X', 'N', '0', ''):
-        # empty status alone is not enough to reject if AllowReservation True
-        if status in ('C', 'CLOSED', 'X', 'N', '0'):
-            return False
+    if status in ('C', 'CLOSED', 'X', 'N', '0'):
+        return False
     if class_row.get('AllowReservation') is True:
         return True
     # Fallback: positive numeric status = seats left
@@ -128,6 +126,58 @@ def _class_allows_reservation(class_row: dict) -> bool:
         return int(status) > 0
     except ValueError:
         return status in ('A', 'AA', 'OPEN', 'AVAILABLE')
+
+
+def parse_remaining_seats(class_row: dict) -> Optional[int]:
+    """
+    Exact remaining seats when Nira Status is numeric.
+    Letter codes (A/AA/OPEN) mean "available" without a known count → None.
+    """
+    if not isinstance(class_row, dict):
+        return None
+    status = str(class_row.get('Status', '')).strip().upper()
+    if not status or status in ('A', 'AA', 'OPEN', 'AVAILABLE', 'C', 'CLOSED', 'X', 'N'):
+        if status in ('C', 'CLOSED', 'X', 'N', '0'):
+            return 0
+        return None
+    try:
+        n = int(status)
+        return max(0, n)
+    except ValueError:
+        return None
+
+
+def _is_cancelled_flight(flight: dict) -> bool:
+    status = str((flight or {}).get('FlightStatus') or '').strip().upper()
+    return status in ('X', 'CANCELLED', 'CNL', 'CXL')
+
+
+def pick_best_class_row(candidates: list) -> Optional[dict]:
+    """Prefer a bookable row that still has the most known remaining seats."""
+    bookable = [c for c in candidates if _class_allows_reservation(c)]
+    if not bookable:
+        return None
+
+    def sort_key(row: dict):
+        rem = parse_remaining_seats(row)
+        # Prefer known positive counts; unknown letter availability ranks after
+        if rem is None:
+            return (1, 0)
+        return (0, -rem)
+
+    return sorted(bookable, key=sort_key)[0]
+
+
+def effective_hold_cap(nira_remaining: Optional[int]) -> int:
+    """
+    Cap concurrent local soft-holds.
+    When Nira gives a number, that number wins (tighter).
+    Otherwise fall back to BOOKING_SOFT_HOLD_CAP.
+    """
+    soft_cap = int(getattr(settings, 'BOOKING_SOFT_HOLD_CAP', 9))
+    if nira_remaining is None:
+        return max(1, soft_cap)
+    return max(0, min(soft_cap, int(nira_remaining)))
 
 
 def revalidate_with_nira(
@@ -138,6 +188,9 @@ def revalidate_with_nira(
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Live Availability check (no cache). Returns (ok, details).
+
+    Hardens inventory when Nira Status is numeric:
+      seats_needed must be <= remaining seats on the selected class.
     """
     from flights.nira_client import NiraClient
 
@@ -179,7 +232,21 @@ def revalidate_with_nira(
             'message': 'این پرواز دیگر در موجودی نیرا نیست. لطفاً دوباره جستجو کنید.',
         }
 
+    if _is_cancelled_flight(matched):
+        return False, {
+            'error': 'flight_cancelled',
+            'message': 'این پرواز لغو شده و قابل فروش نیست.',
+            'flight': matched,
+        }
+
     classes = matched.get('ClassStatus') or []
+    if not classes:
+        return False, {
+            'error': 'schedule_only',
+            'message': 'برای این پرواز هنوز صندلی فروش آنلاین باز نشده است.',
+            'flight': matched,
+        }
+
     cabin = identity['cabin_class']
     class_name = identity['class_name'].upper()
     candidates = []
@@ -195,19 +262,50 @@ def revalidate_with_nira(
     if not candidates:
         candidates = list(classes)
 
-    allow_any = any(_class_allows_reservation(c) for c in candidates) if candidates else False
-    if not allow_any:
+    chosen = pick_best_class_row(candidates)
+    if chosen is None:
         return False, {
             'error': 'sold_out',
             'message': 'ظرفیت این پرواز تکمیل شده است.',
             'flight': matched,
         }
 
+    # Closed online sale: AllowReservation false or zero/missing price
+    if chosen.get('AllowReservation') is False:
+        return False, {
+            'error': 'sale_closed',
+            'message': 'فروش آنلاین این پرواز بسته است.',
+            'flight': matched,
+        }
+    try:
+        price = float(chosen.get('TotalPrice') or 0)
+    except (TypeError, ValueError):
+        price = 0.0
+    if price <= 0:
+        return False, {
+            'error': 'sale_closed',
+            'message': 'فروش آنلاین این پرواز بسته است.',
+            'flight': matched,
+        }
+
     seats_needed = max(1, adult_qty) + max(0, child_qty)
+    remaining = parse_remaining_seats(chosen)
+    if remaining is not None and seats_needed > remaining:
+        return False, {
+            'error': 'insufficient_seats',
+            'message': f'فقط {remaining} صندلی باقی مانده است.',
+            'flight': matched,
+            'nira_remaining': remaining,
+            'seats_needed': seats_needed,
+        }
+
     return True, {
         'nira_flight': matched,
+        'nira_class': chosen,
         'identity': identity,
         'seats_needed': seats_needed,
+        'nira_remaining': remaining,  # None = letter status, unknown exact count
+        'hold_cap': effective_hold_cap(remaining),
         'message': 'ok',
     }
 
@@ -254,6 +352,8 @@ def build_membership_test_hold_details(
         'nira_flight': (flight_data or {}).get('originalData') or {},
         'identity': identity,
         'seats_needed': seats_needed,
+        'nira_remaining': None,
+        'hold_cap': effective_hold_cap(None),
         'message': 'membership_test_hold',
         'membership_test_hold': True,
     }

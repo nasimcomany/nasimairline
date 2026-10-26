@@ -536,10 +536,16 @@ MELLIPAYAMAK_FROM_NUMBER = os.environ.get('MELLIPAYAMAK_FROM_NUMBER', '')  # ش�
 NIRA_BASE_URL = os.environ.get('NIRA_BASE_URL', '')  # URL پایه سیستم نیرا (مثال: https://airline.example.com)
 NIRA_OFFICE_USER = os.environ.get('NIRA_OFFICE_USER', '')  # نام کاربری Office برای دسترسی به Web Service
 NIRA_OFFICE_PASS = os.environ.get('NIRA_OFFICE_PASS', '')  # رمز عبور Office
-# Cap prevents a single slow Nira call from pinning a Gunicorn worker (502/OOM risk)
-NIRA_API_TIMEOUT = min(int(os.environ.get('NIRA_API_TIMEOUT', '25')), int(os.environ.get('NIRA_API_TIMEOUT_CAP', '45')))
-NIRA_ROUTES_CACHE_TTL = int(os.environ.get('NIRA_ROUTES_CACHE_TTL', '180'))
-NIRA_AVAILABILITY_CACHE_TTL = int(os.environ.get('NIRA_AVAILABILITY_CACHE_TTL', '45'))
+# Cap prevents a single slow Nira call from pinning a Gunicorn worker (502/OOM risk).
+# Keep read timeout well under GUNICORN_TIMEOUT so hung Nira never outlives the worker.
+NIRA_API_TIMEOUT = min(int(os.environ.get('NIRA_API_TIMEOUT', '15')), int(os.environ.get('NIRA_API_TIMEOUT_CAP', '20')))
+NIRA_CONNECT_TIMEOUT = int(os.environ.get('NIRA_CONNECT_TIMEOUT', '3'))
+NIRA_ROUTES_CACHE_TTL = int(os.environ.get('NIRA_ROUTES_CACHE_TTL', '300'))
+NIRA_ROUTES_STALE_TTL = int(os.environ.get('NIRA_ROUTES_STALE_TTL', '86400'))  # serve stale on outage
+NIRA_AVAILABILITY_CACHE_TTL = int(os.environ.get('NIRA_AVAILABILITY_CACHE_TTL', '60'))
+NIRA_MAX_INFLIGHT = int(os.environ.get('NIRA_MAX_INFLIGHT', '4'))  # shared across workers when Redis is up
+NIRA_CIRCUIT_FAILURE_THRESHOLD = int(os.environ.get('NIRA_CIRCUIT_FAILURE_THRESHOLD', '5'))
+NIRA_CIRCUIT_RECOVERY_SECONDS = int(os.environ.get('NIRA_CIRCUIT_RECOVERY_SECONDS', '30'))
 NIRA_ENRICH_STATUS_ASYNC = env_bool('NIRA_ENRICH_STATUS_ASYNC', True)
 
 # تنظیمات API برای دریافت اطلاعات لحظه‌ای پروازها

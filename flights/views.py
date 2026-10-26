@@ -263,7 +263,7 @@ class NiraAPIViewSet(viewsets.ViewSet):
                 datetime.min.time()
             )
         
-        # Call Nira API (cached short-TTL inside client)
+        # Call Nira API (cached short-TTL + circuit/inflight guards inside client)
         result = self.nira_client.check_availability(
             origin=validated_data['origin'],
             destination=validated_data['destination'],
@@ -276,7 +276,7 @@ class NiraAPIViewSet(viewsets.ViewSet):
         )
 
         # Do NOT call FlightStatusService inline (was causing multi-second hangs / worker stalls).
-        # Warm status cache in background for a few flights; search response stays fast.
+        # Warm status cache in background; never run inline on the web path.
         if result.get('success') and result.get('data', {}).get('AvailableFlights'):
             try:
                 from django.conf import settings as dj_settings
@@ -294,18 +294,22 @@ class NiraAPIViewSet(viewsets.ViewSet):
                                 validated_data['origin'],
                                 validated_data['destination'],
                                 str(dep),
+                                allow_inline=False,
                             )
             except Exception:
                 pass
         
-        if result['success']:
+        if result.get('success'):
             return Response(result, status=status.HTTP_200_OK)
-        else:
-            # Return full error details for debugging
-            return Response(
-                result,  # Return full result object with all debug info
-                status=status.HTTP_400_BAD_REQUEST
-            )
+
+        code = result.get('code')
+        if code in ('NIRA_CIRCUIT_OPEN', 'NIRA_OVERLOADED'):
+            retry_after = int(result.get('retry_after') or 10)
+            response = Response(result, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            response['Retry-After'] = str(retry_after)
+            return response
+
+        return Response(result, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'], url_path='routes/origins')
     def get_origin_cities(self, request):
@@ -316,14 +320,13 @@ class NiraAPIViewSet(viewsets.ViewSet):
         """
         result = self.nira_client.get_origin_cities()
         
-        if result['success']:
+        if result.get('success'):
             return Response(result, status=status.HTTP_200_OK)
-        else:
-            # Return full error details for debugging
-            return Response(
-                result,  # Return full result object with all debug info
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        if result.get('code') in ('NIRA_CIRCUIT_OPEN', 'NIRA_OVERLOADED'):
+            response = Response(result, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            response['Retry-After'] = str(int(result.get('retry_after') or 10))
+            return response
+        return Response(result, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'], url_path='routes/destinations')
     def get_destinations(self, request):

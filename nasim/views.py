@@ -43,11 +43,25 @@ class SpaRootAssetView(View):
 
 
 class HealthCheckView(View):
-    """Railway / uptime health endpoint — no auth, no SPA redirect."""
+    """
+    Ops health endpoint — no auth, no SPA redirect, never calls Nira.
+
+    - Default /healthz/ : liveness (process up) → always 200 so load balancers
+      do not yank the whole site when DB blips or Nira is slow.
+    - /healthz/?deep=1 or /api/health/ : readiness (DB) → 503 only if DB is down.
+    """
 
     def get(self, request, *args, **kwargs):
         from django.conf import settings as dj_settings
         from django.core.cache import cache
+
+        deep = (
+            request.GET.get('deep') in ('1', 'true', 'yes')
+            or request.path.rstrip('/').endswith('/api/health')
+        )
+
+        if not deep:
+            return JsonResponse({'status': 'ok', 'live': True}, status=200)
 
         db_ok = False
         db_error = None
@@ -69,9 +83,10 @@ class HealthCheckView(View):
         redis_configured = bool(getattr(dj_settings, 'CELERY_BROKER_URL', '') and
                                 not str(getattr(dj_settings, 'CELERY_BROKER_URL', '')).startswith('memory'))
 
-        # Degraded cache must NOT take the site down — only DB is critical for 200
+        # Degraded cache must NOT take the site down — only DB is critical for deep checks
         payload = {
             'status': 'ok' if db_ok else 'degraded',
+            'live': True,
             'database': 'ok' if db_ok else 'error',
             'cache': 'ok' if cache_ok else 'degraded',
             'broker': 'redis' if redis_configured else 'eager/memory',

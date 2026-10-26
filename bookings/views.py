@@ -325,13 +325,16 @@ class BookingViewSet(viewsets.ModelViewSet):
                 Flight.objects.select_for_update().filter(pk=shadow_flight.pk).first()
 
                 locked = count_locked_seats(inventory_key)
-                # Soft cap: if Nira Status was numeric we could use it; otherwise block absurd pile-up
-                soft_cap = int(getattr(settings, 'BOOKING_SOFT_HOLD_CAP', 9))
-                if locked + seats_needed > soft_cap:
+                # Prefer Nira numeric remaining (via hold_cap); else soft pile-up cap
+                hold_cap = int(details.get('hold_cap') or getattr(settings, 'BOOKING_SOFT_HOLD_CAP', 9))
+                if locked + seats_needed > hold_cap:
                     return Response({
                         'success': False,
                         'code': 'local_hold_full',
-                        'error': 'ظرفیت موقت این پرواز در حال حاضر تکمیل است. لطفاً لحظاتی بعد دوباره تلاش کنید.',
+                        'error': 'ظرفیت این پرواز تکمیل است یا در حال خرید توسط دیگران است. لطفاً دوباره جستجو کنید.',
+                        'nira_remaining': details.get('nira_remaining'),
+                        'locked_locally': locked,
+                        'hold_cap': hold_cap,
                     }, status=status.HTTP_409_CONFLICT)
 
                 hold_until = timezone.now() + timedelta(minutes=hold_minutes())

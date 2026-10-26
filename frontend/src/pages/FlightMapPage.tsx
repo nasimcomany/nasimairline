@@ -162,8 +162,12 @@ const FlightMapPage: React.FC = () => {
   }, []);
 
   // فقط شهرهایی که برای تاریخ انتخاب‌شده حداقل یک پرواز دارند
+  // Concurrency capped — unbounded Promise.all was pinning Nira/Gunicorn under peak.
   useEffect(() => {
     let cancelled = false;
+    const ORIGIN_CONCURRENCY = 2;
+    const MAX_DEST_PROBES = 3;
+
     const scanOriginsForDate = async () => {
       if (!cities.length) {
         setOriginsWithFlights([]);
@@ -172,37 +176,47 @@ const FlightMapPage: React.FC = () => {
       setScanningOrigins(true);
       const dateStr = toLocalDateISO(selectedDate);
       const active: string[] = [];
+      const queue = cities.filter((c) => c.CITY && cityCoordinates[c.CITY]);
 
-      await Promise.all(
-        cities.map(async (city) => {
-          const code = city.CITY;
-          if (!code || !cityCoordinates[code]) return;
-          try {
-            const destinations = await getDestinations(code);
-            const destCodes = destinations
-              .map((d) => d.CITY)
-              .filter((c) => c && c !== code);
-            for (const dest of destCodes) {
-              if (cancelled) return;
-              const flights = await checkAvailability({
-                origin: code,
-                destination: dest,
-                departure_date: dateStr,
-                round_trip: false,
-                adult_qty: 1,
-                child_qty: 0,
-                infant_qty: 0,
-              });
-              if (filterListedNiraFlights(flights).length > 0) {
-                active.push(code);
-                return;
-              }
+      const probeOrigin = async (city: OriginCity) => {
+        const code = city.CITY;
+        if (!code || cancelled) return;
+        try {
+          const destinations = await getDestinations(code);
+          const destCodes = destinations
+            .map((d) => d.CITY)
+            .filter((c): c is string => Boolean(c && c !== code))
+            .slice(0, MAX_DEST_PROBES);
+          for (const dest of destCodes) {
+            if (cancelled) return;
+            const flights = await checkAvailability({
+              origin: code,
+              destination: dest,
+              departure_date: dateStr,
+              round_trip: false,
+              adult_qty: 1,
+              child_qty: 0,
+              infant_qty: 0,
+            });
+            if (filterListedNiraFlights(flights).length > 0) {
+              active.push(code);
+              return;
             }
-          } catch {
-            /* ignore single-origin failures */
           }
-        })
-      );
+        } catch {
+          /* ignore single-origin failures */
+        }
+      };
+
+      let next = 0;
+      const workers = Array.from({ length: Math.min(ORIGIN_CONCURRENCY, queue.length) }, async () => {
+        while (!cancelled) {
+          const idx = next++;
+          if (idx >= queue.length) break;
+          await probeOrigin(queue[idx]);
+        }
+      });
+      await Promise.all(workers);
 
       if (!cancelled) {
         setOriginsWithFlights(active);

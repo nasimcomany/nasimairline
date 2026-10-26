@@ -6,14 +6,43 @@ Nira API Client for IBE (Third Generation) Web Site Integration
 """
 import requests
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from django.conf import settings
 from datetime import datetime
 from persiantools.jdatetime import JalaliDate
 from cachetools import TTLCache
 import hashlib
 
+from nasim.resilience import (
+    CircuitOpenError,
+    OverloadedError,
+    nira_guarded,
+    nira_soft_error,
+)
+
 logger = logging.getLogger(__name__)
+
+# Shared session — connection reuse under peak search traffic
+_http_session: Optional[requests.Session] = None
+_http_lock = __import__('threading').Lock()
+
+
+def _get_http_session() -> requests.Session:
+    global _http_session
+    if _http_session is not None:
+        return _http_session
+    with _http_lock:
+        if _http_session is None:
+            session = requests.Session()
+            adapter = requests.adapters.HTTPAdapter(
+                pool_connections=8,
+                pool_maxsize=8,
+                max_retries=0,
+            )
+            session.mount('https://', adapter)
+            session.mount('http://', adapter)
+            _http_session = session
+        return _http_session
 
 
 class NiraClient:
@@ -30,15 +59,60 @@ class NiraClient:
         self.ws_url = f"{self.base_url}/ws1/NRSCWS.jsp" if self.base_url else None
         self.office_user = getattr(settings, 'NIRA_OFFICE_USER', '')
         self.office_pass = getattr(settings, 'NIRA_OFFICE_PASS', '')
-        self.timeout = int(getattr(settings, 'NIRA_API_TIMEOUT', 25))
-        self.routes_cache_ttl = int(getattr(settings, 'NIRA_ROUTES_CACHE_TTL', 180))
-        self.availability_cache_ttl = int(getattr(settings, 'NIRA_AVAILABILITY_CACHE_TTL', 45))
+        # Keep short: long hangs pin Gunicorn threads → site-wide 503
+        self.timeout = int(getattr(settings, 'NIRA_API_TIMEOUT', 15))
+        self.connect_timeout = int(getattr(settings, 'NIRA_CONNECT_TIMEOUT', 3))
+        self.routes_cache_ttl = int(getattr(settings, 'NIRA_ROUTES_CACHE_TTL', 300))
+        self.routes_stale_ttl = int(getattr(settings, 'NIRA_ROUTES_STALE_TTL', 86400))
+        self.availability_cache_ttl = int(getattr(settings, 'NIRA_AVAILABILITY_CACHE_TTL', 60))
         
         # Process-local fallback if Redis/LocMem glitches mid-request
         self._routes_cache = TTLCache(maxsize=100, ttl=self.routes_cache_ttl)
         
         if not self.base_url:
             logger.warning("NIRA_BASE_URL is not set in settings")
+
+    def _timeout_tuple(self, read: Optional[int] = None) -> Tuple[float, float]:
+        return (float(self.connect_timeout), float(read if read is not None else self.timeout))
+
+    def _http_get(self, url: str, *, params=None, headers=None, read_timeout: Optional[int] = None, **kwargs):
+        return _get_http_session().get(
+            url,
+            params=params,
+            headers=headers,
+            timeout=self._timeout_tuple(read_timeout),
+            **kwargs,
+        )
+
+    def _http_post(self, url: str, *, params=None, json=None, headers=None, read_timeout: Optional[int] = None, **kwargs):
+        return _get_http_session().post(
+            url,
+            params=params,
+            json=json,
+            headers=headers,
+            timeout=self._timeout_tuple(read_timeout),
+            **kwargs,
+        )
+
+    def _stale_key(self, key: str) -> str:
+        return f'{key}:stale'
+
+    def _store_fresh_and_stale(self, key: str, result: Dict[str, Any], fresh_ttl: int) -> None:
+        from nasim.cache_utils import cache_set
+        cache_set(key, result, fresh_ttl)
+        cache_set(self._stale_key(key), result, self.routes_stale_ttl)
+
+    def _serve_stale(self, key: str, reason: str) -> Optional[Dict[str, Any]]:
+        from nasim.cache_utils import cache_get
+        stale = cache_get(self._stale_key(key))
+        if stale and isinstance(stale, dict) and stale.get('success'):
+            out = dict(stale)
+            out['stale'] = True
+            out['degraded'] = True
+            out['stale_reason'] = reason
+            logger.warning('Serving stale Nira cache for %s (%s)', key, reason)
+            return out
+        return None
     
     def _convert_to_jalali(self, date_obj: datetime) -> str:
         """
@@ -186,106 +260,110 @@ class NiraClient:
             if cached and isinstance(cached, dict):
                 logger.info('Nira availability cache HIT')
                 return cached
-        
-        # Convert dates to Jalali format
-        departure_date_jalali = self._convert_to_jalali(departure_date)
-        return_date_jalali = None
-        if round_trip and return_date:
-            return_date_jalali = self._convert_to_jalali(return_date)
-        
-        # Create OfficePass with current date and time (format: {OfficeUser}_{YYYY-MM-DD HH:MM:SS})
-        import base64
-        from datetime import datetime
-        now = datetime.now()
-        office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
-        office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
-        
-        # Build query parameters طبق مستندات: همه پارامترها در QueryString
-        params = {
-            'origin': origin.upper(),
-            'destination': destination.upper(),
-            'departureDate': departure_date_jalali,  # تاریخ شمسی
-            'roundTrip': 'true' if round_trip else 'false',
-            'adultQty': adult_qty,
-            'childQty': child_qty,
-            'infantQty': infant_qty,
-            'OfficeUser': self.office_user,
-            'OfficePass': office_pass_encoded,
-        }
-        
-        # Add return date if round trip
-        if round_trip and return_date_jalali:
-            params['returnDate'] = return_date_jalali
-        
-        # First try: GET request طبق مستندات با Accept header برای JSON
-        try:
-            response = requests.get(
-                f"{self.base_url}/ibe/Availability",
-                params=params,  # همه پارامترها در QueryString
-                headers={
-                    'Accept': 'application/json',  # فقط JSON قبول کن
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    'X-Requested-With': 'XMLHttpRequest'  # نشان می‌دهد که درخواست AJAX است
-                },
-                timeout=self.timeout,
-                allow_redirects=True
-            )
-            
-            # Check if response is JSON
-            content_type = response.headers.get('Content-Type', '').lower()
-            if 'application/json' in content_type or response.text.strip().startswith('{'):
-                try:
-                    data = response.json()
-                    result = {
-                        'success': True,
-                        'data': data,
-                        'status_code': response.status_code
-                    }
-                    if use_cache and self.availability_cache_ttl > 0:
+
+        def _fetch() -> Dict[str, Any]:
+            # Convert dates to Jalali format
+            departure_date_jalali = self._convert_to_jalali(departure_date)
+            return_date_jalali = None
+            if round_trip and return_date:
+                return_date_jalali = self._convert_to_jalali(return_date)
+
+            import base64
+            now = datetime.now()
+            office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
+            office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
+
+            params = {
+                'origin': origin.upper(),
+                'destination': destination.upper(),
+                'departureDate': departure_date_jalali,
+                'roundTrip': 'true' if round_trip else 'false',
+                'adultQty': adult_qty,
+                'childQty': child_qty,
+                'infantQty': infant_qty,
+                'OfficeUser': self.office_user,
+                'OfficePass': office_pass_encoded,
+            }
+            if round_trip and return_date_jalali:
+                params['returnDate'] = return_date_jalali
+
+            # Primary gets most of the budget; fallback uses a short remainder — never 2× timeout
+            primary_read = max(5, int(self.timeout * 0.7))
+            fallback_read = max(4, int(self.timeout - primary_read))
+
+            try:
+                response = self._http_get(
+                    f"{self.base_url}/ibe/Availability",
+                    params=params,
+                    headers={
+                        'Accept': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    read_timeout=primary_read,
+                    allow_redirects=True,
+                )
+
+                content_type = response.headers.get('Content-Type', '').lower()
+                if 'application/json' in content_type or response.text.strip().startswith('{'):
+                    try:
+                        data = response.json()
+                        result = {
+                            'success': True,
+                            'data': data,
+                            'status_code': response.status_code,
+                        }
+                        if use_cache and self.availability_cache_ttl > 0:
+                            cache_set(avail_key, result, self.availability_cache_ttl)
+                        return result
+                    except ValueError:
+                        pass
+
+                if response.status_code == 200 and (
+                    'text/html' in content_type or response.text.strip().startswith('<!')
+                ):
+                    logger.warning('Received HTML from /ibe/Availability, trying fallback endpoint')
+                    result = self._check_availability_fallback(
+                        origin, destination, departure_date, round_trip, return_date,
+                        adult_qty, child_qty, infant_qty, departure_date_jalali,
+                        return_date_jalali, office_pass_encoded,
+                        read_timeout=fallback_read,
+                    )
+                    if result.get('success') and use_cache and self.availability_cache_ttl > 0:
                         cache_set(avail_key, result, self.availability_cache_ttl)
                     return result
-                except ValueError:
-                    pass  # Fall through to check if it's HTML
-            
-            # If response is HTML, try fallback to /api/Res/FlightAvailability
-            if response.status_code == 200 and ('text/html' in content_type or response.text.strip().startswith('<!')):
-                logger.warning("Received HTML from /ibe/Availability, trying fallback endpoint")
-                # Fallback: Use the working endpoint
-                result = self._check_availability_fallback(
-                    origin, destination, departure_date, round_trip, return_date,
-                    adult_qty, child_qty, infant_qty, departure_date_jalali, return_date_jalali, office_pass_encoded
-                )
-                if result.get('success') and use_cache and self.availability_cache_ttl > 0:
+
+                result = {
+                    'success': True,
+                    'data': response.text,
+                    'status_code': response.status_code,
+                    'content_type': content_type,
+                }
+                if use_cache and self.availability_cache_ttl > 0:
                     cache_set(avail_key, result, self.availability_cache_ttl)
                 return result
-            
-            # If not JSON and not HTML, return as is
-            result = {
-                'success': True,
-                'data': response.text,
-                'status_code': response.status_code,
-                'content_type': content_type
-            }
-            if use_cache and self.availability_cache_ttl > 0:
-                cache_set(avail_key, result, self.availability_cache_ttl)
-            return result
-            
-        except requests.exceptions.Timeout:
-            return {
-                'success': False,
-                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds.'
-            }
-        except requests.exceptions.ConnectionError:
-            return {
-                'success': False,
-                'error': 'Connection error - Could not connect to Nira API'
-            }
-        except Exception as e:
-            logger.error(f"Error calling Nira Availability API: {e}")
-            return {
-                'success': False,
-                'error': f'Unexpected error: {str(e)}'
-            }
+
+            except requests.exceptions.Timeout:
+                return {
+                    'success': False,
+                    'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds.',
+                }
+            except requests.exceptions.ConnectionError:
+                return {
+                    'success': False,
+                    'error': 'Connection error - Could not connect to Nira API',
+                }
+            except Exception as e:
+                logger.error(f'Error calling Nira Availability API: {e}')
+                return {
+                    'success': False,
+                    'error': f'Unexpected error: {str(e)}',
+                }
+
+        try:
+            return nira_guarded(_fetch, coalesce_key=f'avail:{avail_key}')
+        except (CircuitOpenError, OverloadedError) as exc:
+            return nira_soft_error(exc)
     
     def _check_availability_fallback(
         self,
@@ -299,7 +377,8 @@ class NiraClient:
         infant_qty: int,
         departure_date_jalali: str,
         return_date_jalali: Optional[str],
-        office_pass_encoded: str
+        office_pass_encoded: str,
+        read_timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Fallback method: Use /api/Res/FlightAvailability if /ibe/Availability returns HTML
@@ -342,17 +421,17 @@ class NiraClient:
             logger.info(f"🔍 Nira API JSON Body: {json_data}")
             
             # Make POST request to Nira API with JSON body
-            response = requests.post(
+            response = self._http_post(
                 f"{self.api_url}/FlightAvailability",
-                params=query_params,  # OfficeUser and OfficePass in query string
-                json=json_data,  # Flight parameters as JSON in POST body
+                params=query_params,
+                json=json_data,
                 headers={
                     'Content-Type': 'application/json',
                     'Accept': 'application/json, text/plain, */*',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                 },
-                timeout=self.timeout,
-                allow_redirects=True
+                read_timeout=read_timeout if read_timeout is not None else max(4, int(self.timeout * 0.4)),
+                allow_redirects=True,
             )
             
             # Log response details for debugging
@@ -430,8 +509,9 @@ class NiraClient:
         """
         Get list of origin cities from Nira Routes API
         Shared Redis/LocMem cache (all Gunicorn workers) + process TTL fallback.
+        On Nira outage, serve stale cache so the SPA still loads.
         """
-        from nasim.cache_utils import cache_get, cache_set, cache_key as shared_cache_key
+        from nasim.cache_utils import cache_get, cache_key as shared_cache_key
 
         shared_key = shared_cache_key('nira_origins')
         local_key = self._generate_cache_key('get_origin_cities')
@@ -458,108 +538,111 @@ class NiraClient:
                 'success': False,
                 'error': 'Nira Office credentials are not configured'
             }
-        
-        # Create OfficePass with current date and time (format: {OfficeUser}_{YYYY-MM-DD HH:MM:SS})
-        import base64
-        from datetime import datetime
-        now = datetime.now()
-        office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
-        office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
-        
-        # Build query parameters
-        params = {
-            'ModuleType': 'SP',
-            'ModuleName': 'RoutesApp',
-            'Origin': '',  # Empty to get all origin cities (capital O)
-            'OfficeUser': self.office_user,
-            'OfficePass': office_pass_encoded,  # Use encoded password with date
-        }
-        
-        try:
-            response = requests.get(
-                self.ws_url,
-                params=params,
-                timeout=self.timeout
-            )
-            
-            if response.status_code == 200:
-                try:
-                    data = response.json()
-                    # Check if response is "SIGN" (authentication error)
-                    if isinstance(data, str) and data.strip() == "SIGN":
-                        return {
-                            'success': False,
-                            'error': 'Authentication failed - OfficePass might be incorrect or expired. Check OfficeUser and OfficePass.',
+
+        def _fetch() -> Dict[str, Any]:
+            import base64
+            now = datetime.now()
+            office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
+            office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
+
+            params = {
+                'ModuleType': 'SP',
+                'ModuleName': 'RoutesApp',
+                'Origin': '',
+                'OfficeUser': self.office_user,
+                'OfficePass': office_pass_encoded,
+            }
+
+            try:
+                response = self._http_get(self.ws_url, params=params)
+
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                        if isinstance(data, str) and data.strip() == 'SIGN':
+                            return {
+                                'success': False,
+                                'error': 'Authentication failed - OfficePass might be incorrect or expired. Check OfficeUser and OfficePass.',
+                                'status_code': response.status_code,
+                                'url': response.url,
+                                'office_user': self.office_user,
+                                'debug': 'Response was "SIGN" which indicates authentication failure',
+                            }
+                        result = {
+                            'success': True,
+                            'data': data,
                             'status_code': response.status_code,
-                            'url': response.url,
-                            'office_user': self.office_user,
-                            'debug': 'Response was "SIGN" which indicates authentication failure'
                         }
-                    # Cache successful response
-                    result = {
-                        'success': True,
-                        'data': data,
-                        'status_code': response.status_code
-                    }
-                    self._routes_cache[local_key] = result
-                    cache_set(shared_key, result, self.routes_cache_ttl)
-                    logger.info('Cached origin cities')
-                    return self._strip_test_route_cities(result)
-                except ValueError:
-                    # If not JSON, check if it's "SIGN" string
-                    if response.text.strip() == "SIGN":
-                        return {
-                            'success': False,
-                            'error': 'Authentication failed - OfficePass might be incorrect or expired. Check OfficeUser and OfficePass.',
+                        self._routes_cache[local_key] = result
+                        self._store_fresh_and_stale(shared_key, result, self.routes_cache_ttl)
+                        logger.info('Cached origin cities')
+                        return self._strip_test_route_cities(result)
+                    except ValueError:
+                        if response.text.strip() == 'SIGN':
+                            return {
+                                'success': False,
+                                'error': 'Authentication failed - OfficePass might be incorrect or expired. Check OfficeUser and OfficePass.',
+                                'status_code': response.status_code,
+                                'url': response.url,
+                                'office_user': self.office_user,
+                                'debug': 'Response was "SIGN" which indicates authentication failure',
+                            }
+                        result = {
+                            'success': True,
+                            'data': response.text,
                             'status_code': response.status_code,
-                            'url': response.url,
-                            'office_user': self.office_user,
-                            'debug': 'Response was "SIGN" which indicates authentication failure'
+                            'content_type': response.headers.get('Content-Type', ''),
                         }
-                    # If not JSON, might be XML or HTML
-                    result = {
-                        'success': True,
-                        'data': response.text,
-                        'status_code': response.status_code,
-                        'content_type': response.headers.get('Content-Type', '')
-                    }
-                    self._routes_cache[local_key] = result
-                    cache_set(shared_key, result, self.routes_cache_ttl)
-                    logger.info('Cached origin cities (text format)')
-                    return self._strip_test_route_cities(result)
-            else:
+                        self._routes_cache[local_key] = result
+                        self._store_fresh_and_stale(shared_key, result, self.routes_cache_ttl)
+                        logger.info('Cached origin cities (text format)')
+                        return self._strip_test_route_cities(result)
                 return {
                     'success': False,
                     'error': f'API returned status code {response.status_code}',
                     'status_code': response.status_code,
-                    'response': response.text[:500]
+                    'response': response.text[:500],
                 }
-                
-        except requests.exceptions.Timeout:
-            return {
-                'success': False,
-                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.',
-                'timeout': self.timeout,
-                'url': self.ws_url
-            }
-        except requests.exceptions.ConnectionError:
-            return {
-                'success': False,
-                'error': 'Connection error - Could not connect to Nira API'
-            }
-        except Exception as e:
-            logger.error(f"Error calling Nira Routes API (origin cities): {e}")
-            return {
-                'success': False,
-                'error': f'Unexpected error: {str(e)}'
-            }
+
+            except requests.exceptions.Timeout:
+                return {
+                    'success': False,
+                    'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.',
+                    'timeout': self.timeout,
+                    'url': self.ws_url,
+                }
+            except requests.exceptions.ConnectionError:
+                return {
+                    'success': False,
+                    'error': 'Connection error - Could not connect to Nira API',
+                }
+            except Exception as e:
+                logger.error(f'Error calling Nira Routes API (origin cities): {e}')
+                return {
+                    'success': False,
+                    'error': f'Unexpected error: {str(e)}',
+                }
+
+        try:
+            result = nira_guarded(_fetch, coalesce_key='origins')
+        except (CircuitOpenError, OverloadedError) as exc:
+            stale = self._serve_stale(shared_key, type(exc).__name__)
+            if stale:
+                return self._strip_test_route_cities(stale)
+            return nira_soft_error(exc)
+
+        if not result.get('success'):
+            stale = self._serve_stale(shared_key, result.get('error') or 'nira_error')
+            if stale:
+                return self._strip_test_route_cities(stale)
+        return result
     
     def get_destinations(self, origin: str) -> Dict[str, Any]:
         """
         Get list of flight destinations from a specific origin
-        Shared Redis/LocMem cache + process TTL fallback.
+        Shared Redis/LocMem cache + process TTL fallback + stale on outage.
         """
-        from nasim.cache_utils import cache_get, cache_set, cache_key as shared_cache_key
+        from nasim.cache_utils import cache_get, cache_key as shared_cache_key
 
         origin_u = origin.upper()
         shared_key = shared_cache_key('nira_dest', origin_u)
@@ -586,79 +669,84 @@ class NiraClient:
                 'success': False,
                 'error': 'Nira Office credentials are not configured'
             }
-        
-        # Create OfficePass with current date and time (format: {OfficeUser}_{YYYY-MM-DD HH:MM:SS})
-        import base64
-        from datetime import datetime
-        now = datetime.now()
-        office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
-        office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
-        
-        # Build query parameters
-        params = {
-            'ModuleType': 'SP',
-            'ModuleName': 'RoutesApp',
-            'Origin': origin_u,  # IATA code of origin (capital O)
-            'OfficeUser': self.office_user,
-            'OfficePass': office_pass_encoded,  # Use encoded password with date
-        }
-        
-        try:
-            response = requests.get(
-                self.ws_url,
-                params=params,
-                timeout=self.timeout
-            )
-            
-            if response.status_code == 200:
-                try:
-                    data = response.json()
-                    # Cache successful response
-                    result = {
-                        'success': True,
-                        'data': data,
-                        'status_code': response.status_code
-                    }
-                    self._routes_cache[cache_key] = result
-                    cache_set(shared_key, result, self.routes_cache_ttl)
-                    logger.info('Cached destinations for %s', origin_u)
-                    return self._strip_test_route_cities(result)
-                except ValueError:
-                    # If not JSON, might be XML or HTML
-                    result = {
-                        'success': True,
-                        'data': response.text,
-                        'status_code': response.status_code,
-                        'content_type': response.headers.get('Content-Type', '')
-                    }
-                    self._routes_cache[cache_key] = result
-                    cache_set(shared_key, result, self.routes_cache_ttl)
-                    logger.info('Cached destinations for %s (text)', origin_u)
-                    return self._strip_test_route_cities(result)
-            else:
+
+        def _fetch() -> Dict[str, Any]:
+            import base64
+            now = datetime.now()
+            office_pass_pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
+            office_pass_encoded = base64.b64encode(office_pass_pattern.encode('utf-8')).decode('utf-8')
+
+            params = {
+                'ModuleType': 'SP',
+                'ModuleName': 'RoutesApp',
+                'Origin': origin_u,
+                'OfficeUser': self.office_user,
+                'OfficePass': office_pass_encoded,
+            }
+
+            try:
+                response = self._http_get(self.ws_url, params=params)
+
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                        result = {
+                            'success': True,
+                            'data': data,
+                            'status_code': response.status_code,
+                        }
+                        self._routes_cache[cache_key] = result
+                        self._store_fresh_and_stale(shared_key, result, self.routes_cache_ttl)
+                        logger.info('Cached destinations for %s', origin_u)
+                        return self._strip_test_route_cities(result)
+                    except ValueError:
+                        result = {
+                            'success': True,
+                            'data': response.text,
+                            'status_code': response.status_code,
+                            'content_type': response.headers.get('Content-Type', ''),
+                        }
+                        self._routes_cache[cache_key] = result
+                        self._store_fresh_and_stale(shared_key, result, self.routes_cache_ttl)
+                        logger.info('Cached destinations for %s (text)', origin_u)
+                        return self._strip_test_route_cities(result)
                 return {
                     'success': False,
                     'error': f'API returned status code {response.status_code}',
                     'status_code': response.status_code,
-                    'response': response.text[:500]
+                    'response': response.text[:500],
                 }
-                
-        except requests.exceptions.Timeout:
-            return {
-                'success': False,
-                'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.'
-            }
-        except requests.exceptions.ConnectionError:
-            return {
-                'success': False,
-                'error': 'Connection error - Could not connect to Nira API'
-            }
-        except Exception as e:
-            logger.error(f"Error calling Nira Routes API (destinations): {e}")
-            return {
-                'success': False,
-                'error': f'Unexpected error: {str(e)}'
-            }
+
+            except requests.exceptions.Timeout:
+                return {
+                    'success': False,
+                    'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds. The API might be slow or unavailable.',
+                }
+            except requests.exceptions.ConnectionError:
+                return {
+                    'success': False,
+                    'error': 'Connection error - Could not connect to Nira API',
+                }
+            except Exception as e:
+                logger.error(f'Error calling Nira Routes API (destinations): {e}')
+                return {
+                    'success': False,
+                    'error': f'Unexpected error: {str(e)}',
+                }
+
+        try:
+            result = nira_guarded(_fetch, coalesce_key=f'dest:{origin_u}')
+        except (CircuitOpenError, OverloadedError) as exc:
+            stale = self._serve_stale(shared_key, type(exc).__name__)
+            if stale:
+                return self._strip_test_route_cities(stale)
+            return nira_soft_error(exc)
+
+        if not result.get('success'):
+            stale = self._serve_stale(shared_key, result.get('error') or 'nira_error')
+            if stale:
+                return self._strip_test_route_cities(stale)
+        return result
 
     # ------------------------------------------------------------------
     # Reservation / payment — NOT in current project Nira docs.
@@ -725,7 +813,7 @@ class NiraClient:
         except Exception as exc:
             return {'success': False, 'error': str(exc)}
         try:
-            response = requests.get(url, timeout=self.timeout)
+            response = self._http_get(url)
             if response.status_code != 200:
                 return {'success': False, 'status_code': response.status_code, 'error': response.text[:300]}
             data = response.json() if 'application/json' in (response.headers.get('Content-Type') or '') else {'raw': response.text}
