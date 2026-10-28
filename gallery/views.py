@@ -198,7 +198,11 @@ class HomePageSectionItemViewSet(viewsets.ReadOnlyModelViewSet):
             'faq': [i for i in serializer.data if i['section_type'] == 'FAQ'],
             'popular_routes': [i for i in serializer.data if i['section_type'] == 'POPULAR_ROUTES'],
         }
-        return Response(data)
+        response = Response(data)
+        # CMS copy/images must never be served stale from browser/CDN caches
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response['Pragma'] = 'no-cache'
+        return response
 
 
 class HomePageSectionConfigViewSet(viewsets.ReadOnlyModelViewSet):
@@ -213,7 +217,10 @@ class HomePageSectionConfigViewSet(viewsets.ReadOnlyModelViewSet):
         configs = self.get_queryset()
         serializer = self.get_serializer(configs, many=True)
         data = {c['section_type']: c for c in serializer.data}
-        return Response(data)
+        response = Response(data)
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response['Pragma'] = 'no-cache'
+        return response
 
 
 class HeaderMenuImageViewSet(viewsets.ReadOnlyModelViewSet):

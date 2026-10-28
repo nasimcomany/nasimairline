@@ -262,7 +262,8 @@ class HomePageSectionItemAdmin(admin.ModelAdmin):
             ),
             'description': (
                 'SPECIAL_SERVICE / EXPERIENCE: تصویر + عنوان + لینک. '
-                'SURVEY: یک آیتم با تصویر پس‌زمینه بنر و لینک دکمه. '
+                'SURVEY (بنر بزرگ صفحه اصلی): عنوان فارسی = تیتر بنر، '
+                'متن/توضیح فارسی = توضیح زیر تیتر، تصویر = پس‌زمینه بنر، لینک = مقصد دکمه. '
                 'FAQ: عنوان زیر دایره + متن مودال در فیلد توضیح. '
                 'POPULAR_ROUTES: عنوان مسیر، توضیح (قیمت/تاریخ)، تصویر کارت.'
             ),
@@ -300,6 +301,29 @@ class HomePageSectionItemAdmin(admin.ModelAdmin):
         if not change:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+        # Keep SURVEY banner config copy in sync with the item admins usually edit
+        if obj.section_type == 'SURVEY':
+            from gallery.models import HomePageSectionConfig
+            placeholder = {
+                'بنر نظرسنجی',
+                'Survey banner',
+                'بانر الاستبيان',
+            }
+            cfg, _ = HomePageSectionConfig.objects.get_or_create(section_type='SURVEY')
+            title_fa = (obj.title_fa or '').strip()
+            if title_fa and title_fa not in placeholder:
+                cfg.title1_fa = title_fa
+                if (obj.title_ar or '').strip():
+                    cfg.title1_ar = obj.title_ar.strip()
+                if (obj.title_en or '').strip():
+                    cfg.title1_en = obj.title_en.strip()
+            if (obj.description_fa or '').strip():
+                cfg.title2_fa = obj.description_fa.strip()
+                if (obj.description_ar or '').strip():
+                    cfg.title2_ar = obj.description_ar.strip()
+                if (obj.description_en or '').strip():
+                    cfg.title2_en = obj.description_en.strip()
+            cfg.save()
 
 
 @admin.register(HomePageSectionConfig)
@@ -318,7 +342,9 @@ class HomePageSectionConfigAdmin(admin.ModelAdmin):
             'description': (
                 'HERO: خط۱ عنوان اصلی، خط۲ زیرعنوان. '
                 'QUOTE: خط۱ متن فارسی/عربی، خط۲ متن انگلیسی کنار آن. '
-                'MEMBERSHIP / SURVEY: خط۱ عنوان، خط۲ توضیح، خط۳ متن دکمه. '
+                'MEMBERSHIP: خط۱ عنوان، خط۲ توضیح، خط۳ متن دکمه. '
+                'SURVEY (بنر بزرگ): ترجیحاً از «آیتم‌های بخش صفحه اصلی» (نوع SURVEY) '
+                'عنوان/توضیح/تصویر را ویرایش کنید؛ خط۳ اینجا = متن دکمه. '
                 'FAQ / POPULAR_ROUTES / SPECIAL_SERVICE / EXPERIENCE: عناوین بخش.'
             ),
         }),

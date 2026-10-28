@@ -350,15 +350,15 @@ class HeroSliderSerializer(serializers.ModelSerializer):
 class HomePageSectionItemSerializer(serializers.ModelSerializer):
     """Serializer for HomePageSectionItem - public API"""
     image_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = HomePageSectionItem
         fields = [
             'id', 'uuid', 'section_type', 'title_fa', 'title_ar', 'title_en',
             'description_fa', 'description_ar', 'description_en',
-            'image_url', 'link_url', 'order', 'is_active'
+            'image_url', 'link_url', 'order', 'is_active', 'updated_at',
         ]
-    
+
     def get_image_url(self, obj):
         if obj.image:
             request = self.context.get('request')

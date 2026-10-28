@@ -160,6 +160,7 @@ const HomePage: React.FC = () => {
   const [surveyItems, setSurveyItems] = useState<HomePageSectionItem[]>([]);
   const [faqItems, setFaqItems] = useState<HomePageSectionItem[]>([]);
   const [popularRouteItems, setPopularRouteItems] = useState<HomePageSectionItem[]>([]);
+  const [sectionsReady, setSectionsReady] = useState(false);
   const [sectionConfigs, setSectionConfigs] = useState<Record<string, HomePageSectionConfig>>(() => {
     const cached = readHeroBootstrap();
     if (cached?.hero) return { HERO: cached.hero };
@@ -372,6 +373,7 @@ const HomePage: React.FC = () => {
         setFaqItems(items.faq);
         setPopularRouteItems(items.popular_routes);
         setSectionConfigs(configs);
+        setSectionsReady(true);
         if (items.popular_routes.length > 0) {
           const ids = items.popular_routes.map((r) => r.id);
           setVisibleCardIds(ids.slice(0, 4));
@@ -379,6 +381,7 @@ const HomePage: React.FC = () => {
         }
       } catch (error) {
         console.error('Error loading homepage sections:', error);
+        if (!cancelled) setSectionsReady(true);
       }
     };
     fetchSections();
@@ -419,6 +422,65 @@ const HomePage: React.FC = () => {
     if (line === 2) return pickLang(c.title2_fa, c.title2_ar, c.title2_en, fallback);
     return pickLang(c.title3_fa, c.title3_ar, c.title3_en, fallback);
   };
+
+  const surveyBanner = useMemo(() => {
+    const survey = surveyItems[0];
+    const placeholderTitles = new Set([
+      'بنر نظرسنجی',
+      'Survey banner',
+      'بانر الاستبيان',
+    ]);
+    const itemTitle = pickLang(
+      survey?.title_fa,
+      survey?.title_ar,
+      survey?.title_en,
+      ''
+    ).trim();
+    const itemDesc = pickLang(
+      survey?.description_fa,
+      survey?.description_ar,
+      survey?.description_en,
+      ''
+    ).trim();
+    const title =
+      (itemTitle && !placeholderTitles.has(itemTitle) ? itemTitle : '') ||
+      pickConfig('SURVEY', 1, t('home.loyalty.enhanceTitle'));
+    const description =
+      itemDesc || pickConfig('SURVEY', 2, t('home.loyalty.fullDescription'));
+    const buttonLabel = pickConfig(
+      'SURVEY',
+      3,
+      language === 'fa'
+        ? 'لینک نظرسنجی'
+        : language === 'ar'
+        ? 'رابط الاستبيان'
+        : 'Survey Link'
+    );
+    const bust = encodeURIComponent(
+      survey?.updated_at || String(survey?.id || survey?.uuid || '')
+    );
+    const cmsUrl = (survey?.image_url || '').trim();
+    // Wait for CMS before choosing image — avoids flashing the static fallback then swapping
+    let imageUrl: string | null = null;
+    if (sectionsReady) {
+      imageUrl = cmsUrl
+        ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}v=${bust}`
+        : '/images/airport-crew.jpg';
+    }
+    return {
+      survey,
+      title,
+      description,
+      buttonLabel,
+      imageUrl,
+      linkUrl: survey?.link_url || '/membership',
+    };
+  }, [surveyItems, sectionConfigs, language, t, sectionsReady]);
+
+  const [surveyImageSrc, setSurveyImageSrc] = useState<string | null>(null);
+  useEffect(() => {
+    setSurveyImageSrc(surveyBanner.imageUrl);
+  }, [surveyBanner.imageUrl]);
 
   // Helper: handle section item click (link_url)
   const handleSectionItemClick = (linkUrl: string) => {
@@ -1694,7 +1756,7 @@ const HomePage: React.FC = () => {
                       </div>
       </section>
 
-      {/* Loyalty / Survey banner — public fallback always visible; CMS image overlays when available */}
+      {/* Loyalty / Survey banner — single CMS image (no stacked fallback flicker) */}
       <section
         className="relative z-10 overflow-hidden bg-slate-900 loyalty-survey-banner"
         style={{
@@ -1702,20 +1764,19 @@ const HomePage: React.FC = () => {
         }}
       >
         <div className="loyalty-survey-banner__media absolute inset-0" aria-hidden>
-          <img
-            src="/images/airport-crew.jpg"
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: 'center 28%' }}
-          />
-          {surveyItems[0]?.image_url ? (
+          {surveyImageSrc ? (
             <img
-              src={surveyItems[0].image_url}
+              key={surveyImageSrc}
+              src={surveyImageSrc}
               alt=""
               className="absolute inset-0 w-full h-full object-cover"
               style={{ objectPosition: 'center 28%' }}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
+              onError={() => {
+                setSurveyImageSrc((prev) =>
+                  !prev || prev.includes('/images/airport-crew.jpg')
+                    ? prev
+                    : '/images/airport-crew.jpg'
+                );
               }}
             />
           ) : null}
@@ -1743,7 +1804,7 @@ const HomePage: React.FC = () => {
                 textShadow: '0 2px 20px rgba(0,0,0,0.4)',
               }}
             >
-              {pickConfig('SURVEY', 1, t('home.loyalty.enhanceTitle'))}
+              {surveyBanner.title}
             </h2>
             <p
               className={`loyalty-survey-banner__desc text-white/95 break-words ${fontClass}`}
@@ -1753,21 +1814,17 @@ const HomePage: React.FC = () => {
                 textShadow: '0 1px 12px rgba(0,0,0,0.35)',
               }}
             >
-              {pickConfig('SURVEY', 2, t('home.loyalty.fullDescription'))}
+              {surveyBanner.description}
             </p>
             <button
-              onClick={() => handleSectionItemClick(surveyItems[0]?.link_url || '/membership')}
+              onClick={() => handleSectionItemClick(surveyBanner.linkUrl)}
               className="loyalty-survey-banner__btn bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-xl transition-colors shadow-xl"
               style={{
                 fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl',
               }}
             >
-              {pickConfig(
-                'SURVEY',
-                3,
-                language === 'fa' ? 'لینک نظرسنجی' : language === 'ar' ? 'رابط الاستبيان' : 'Survey Link'
-              )}
+              {surveyBanner.buttonLabel}
             </button>
           </div>
         </div>

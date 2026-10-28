@@ -17,6 +17,7 @@ export interface HomePageSectionItem {
   link_url: string;
   order: number;
   is_active: boolean;
+  updated_at?: string;
 }
 
 export interface HomePageSectionConfig {
