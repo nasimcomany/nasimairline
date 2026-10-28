@@ -276,12 +276,23 @@ class NiraClient:
                         'response': (response.text or '')[:500],
                     }
                 text = (response.text or '').strip()
-                if text == 'SIGN':
-                    return {
+                # SIGN here usually means this OfficeUser is not allowed for ModuleName=Flights
+                # (RoutesApp/Availability may still work with the same credentials).
+                if text == 'SIGN' or text.upper() == 'SIGN':
+                    unsupported = {
                         'success': False,
-                        'error': 'Authentication failed - OfficePass might be incorrect or expired.',
+                        'supported': False,
+                        'code': 'NIRA_FLIGHTS_UNSUPPORTED',
+                        'error': (
+                            'Nira Flights module not enabled for this OfficeUser (got SIGN). '
+                            'Fall back to RoutesApp + Availability.'
+                        ),
                         'status_code': response.status_code,
                     }
+                    # Cache negative so map/search do not hammer Nira on every request
+                    self._routes_cache[local_key] = unsupported
+                    self._store_fresh_and_stale(shared_key, unsupported, min(120, self.routes_cache_ttl))
+                    return unsupported
                 try:
                     data = response.json()
                 except ValueError:
@@ -290,10 +301,12 @@ class NiraClient:
                         'error': 'Invalid JSON from Nira Flights module',
                         'response': text[:500],
                     }
-                if isinstance(data, str) and data.strip() == 'SIGN':
+                if isinstance(data, str) and data.strip().upper() == 'SIGN':
                     return {
                         'success': False,
-                        'error': 'Authentication failed - OfficePass might be incorrect or expired.',
+                        'supported': False,
+                        'code': 'NIRA_FLIGHTS_UNSUPPORTED',
+                        'error': 'Nira Flights module not enabled for this OfficeUser (got SIGN).',
                     }
                 # Normalize list under NRSFlights
                 if isinstance(data, list):
@@ -349,6 +362,7 @@ class NiraClient:
         end = start + timedelta(days=days)
         schedule = self.get_flights_in_range(start, end)
         if not schedule.get('success'):
+            # Preserve unsupported flag for callers that want to skip merge
             return schedule
 
         rows = []

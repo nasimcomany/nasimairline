@@ -169,10 +169,12 @@ const FlightMapPage: React.FC = () => {
     fetchCities();
   }, []);
 
-  // Origins that have at least one Nasim flight on the selected date
-  // (Nira ModuleName=Flights — full timetable, not a 3-destination probe).
+  // Origins with flights on selected date:
+  // 1) Prefer Nira ModuleName=Flights timetable when office has access
+  // 2) Else probe RoutesApp origins × ALL destinations via Availability
   useEffect(() => {
     let cancelled = false;
+    const ORIGIN_CONCURRENCY = 2;
 
     const scanOriginsForDate = async () => {
       setScanningOrigins(true);
@@ -180,14 +182,64 @@ const FlightMapPage: React.FC = () => {
       try {
         const schedule = await getScheduleFlights(dateStr, dateStr);
         if (cancelled) return;
-        const active = Array.from(
+        const fromSchedule = Array.from(
           new Set(
             schedule
               .map((row) => (row.Origin || '').toUpperCase())
               .filter(Boolean)
           )
         );
-        setOriginsWithFlights(active);
+        if (fromSchedule.length > 0) {
+          setOriginsWithFlights(fromSchedule);
+          return;
+        }
+
+        // Fallback: RoutesApp city list + real Availability (no 3-dest cap)
+        if (!cities.length) {
+          setOriginsWithFlights([]);
+          return;
+        }
+        const active: string[] = [];
+        const queue = cities.filter((c) => c.CITY);
+        let next = 0;
+        const workers = Array.from(
+          { length: Math.min(ORIGIN_CONCURRENCY, Math.max(queue.length, 1)) },
+          async () => {
+            while (!cancelled) {
+              const idx = next++;
+              if (idx >= queue.length) break;
+              const city = queue[idx];
+              const code = (city.CITY || '').toUpperCase();
+              if (!code) continue;
+              try {
+                const destinations = await getDestinations(code);
+                const destCodes = destinations
+                  .map((d) => (d.CITY || '').toUpperCase())
+                  .filter((c) => c && c !== code);
+                for (const dest of destCodes) {
+                  if (cancelled) return;
+                  const flights = await checkAvailability({
+                    origin: code,
+                    destination: dest,
+                    departure_date: dateStr,
+                    round_trip: false,
+                    adult_qty: 1,
+                    child_qty: 0,
+                    infant_qty: 0,
+                  });
+                  if (filterListedNiraFlights(flights).length > 0) {
+                    active.push(code);
+                    break;
+                  }
+                }
+              } catch {
+                /* ignore single-origin failures */
+              }
+            }
+          }
+        );
+        await Promise.all(workers);
+        if (!cancelled) setOriginsWithFlights(active);
       } catch {
         if (!cancelled) setOriginsWithFlights([]);
       } finally {
@@ -199,12 +251,9 @@ const FlightMapPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [selectedDate]);
+  }, [cities, selectedDate]);
 
-  const availableCityCodes = React.useMemo(() => {
-    // Prefer known map coords; still show schedule origins with a center fallback
-    return originsWithFlights;
-  }, [originsWithFlights]);
+  const availableCityCodes = React.useMemo(() => originsWithFlights, [originsWithFlights]);
 
   useEffect(() => {
     if (scanningOrigins) return;
@@ -258,7 +307,8 @@ const FlightMapPage: React.FC = () => {
       return classes.map((classStatus, classIndex) => toCard(classStatus, classIndex));
     });
 
-    const rank = (s: FlightSaleState) => (s === 'bookable' ? 0 : s === 'sale_closed' ? 1 : 2);
+    const rank = (s: FlightSaleState) =>
+      s === 'bookable' ? 0 : s === 'sale_closed' ? 1 : s === 'schedule_only' ? 2 : 3;
     return cards.sort((a, b) => rank(a.saleState) - rank(b.saleState));
   }, []);
 
@@ -538,7 +588,7 @@ const FlightMapPage: React.FC = () => {
                         style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
                       >
                         {language === 'fa'
-                          ? 'برای این تاریخ پروازی از نیرا پیدا نشد. تاریخ دیگری را امتحان کنید.'
+                          ? 'برای این تاریخ هنوز مبدأ فعالی پیدا نشد. چند لحظه صبر کنید یا تاریخ دیگری را امتحان کنید.'
                           : 'No flights found for this date. Try another date.'}
                       </p>
                     </div>

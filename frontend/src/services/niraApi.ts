@@ -63,15 +63,20 @@ export interface FlightAvailability {
   Stops?: number;                     // تعداد توقف
 }
 
+/** True when Nira marks the flight as cancelled (still listed for the passenger). */
+export function isCancelledNiraFlight(flight: FlightAvailability | null | undefined): boolean {
+  if (!flight) return false;
+  const status = String(flight.FlightStatus || '').trim().toUpperCase();
+  return status === 'X' || status === 'CANCELLED' || status === 'CNL';
+}
+
 /**
  * Same rule for map + search results:
- * list scheduled flights from Nira, except hard-cancelled rows.
+ * list every Nira flight row with a flight number (including cancelled).
  * Sale/bookability is decided separately via getFlightSaleState().
  */
 export function isListedNiraFlight(flight: FlightAvailability | null | undefined): boolean {
   if (!flight) return false;
-  const status = String(flight.FlightStatus || '').trim().toUpperCase();
-  if (status === 'X' || status === 'CANCELLED' || status === 'CNL') return false;
   return Boolean(flight.FlightNo && flight.Origin && flight.Destination);
 }
 
@@ -94,12 +99,13 @@ export function filterDisplayableNiraFlights(
   return filterListedNiraFlights(flights);
 }
 
-export type FlightSaleState = 'bookable' | 'sale_closed' | 'schedule_only';
+export type FlightSaleState = 'bookable' | 'sale_closed' | 'schedule_only' | 'cancelled';
 
 export type NiraClassRow = FlightAvailability['ClassStatus'][number];
 
 /**
  * Airline-facing sale state from Nira inventory:
+ * - cancelled: flight is cancelled (still shown in results)
  * - bookable: online ticket can be sold
  * - sale_closed: flight exists / may have a class row, but sale is closed (price 0 / no reserve)
  * - schedule_only: only timetable — no class/seat inventory yet
@@ -108,6 +114,7 @@ export function getFlightSaleState(
   flight: FlightAvailability,
   classRow?: NiraClassRow | null
 ): FlightSaleState {
+  if (isCancelledNiraFlight(flight)) return 'cancelled';
   const classes = Array.isArray(flight.ClassStatus) ? flight.ClassStatus : [];
   if (classes.length === 0) return 'schedule_only';
 
@@ -123,6 +130,14 @@ export function getFlightSaleCopy(
   language: string
 ): { badge: string; notice: string; cta: string; priceLabel?: string } {
   if (language === 'en') {
+    if (state === 'cancelled') {
+      return {
+        badge: 'Cancelled',
+        notice: 'This flight has been cancelled.',
+        cta: 'Not available',
+        priceLabel: '—',
+      };
+    }
     if (state === 'bookable') {
       return { badge: 'Available to book', notice: '', cta: 'Select flight' };
     }
@@ -142,6 +157,14 @@ export function getFlightSaleCopy(
     };
   }
   if (language === 'ar') {
+    if (state === 'cancelled') {
+      return {
+        badge: 'ملغاة',
+        notice: 'تم إلغاء هذه الرحلة.',
+        cta: 'غير متاح',
+        priceLabel: '—',
+      };
+    }
     if (state === 'bookable') {
       return { badge: 'متاح للحجز', notice: '', cta: 'اختيار الرحلة' };
     }
@@ -161,6 +184,14 @@ export function getFlightSaleCopy(
     };
   }
   // fa (default)
+  if (state === 'cancelled') {
+    return {
+      badge: 'کنسل شده',
+      notice: 'این پرواز لغو شده است.',
+      cta: 'قابل رزرو نیست',
+      priceLabel: '—',
+    };
+  }
   if (state === 'bookable') {
     return { badge: 'قابل رزرو', notice: '', cta: 'انتخاب پرواز' };
   }

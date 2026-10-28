@@ -367,6 +367,7 @@ class NiraAPIViewSet(viewsets.ViewSet):
         result = self.nira_client.get_destinations(origin=origin)
         
         if result.get('success'):
+            # Only real destinations for this origin (RoutesApp + optional Flights schedule)
             result = self._merge_schedule_destinations(result, origin)
             return Response(result, status=status.HTTP_200_OK)
 
@@ -421,6 +422,20 @@ class NiraAPIViewSet(viewsets.ViewSet):
             response = Response(result, status=status.HTTP_503_SERVICE_UNAVAILABLE)
             response['Retry-After'] = str(int(result.get('retry_after') or 10))
             return response
+        # Office without Flights module → soft empty payload so SPA can fall back
+        if result.get('code') == 'NIRA_FLIGHTS_UNSUPPORTED' or result.get('supported') is False:
+            return Response(
+                {
+                    'success': True,
+                    'supported': False,
+                    'code': 'NIRA_FLIGHTS_UNSUPPORTED',
+                    'data': {'NRSFlights': []},
+                    'from_date': from_d.strftime('%Y-%m-%d'),
+                    'to_date': to_d.strftime('%Y-%m-%d'),
+                    'error': result.get('error'),
+                },
+                status=status.HTTP_200_OK,
+            )
         return Response(result, status=status.HTTP_400_BAD_REQUEST)
 
     def _merge_schedule_origins(self, routes_result: dict) -> dict:
