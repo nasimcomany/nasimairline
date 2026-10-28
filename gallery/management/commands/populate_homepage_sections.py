@@ -1,5 +1,11 @@
 """
 Management command to populate default HomePageSectionItem and HomePageSectionConfig.
+
+Safe for production restarts / Docker deploys:
+  - Creates missing rows only (get_or_create)
+  - NEVER overwrites titles, links, descriptions, or images already in the DB
+    so admin / limited-admin CMS edits survive every redeploy.
+
 Run: python manage.py populate_homepage_sections
 """
 from django.core.management.base import BaseCommand
@@ -7,7 +13,7 @@ from gallery.models import HomePageSectionItem, HomePageSectionConfig
 
 
 class Command(BaseCommand):
-    help = 'Populate default homepage section items and configs'
+    help = 'Create missing homepage section rows only (never overwrite CMS edits)'
 
     def handle(self, *args, **options):
         configs_data = [
@@ -87,7 +93,6 @@ class Command(BaseCommand):
                 'title1_en': 'Popular Routes',
             },
         ]
-        # Create missing section titles only — never overwrite admin/CMS edits on deploy.
         for data in configs_data:
             defaults = {k: v for k, v in data.items() if k != 'section_type'}
             obj, created = HomePageSectionConfig.objects.get_or_create(
@@ -105,20 +110,7 @@ class Command(BaseCommand):
             {'order': 3, 'title_fa': 'پروازهای فرودگاه مهرآباد', 'title_ar': 'رحلات مطار مهرآباد', 'title_en': 'Mehrabad Airport Flights', 'link_url': 'https://fids.airport.ir/'},
             {'order': 4, 'title_fa': 'پروازهای فرودگاه امام', 'title_ar': 'رحلات مطار الإمام', 'title_en': 'Imam Airport Flights', 'link_url': 'https://ikac.ir/'},
         ]
-        for item_data in special_services:
-            _, created = HomePageSectionItem.objects.update_or_create(
-                section_type='SPECIAL_SERVICE',
-                order=item_data['order'],
-                defaults={
-                    'title_fa': item_data['title_fa'],
-                    'title_ar': item_data['title_ar'],
-                    'title_en': item_data['title_en'],
-                    'link_url': item_data['link_url'],
-                    'is_active': True,
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created SPECIAL_SERVICE order {item_data['order']}"))
+        self._create_items_only('SPECIAL_SERVICE', special_services)
 
         experience_items = [
             {'order': 1, 'title_fa': 'ثبت شکایات', 'title_ar': 'تسجيل الشكاوى', 'title_en': 'Complaints', 'link_url': '/survey'},
@@ -127,35 +119,15 @@ class Command(BaseCommand):
             {'order': 4, 'title_fa': 'پروازهای فرودگاه امام خمینی (ره)', 'title_ar': 'رحلات مطار الإمام الخميني', 'title_en': 'Imam Khomeini Airport Flights', 'link_url': 'https://ikac.ir/'},
             {'order': 5, 'title_fa': 'ایران شناسی', 'title_ar': 'إيرانولوجيا', 'title_en': 'Iranology', 'link_url': '/iranology'},
         ]
-        for item_data in experience_items:
-            _, created = HomePageSectionItem.objects.update_or_create(
-                section_type='EXPERIENCE',
-                order=item_data['order'],
-                defaults={
-                    'title_fa': item_data['title_fa'],
-                    'title_ar': item_data['title_ar'],
-                    'title_en': item_data['title_en'],
-                    'link_url': item_data['link_url'],
-                    'is_active': True,
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created EXPERIENCE order {item_data['order']}"))
+        self._create_items_only('EXPERIENCE', experience_items)
 
-        # Survey banner: one item for background image + button link
-        _, created = HomePageSectionItem.objects.update_or_create(
-            section_type='SURVEY',
-            order=1,
-            defaults={
-                'title_fa': 'بنر نظرسنجی',
-                'title_ar': 'بانر الاستبيان',
-                'title_en': 'Survey banner',
-                'link_url': '/membership',
-                'is_active': True,
-            }
-        )
-        if created:
-            self.stdout.write(self.style.SUCCESS('Created SURVEY item'))
+        self._create_items_only('SURVEY', [{
+            'order': 1,
+            'title_fa': 'بنر نظرسنجی',
+            'title_ar': 'بانر الاستبيان',
+            'title_en': 'Survey banner',
+            'link_url': '/membership',
+        }])
 
         faq_items = [
             {
@@ -213,22 +185,7 @@ class Command(BaseCommand):
                 'description_en': 'FAQ content for support',
             },
         ]
-        for item_data in faq_items:
-            _, created = HomePageSectionItem.objects.update_or_create(
-                section_type='FAQ',
-                order=item_data['order'],
-                defaults={
-                    'title_fa': item_data['title_fa'],
-                    'title_ar': item_data['title_ar'],
-                    'title_en': item_data['title_en'],
-                    'description_fa': item_data['description_fa'],
-                    'description_ar': item_data['description_ar'],
-                    'description_en': item_data['description_en'],
-                    'is_active': True,
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created FAQ order {item_data['order']}"))
+        self._create_items_only('FAQ', faq_items)
 
         popular_routes = [
             {
@@ -272,24 +229,26 @@ class Command(BaseCommand):
                 'link_url': '/flights/map',
             },
         ]
-        for item_data in popular_routes:
-            _, created = HomePageSectionItem.objects.update_or_create(
-                section_type='POPULAR_ROUTES',
-                order=item_data['order'],
-                defaults={
-                    'title_fa': item_data['title_fa'],
-                    'title_ar': item_data['title_ar'],
-                    'title_en': item_data['title_en'],
-                    'description_fa': item_data['description_fa'],
-                    'description_ar': item_data['description_ar'],
-                    'description_en': item_data['description_en'],
-                    'link_url': item_data['link_url'],
-                    'is_active': True,
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created POPULAR_ROUTES order {item_data['order']}"))
+        self._create_items_only('POPULAR_ROUTES', popular_routes)
 
         self.stdout.write(self.style.SUCCESS(
-            'Done. Upload images via admin (Hero Slider, section items, survey banner).'
+            'Done. Existing CMS rows left untouched; only missing defaults were created.'
         ))
+
+    def _create_items_only(self, section_type: str, items: list):
+        for item_data in items:
+            defaults = {k: v for k, v in item_data.items() if k != 'order'}
+            defaults['is_active'] = True
+            _, created = HomePageSectionItem.objects.get_or_create(
+                section_type=section_type,
+                order=item_data['order'],
+                defaults=defaults,
+            )
+            if created:
+                self.stdout.write(self.style.SUCCESS(
+                    f"Created {section_type} order {item_data['order']}"
+                ))
+            else:
+                self.stdout.write(
+                    f"Kept CMS item (admin-owned): {section_type}#{item_data['order']}"
+                )

@@ -5,8 +5,9 @@ Seed homepage defaults (Special Services + one-time Experience/FAQ brand images)
   python manage.py populate_site_defaults --force
   python manage.py populate_site_defaults --force-experience-faq
 
-Experience/FAQ brand images are applied once (marker file) so production gets the new
-assets, then admin can replace them freely without later deploys overwriting.
+Safe on every Docker / Runflare restart:
+  - Missing rows/images only
+  - Admin / limited-admin CMS edits are never overwritten unless --force
 """
 from pathlib import Path
 
@@ -174,6 +175,10 @@ class Command(BaseCommand):
         return path
 
     def _seed_special_services(self, force: bool):
+        """
+        Fill missing Special Service images only.
+        Never overwrite link_url / titles / admin-uploaded images unless --force.
+        """
         for order, meta in SPECIAL_SERVICES_BRAND.items():
             filename = meta["file"]
             path = self._open_home(filename)
@@ -184,13 +189,12 @@ class Command(BaseCommand):
             ).first()
             if not item:
                 continue
-            item.link_url = meta["link_url"]
-            item.is_active = True
+
             file_ok = False
             if item.image and not force:
                 try:
                     file_ok = item.image.storage.exists(item.image.name)
-                    # Refresh if still using legacy 11/22/33/44 assets
+                    # One-time migrate only known legacy placeholder filenames
                     if file_ok and Path(item.image.name).name in {
                         "11.png",
                         "22.png",
@@ -198,15 +202,20 @@ class Command(BaseCommand):
                         "44.png",
                     }:
                         file_ok = False
-                    if file_ok and not Path(item.image.name).name.startswith("svc-"):
-                        file_ok = False
                 except Exception:
                     file_ok = False
                 if file_ok:
-                    item.save(update_fields=["link_url", "is_active"])
+                    self.stdout.write(
+                        f"Kept CMS SPECIAL_SERVICE#{order} image (admin-owned)"
+                    )
                     continue
+
             with path.open("rb") as fh:
                 item.image.save(path.name, File(fh), save=False)
+            # Only fill empty link on first seed; never clobber admin edits
+            if force or not (item.link_url or "").strip():
+                item.link_url = meta["link_url"]
+            item.is_active = True
             item.save()
             self.stdout.write(self.style.SUCCESS(f"SPECIAL_SERVICE#{order} <- {filename}"))
 
@@ -284,7 +293,8 @@ class Command(BaseCommand):
 
         data = json.loads(MAG_FIXTURE.read_text(encoding="utf-8"))
         for cat in data.get("categories", []):
-            Category.objects.update_or_create(
+            # Create missing magazine categories only — do not overwrite admin edits
+            _, created = Category.objects.get_or_create(
                 slug=cat["slug"],
                 defaults={
                     "name": cat["name"],
@@ -293,6 +303,13 @@ class Command(BaseCommand):
                     "is_active": cat.get("is_active", True),
                 },
             )
+            if force and not created:
+                Category.objects.filter(slug=cat["slug"]).update(
+                    name=cat["name"],
+                    description=cat.get("description") or "",
+                    order=cat.get("order") or 0,
+                    is_active=cat.get("is_active", True),
+                )
         author = (
             User.objects.filter(is_superuser=True).order_by("id").first()
             or User.objects.order_by("id").first()
