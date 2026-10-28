@@ -225,14 +225,17 @@ class HeaderMenuImageViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
     def map(self, request):
         """
-        Return { \"flyWithNasim:0\": \"https://...\", ... } for active rows that have an image.
+        Return CMS overrides for header menu slots:
+          { "flyWithNasim:0": { "image_url": "...|null", "label_fa": "...", "label_en": "..." }, ... }
+
+        Includes rows even without an image so admin label edits still reach the SPA.
         """
         data = {}
         for row in self.get_queryset():
-            if not row.image:
-                continue
             serializer = self.get_serializer(row)
-            url = serializer.data.get('image_url')
-            if url:
-                data[f'{row.menu_key}:{row.item_key}'] = url
+            data[f'{row.menu_key}:{row.item_key}'] = {
+                'image_url': serializer.data.get('image_url'),
+                'label_fa': (row.label_fa or '').strip(),
+                'label_en': (row.label_en or '').strip(),
+            }
         return Response(data)

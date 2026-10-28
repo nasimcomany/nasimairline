@@ -38,7 +38,7 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
-import galleryService from '../../services/galleryService';
+import galleryService, { HeaderMenuCmsSlot } from '../../services/galleryService';
 import AuthModal from '../Auth/AuthModal';
 import StaffLoginModal from '../Auth/StaffLoginModal';
 
@@ -53,7 +53,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [hoveredSubItem, setHoveredSubItem] = useState<{key: string, index: number} | null>(null);
   const [hoveredNestedPath, setHoveredNestedPath] = useState<number[]>([]); // e.g. [2] for مسافرین ویژه, [2,1] for درخواست ولیچر
-  const [cmsMenuImages, setCmsMenuImages] = useState<Record<string, string>>({});
+  const [cmsMenuSlots, setCmsMenuSlots] = useState<Record<string, HeaderMenuCmsSlot>>({});
   const [selectedDestinationIndex, setSelectedDestinationIndex] = useState<number | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
@@ -120,11 +120,11 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return null; // index 1 (fleet) and 5 (magazine) navigate, no modal
   };
 
-  // CMS overrides for header menu photos (admin → HeaderMenuImage)
+  // CMS overrides for header menu photos + labels (admin → HeaderMenuImage)
   useEffect(() => {
     let cancelled = false;
     galleryService.getHeaderMenuImages().then((map) => {
-      if (!cancelled) setCmsMenuImages(map || {});
+      if (!cancelled) setCmsMenuSlots(map || {});
     });
     return () => {
       cancelled = true;
@@ -132,8 +132,22 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   }, []);
 
   const resolveMenuImage = (menuKey: string, itemKey: string, fallback: string) => {
-    const cms = cmsMenuImages[`${menuKey}:${itemKey}`];
-    return cms || fallback;
+    const cms = cmsMenuSlots[`${menuKey}:${itemKey}`];
+    return (cms?.image_url && String(cms.image_url).trim()) || fallback;
+  };
+
+  /** Prefer admin label_fa / label_en when set; otherwise keep built-in translation. */
+  const resolveMenuLabel = (menuKey: string, itemKey: string, fallback: string) => {
+    const cms = cmsMenuSlots[`${menuKey}:${itemKey}`];
+    if (!cms) return fallback;
+    if (language === 'en') {
+      const en = (cms.label_en || '').trim();
+      if (en) return en;
+    }
+    const fa = (cms.label_fa || '').trim();
+    if (fa) return fa;
+    const en = (cms.label_en || '').trim();
+    return en || fallback;
   };
 
   // Built-in defaults — used when CMS has no uploaded image for that slot
@@ -220,14 +234,14 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     
     const index = subItemIndex !== undefined ? subItemIndex : 0;
     const base = destinationData[index] || destinationData[0];
-    return base.map((destination, cellIdx) => ({
-      ...destination,
-      image: resolveMenuImage(
-        'wherewefly',
-        `dest.${index}.${cellIdx}`,
-        destination.image,
-      ),
-    }));
+    return base.map((destination, cellIdx) => {
+      const itemKey = `dest.${index}.${cellIdx}`;
+      return {
+        ...destination,
+        name: resolveMenuLabel('wherewefly', itemKey, destination.name),
+        image: resolveMenuImage('wherewefly', itemKey, destination.image),
+      };
+    });
   };
 
   type DropdownSubItem = { label: string; path: string; children?: DropdownSubItem[] };
@@ -237,25 +251,25 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.flyWithNasim') || 'رزرو',
       path: '#',
       dropdown: [
-        { label: t('nav.checkInTime') || 'زمان مراجعه و پذیرش', path: '#' },
-        { label: t('nav.unacceptablePassengers') || 'مسافرین غیر قابل پذیرش', path: '#' },
+        { label: resolveMenuLabel('flyWithNasim', '0', t('nav.checkInTime') || 'زمان مراجعه و پذیرش'), path: '#' },
+        { label: resolveMenuLabel('flyWithNasim', '1', t('nav.unacceptablePassengers') || 'مسافرین غیر قابل پذیرش'), path: '#' },
         {
-          label: t('nav.specialPassengers') || 'مسافرین ویژه',
+          label: resolveMenuLabel('flyWithNasim', '2', t('nav.specialPassengers') || 'مسافرین ویژه'),
           path: '#',
           children: [
-            { label: t('nav.seatSelection') || 'انتخاب صندلی', path: '/#search-form' },
-            { label: t('nav.wheelchairRequest') || 'درخواست ولیچر', path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '2.0', t('nav.seatSelection') || 'انتخاب صندلی'), path: '/#search-form' },
+            { label: resolveMenuLabel('flyWithNasim', '2.1', t('nav.wheelchairRequest') || 'درخواست ولیچر'), path: '#' },
           ]
         },
-        { label: t('nav.refund') || 'استرداد', path: '#' },
+        { label: resolveMenuLabel('flyWithNasim', '3', t('nav.refund') || 'استرداد'), path: '#' },
         {
-          label: t('nav.baggage') || 'جامه دان',
+          label: resolveMenuLabel('flyWithNasim', '4', t('nav.baggage') || 'جامه دان'),
           path: '#',
           children: [
-            { label: t('nav.passengerBaggage') || 'بار همراه مسافر', path: '#' },
-            { label: t('nav.carryOnAcceptance') || 'پذیرش بار همراه', path: '#' },
-            { label: t('nav.prohibitedItems') || 'اقلام ممنوعه', path: '#' },
-            { label: t('nav.excessBaggage') || 'اضافه بار', path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '4.0', t('nav.passengerBaggage') || 'بار همراه مسافر'), path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '4.1', t('nav.carryOnAcceptance') || 'پذیرش بار همراه'), path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '4.2', t('nav.prohibitedItems') || 'اقلام ممنوعه'), path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '4.3', t('nav.excessBaggage') || 'اضافه بار'), path: '#' },
           ]
         },
       ]
@@ -265,9 +279,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.flightDestinations') || 'مقاصد',
       path: '#',
       dropdown: [
-        { label: t('nav.domestic') || 'داخلی', path: '/flights/map' },
-        { label: t('nav.international') || 'خارجی', path: '#' },
-        { label: t('nav.allDestinations') || 'همه مقاصد', path: '/flights/map' },
+        { label: resolveMenuLabel('wherewefly', '0', t('nav.domestic') || 'داخلی'), path: '/flights/map' },
+        { label: resolveMenuLabel('wherewefly', '1', t('nav.international') || 'خارجی'), path: '#' },
+        { label: resolveMenuLabel('wherewefly', '2', t('nav.allDestinations') || 'همه مقاصد'), path: '/flights/map' },
       ]
     },
     {
@@ -275,13 +289,13 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.about') || 'ارتباط با ما',
       path: '#',
       dropdown: [
-        { label: t('nav.nasimHistory') || 'تاریخچه نسیم', path: '#' },
-        { label: t('nav.airlineFleet') || 'ناوگان هوایی', path: '/flights/map' },
-        { label: t('nav.contactUs') || 'تماس با ما', path: '#' },
-        { label: t('nav.cooperationRequest') || 'درخواست همکاری', path: '#' },
-        { label: t('nav.nasimTraining') || 'آموزش نسیم', path: '#' },
-        { label: t('nav.nasimMagazine') || 'مجله نسیم', path: '/magazine' },
-        { label: t('nav.safetyHazardReport') || 'گزارش مخاطرات ایمنی (SHOR)', path: '/safety-report/safety' },
+        { label: resolveMenuLabel('about', '0', t('nav.nasimHistory') || 'تاریخچه نسیم'), path: '#' },
+        { label: resolveMenuLabel('about', '1', t('nav.airlineFleet') || 'ناوگان هوایی'), path: '/flights/map' },
+        { label: resolveMenuLabel('about', '2', t('nav.contactUs') || 'تماس با ما'), path: '#' },
+        { label: resolveMenuLabel('about', '3', t('nav.cooperationRequest') || 'درخواست همکاری'), path: '#' },
+        { label: resolveMenuLabel('about', '4', t('nav.nasimTraining') || 'آموزش نسیم'), path: '#' },
+        { label: resolveMenuLabel('about', '5', t('nav.nasimMagazine') || 'مجله نسیم'), path: '/magazine' },
+        { label: resolveMenuLabel('about', '6', t('nav.safetyHazardReport') || 'گزارش مخاطرات ایمنی (SHOR)'), path: '/safety-report/safety' },
       ]
     },
   ];

@@ -115,13 +115,32 @@ export const getHomePageSectionConfigs = async (): Promise<Record<string, HomePa
   }
 };
 
+/** CMS override for one header menu slot (image and/or labels) */
+export type HeaderMenuCmsSlot = {
+  image_url?: string | null;
+  label_fa?: string;
+  label_en?: string;
+};
+
 /**
- * Active header mega-menu image overrides keyed as "menuKey:itemKey"
+ * Active header mega-menu CMS overrides keyed as "menuKey:itemKey"
+ * (images + admin labels). Supports legacy string-only map responses.
  */
-export const getHeaderMenuImages = async (): Promise<Record<string, string>> => {
+export const getHeaderMenuImages = async (): Promise<Record<string, HeaderMenuCmsSlot>> => {
   try {
-    const response = await api.get<Record<string, string>>('/gallery/header-menu-images/map/');
-    return response.data || {};
+    const response = await api.get<Record<string, HeaderMenuCmsSlot | string>>(
+      '/gallery/header-menu-images/map/'
+    );
+    const raw = response.data || {};
+    const normalized: Record<string, HeaderMenuCmsSlot> = {};
+    Object.entries(raw).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        normalized[key] = { image_url: value };
+      } else if (value && typeof value === 'object') {
+        normalized[key] = value;
+      }
+    });
+    return normalized;
   } catch (error) {
     console.error('Error fetching header menu images:', error);
     return {};
