@@ -479,10 +479,13 @@ COMPLAINT_NOTIFICATION_EMAILS = [
 if not COMPLAINT_NOTIFICATION_EMAILS:
     COMPLAINT_NOTIFICATION_EMAILS = ['grifindorekamyar@gmail.com', 'info@nasimair.com']
 
-# Survey Form — فقط این لیست. پیش‌فرض: همان شکایت (info@nasimair.com)
+# Survey Form — فقط این لیست (بدون ALWAYS_NOTIFY). پیش‌فرض: همان شکایت
 SURVEY_NOTIFICATION_EMAILS = [
     email.strip() for email in
-    os.environ.get('SURVEY_NOTIFICATION_EMAILS', 'info@nasimair.com').split(',')
+    os.environ.get(
+        'SURVEY_NOTIFICATION_EMAILS',
+        'grifindorekamyar@gmail.com,info@nasimair.com',
+    ).split(',')
     if email.strip()
 ]
 if not SURVEY_NOTIFICATION_EMAILS:
