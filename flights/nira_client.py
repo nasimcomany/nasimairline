@@ -8,7 +8,7 @@ import requests
 import logging
 from typing import Dict, List, Optional, Any, Tuple
 from django.conf import settings
-from datetime import datetime
+from datetime import datetime, timedelta
 from persiantools.jdatetime import JalaliDate
 from cachetools import TTLCache
 import hashlib
@@ -189,6 +189,216 @@ class NiraClient:
         out_data['NRSRoutesApp'] = cleaned
         out['data'] = out_data
         return out
+
+    def _encode_office_pass(self) -> str:
+        import base64
+        now = datetime.now()
+        pattern = f"{self.office_user}_{now.strftime('%Y-%m-%d %H:%M:%S')}"
+        return base64.b64encode(pattern.encode('utf-8')).decode('utf-8')
+
+    @staticmethod
+    def _is_test_airport_code(code: str) -> bool:
+        return str(code or '').strip().upper() in {'UGT', 'TTQ'}
+
+    def _strip_test_schedule_flights(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        if not result.get('success'):
+            return result
+        data = result.get('data')
+        if not isinstance(data, dict):
+            return result
+        rows = data.get('NRSFlights')
+        if not isinstance(rows, list):
+            return result
+        cleaned = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            origin = str(row.get('Origin') or '').strip().upper()
+            dest = str(row.get('Destination') or '').strip().upper()
+            if self._is_test_airport_code(origin) or self._is_test_airport_code(dest):
+                continue
+            cleaned.append(row)
+        if len(cleaned) == len(rows):
+            return result
+        out = dict(result)
+        out_data = dict(data)
+        out_data['NRSFlights'] = cleaned
+        out['data'] = out_data
+        return out
+
+    def get_flights_in_range(
+        self,
+        from_date: datetime,
+        to_date: datetime,
+        use_cache: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        All Nasim scheduled flights in a date range (Nira ADVANCED doc).
+
+        GET ws1/NRSCWS.jsp?ModuleType=SP&ModuleName=Flights&FromDate=&ToDate=
+        Response: { "NRSFlights": [ { Origin, Destination, DepartureDateTime, FlightNo }, ... ] }
+        """
+        from nasim.cache_utils import cache_get, cache_key as shared_cache_key
+
+        from_s = from_date.strftime('%Y-%m-%d')
+        to_s = to_date.strftime('%Y-%m-%d')
+        shared_key = shared_cache_key('nira_flights', from_s, to_s)
+        local_key = self._generate_cache_key('get_flights_in_range', from_date=from_s, to_date=to_s)
+
+        if use_cache:
+            shared = cache_get(shared_key)
+            if shared and isinstance(shared, dict):
+                return self._strip_test_schedule_flights(shared)
+            if local_key in self._routes_cache:
+                return self._strip_test_schedule_flights(self._routes_cache[local_key])
+
+        if not self.ws_url:
+            return {'success': False, 'error': 'Nira Web Service URL is not configured'}
+        if not self.office_user:
+            return {'success': False, 'error': 'Nira Office credentials are not configured'}
+
+        def _fetch() -> Dict[str, Any]:
+            params = {
+                'ModuleType': 'SP',
+                'ModuleName': 'Flights',
+                'FromDate': from_s,
+                'ToDate': to_s,
+                'OfficeUser': self.office_user,
+                'OfficePass': self._encode_office_pass(),
+            }
+            try:
+                response = self._http_get(self.ws_url, params=params)
+                if response.status_code != 200:
+                    return {
+                        'success': False,
+                        'error': f'API returned status code {response.status_code}',
+                        'status_code': response.status_code,
+                        'response': (response.text or '')[:500],
+                    }
+                text = (response.text or '').strip()
+                if text == 'SIGN':
+                    return {
+                        'success': False,
+                        'error': 'Authentication failed - OfficePass might be incorrect or expired.',
+                        'status_code': response.status_code,
+                    }
+                try:
+                    data = response.json()
+                except ValueError:
+                    return {
+                        'success': False,
+                        'error': 'Invalid JSON from Nira Flights module',
+                        'response': text[:500],
+                    }
+                if isinstance(data, str) and data.strip() == 'SIGN':
+                    return {
+                        'success': False,
+                        'error': 'Authentication failed - OfficePass might be incorrect or expired.',
+                    }
+                # Normalize list under NRSFlights
+                if isinstance(data, list):
+                    data = {'NRSFlights': data}
+                elif isinstance(data, dict) and 'NRSFlights' not in data:
+                    # Some tenants nest differently
+                    for key in ('Flights', 'flights', 'Data'):
+                        if isinstance(data.get(key), list):
+                            data = {'NRSFlights': data[key]}
+                            break
+                result = {
+                    'success': True,
+                    'data': data if isinstance(data, dict) else {'NRSFlights': []},
+                    'status_code': response.status_code,
+                    'from_date': from_s,
+                    'to_date': to_s,
+                }
+                self._routes_cache[local_key] = result
+                self._store_fresh_and_stale(shared_key, result, self.routes_cache_ttl)
+                return self._strip_test_schedule_flights(result)
+            except requests.exceptions.Timeout:
+                return {
+                    'success': False,
+                    'error': f'Request timeout - Nira Flights module ({self.timeout}s)',
+                }
+            except requests.exceptions.ConnectionError:
+                return {'success': False, 'error': 'Connection error - Could not connect to Nira API'}
+            except Exception as e:
+                logger.error('Error calling Nira Flights module: %s', e)
+                return {'success': False, 'error': f'Unexpected error: {e}'}
+
+        try:
+            result = nira_guarded(_fetch, coalesce_key=f'flights:{from_s}:{to_s}')
+        except (CircuitOpenError, OverloadedError) as exc:
+            stale = self._serve_stale(shared_key, type(exc).__name__)
+            if stale:
+                return self._strip_test_schedule_flights(stale)
+            return nira_soft_error(exc)
+
+        if not result.get('success'):
+            stale = self._serve_stale(shared_key, result.get('error') or 'nira_error')
+            if stale:
+                return self._strip_test_schedule_flights(stale)
+        return result
+
+    def get_route_network(self, days_ahead: int = 14) -> Dict[str, Any]:
+        """
+        Build origin/destination graph from ModuleName=Flights over [today, today+days].
+        Used so search + map see every Nasim OD that actually has scheduled flights.
+        """
+        days = max(1, min(int(days_ahead or 14), 30))
+        start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        end = start + timedelta(days=days)
+        schedule = self.get_flights_in_range(start, end)
+        if not schedule.get('success'):
+            return schedule
+
+        rows = []
+        data = schedule.get('data') or {}
+        if isinstance(data, dict):
+            rows = data.get('NRSFlights') or []
+        origins: Dict[str, Dict[str, str]] = {}
+        dest_map: Dict[str, Dict[str, Dict[str, str]]] = {}
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            o = str(row.get('Origin') or '').strip().upper()
+            d = str(row.get('Destination') or '').strip().upper()
+            if not o or not d or o == d:
+                continue
+            if o not in origins:
+                origins[o] = {
+                    'CITY': o,
+                    'CITYNAME_FA': o,
+                    'CITYNAME_EN': o,
+                    'isDomestic': '1',
+                }
+            if d not in origins:
+                origins[d] = {
+                    'CITY': d,
+                    'CITYNAME_FA': d,
+                    'CITYNAME_EN': d,
+                    'isDomestic': '1',
+                }
+            dest_map.setdefault(o, {})
+            dest_map[o][d] = {
+                'CITY': d,
+                'CITYNAME_FA': d,
+                'CITYNAME_EN': d,
+                'isDomestic': '1',
+            }
+
+        return {
+            'success': True,
+            'data': {
+                'origins': list(origins.values()),
+                'destinations_by_origin': {
+                    origin: list(dests.values()) for origin, dests in dest_map.items()
+                },
+                'flight_count': len(rows),
+                'from_date': start.strftime('%Y-%m-%d'),
+                'to_date': end.strftime('%Y-%m-%d'),
+            },
+            'status_code': schedule.get('status_code', 200),
+        }
     
     def check_availability(
         self,
@@ -403,7 +613,8 @@ class NiraClient:
             'AdultNo': adult_qty,
             'ChildNo': child_qty,
             'InfantNo': infant_qty,
-            'isForeign': False,  # False for domestic flights, True for international
+            # Prefer domestic; Availability IBE path is primary. Fallback used when IBE returns HTML.
+            'isForeign': False,
         }
         
         # Add round trip fields if needed

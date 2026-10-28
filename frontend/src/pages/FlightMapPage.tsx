@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getOriginCities, getDestinations, checkAvailability, FlightAvailability, OriginCity, filterListedNiraFlights, getFlightSaleState, FlightSaleState } from '../services/niraApi';
+import { getOriginCities, getDestinations, checkAvailability, getScheduleFlights, FlightAvailability, OriginCity, filterListedNiraFlights, getFlightSaleState, FlightSaleState } from '../services/niraApi';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IranMap } from 'react-iran-map';
@@ -58,6 +58,14 @@ const cityCoordinates: Record<string, { x: number; y: number }> = {
   'TBS': { x: 180, y: 80 },
   'TAS': { x: 980, y: 200 },
   'DYU': { x: 980, y: 160 },
+  'YES': { x: 560, y: 420 }, // Yasuj / Kohgiluyeh
+  'JSK': { x: 720, y: 900 }, // Jask
+  'HDM': { x: 300, y: 380 }, // Hamadan
+  'ACZ': { x: 850, y: 700 }, // Zabol area
+  'PFQ': { x: 200, y: 200 }, // Parsabad
+  'GCH': { x: 320, y: 580 }, // Gachsaran
+  'RJN': { x: 680, y: 700 }, // Rafsanjan
+  'SYJ': { x: 620, y: 620 }, // Sirjan
 };
 
 interface Flight {
@@ -161,66 +169,29 @@ const FlightMapPage: React.FC = () => {
     fetchCities();
   }, []);
 
-  // فقط شهرهایی که برای تاریخ انتخاب‌شده حداقل یک پرواز دارند
-  // Concurrency capped — unbounded Promise.all was pinning Nira/Gunicorn under peak.
+  // Origins that have at least one Nasim flight on the selected date
+  // (Nira ModuleName=Flights — full timetable, not a 3-destination probe).
   useEffect(() => {
     let cancelled = false;
-    const ORIGIN_CONCURRENCY = 2;
-    const MAX_DEST_PROBES = 3;
 
     const scanOriginsForDate = async () => {
-      if (!cities.length) {
-        setOriginsWithFlights([]);
-        return;
-      }
       setScanningOrigins(true);
       const dateStr = toLocalDateISO(selectedDate);
-      const active: string[] = [];
-      const queue = cities.filter((c) => c.CITY && cityCoordinates[c.CITY]);
-
-      const probeOrigin = async (city: OriginCity) => {
-        const code = city.CITY;
-        if (!code || cancelled) return;
-        try {
-          const destinations = await getDestinations(code);
-          const destCodes = destinations
-            .map((d) => d.CITY)
-            .filter((c): c is string => Boolean(c && c !== code))
-            .slice(0, MAX_DEST_PROBES);
-          for (const dest of destCodes) {
-            if (cancelled) return;
-            const flights = await checkAvailability({
-              origin: code,
-              destination: dest,
-              departure_date: dateStr,
-              round_trip: false,
-              adult_qty: 1,
-              child_qty: 0,
-              infant_qty: 0,
-            });
-            if (filterListedNiraFlights(flights).length > 0) {
-              active.push(code);
-              return;
-            }
-          }
-        } catch {
-          /* ignore single-origin failures */
-        }
-      };
-
-      let next = 0;
-      const workers = Array.from({ length: Math.min(ORIGIN_CONCURRENCY, queue.length) }, async () => {
-        while (!cancelled) {
-          const idx = next++;
-          if (idx >= queue.length) break;
-          await probeOrigin(queue[idx]);
-        }
-      });
-      await Promise.all(workers);
-
-      if (!cancelled) {
+      try {
+        const schedule = await getScheduleFlights(dateStr, dateStr);
+        if (cancelled) return;
+        const active = Array.from(
+          new Set(
+            schedule
+              .map((row) => (row.Origin || '').toUpperCase())
+              .filter(Boolean)
+          )
+        );
         setOriginsWithFlights(active);
-        setScanningOrigins(false);
+      } catch {
+        if (!cancelled) setOriginsWithFlights([]);
+      } finally {
+        if (!cancelled) setScanningOrigins(false);
       }
     };
 
@@ -228,12 +199,12 @@ const FlightMapPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [cities, selectedDate]);
+  }, [selectedDate]);
 
-  const availableCityCodes = React.useMemo(
-    () => originsWithFlights.filter((code) => cityCoordinates[code]),
-    [originsWithFlights]
-  );
+  const availableCityCodes = React.useMemo(() => {
+    // Prefer known map coords; still show schedule origins with a center fallback
+    return originsWithFlights;
+  }, [originsWithFlights]);
 
   useEffect(() => {
     if (scanningOrigins) return;
@@ -301,47 +272,108 @@ const FlightMapPage: React.FC = () => {
 
     try {
       const departureDate = toLocalDateISO(date);
-      const destinations = await getDestinations(cityCode);
+      const originU = cityCode.toUpperCase();
+
+      // 1) Timetable for the day — every Nasim OD from this origin (Flights module)
+      const schedule = await getScheduleFlights(departureDate, departureDate);
       if (requestId !== loadRequestId.current) return;
 
-      const validDestinations = destinations
-        .map(d => d.CITY)
-        .filter(code => code && code !== cityCode);
-
-      // فوری مقصدها را روی نقشه نشان بده تا UI سریع حس شود
-      setDestinationCities(validDestinations);
-
-      const results = await Promise.all(
-        validDestinations.map(async (destCode) => {
-          try {
-            const flights = await checkAvailability({
-              origin: cityCode,
-              destination: destCode,
-              departure_date: departureDate,
-              round_trip: false,
-              adult_qty: 1,
-              child_qty: 0,
-              infant_qty: 0,
-            });
-            return { destCode, flights: filterListedNiraFlights(flights || []) };
-          } catch {
-            return { destCode, flights: [] as FlightAvailability[] };
-          }
-        })
+      const scheduleFromOrigin = schedule.filter(
+        (row) => (row.Origin || '').toUpperCase() === originU
+      );
+      const scheduleDests = Array.from(
+        new Set(
+          scheduleFromOrigin
+            .map((row) => (row.Destination || '').toUpperCase())
+            .filter((code) => code && code !== originU)
+        )
       );
 
+      // 2) Also merge RoutesApp destinations (names + any extra ODs)
+      let routeDests: string[] = [];
+      try {
+        const destinations = await getDestinations(cityCode);
+        if (requestId !== loadRequestId.current) return;
+        routeDests = destinations
+          .map((d) => (d.CITY || '').toUpperCase())
+          .filter((code) => code && code !== originU);
+      } catch {
+        /* schedule-only is enough */
+      }
+
+      const validDestinations = Array.from(new Set([...scheduleDests, ...routeDests]));
+      setDestinationCities(validDestinations);
+
+      // 3) Enrich with Availability (price/classes) for each OD — concurrency capped
+      const DEST_CONCURRENCY = 3;
+      const allFlights: FlightAvailability[] = [];
+      const availableDestinations: string[] = [];
+      let next = 0;
+      const workers = Array.from(
+        { length: Math.min(DEST_CONCURRENCY, Math.max(validDestinations.length, 1)) },
+        async () => {
+          while (requestId === loadRequestId.current) {
+            const idx = next++;
+            if (idx >= validDestinations.length) break;
+            const destCode = validDestinations[idx];
+            try {
+              const flights = await checkAvailability({
+                origin: cityCode,
+                destination: destCode,
+                departure_date: departureDate,
+                round_trip: false,
+                adult_qty: 1,
+                child_qty: 0,
+                infant_qty: 0,
+              });
+              const listed = filterListedNiraFlights(flights || []);
+              if (listed.length > 0) {
+                availableDestinations.push(destCode);
+                allFlights.push(...listed);
+              } else {
+                // Still show schedule-only legs so map lists every Nasim flight
+                const schedLegs = scheduleFromOrigin.filter(
+                  (row) => (row.Destination || '').toUpperCase() === destCode
+                );
+                if (schedLegs.length) {
+                  availableDestinations.push(destCode);
+                  schedLegs.forEach((leg) => {
+                    allFlights.push({
+                      Origin: leg.Origin,
+                      Destination: leg.Destination,
+                      DepartureDateTime: leg.DepartureDateTime,
+                      ArrivalDateTime: leg.DepartureDateTime,
+                      FlightNo: leg.FlightNo,
+                      FlightStatus: '',
+                      FlightDurationTime: '',
+                      ClassStatus: [],
+                      DepartureAirportName: leg.Origin,
+                      ArrivalAirportName: leg.Destination,
+                      AircarftType: '',
+                      AircarftTypeNameFA: '',
+                      AircarftTypeNameEN: '',
+                      Meal: '',
+                      DepartureTerminal: '',
+                      ArrivalTerminal: '',
+                      JourneyType: '',
+                      AirLineCode: 'NSN',
+                    });
+                  });
+                }
+              }
+            } catch {
+              /* skip OD */
+            }
+          }
+        }
+      );
+      await Promise.all(workers);
+
       if (requestId !== loadRequestId.current) return;
 
-      const availableDestinations: string[] = [];
-      const allFlights: FlightAvailability[] = [];
-      results.forEach(({ destCode, flights }) => {
-        if (flights.length > 0) {
-          availableDestinations.push(destCode);
-          allFlights.push(...flights);
-        }
-      });
-
-      setDestinationCities(availableDestinations);
+      setDestinationCities(
+        availableDestinations.length ? availableDestinations : scheduleDests
+      );
       setFlights(convertFlights(allFlights));
       setShowFlights(true);
     } catch (error) {

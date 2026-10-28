@@ -273,7 +273,7 @@ const HomePage: React.FC = () => {
         image,
         alt: item.title_fa,
         fallbackImage: branded,
-        linkUrl: '/flights/map',
+        linkUrl: (item.link_url || '').trim() || '/flights/map',
       };
     });
   }, [popularRouteItems]);
@@ -425,28 +425,14 @@ const HomePage: React.FC = () => {
 
   const surveyBanner = useMemo(() => {
     const survey = surveyItems[0];
-    const placeholderTitles = new Set([
-      'بنر نظرسنجی',
-      'Survey banner',
-      'بانر الاستبيان',
-    ]);
-    const itemTitle = pickLang(
-      survey?.title_fa,
-      survey?.title_ar,
-      survey?.title_en,
-      ''
-    ).trim();
-    const itemDesc = pickLang(
-      survey?.description_fa,
-      survey?.description_ar,
-      survey?.description_en,
-      ''
-    ).trim();
-    const title =
-      (itemTitle && !placeholderTitles.has(itemTitle) ? itemTitle : '') ||
-      pickConfig('SURVEY', 1, t('home.loyalty.enhanceTitle'));
-    const description =
-      itemDesc || pickConfig('SURVEY', 2, t('home.loyalty.fullDescription'));
+    // SURVEY banner copy is owned by HomePageSectionConfig (title1/2/3).
+    // Item is for image + link only; admin sync keeps config ↔ item aligned.
+    const title = pickConfig('SURVEY', 1, t('home.loyalty.enhanceTitle'));
+    const description = pickConfig(
+      'SURVEY',
+      2,
+      t('home.loyalty.fullDescription')
+    );
     const buttonLabel = pickConfig(
       'SURVEY',
       3,
@@ -1356,16 +1342,11 @@ const HomePage: React.FC = () => {
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              {(() => {
-              const config = sectionConfigs['SPECIAL_SERVICE'];
-              return config?.title1_fa || config?.title1_ar || config?.title1_en
-                ? (language === 'fa' ? config.title1_fa : language === 'ar' ? config.title1_ar : config.title1_en)
-                : t('home.services.specialTitle');
-            })()}
+              {pickConfig('SPECIAL_SERVICE', 1, t('home.services.specialTitle'))}
             </h2>
           </div>
 
-          {/* Special Services — defaults match localhost; CMS image/title/link win when set */}
+          {/* Special Services — CMS image/title/link win when set */}
           <div className="flex flex-row flex-nowrap items-stretch gap-3 sm:gap-5 max-w-full overflow-x-auto pb-1" style={{ justifyContent: 'center' }}>
             {(
               (() => {
@@ -1391,7 +1372,7 @@ const HomePage: React.FC = () => {
                 });
               })()
             ).map((item, idx) => {
-              const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
+              const title = pickLang(item.title_fa, item.title_ar, item.title_en, '');
               const defaultImgs = [
                 '/images/svc-network.jpg?v=7',
                 '/images/svc-weather.jpg?v=7',
@@ -1400,13 +1381,7 @@ const HomePage: React.FC = () => {
               ];
               const imgSrc = item.image_url || defaultImgs[idx] || defaultImgs[0];
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
-              const linkUrl = (() => {
-                const isNetwork = /شبکه پروازی|Flight Network|شبكة الطيران/i.test(title) || item.order === 1;
-                const isWeather = /آب و هوا|وضعیت آب و هوا|Weather|الطقس|حالة الطقس/i.test(title) || item.order === 2;
-                if (isNetwork) return '/flights/map';
-                if (isWeather) return 'weather';
-                return item.link_url || '';
-              })();
+              const linkUrl = item.link_url || '';
               return (
                 <div 
                   key={item.id || idx}
@@ -1711,18 +1686,27 @@ const HomePage: React.FC = () => {
                       background: 'linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.3))'
                     }}
                   >
-                    <div className="flex items-center justify-center gap-2">
-                      <span className={`text-white font-semibold text-base ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {card.from[language]}
-                      </span>
-                      <PaperAirplaneIcon className="w-4 h-4 text-white" />
-                      <span className={`text-white font-semibold text-base ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {card.to[language]}
-                      </span>
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-2">
+                        <span className={`text-white font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {card.from[language]}
+                        </span>
+                        <PaperAirplaneIcon className="w-4 h-4 text-white" />
+                        <span className={`text-white font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {card.to[language]}
+                        </span>
+                      </div>
+                      {card.price[language] ? (
+                        <span className={`text-white/90 text-sm ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {card.price[language]}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -1853,10 +1837,7 @@ const HomePage: React.FC = () => {
                 fontVariant: 'normal',
                 textDecoration: 'none'
               }}>
-                {(() => {
-                  const c = sectionConfigs['EXPERIENCE'];
-                  return c?.title1_fa || c?.title1_ar || c?.title1_en ? (language === 'fa' ? c.title1_fa : language === 'ar' ? c.title1_ar : c.title1_en) : t('home.experience.flyWithNasim');
-                })()}
+                {pickConfig('EXPERIENCE', 1, t('home.experience.flyWithNasim'))}
               </p>
               
               {/* Second line - Large */}
@@ -1875,10 +1856,7 @@ const HomePage: React.FC = () => {
                 justifyContent: 'center',
                 fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
               }}>
-                {(() => {
-                  const c = sectionConfigs['EXPERIENCE'];
-                  return c?.title2_fa || c?.title2_ar || c?.title2_en ? (language === 'fa' ? c.title2_fa : language === 'ar' ? c.title2_ar : c.title2_en) : t('home.experience.exploreNasim');
-                })()}
+                {pickConfig('EXPERIENCE', 2, t('home.experience.exploreNasim'))}
               </h2>
               
               {/* Third line - Small */}
@@ -1891,10 +1869,7 @@ const HomePage: React.FC = () => {
                 opacity: 1,
                 fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
               }}>
-                {(() => {
-                  const c = sectionConfigs['EXPERIENCE'];
-                  return c?.title3_fa || c?.title3_ar || c?.title3_en ? (language === 'fa' ? c.title3_fa : language === 'ar' ? c.title3_ar : c.title3_en) : t('home.experience.planUnforgettable');
-                })()}
+                {pickConfig('EXPERIENCE', 3, t('home.experience.planUnforgettable'))}
               </p>
             </div>
           </div>
@@ -1955,7 +1930,7 @@ const HomePage: React.FC = () => {
                             border: '0.5px solid #d1d5db',
                             boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                           }}
-                          onClick={() => handleSectionItemClick(idx === 0 ? '/survey' : idx === 1 ? '/tickets' : (item.link_url || ''))}
+                          onClick={() => handleSectionItemClick(item.link_url || '')}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)';
                             e.currentTarget.style.transform = 'translateY(-4px)';

@@ -123,11 +123,18 @@ class Command(BaseCommand):
 
         self._create_items_only('SURVEY', [{
             'order': 1,
-            'title_fa': 'بنر نظرسنجی',
-            'title_ar': 'بانر الاستبيان',
-            'title_en': 'Survey banner',
+            'title_fa': 'تجربه پرواز خود را بهتر کنید',
+            'title_ar': 'حسّن تجربة رحلتك',
+            'title_en': 'Enhance your flight experience',
+            'description_fa': (
+                'با شرکت در نظرسنجی یا عضویت در باشگاه مشتریان، خدمات بهتری دریافت کنید'
+            ),
+            'description_ar': 'عزّز تجربتك في السفر جوّاً مع "نسيم".',
+            'description_en': 'Enhance your flight experience with Nasim.',
             'link_url': '/membership',
         }])
+        # Heal old placeholder SURVEY titles so admin + site share the same copy
+        self._heal_survey_placeholder_from_config()
 
         faq_items = [
             {
@@ -252,3 +259,34 @@ class Command(BaseCommand):
                 self.stdout.write(
                     f"Kept CMS item (admin-owned): {section_type}#{item_data['order']}"
                 )
+
+    def _heal_survey_placeholder_from_config(self):
+        placeholders = {
+            'بنر نظرسنجی',
+            'Survey banner',
+            'بانر الاستبيان',
+        }
+        cfg = HomePageSectionConfig.objects.filter(section_type='SURVEY').first()
+        item = (
+            HomePageSectionItem.objects
+            .filter(section_type='SURVEY', order=1)
+            .first()
+        )
+        if not cfg or not item:
+            return
+        dirty = False
+        if (item.title_fa or '').strip() in placeholders and (cfg.title1_fa or '').strip():
+            item.title_fa = cfg.title1_fa
+            item.title_ar = cfg.title1_ar or item.title_ar
+            item.title_en = cfg.title1_en or item.title_en
+            dirty = True
+        if not (item.description_fa or '').strip() and (cfg.title2_fa or '').strip():
+            item.description_fa = cfg.title2_fa
+            item.description_ar = cfg.title2_ar or ''
+            item.description_en = cfg.title2_en or ''
+            dirty = True
+        if dirty:
+            item.save()
+            self.stdout.write(self.style.SUCCESS(
+                'Healed SURVEY item labels from section config'
+            ))

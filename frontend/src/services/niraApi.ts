@@ -252,6 +252,55 @@ export const getDestinations = async (origin: string): Promise<OriginCity[]> => 
   }
 };
 
+export interface ScheduleFlight {
+  Origin: string;
+  Destination: string;
+  DepartureDateTime: string;
+  FlightNo: string;
+}
+
+export interface ScheduleResponse {
+  success: boolean;
+  data: {
+    NRSFlights: ScheduleFlight[];
+  };
+  from_date?: string;
+  to_date?: string;
+  status_code?: number;
+  error?: string;
+}
+
+/**
+ * All Nasim flights in a date range (Nira ModuleName=Flights).
+ */
+export const getScheduleFlights = async (
+  fromDate: string,
+  toDate?: string
+): Promise<ScheduleFlight[]> => {
+  try {
+    const to = toDate || fromDate;
+    const response = await fetch(
+      `${API_BASE_URL}/flights/nira/schedule/?from_date=${encodeURIComponent(fromDate)}&to_date=${encodeURIComponent(to)}`
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data: ScheduleResponse = await response.json();
+    if (!data.success || !Array.isArray(data.data?.NRSFlights)) {
+      return [];
+    }
+    return data.data.NRSFlights.filter((row) => {
+      const o = (row.Origin || '').toUpperCase();
+      const d = (row.Destination || '').toUpperCase();
+      if (!o || !d || o === 'UGT' || o === 'TTQ' || d === 'UGT' || d === 'TTQ') return false;
+      return Boolean(row.FlightNo);
+    });
+  } catch (error) {
+    console.error('Error fetching Nira schedule flights:', error);
+    return [];
+  }
+};
+
 /**
  * Check flight availability
  */

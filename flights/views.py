@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta  # timedelta used by schedule range cap
 from .models import Airport, Aircraft, Flight
 from .serializers import (
     AirportSerializer,
@@ -314,24 +314,39 @@ class NiraAPIViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path='routes/origins')
     def get_origin_cities(self, request):
         """
-        Get list of origin cities from Nira Routes API
+        Get list of origin cities from Nira Routes API,
+        merged with ModuleName=Flights schedule so every active Nasim origin appears.
         
         GET /api/flights/nira/routes/origins/
         """
         result = self.nira_client.get_origin_cities()
         
         if result.get('success'):
+            result = self._merge_schedule_origins(result)
             return Response(result, status=status.HTTP_200_OK)
         if result.get('code') in ('NIRA_CIRCUIT_OPEN', 'NIRA_OVERLOADED'):
             response = Response(result, status=status.HTTP_503_SERVICE_UNAVAILABLE)
             response['Retry-After'] = str(int(result.get('retry_after') or 10))
             return response
+        # Still try schedule-only if RoutesApp failed
+        network = self.nira_client.get_route_network(days_ahead=14)
+        if network.get('success'):
+            origins = (network.get('data') or {}).get('origins') or []
+            return Response(
+                {
+                    'success': True,
+                    'data': {'NRSRoutesApp': origins},
+                    'status_code': 200,
+                    'source': 'flights_module',
+                },
+                status=status.HTTP_200_OK,
+            )
         return Response(result, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'], url_path='routes/destinations')
     def get_destinations(self, request):
         """
-        Get list of destinations from a specific origin
+        Get list of destinations from a specific origin (RoutesApp + Flights schedule).
         
         GET /api/flights/nira/routes/destinations/?origin=THR
         
@@ -351,10 +366,117 @@ class NiraAPIViewSet(viewsets.ViewSet):
         
         result = self.nira_client.get_destinations(origin=origin)
         
-        if result['success']:
+        if result.get('success'):
+            result = self._merge_schedule_destinations(result, origin)
             return Response(result, status=status.HTTP_200_OK)
-        else:
+
+        network = self.nira_client.get_route_network(days_ahead=14)
+        if network.get('success'):
+            by_origin = (network.get('data') or {}).get('destinations_by_origin') or {}
+            dests = by_origin.get(origin.upper()) or []
             return Response(
-                {'error': result.get('error', 'Unknown error')},
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    'success': True,
+                    'data': {'NRSRoutesApp': dests},
+                    'status_code': 200,
+                    'source': 'flights_module',
+                },
+                status=status.HTTP_200_OK,
             )
+
+        return Response(
+            {'error': result.get('error', 'Unknown error')},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(detail=False, methods=['get'], url_path='schedule')
+    def get_schedule(self, request):
+        """
+        All Nasim flights in a date range via Nira ModuleName=Flights.
+
+        GET /api/flights/nira/schedule/?from_date=YYYY-MM-DD&to_date=YYYY-MM-DD
+        Defaults: from_date=today, to_date=today (single-day timetable).
+        """
+        from_s = (request.query_params.get('from_date') or '').strip()
+        to_s = (request.query_params.get('to_date') or '').strip()
+        today = datetime.now().date()
+        try:
+            from_d = datetime.strptime(from_s, '%Y-%m-%d') if from_s else datetime.combine(today, datetime.min.time())
+            to_d = datetime.strptime(to_s, '%Y-%m-%d') if to_s else from_d
+        except ValueError:
+            return Response(
+                {'success': False, 'error': 'from_date/to_date must be YYYY-MM-DD'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if to_d < from_d:
+            from_d, to_d = to_d, from_d
+        # Cap range to protect Nira / workers
+        if (to_d - from_d).days > 30:
+            to_d = from_d + timedelta(days=30)
+
+        result = self.nira_client.get_flights_in_range(from_d, to_d)
+        if result.get('success'):
+            return Response(result, status=status.HTTP_200_OK)
+        if result.get('code') in ('NIRA_CIRCUIT_OPEN', 'NIRA_OVERLOADED'):
+            response = Response(result, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            response['Retry-After'] = str(int(result.get('retry_after') or 10))
+            return response
+        return Response(result, status=status.HTTP_400_BAD_REQUEST)
+
+    def _merge_schedule_origins(self, routes_result: dict) -> dict:
+        """Union RoutesApp origins with cities that appear in the Flights schedule."""
+        try:
+            network = self.nira_client.get_route_network(days_ahead=14)
+            if not network.get('success'):
+                return routes_result
+            data = routes_result.get('data')
+            if not isinstance(data, dict):
+                return routes_result
+            existing = data.get('NRSRoutesApp')
+            if not isinstance(existing, list):
+                existing = []
+            by_code = {}
+            for row in existing:
+                if isinstance(row, dict) and row.get('CITY'):
+                    by_code[str(row['CITY']).upper()] = row
+            for row in (network.get('data') or {}).get('origins') or []:
+                code = str((row or {}).get('CITY') or '').upper()
+                if code and code not in by_code:
+                    by_code[code] = row
+            out = dict(routes_result)
+            out_data = dict(data)
+            out_data['NRSRoutesApp'] = list(by_code.values())
+            out['data'] = out_data
+            out['merged_from_schedule'] = True
+            return out
+        except Exception:
+            return routes_result
+
+    def _merge_schedule_destinations(self, routes_result: dict, origin: str) -> dict:
+        try:
+            network = self.nira_client.get_route_network(days_ahead=14)
+            if not network.get('success'):
+                return routes_result
+            data = routes_result.get('data')
+            if not isinstance(data, dict):
+                return routes_result
+            existing = data.get('NRSRoutesApp')
+            if not isinstance(existing, list):
+                existing = []
+            by_code = {}
+            for row in existing:
+                if isinstance(row, dict) and row.get('CITY'):
+                    by_code[str(row['CITY']).upper()] = row
+            dests = ((network.get('data') or {}).get('destinations_by_origin') or {}).get(origin.upper()) or []
+            for row in dests:
+                code = str((row or {}).get('CITY') or '').upper()
+                if code and code not in by_code:
+                    by_code[code] = row
+            out = dict(routes_result)
+            out_data = dict(data)
+            out_data['NRSRoutesApp'] = list(by_code.values())
+            out['data'] = out_data
+            out['merged_from_schedule'] = True
+            return out
+        except Exception:
+            return routes_result

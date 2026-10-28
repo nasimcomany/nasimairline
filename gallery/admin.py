@@ -262,8 +262,10 @@ class HomePageSectionItemAdmin(admin.ModelAdmin):
             ),
             'description': (
                 'SPECIAL_SERVICE / EXPERIENCE: تصویر + عنوان + لینک. '
-                'SURVEY (بنر بزرگ صفحه اصلی): عنوان فارسی = تیتر بنر، '
-                'متن/توضیح فارسی = توضیح زیر تیتر، تصویر = پس‌زمینه بنر، لینک = مقصد دکمه. '
+                'SURVEY (بنر بزرگ): تصویر و لینک دکمه را اینجا عوض کنید. '
+                'متن تیتر/توضیح/دکمه را از «تنظیمات عناوین بخش‌های صفحه اصلی» '
+                '(نوع SURVEY، خط ۱ و ۲ و ۳) ویرایش کنید — یا همین‌جا عنوان و توضیح را '
+                'عوض کنید تا خودکار همان‌جا هم ذخیره شود. '
                 'FAQ: عنوان زیر دایره + متن مودال در فیلد توضیح. '
                 'POPULAR_ROUTES: عنوان مسیر، توضیح (قیمت/تاریخ)، تصویر کارت.'
             ),
@@ -301,7 +303,7 @@ class HomePageSectionItemAdmin(admin.ModelAdmin):
         if not change:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
-        # Keep SURVEY banner config copy in sync with the item admins usually edit
+        # SURVEY item edits (title/description) push into the config the site reads
         if obj.section_type == 'SURVEY':
             from gallery.models import HomePageSectionConfig
             placeholder = {
@@ -343,8 +345,8 @@ class HomePageSectionConfigAdmin(admin.ModelAdmin):
                 'HERO: خط۱ عنوان اصلی، خط۲ زیرعنوان. '
                 'QUOTE: خط۱ متن فارسی/عربی، خط۲ متن انگلیسی کنار آن. '
                 'MEMBERSHIP: خط۱ عنوان، خط۲ توضیح، خط۳ متن دکمه. '
-                'SURVEY (بنر بزرگ): ترجیحاً از «آیتم‌های بخش صفحه اصلی» (نوع SURVEY) '
-                'عنوان/توضیح/تصویر را ویرایش کنید؛ خط۳ اینجا = متن دکمه. '
+                'SURVEY (بنر بزرگ صفحه اصلی): خط۱ = تیتر سفید، خط۲ = توضیح زیر تیتر، '
+                'خط۳ = متن دکمه. تصویر بنر را از «المان‌های بخش صفحه اصلی» (نوع SURVEY) عوض کنید. '
                 'FAQ / POPULAR_ROUTES / SPECIAL_SERVICE / EXPERIENCE: عناوین بخش.'
             ),
         }),
@@ -362,6 +364,35 @@ class HomePageSectionConfigAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        # Keep SURVEY item labels aligned so both admin screens show the same copy
+        if obj.section_type == 'SURVEY':
+            from gallery.models import HomePageSectionItem
+            item = (
+                HomePageSectionItem.objects
+                .filter(section_type='SURVEY', is_active=True)
+                .order_by('order', 'id')
+                .first()
+            )
+            if not item:
+                return
+            dirty = False
+            t1 = (obj.title1_fa or '').strip()
+            if t1:
+                item.title_fa = t1
+                item.title_ar = (obj.title1_ar or '').strip()
+                item.title_en = (obj.title1_en or '').strip()
+                dirty = True
+            t2 = (obj.title2_fa or '').strip()
+            if t2:
+                item.description_fa = t2
+                item.description_ar = (obj.title2_ar or '').strip()
+                item.description_en = (obj.title2_en or '').strip()
+                dirty = True
+            if dirty:
+                item.save()
 
 
 @admin.register(HeroSlider)
