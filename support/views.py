@@ -353,10 +353,12 @@ def submit_complaint_form(request):
     from .email_i18n import get_labels
     L = get_labels(lang, 'complaint')
 
-    recipient_list = merge_notification_emails(
-        getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', []),
-        'publicrelation@nasimair.com',
-    )
+    # شکایت فقط به COMPLAINT_NOTIFICATION_EMAILS (پیش‌فرض: info@nasimair.com)
+    recipient_list = [
+        e.strip()
+        for e in (getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None) or ['info@nasimair.com'])
+        if e and str(e).strip()
+    ]
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -458,8 +460,16 @@ def submit_survey_form(request):
     def lbl(v):
         return get_survey_label(v, lang)
 
-    base_list = getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', [])
-    recipient_list = merge_notification_emails(base_list, 'publicrelation@nasimair.com')
+    # نظرسنجی فقط به SURVEY_NOTIFICATION_EMAILS (پیش‌فرض: info@nasimair.com)
+    recipient_list = [
+        e.strip()
+        for e in (
+            getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None)
+            or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None)
+            or ['info@nasimair.com']
+        )
+        if e and str(e).strip()
+    ]
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL

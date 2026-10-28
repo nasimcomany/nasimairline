@@ -467,26 +467,26 @@ ALWAYS_NOTIFY_EMAILS = [
     if email.strip()
 ]
 
-# Complaint Form - ایمیل‌های دریافت اعلان شکایت (جدا شده با کاما)
+# Complaint / انتقادات و پیشنهادات — فقط این لیست (بدون ALWAYS_NOTIFY)
 COMPLAINT_NOTIFICATION_EMAILS = [
-    email.strip() for email in 
+    email.strip() for email in
     os.environ.get(
         'COMPLAINT_NOTIFICATION_EMAILS',
-        'grifindorekamyar@gmail.com,info@nasimair.com,support@nasimair.com',
+        'grifindorekamyar@gmail.com,info@nasimair.com',
     ).split(',')
     if email.strip()
 ]
 if not COMPLAINT_NOTIFICATION_EMAILS:
-    COMPLAINT_NOTIFICATION_EMAILS = list(ALWAYS_NOTIFY_EMAILS) or ['grifindorekamyar@gmail.com']
+    COMPLAINT_NOTIFICATION_EMAILS = ['grifindorekamyar@gmail.com', 'info@nasimair.com']
 
-# Survey Form - ایمیل‌های دریافت اعلان نظرسنجی (پیش‌فرض: همان شکایت)
+# Survey Form — فقط این لیست. پیش‌فرض: همان شکایت (info@nasimair.com)
 SURVEY_NOTIFICATION_EMAILS = [
     email.strip() for email in
-    os.environ.get('SURVEY_NOTIFICATION_EMAILS', '').split(',')
+    os.environ.get('SURVEY_NOTIFICATION_EMAILS', 'info@nasimair.com').split(',')
     if email.strip()
 ]
 if not SURVEY_NOTIFICATION_EMAILS:
-    SURVEY_NOTIFICATION_EMAILS = COMPLAINT_NOTIFICATION_EMAILS
+    SURVEY_NOTIFICATION_EMAILS = list(COMPLAINT_NOTIFICATION_EMAILS)
 
 # Chat widget — ایمیل اعلان پیام کاربر (علاوه بر تلگرام/واتساپ)
 CHAT_NOTIFICATION_EMAILS = [
