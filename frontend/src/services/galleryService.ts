@@ -124,20 +124,34 @@ export type HeaderMenuCmsSlot = {
 
 /**
  * Active header mega-menu CMS overrides keyed as "menuKey:itemKey"
- * (images + admin labels). Supports legacy string-only map responses.
+ * (images + admin labels).
+ *
+ * Supports:
+ * - New API: { _v2: { "menu:key": { image_url, label_fa, label_en } }, "menu:key": "url", ... }
+ * - Mid API: flat object slots
+ * - Legacy API: flat string URL map
  */
 export const getHeaderMenuImages = async (): Promise<Record<string, HeaderMenuCmsSlot>> => {
   try {
-    const response = await api.get<Record<string, HeaderMenuCmsSlot | string>>(
-      '/gallery/header-menu-images/map/'
-    );
+    const response = await api.get<Record<string, any>>('/gallery/header-menu-images/map/');
     const raw = response.data || {};
     const normalized: Record<string, HeaderMenuCmsSlot> = {};
-    Object.entries(raw).forEach(([key, value]) => {
+
+    const source =
+      raw._v2 && typeof raw._v2 === 'object'
+        ? (raw._v2 as Record<string, HeaderMenuCmsSlot | string>)
+        : raw;
+
+    Object.entries(source).forEach(([key, value]) => {
+      if (key === '_v2') return;
       if (typeof value === 'string') {
         normalized[key] = { image_url: value };
       } else if (value && typeof value === 'object') {
-        normalized[key] = value;
+        normalized[key] = {
+          image_url: value.image_url ?? null,
+          label_fa: value.label_fa || '',
+          label_en: value.label_en || '',
+        };
       }
     });
     return normalized;

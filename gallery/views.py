@@ -225,17 +225,28 @@ class HeaderMenuImageViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
     def map(self, request):
         """
-        Return CMS overrides for header menu slots:
-          { "flyWithNasim:0": { "image_url": "...|null", "label_fa": "...", "label_en": "..." }, ... }
+        Header CMS map — backward compatible with older SPA builds.
 
-        Includes rows even without an image so admin label edits still reach the SPA.
+        Legacy (top-level string URLs, only when an image exists):
+          { "flyWithNasim:0": "https://.../media/..." }
+
+        Rich payload for current SPA (labels + optional image):
+          { "_v2": { "flyWithNasim:0": { "image_url": "...|null", "label_fa": "...", "label_en": "..." }, ... } }
+
+        Older clients ignore unknown "_v2" and keep using string URLs / local fallbacks.
         """
-        data = {}
+        legacy: dict = {}
+        v2: dict = {}
         for row in self.get_queryset():
+            key = f'{row.menu_key}:{row.item_key}'
             serializer = self.get_serializer(row)
-            data[f'{row.menu_key}:{row.item_key}'] = {
-                'image_url': serializer.data.get('image_url'),
+            url = serializer.data.get('image_url')
+            v2[key] = {
+                'image_url': url,
                 'label_fa': (row.label_fa or '').strip(),
                 'label_en': (row.label_en or '').strip(),
             }
-        return Response(data)
+            if url:
+                legacy[key] = url
+        legacy['_v2'] = v2
+        return Response(legacy)
