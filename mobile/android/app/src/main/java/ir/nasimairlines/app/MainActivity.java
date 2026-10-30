@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                showLoading("در حال بارگذاری سایت نسیم…");
+                showLoading("در حال بارگذاری اپلیکیشن نسیم…");
             }
 
             @Override
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadSite() {
-        showLoading("در حال بارگذاری سایت نسیم…");
+        showLoading("در حال بارگذاری اپلیکیشن نسیم…");
         webView.loadUrl(START_URL);
     }
 
