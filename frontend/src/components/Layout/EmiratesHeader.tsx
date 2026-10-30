@@ -35,7 +35,8 @@ import {
   WalletIcon,
   PhoneIcon,
   EnvelopeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import galleryService, { HeaderMenuCmsSlot } from '../../services/galleryService';
@@ -1165,6 +1166,29 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               </>
             )}
 
+            {/* Android APK download */}
+            <a
+              href="/downloads/nasim-airlines.apk"
+              download="nasim-airlines.apk"
+              className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
+              style={{
+                ...navBoldStyle,
+                borderBottom: '2px solid transparent',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderBottomColor = '#000';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderBottomColor = 'transparent';
+              }}
+              title={t('nav.androidApp') || 'اپ اندروید'}
+            >
+              <DevicePhoneMobileIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />
+              {t('nav.androidApp') || 'اپ اندروید'}
+            </a>
+
             {/* Language Dropdown - at end of header */}
             <div 
               className="relative"
@@ -1286,6 +1310,15 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 ))}
                 
                 <div className="border-t border-gray-700 pt-4 mt-4">
+                  <a
+                    href="/downloads/nasim-airlines.apk"
+                    download="nasim-airlines.apk"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center gap-2 px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                  >
+                    <DevicePhoneMobileIcon className="w-5 h-5" />
+                    {t('nav.androidApp') || 'اپ اندروید'}
+                  </a>
                   {isAuthenticated ? (
                     <button
                       onClick={() => {

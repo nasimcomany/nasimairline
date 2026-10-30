@@ -33,6 +33,7 @@ RUN test -f frontend/build/index.html \
          apple-touch-icon.png logo192.png logo512.png manifest.json index.html; do \
          if [ -f "frontend/build/$f" ]; then cp -f "frontend/build/$f" "staticfiles/$f"; fi; \
        done \
+    && if [ -d frontend/build/downloads ]; then cp -a frontend/build/downloads staticfiles/; fi \
     && mkdir -p /data/media
 
 EXPOSE 8000

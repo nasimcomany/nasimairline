@@ -78,6 +78,14 @@ urlpatterns = [
     re_path(r'^images/(?P<path>.*)$', serve, {
         'document_root': os.path.join(settings.FRONTEND_BUILD_DIR, 'images') if os.path.exists(os.path.join(getattr(settings, 'FRONTEND_BUILD_DIR', ''), 'images')) else os.path.join(settings.BASE_DIR, 'frontend', 'public', 'images'),
     }),
+    # Android APK download (Cafe Bazaar / sideload)
+    re_path(r'^downloads/(?P<path>.*)$', serve, {
+        'document_root': (
+            os.path.join(settings.FRONTEND_BUILD_DIR, 'downloads')
+            if os.path.exists(os.path.join(getattr(settings, 'FRONTEND_BUILD_DIR', ''), 'downloads'))
+            else os.path.join(settings.BASE_DIR, 'frontend', 'public', 'downloads')
+        ),
+    }),
 ]
 
 # Media: django.conf.urls.static.static() is a no-op when DEBUG=False, so serve explicitly.
@@ -104,5 +112,5 @@ urlpatterns += [
 # Serve React app for all other routes (SPA)
 # This must be last to catch all unmatched routes
 urlpatterns += [
-    re_path(r'^(?!api|admin|limited-admin|ckeditor|media|static|healthz|robots\.txt|sitemap\.xml).*$', ReactAppView.as_view(), name='react-app'),
+    re_path(r'^(?!api|admin|limited-admin|ckeditor|media|static|downloads|healthz|robots\.txt|sitemap\.xml).*$', ReactAppView.as_view(), name='react-app'),
 ]
