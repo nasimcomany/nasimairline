@@ -7,6 +7,7 @@ import ChatWidget from './components/Chat/ChatWidget';
 import ScrollToTopButton from './components/ScrollToTop/ScrollToTopButton';
 import ScrollToTopOnNavigate from './components/ScrollToTop/ScrollToTopOnNavigate';
 import DisabledRoute from './components/DisabledRoute';
+import MaintenanceLock from './components/MaintenanceLock';
 import { ChatProvider } from './contexts/ChatContext';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -100,6 +101,7 @@ function App() {
               </Suspense>
               <ChatWidget />
               <ScrollToTopButton />
+              <MaintenanceLock />
             </div>
           </Router>
         </ChatProvider>
