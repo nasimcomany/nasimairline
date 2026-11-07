@@ -353,10 +353,13 @@ def submit_complaint_form(request):
     from .email_i18n import get_labels
     L = get_labels(lang, 'complaint')
 
-    # شکایت فقط به COMPLAINT_NOTIFICATION_EMAILS (پیش‌فرض: info@nasimair.com)
+    # شکایت: info + روابط عمومی (بدون ALWAYS_NOTIFY)
     recipient_list = [
         e.strip()
-        for e in (getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None) or ['info@nasimair.com'])
+        for e in (
+            getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None)
+            or ['grifindorekamyar@gmail.com', 'info@nasimairlines.ir', 'publicrelation@nasimair.com']
+        )
         if e and str(e).strip()
     ]
     if recipient_list:
@@ -460,13 +463,13 @@ def submit_survey_form(request):
     def lbl(v):
         return get_survey_label(v, lang)
 
-    # نظرسنجی فقط به SURVEY_NOTIFICATION_EMAILS (پیش‌فرض: info@nasimair.com)
+    # نظرسنجی: info + روابط عمومی (بدون ALWAYS_NOTIFY)
     recipient_list = [
         e.strip()
         for e in (
             getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None)
             or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None)
-            or ['info@nasimair.com']
+            or ['grifindorekamyar@gmail.com', 'info@nasimairlines.ir', 'publicrelation@nasimair.com']
         )
         if e and str(e).strip()
     ]
@@ -589,8 +592,15 @@ def submit_cabin_safety_form(request):
     def fmt_list(lst):
         return ', '.join(lst) if lst else '—'
 
-    base_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', [])
-    recipient_list = merge_notification_emails(base_list, 'safety@nasimair.com')
+    # گزارش ایمنی کابین: فقط safety@nasimair.com (بدون ALWAYS_NOTIFY)
+    recipient_list = [
+        e.strip()
+        for e in (
+            getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None)
+            or ['grifindorekamyar@gmail.com', 'safety@nasimair.com']
+        )
+        if e and str(e).strip()
+    ]
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL

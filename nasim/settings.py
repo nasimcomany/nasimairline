@@ -472,24 +472,40 @@ COMPLAINT_NOTIFICATION_EMAILS = [
     email.strip() for email in
     os.environ.get(
         'COMPLAINT_NOTIFICATION_EMAILS',
-        'grifindorekamyar@gmail.com,info@nasimair.com',
+        'grifindorekamyar@gmail.com,info@nasimairlines.ir,publicrelation@nasimair.com',
     ).split(',')
     if email.strip()
 ]
 if not COMPLAINT_NOTIFICATION_EMAILS:
-    COMPLAINT_NOTIFICATION_EMAILS = ['grifindorekamyar@gmail.com', 'info@nasimair.com']
+    COMPLAINT_NOTIFICATION_EMAILS = [
+        'grifindorekamyar@gmail.com',
+        'info@nasimairlines.ir',
+        'publicrelation@nasimair.com',
+    ]
 
-# Survey Form — فقط این لیست (بدون ALWAYS_NOTIFY). پیش‌فرض: همان شکایت
+# Survey Form — فقط این لیست (بدون ALWAYS_NOTIFY)
 SURVEY_NOTIFICATION_EMAILS = [
     email.strip() for email in
     os.environ.get(
         'SURVEY_NOTIFICATION_EMAILS',
-        'grifindorekamyar@gmail.com,info@nasimair.com',
+        'grifindorekamyar@gmail.com,info@nasimairlines.ir,publicrelation@nasimair.com',
     ).split(',')
     if email.strip()
 ]
 if not SURVEY_NOTIFICATION_EMAILS:
     SURVEY_NOTIFICATION_EMAILS = list(COMPLAINT_NOTIFICATION_EMAILS)
+
+# گزارش ایمنی کابین — safety + کپی مانیتورینگ (بدون info/PR و بدون ALWAYS_NOTIFY)
+CABIN_SAFETY_NOTIFICATION_EMAILS = [
+    email.strip() for email in
+    os.environ.get(
+        'CABIN_SAFETY_NOTIFICATION_EMAILS',
+        'grifindorekamyar@gmail.com,safety@nasimair.com',
+    ).split(',')
+    if email.strip()
+]
+if not CABIN_SAFETY_NOTIFICATION_EMAILS:
+    CABIN_SAFETY_NOTIFICATION_EMAILS = ['grifindorekamyar@gmail.com', 'safety@nasimair.com']
 
 # Chat widget — ایمیل اعلان پیام کاربر (علاوه بر تلگرام/واتساپ)
 CHAT_NOTIFICATION_EMAILS = [
