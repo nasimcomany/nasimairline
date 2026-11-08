@@ -664,6 +664,9 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+# Direct ticket sale is paused until the airline opens its own checkout.
+DIRECT_TICKET_SALES = env_bool('DIRECT_TICKET_SALES', False)
+
 BOOKING_HOLD_MINUTES = int(os.environ.get('BOOKING_HOLD_MINUTES', '15'))
 BOOKING_SOFT_HOLD_CAP = int(os.environ.get('BOOKING_SOFT_HOLD_CAP', '9'))
 

@@ -56,6 +56,14 @@ class BookingViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_staff:
             queryset = queryset.filter(user=self.request.user)
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        if not getattr(settings, 'DIRECT_TICKET_SALES', False):
+            return Response(
+                {'detail': 'فروش مستقیم بلیت فعلاً انجام نمی‌شود.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().create(request, *args, **kwargs)
     
     def perform_create(self, serializer):
         """Set user to current user when creating booking"""

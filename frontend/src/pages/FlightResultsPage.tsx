@@ -17,6 +17,7 @@ import { cities } from '../data/cities';
 import CustomSelect from '../components/CustomSelect/CustomSelect';
 import { useLanguage } from '../contexts/LanguageContext';
 import { checkAvailability, FlightAvailability, filterListedNiraFlights, getFlightSaleState, getFlightSaleCopy, FlightSaleState, isFlightSearchLimitError } from '../services/niraApi';
+import { DIRECT_SALES_CLOSED_MESSAGE, DIRECT_TICKET_SALES } from '../config/directSales';
 
 interface Flight {
   id: string;
@@ -333,6 +334,12 @@ const FlightResultsPage: React.FC = () => {
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
                   <p className="mt-4 text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('flights.loadingFlights')}
+                  </p>
+                </div>
+              ) : !DIRECT_TICKET_SALES ? (
+                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                  <p className="text-xl text-gray-800" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {DIRECT_SALES_CLOSED_MESSAGE}
                   </p>
                 </div>
               ) : limitMessage ? (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getOriginCities, getDestinations, checkAvailability, getScheduleFlights, FlightAvailability, OriginCity, filterListedNiraFlights, getFlightSaleState, FlightSaleState, isFlightSearchLimitError } from '../services/niraApi';
+import { DIRECT_SALES_CLOSED_MESSAGE, DIRECT_TICKET_SALES } from '../config/directSales';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IranMap } from 'react-iran-map';
@@ -834,6 +835,12 @@ const FlightMapPage: React.FC = () => {
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
                   <p className="mt-4 text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {language === 'fa' ? 'در حال بارگذاری پروازها...' : 'Loading flights...'}
+                  </p>
+                </div>
+              ) : !DIRECT_TICKET_SALES ? (
+                <div className="text-center py-12">
+                  <p className="text-xl text-gray-800" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {DIRECT_SALES_CLOSED_MESSAGE}
                   </p>
                 </div>
               ) : limitMessage ? (
