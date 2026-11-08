@@ -17,6 +17,7 @@ from .serializers import (
     IranCitySerializer, IranologyArticleListSerializer, IranologyArticleDetailSerializer
 )
 from .constants import ARTICLE_STATUS_PUBLISHED
+from nasim.throttles import PublicFormThrottle
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
@@ -192,6 +193,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     filterset_fields = ['article', 'status']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+
+    def get_throttles(self):
+        throttles = super().get_throttles()
+        if getattr(self, 'action', None) == 'create':
+            throttles.append(PublicFormThrottle())
+        return throttles
     
     def get_queryset(self):
         """Filter queryset based on user permissions"""

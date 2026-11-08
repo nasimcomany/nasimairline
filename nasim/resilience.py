@@ -81,11 +81,11 @@ class CircuitBreaker:
 
     @property
     def _failure_threshold(self) -> int:
-        return int(_cfg('NIRA_CIRCUIT_FAILURE_THRESHOLD', 5))
+        return int(_cfg('NIRA_CIRCUIT_FAILURE_THRESHOLD', 3))
 
     @property
     def _recovery_seconds(self) -> float:
-        return float(_cfg('NIRA_CIRCUIT_RECOVERY_SECONDS', 30))
+        return float(_cfg('NIRA_CIRCUIT_RECOVERY_SECONDS', 45))
 
     @property
     def _cache_key(self) -> str:

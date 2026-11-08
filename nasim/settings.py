@@ -382,6 +382,24 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
     ],
+    # Baseline ceilings. Sensitive routes add a tighter scope in the view.
+    'DEFAULT_THROTTLE_CLASSES': (
+        'nasim.throttles.AnonIpThrottle',
+        'nasim.throttles.UserAccountThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/min',
+        'user': '20/min',
+        'auth': '6/min',
+        'auth_hour': '30/hour',
+        'password_reset': '4/min',
+        'password_reset_hour': '10/hour',
+        'nira_search': '12/min',
+        'nira_read': '40/min',
+        'public_form': '8/min',
+        'chat_send': '20/min',
+    },
+    'EXCEPTION_HANDLER': 'nasim.exceptions.throttled_exception_handler',
 }
 
 # JWT Settings
@@ -563,8 +581,8 @@ NIRA_ROUTES_CACHE_TTL = int(os.environ.get('NIRA_ROUTES_CACHE_TTL', '300'))
 NIRA_ROUTES_STALE_TTL = int(os.environ.get('NIRA_ROUTES_STALE_TTL', '86400'))  # serve stale on outage
 NIRA_AVAILABILITY_CACHE_TTL = int(os.environ.get('NIRA_AVAILABILITY_CACHE_TTL', '60'))
 NIRA_MAX_INFLIGHT = int(os.environ.get('NIRA_MAX_INFLIGHT', '4'))  # shared across workers when Redis is up
-NIRA_CIRCUIT_FAILURE_THRESHOLD = int(os.environ.get('NIRA_CIRCUIT_FAILURE_THRESHOLD', '5'))
-NIRA_CIRCUIT_RECOVERY_SECONDS = int(os.environ.get('NIRA_CIRCUIT_RECOVERY_SECONDS', '30'))
+NIRA_CIRCUIT_FAILURE_THRESHOLD = int(os.environ.get('NIRA_CIRCUIT_FAILURE_THRESHOLD', '3'))
+NIRA_CIRCUIT_RECOVERY_SECONDS = int(os.environ.get('NIRA_CIRCUIT_RECOVERY_SECONDS', '45'))
 NIRA_ENRICH_STATUS_ASYNC = env_bool('NIRA_ENRICH_STATUS_ASYNC', True)
 
 # تنظیمات API برای دریافت اطلاعات لحظه‌ای پروازها
@@ -632,8 +650,8 @@ CELERY_TASK_ROUTES = {
     'bookings.*': {'queue': 'default'},
 }
 CELERY_TASK_ANNOTATIONS = {
-    'notifications.send_email': {'rate_limit': '30/m'},
-    'sms.send_sms': {'rate_limit': '20/m'},
+    'notifications.send_email': {'rate_limit': '12/m'},
+    'sms.send_sms': {'rate_limit': '8/m'},
 }
 CELERY_BEAT_SCHEDULE = {
     'warm-nira-origins': {
@@ -709,6 +727,7 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_REFERRER_POLICY = 'same-origin'
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
     X_FRAME_OPTIONS = 'DENY'
     SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_HTTPONLY = False  # SPA may need to read CSRF token if used

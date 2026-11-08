@@ -24,6 +24,7 @@ from .nira_serializers import (
 )
 from .nira_client import NiraClient
 from .flight_status_service import FlightStatusService
+from nasim.throttles import NiraReadThrottle, NiraSearchThrottle
 
 
 class AirportViewSet(viewsets.ModelViewSet):
@@ -90,6 +91,12 @@ class FlightViewSet(viewsets.ModelViewSet):
         if self.action == 'retrieve':
             return FlightDetailSerializer
         return FlightSerializer
+
+    def get_throttles(self):
+        throttles = super().get_throttles()
+        if getattr(self, 'action', None) == 'search':
+            throttles.append(NiraSearchThrottle())
+        return throttles
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def search(self, request):
@@ -222,6 +229,14 @@ class NiraAPIViewSet(viewsets.ViewSet):
     Provides endpoints for Availability and Routes APIs
     """
     permission_classes = [permissions.AllowAny]
+
+    def get_throttles(self):
+        throttles = super().get_throttles()
+        if getattr(self, 'action', None) == 'check_availability':
+            throttles.append(NiraSearchThrottle())
+        else:
+            throttles.append(NiraReadThrottle())
+        return throttles
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

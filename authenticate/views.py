@@ -2,7 +2,7 @@
 Views for authentication app
 """
 from rest_framework import status, generics, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
@@ -17,6 +17,15 @@ from .serializers import (
     TokenObtainPairResponseSerializer,
 )
 from accounts.serializers import UserSerializer
+from nasim.throttles import (
+    AuthHourThrottle,
+    AuthIpThrottle,
+    PasswordResetHourThrottle,
+    PasswordResetIpThrottle,
+)
+
+_AUTH_THROTTLES = [AuthIpThrottle, AuthHourThrottle]
+_RESET_THROTTLES = [PasswordResetIpThrottle, PasswordResetHourThrottle]
 
 User = get_user_model()
 
@@ -28,6 +37,7 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = _AUTH_THROTTLES
     
     def create(self, request, *args, **kwargs):
         """Create user and return JWT tokens"""
@@ -78,6 +88,7 @@ class UserLoginView(generics.GenericAPIView):
     """
     serializer_class = UserLoginSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = _AUTH_THROTTLES
     
     def post(self, request, *args, **kwargs):
         """Login user and return JWT tokens"""
@@ -124,6 +135,7 @@ class StaffLoginView(generics.GenericAPIView):
     """
     serializer_class = StaffLoginSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = _AUTH_THROTTLES
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})
@@ -161,6 +173,7 @@ def _parse_captcha_int(value):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes(_AUTH_THROTTLES)
 def verify_captcha(request):
     """
     Verify captcha for dashboard access (fast, local arithmetic only).
@@ -218,6 +231,7 @@ def user_profile(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes(_RESET_THROTTLES)
 def request_password_reset(request):
     """
     درخواست بازیابی رمز: ایمیل را دریافت می‌کند و کد ۶ رقمی به ایمیل ارسال می‌کند.
@@ -278,6 +292,7 @@ def request_password_reset(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes(_RESET_THROTTLES)
 def verify_reset_code_and_set_password(request):
     """
     تأیید کد و تنظیم رمز جدید.

@@ -2,7 +2,7 @@
 Views for support app
 """
 from rest_framework import viewsets, status, permissions, serializers
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,6 +24,7 @@ from .serializers import (
     ChatMessageCreateSerializer,
 )
 from .permissions import IsTicketOwnerOrStaff, IsStaffOrReadOnly
+from nasim.throttles import ChatSendThrottle, PublicFormThrottle
 
 
 class TicketCategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -304,6 +305,7 @@ class TicketAttachmentViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([PublicFormThrottle])
 def submit_complaint_form(request):
     """
     Submit complaint/suggestion form - no auth required
@@ -404,6 +406,7 @@ def submit_complaint_form(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([PublicFormThrottle])
 def submit_survey_form(request):
     """
     Submit survey form - no auth required
@@ -823,6 +826,12 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return ChatMessageCreateSerializer
         return ChatMessageSerializer
+
+    def get_throttles(self):
+        throttles = super().get_throttles()
+        if getattr(self, 'action', None) == 'create':
+            throttles.append(ChatSendThrottle())
+        return throttles
     
     def get_queryset(self):
         """Filter messages based on user or session - SECURE VERSION"""

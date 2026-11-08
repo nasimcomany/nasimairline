@@ -34,6 +34,7 @@ from .constants import (
     CHAT_STATUS_IN_PROGRESS,
     CHAT_STATUS_CLOSED,
 )
+from nasim.throttles import ChatSendThrottle, PublicFormThrottle
 
 User = get_user_model()
 
@@ -64,6 +65,12 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
     search_fields = ['guest_name', 'guest_email', 'session_id']
     ordering_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
+
+    def get_throttles(self):
+        throttles = super().get_throttles()
+        if getattr(self, 'action', None) in ('create', 'create_guest_session', 'send_message'):
+            throttles.append(ChatSendThrottle())
+        return throttles
     
     def get_serializer_class(self):
         """Return appropriate serializer based on action"""
@@ -342,6 +349,12 @@ class FlightMealFeedbackViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [permissions.IsAdminUser]
         return [permission() for permission in permission_classes]
+
+    def get_throttles(self):
+        throttles = super().get_throttles()
+        if getattr(self, 'action', None) == 'create':
+            throttles.append(PublicFormThrottle())
+        return throttles
     
     def create(self, request, *args, **kwargs):
         """Create new feedback submission"""
