@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getOriginCities, getDestinations, checkAvailability, getScheduleFlights, FlightAvailability, OriginCity, filterListedNiraFlights, getFlightSaleState, FlightSaleState } from '../services/niraApi';
+import { getOriginCities, getDestinations, checkAvailability, getScheduleFlights, FlightAvailability, OriginCity, filterListedNiraFlights, getFlightSaleState, FlightSaleState, isFlightSearchLimitError } from '../services/niraApi';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IranMap } from 'react-iran-map';
@@ -136,6 +136,7 @@ const FlightMapPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingCities, setLoadingCities] = useState(true);
   const [showFlights, setShowFlights] = useState(false);
+  const [limitMessage, setLimitMessage] = useState('');
   const [destinationCities, setDestinationCities] = useState<string[]>([]); // Cities with available flights from selected city
   const [originsWithFlights, setOriginsWithFlights] = useState<string[]>([]);
   const [scanningOrigins, setScanningOrigins] = useState(false);
@@ -318,6 +319,7 @@ const FlightMapPage: React.FC = () => {
     const requestId = ++loadRequestId.current;
     setLoading(true);
     setFlights([]);
+    setLimitMessage('');
     setShowFlights(false);
 
     try {
@@ -358,11 +360,12 @@ const FlightMapPage: React.FC = () => {
       const DEST_CONCURRENCY = 3;
       const allFlights: FlightAvailability[] = [];
       const availableDestinations: string[] = [];
+      let searchLimited: string | null = null;
       let next = 0;
       const workers = Array.from(
         { length: Math.min(DEST_CONCURRENCY, Math.max(validDestinations.length, 1)) },
         async () => {
-          while (requestId === loadRequestId.current) {
+          while (requestId === loadRequestId.current && !searchLimited) {
             const idx = next++;
             if (idx >= validDestinations.length) break;
             const destCode = validDestinations[idx];
@@ -411,8 +414,11 @@ const FlightMapPage: React.FC = () => {
                   });
                 }
               }
-            } catch {
-              /* skip OD */
+            } catch (error) {
+              if (isFlightSearchLimitError(error)) {
+                searchLimited = error.message;
+                return;
+              }
             }
           }
         }
@@ -420,6 +426,13 @@ const FlightMapPage: React.FC = () => {
       await Promise.all(workers);
 
       if (requestId !== loadRequestId.current) return;
+
+      if (searchLimited) {
+        setFlights([]);
+        setLimitMessage(searchLimited);
+        setShowFlights(true);
+        return;
+      }
 
       setDestinationCities(
         availableDestinations.length ? availableDestinations : scheduleDests
@@ -821,6 +834,12 @@ const FlightMapPage: React.FC = () => {
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
                   <p className="mt-4 text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {language === 'fa' ? 'در حال بارگذاری پروازها...' : 'Loading flights...'}
+                  </p>
+                </div>
+              ) : limitMessage ? (
+                <div className="text-center py-12">
+                  <p className="text-xl text-gray-800" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {limitMessage}
                   </p>
                 </div>
               ) : flights.length === 0 ? (

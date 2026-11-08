@@ -332,6 +332,18 @@ export const getScheduleFlights = async (
   }
 };
 
+export class FlightSearchLimitError extends Error {
+  readonly status = 429;
+  constructor(message: string) {
+    super(message);
+    this.name = 'FlightSearchLimitError';
+  }
+}
+
+export function isFlightSearchLimitError(error: unknown): error is FlightSearchLimitError {
+  return error instanceof FlightSearchLimitError;
+}
+
 /**
  * Check flight availability
  */
@@ -362,7 +374,20 @@ export const checkAvailability = async (params: {
         infant_qty: params.infant_qty || 0,
       }),
     });
-    
+
+    if (response.status === 429) {
+      let detail = 'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.';
+      try {
+        const body = await response.json();
+        if (body && typeof body.detail === 'string' && body.detail.trim()) {
+          detail = body.detail.trim();
+        }
+      } catch {
+        /* keep the default message */
+      }
+      throw new FlightSearchLimitError(detail);
+    }
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

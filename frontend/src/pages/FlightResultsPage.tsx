@@ -16,7 +16,7 @@ import {
 import { cities } from '../data/cities';
 import CustomSelect from '../components/CustomSelect/CustomSelect';
 import { useLanguage } from '../contexts/LanguageContext';
-import { checkAvailability, FlightAvailability, filterListedNiraFlights, getFlightSaleState, getFlightSaleCopy, FlightSaleState } from '../services/niraApi';
+import { checkAvailability, FlightAvailability, filterListedNiraFlights, getFlightSaleState, getFlightSaleCopy, FlightSaleState, isFlightSearchLimitError } from '../services/niraApi';
 
 interface Flight {
   id: string;
@@ -54,6 +54,7 @@ const FlightResultsPage: React.FC = () => {
   
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(true);
+  const [limitMessage, setLimitMessage] = useState('');
   const [sortBy, setSortBy] = useState<'price' | 'duration' | 'departure'>('price');
   const [filterStops, setFilterStops] = useState<'all' | 'direct' | 'one'>('all');
 
@@ -73,6 +74,7 @@ const FlightResultsPage: React.FC = () => {
 
       try {
         setLoading(true);
+        setLimitMessage('');
         
         // Get passenger counts
         const passengers = typeof searchParams.passengers === 'object' 
@@ -149,6 +151,9 @@ const FlightResultsPage: React.FC = () => {
       } catch (error) {
         console.error('Error fetching flights:', error);
         setFlights([]);
+        if (isFlightSearchLimitError(error)) {
+          setLimitMessage(error.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -328,6 +333,12 @@ const FlightResultsPage: React.FC = () => {
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
                   <p className="mt-4 text-gray-600" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                     {t('flights.loadingFlights')}
+                  </p>
+                </div>
+              ) : limitMessage ? (
+                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                  <p className="text-xl text-gray-800" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {limitMessage}
                   </p>
                 </div>
               ) : sortedFlights.length === 0 ? (
