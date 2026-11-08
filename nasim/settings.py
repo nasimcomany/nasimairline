@@ -388,8 +388,8 @@ REST_FRAMEWORK = {
         'nasim.throttles.UserAccountThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '20/min',
-        'user': '20/min',
+        'anon': '180/min',
+        'user': '240/min',
         'auth': '6/min',
         'auth_hour': '30/hour',
         'password_reset': '4/min',
