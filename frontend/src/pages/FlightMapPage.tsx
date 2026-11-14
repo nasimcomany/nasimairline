@@ -7,7 +7,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IranMap } from 'react-iran-map';
 import NeighboringCountryMap from '../components/Maps/NeighboringCountryMap';
-import { formatDateByLanguage, getCurrentDateFormatted, toLocalDateISO } from '../utils/dateFormatter';
+import { formatDateByLanguage, getCurrentDateFormatted, toLocalDateISO, toPersianDigits } from '../utils/dateFormatter';
 import { 
   MapPinIcon,
   CalendarDaysIcon,
@@ -512,6 +512,7 @@ const FlightMapPage: React.FC = () => {
                     }}
                     minDate={new Date()}
                     dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy/MM/dd'}
+                    renderDayContents={language === 'fa' ? (day) => toPersianDigits(String(day)) : undefined}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                     wrapperClassName="w-full"
                     readOnly={true}

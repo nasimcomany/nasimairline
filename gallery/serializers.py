@@ -388,7 +388,7 @@ class HeaderMenuImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = HeaderMenuImage
         fields = [
-            'id', 'uuid', 'menu_key', 'item_key', 'label_fa', 'label_en',
+            'id', 'uuid', 'menu_key', 'item_key', 'label_fa', 'label_en', 'label_ar',
             'image_url', 'order', 'is_active',
         ]
 

@@ -823,6 +823,7 @@ class HeaderMenuImage(models.Model):
     )
     label_fa = models.CharField(_('عنوان فارسی (ادمین)'), max_length=200)
     label_en = models.CharField(_('عنوان انگلیسی (ادمین)'), max_length=200, blank=True)
+    label_ar = models.CharField(_('عنوان عربی (ادمین)'), max_length=200, blank=True)
     image = models.ImageField(
         _('تصویر منو'),
         upload_to='header_menu/',

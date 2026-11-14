@@ -39,6 +39,7 @@ import {
   DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { ANDROID_APP_VERSION } from '../../config/androidAppVersion';
 import galleryService, { HeaderMenuCmsSlot } from '../../services/galleryService';
 import AuthModal from '../Auth/AuthModal';
 import StaffLoginModal from '../Auth/StaffLoginModal';
@@ -46,6 +47,29 @@ import StaffLoginModal from '../Auth/StaffLoginModal';
 interface EmiratesHeaderProps {
   onWeatherClick?: () => void;
 }
+
+const AndroidVersionMark: React.FC<{ onDark?: boolean }> = ({ onDark = false }) => (
+  <span
+    style={{
+      position: 'absolute',
+      top: -7,
+      insetInlineEnd: 0,
+      fontSize: 8,
+      lineHeight: '11px',
+      letterSpacing: '0.06em',
+      fontWeight: 700,
+      fontFamily: 'Inter, sans-serif',
+      textTransform: 'none',
+      color: onDark ? '#dbe7ff' : '#1e3a8a',
+      border: `1px solid ${onDark ? 'rgba(219,231,255,0.75)' : '#1e3a8a'}`,
+      borderRadius: 999,
+      padding: '0 4px',
+      pointerEvents: 'none',
+    }}
+  >
+    {ANDROID_APP_VERSION}
+  </span>
+);
 
 const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -137,10 +161,15 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return (cms?.image_url && String(cms.image_url).trim()) || fallback;
   };
 
-  /** Prefer admin label_fa / label_en when set; otherwise keep built-in translation. */
+  /** Prefer the admin label for the active language; otherwise keep the built-in translation. */
   const resolveMenuLabel = (menuKey: string, itemKey: string, fallback: string) => {
     const cms = cmsMenuSlots[`${menuKey}:${itemKey}`];
     if (!cms) return fallback;
+    if (language === 'ar') {
+      const ar = (cms.label_ar || '').trim();
+      if (ar) return ar;
+      return fallback;
+    }
     if (language === 'en') {
       const en = (cms.label_en || '').trim();
       if (en) return en;
@@ -1186,7 +1215,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               title={t('nav.androidApp') || 'اپ اندروید'}
             >
               <DevicePhoneMobileIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />
-              {t('nav.androidApp') || 'اپ اندروید'}
+              <span className="relative inline-block leading-none" style={{ paddingInlineEnd: 26 }}>
+                {t('nav.androidApp') || 'اپ اندروید'}
+                <AndroidVersionMark />
+              </span>
             </a>
 
             {/* Language Dropdown - at end of header */}
@@ -1317,7 +1349,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     className={`flex items-center gap-2 px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
                   >
                     <DevicePhoneMobileIcon className="w-5 h-5" />
-                    {t('nav.androidApp') || 'اپ اندروید'}
+                    <span className="relative inline-block leading-none" style={{ paddingInlineEnd: 26 }}>
+                      {t('nav.androidApp') || 'اپ اندروید'}
+                      <AndroidVersionMark onDark />
+                    </span>
                   </a>
                   {isAuthenticated ? (
                     <button

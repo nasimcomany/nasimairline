@@ -121,6 +121,7 @@ export type HeaderMenuCmsSlot = {
   image_url?: string | null;
   label_fa?: string;
   label_en?: string;
+  label_ar?: string;
 };
 
 /**
@@ -128,7 +129,7 @@ export type HeaderMenuCmsSlot = {
  * (images + admin labels).
  *
  * Supports:
- * - New API: { _v2: { "menu:key": { image_url, label_fa, label_en } }, "menu:key": "url", ... }
+ * - New API: { _v2: { "menu:key": { image_url, label_fa, label_en, label_ar } }, "menu:key": "url", ... }
  * - Mid API: flat object slots
  * - Legacy API: flat string URL map
  */
@@ -152,6 +153,7 @@ export const getHeaderMenuImages = async (): Promise<Record<string, HeaderMenuCm
           image_url: value.image_url ?? null,
           label_fa: value.label_fa || '',
           label_en: value.label_en || '',
+          label_ar: value.label_ar || '',
         };
       }
     });

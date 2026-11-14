@@ -45,7 +45,7 @@ export const formatDateByLanguage = (date: Date, language: string): string => {
  * @param str - String containing English digits
  * @returns String with Persian digits
  */
-const toPersianDigits = (str: string): string => {
+export const toPersianDigits = (str: string): string => {
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   return str.replace(/\d/g, (digit) => persianDigits[parseInt(digit)]);
 };

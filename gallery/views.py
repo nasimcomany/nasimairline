@@ -238,7 +238,7 @@ class HeaderMenuImageViewSet(viewsets.ReadOnlyModelViewSet):
           { "flyWithNasim:0": "https://.../media/..." }
 
         Rich payload for current SPA (labels + optional image):
-          { "_v2": { "flyWithNasim:0": { "image_url": "...|null", "label_fa": "...", "label_en": "..." }, ... } }
+          { "_v2": { "flyWithNasim:0": { "image_url": "...|null", "label_fa": "...", "label_en": "...", "label_ar": "..." }, ... } }
 
         Older clients ignore unknown "_v2" and keep using string URLs / local fallbacks.
         """
@@ -252,6 +252,7 @@ class HeaderMenuImageViewSet(viewsets.ReadOnlyModelViewSet):
                 'image_url': url,
                 'label_fa': (row.label_fa or '').strip(),
                 'label_en': (row.label_en or '').strip(),
+                'label_ar': (row.label_ar or '').strip(),
             }
             if url:
                 legacy[key] = url

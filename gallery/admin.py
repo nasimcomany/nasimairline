@@ -482,21 +482,22 @@ class HeaderMenuImageAdmin(admin.ModelAdmin):
     Upload an image to override the site default for that menu option.
     """
     list_display = [
-        'preview', 'menu_key', 'label_fa', 'item_key', 'order', 'is_active', 'updated_at',
+        'preview', 'menu_key', 'label_fa', 'label_ar', 'item_key', 'order', 'is_active', 'updated_at',
     ]
     list_filter = ['menu_key', 'is_active']
-    search_fields = ['label_fa', 'label_en', 'item_key']
+    search_fields = ['label_fa', 'label_en', 'label_ar', 'item_key']
     list_editable = ['order', 'is_active']
     readonly_fields = ['uuid', 'updated_at', 'image_display']
     ordering = ['menu_key', 'order', 'item_key']
 
     fieldsets = (
         ('گزینه منو', {
-            'fields': ('menu_key', 'item_key', 'label_fa', 'label_en'),
+            'fields': ('menu_key', 'item_key', 'label_fa', 'label_en', 'label_ar'),
             'description': (
                 'هر ردیف یک گزینه یا زیرگزینه منوی هدر است. '
-                'فقط فیلد تصویر را عوض کنید؛ کلیدها را تغییر ندهید. '
-                'کلید dest.X.Y برای سلول‌های گرید مقاصد است.'
+                'عنوان فارسی، انگلیسی و عربی را می‌توانید جدا عوض کنید. '
+                'عنوان عربی فقط وقتی سایت روی زبان عربی است دیده می‌شود. '
+                'کلیدها را تغییر ندهید. کلید dest.X.Y برای سلول‌های گرید مقاصد است.'
             ),
         }),
         ('تصویر', {

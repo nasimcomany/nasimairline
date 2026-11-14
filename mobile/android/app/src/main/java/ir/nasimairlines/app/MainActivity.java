@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String START_URL = "https://nasimairlines.ir/";
     private static final String DESKTOP_UA =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    + "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 NasimAirlinesApp/1.2";
+                    + "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 NasimAirlinesApp/1.3";
 
     private WebView webView;
     private View statusPanel;
@@ -58,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
         settings.setDisplayZoomControls(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.clearCache(true);
         settings.setAllowContentAccess(true);
         settings.setAllowFileAccess(true);
         settings.setUserAgentString(DESKTOP_UA);

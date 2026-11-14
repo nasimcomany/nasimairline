@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toJalaali, toGregorian, jalaaliMonthLength } from 'jalaali-js';
+import { toPersianDigits } from '../../utils/dateFormatter';
 
 const PERSIAN_MONTHS = [
   'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
@@ -236,7 +237,7 @@ const JalaliBookingDatePicker: React.FC<Props> = ({
                 fontFamily: 'inherit',
               }}
             >
-              {day.day}
+              {toPersianDigits(String(day.day))}
             </button>
           );
         })}
@@ -249,7 +250,7 @@ const JalaliBookingDatePicker: React.FC<Props> = ({
       <input
         type="text"
         readOnly
-        value={formatJalali(value)}
+        value={toPersianDigits(formatJalali(value))}
         placeholder={placeholder}
         onMouseDown={(e) => {
           // Prevent focus+click double-toggle (first click was opening then immediately closing)
