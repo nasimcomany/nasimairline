@@ -73,3 +73,9 @@ _scan_*.py
 _classstatus_audit.json
 _nira_*.json
 _nira_*.py
+
+# Local install leftovers / DB dumps
+requirements_local.tmp.txt
+*.dump
+backup_*.sql
+*.sql.gz
