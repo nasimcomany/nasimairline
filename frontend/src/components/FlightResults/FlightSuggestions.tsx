@@ -14,7 +14,20 @@ function formatDate(iso: string, language: string) {
   if (parts.length < 3 || parts.some((part) => !part)) return iso;
   const date = new Date(parts[0], parts[1] - 1, parts[2]);
   const locale = language === 'en' ? 'en-GB' : language === 'ar' ? 'ar' : 'fa-IR';
-  return date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'long' });
+  return date.toLocaleDateString(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+function cardIsPast(card: FlightSuggestion) {
+  const parts = card.date.split('-').map(Number);
+  if (parts.length < 3 || parts.some((part) => !part)) return false;
+  const [hour, minute] = (card.departure_time || '00:00').split(':').map(Number);
+  const departure = new Date(parts[0], parts[1] - 1, parts[2], hour || 0, minute || 0);
+  return departure.getTime() <= Date.now();
 }
 
 function formatPrice(price: number, language: string) {
@@ -45,6 +58,9 @@ const SuggestionCard: React.FC<{ card: FlightSuggestion }> = ({ card }) => {
           {t('flights.suggest.closed')}
         </span>
       </div>
+      <div className="mt-3 text-sm font-bold text-blue-950" style={font}>
+        {t('flights.suggest.dateLabel')}: {formatDate(card.date, language)}
+      </div>
       <div className="mt-3 flex items-center gap-2 text-gray-900" dir="ltr">
         <span className="text-base font-bold" style={font}>{cityLabel(card, 'origin', language)}</span>
         <span className="text-blue-900" aria-hidden="true">→</span>
@@ -54,14 +70,14 @@ const SuggestionCard: React.FC<{ card: FlightSuggestion }> = ({ card }) => {
         {card.flight_no}
         {badge ? ` · ${badge}` : ''}
       </div>
-      <div className="mt-3 flex flex-wrap items-end justify-between gap-3 border-t border-blue-100 pt-3">
-        <div className="shrink-0 text-sm font-bold text-gray-800" dir="ltr">
+      <div className="mt-3 space-y-2 border-t border-blue-100 pt-3">
+        <div className="text-sm font-bold text-gray-800" dir="ltr">
           {card.departure_time || '—'}
           {card.arrival_time ? ` – ${card.arrival_time}` : ''}
         </div>
         {card.price > 0 ? (
-          <div className="shrink-0 text-left" dir="ltr">
-            <div className="whitespace-nowrap text-base font-bold text-blue-900" style={font}>{formatPrice(card.price, language)}</div>
+          <div dir="ltr">
+            <div className="text-base font-bold text-blue-900" style={font}>{formatPrice(card.price, language)}</div>
             <div className="text-xs text-gray-500" style={font}>{t('flights.currency')}</div>
           </div>
         ) : null}
@@ -84,8 +100,8 @@ const SuggestionSection: React.FC<{
     : 'bg-gradient-to-r from-sky-800 via-blue-800 to-blue-900';
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-lg">
-      <div className={`${headerClass} px-4 py-4 sm:px-5`}>
+    <section className="rounded-2xl border border-blue-100 bg-white shadow-lg">
+      <div className={`${headerClass} overflow-hidden rounded-t-2xl px-4 py-4 sm:px-5`}>
         <h2 className="text-lg font-bold text-white sm:text-xl" style={font}>{title}</h2>
         <p className="mt-1 text-sm text-blue-100" style={font}>{text}</p>
       </div>
@@ -127,8 +143,9 @@ const FlightSuggestions: React.FC<FlightSuggestionsProps> = ({
       departure_date: departureDate,
     }).then((groups) => {
       if (cancelled) return;
-      setAlternate(groups.alternate.filter((card) => card.can_book !== true));
-      setOtherDestinations(groups.otherDestinations.filter((card) => card.can_book !== true));
+      const visible = (card: FlightSuggestion) => card.can_book !== true && !cardIsPast(card);
+      setAlternate(groups.alternate.filter(visible));
+      setOtherDestinations(groups.otherDestinations.filter(visible));
       setLoading(false);
     });
 

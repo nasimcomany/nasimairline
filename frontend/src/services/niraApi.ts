@@ -71,12 +71,34 @@ export function isCancelledNiraFlight(flight: FlightAvailability | null | undefi
 }
 
 /**
+ * Nira sends departure as Iran local time, without a timezone suffix.
+ * A flight is past once that date and clock time have been reached.
+ */
+export function flightDepartureHasPassed(
+  flight: { DepartureDateTime?: string } | null | undefined
+): boolean {
+  const raw = String(flight?.DepartureDateTime || '');
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (!match) return false;
+  const departure = new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5])
+  );
+  return !Number.isNaN(departure.getTime()) && departure.getTime() <= Date.now();
+}
+
+/**
  * Same rule for map + search results:
- * list every Nira flight row with a flight number (including cancelled).
+ * list every Nira flight row with a flight number (including cancelled)
+ * whose departure date and time have not passed.
  * Sale/bookability is decided separately via getFlightSaleState().
  */
 export function isListedNiraFlight(flight: FlightAvailability | null | undefined): boolean {
   if (!flight) return false;
+  if (flightDepartureHasPassed(flight)) return false;
   return Boolean(flight.FlightNo && flight.Origin && flight.Destination);
 }
 

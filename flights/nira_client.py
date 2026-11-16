@@ -9,6 +9,7 @@ import logging
 from typing import Dict, List, Optional, Any, Tuple
 from django.conf import settings
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from persiantools.jdatetime import JalaliDate
 from cachetools import TTLCache
 import hashlib
@@ -21,6 +22,7 @@ from nasim.resilience import (
 )
 
 logger = logging.getLogger(__name__)
+_TEHRAN = ZoneInfo('Asia/Tehran')
 
 # Shared session — connection reuse under peak search traffic
 _http_session: Optional[requests.Session] = None
@@ -494,7 +496,198 @@ class NiraClient:
             cache_set(key, amount, 300)
         return amount
 
-    def _fill_missing_display_fares(self, data: Dict[str, Any]) -> None:
+    def _departure_at(self, value: Any):
+        """Nira datetimes are Iran local, with no timezone suffix."""
+        text = str(value or '').strip().replace('T', ' ')
+        if len(text) < 16:
+            return None
+        for size, fmt in ((19, '%Y-%m-%d %H:%M:%S'), (16, '%Y-%m-%d %H:%M')):
+            try:
+                return datetime.strptime(text[:size], fmt).replace(tzinfo=_TEHRAN)
+            except ValueError:
+                continue
+        return None
+
+    def _flight_has_departed(self, flight: Dict[str, Any]) -> bool:
+        when = self._departure_at(flight.get('DepartureDateTime'))
+        if when is None:
+            return False
+        return when <= datetime.now(_TEHRAN)
+
+    def _without_departed(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        if not result.get('success') or not isinstance(result.get('data'), dict):
+            return result
+        flights = result['data'].get('AvailableFlights')
+        if not isinstance(flights, list):
+            return result
+        kept = [
+            flight for flight in flights
+            if isinstance(flight, dict) and not self._flight_has_departed(flight)
+        ]
+        if len(kept) == len(flights):
+            return result
+        out = dict(result)
+        data = dict(result['data'])
+        data['AvailableFlights'] = kept
+        out['data'] = data
+        return out
+
+    @staticmethod
+    def _flight_identity(flight: Dict[str, Any]) -> Tuple[str, str, str]:
+        return (
+            str(flight.get('FlightNo') or flight.get('FlightNumber') or '').strip(),
+            str(flight.get('Origin') or '').strip().upper(),
+            str(flight.get('Destination') or '').strip().upper(),
+        )
+
+    def _flight_score(self, flight: Dict[str, Any]) -> int:
+        classes = flight.get('ClassStatus')
+        if not isinstance(classes, list):
+            return 0
+        score = len(classes)
+        for row in classes:
+            if isinstance(row, dict) and self._parse_money(row.get('TotalPrice')) > 0:
+                score += 10
+        return score
+
+    def _copy_flight_row(self, flight: Dict[str, Any]) -> Dict[str, Any]:
+        copied = dict(flight)
+        classes = flight.get('ClassStatus')
+        if isinstance(classes, list):
+            copied['ClassStatus'] = [
+                dict(row) if isinstance(row, dict) else row
+                for row in classes
+            ]
+        return copied
+
+    def _merge_flight_rows(self, primary: List[Any], extra: List[Any]) -> List[Dict[str, Any]]:
+        """Union of two availability lists. Same flight keeps the richer class row."""
+        rows: List[Dict[str, Any]] = []
+        index: Dict[Tuple[str, str, str], int] = {}
+        for source in (primary, extra):
+            for flight in source or []:
+                if not isinstance(flight, dict):
+                    continue
+                key = self._flight_identity(flight)
+                if not key[0] or not key[1] or not key[2]:
+                    continue
+                if self._is_test_airport_code(key[1]) or self._is_test_airport_code(key[2]):
+                    continue
+                if key not in index:
+                    index[key] = len(rows)
+                    rows.append(self._copy_flight_row(flight))
+                    continue
+                current = rows[index[key]]
+                if self._flight_score(flight) > self._flight_score(current):
+                    rows[index[key]] = self._copy_flight_row(flight)
+        return rows
+
+    def _documented_rows(
+        self,
+        origin: str,
+        destination: str,
+        departure_date: datetime,
+        adult_qty: int = 1,
+        child_qty: int = 0,
+        infant_qty: int = 0,
+        use_cache: bool = True,
+    ) -> Optional[List[Dict[str, Any]]]:
+        """
+        AvailabilityJS.jsp from the NRS web-service document.
+        Flights that have the required sale capacity for one route and date.
+        None means the call failed. An empty list means Nira returned no flights.
+        """
+        from nasim.cache_utils import cache_get, cache_set, cache_key as shared_cache_key
+
+        origin_u = (origin or '').strip().upper()
+        dest_u = (destination or '').strip().upper()
+        day = departure_date.date().isoformat()
+        if not origin_u or not dest_u or not self.base_url or not self.office_user:
+            return None
+        key = shared_cache_key('nira_avail_js', origin_u, dest_u, day, adult_qty, child_qty, infant_qty)
+        if use_cache:
+            cached = cache_get(key)
+            if isinstance(cached, list):
+                return [row for row in cached if isinstance(row, dict)]
+
+        try:
+            response = self._http_get(
+                f"{self.base_url.rstrip('/')}/ws1/AvailabilityJS.jsp",
+                params={
+                    'AirLine': 'NSN',
+                    'cbSource': origin_u,
+                    'cbTarget': dest_u,
+                    'cbAdultQty': adult_qty,
+                    'cbChildQty': child_qty,
+                    'cbInfantQty': infant_qty,
+                    'OfficeUser': self.office_user,
+                    'OfficePass': self._encode_office_pass(),
+                    'DepartureDate': day,
+                },
+                read_timeout=8,
+            )
+        except Exception as exc:
+            logger.warning('AvailabilityJS skipped: %s', type(exc).__name__)
+            return None
+        text = (response.text or '').strip()
+        if response.status_code != 200 or not text.startswith('{'):
+            return None
+        try:
+            data = response.json()
+        except ValueError:
+            return None
+        flights = data.get('AvailableFlights') if isinstance(data, dict) else None
+        if not isinstance(flights, list):
+            return None
+        rows = [row for row in flights if isinstance(row, dict)]
+        if use_cache:
+            cache_set(key, rows, self.availability_cache_ttl or 60)
+        return rows
+
+    def _merge_documented_into(
+        self,
+        result: Dict[str, Any],
+        origin: str,
+        destination: str,
+        departure_date: datetime,
+        adult_qty: int,
+        child_qty: int,
+        infant_qty: int,
+        use_cache: bool,
+    ) -> Dict[str, Any]:
+        rows = self._documented_rows(
+            origin, destination, departure_date, adult_qty, child_qty, infant_qty, use_cache,
+        )
+        if rows is None:
+            if isinstance(result, dict):
+                result = dict(result)
+                result['_documented_ok'] = False
+            return result
+        data = result.get('data') if isinstance(result, dict) else None
+        existing = data.get('AvailableFlights') if isinstance(data, dict) else []
+        if not isinstance(existing, list):
+            existing = []
+        merged = self._merge_flight_rows(existing, rows)
+        if isinstance(data, dict):
+            out = dict(result)
+            out_data = dict(data)
+            out_data['AvailableFlights'] = merged
+            out['data'] = out_data
+            out['success'] = True
+            out['_documented_ok'] = True
+            return out
+        if merged or not result.get('success'):
+            return {
+                'success': True,
+                'data': {'AvailableFlights': merged},
+                'status_code': 200,
+                '_documented_ok': True,
+            }
+        result = dict(result)
+        result['_documented_ok'] = True
+        return result
+
+    def _fill_missing_display_fares(self, data: Dict[str, Any], limit: int = 8) -> None:
         """
         Availability can list a closed class at price 0 while FareJS still has
         the adult fare, usually on class Y. Copy that number onto the card.
@@ -504,7 +697,7 @@ class NiraClient:
         if not isinstance(flights, list):
             return
         quotes = 0
-        limit = 8
+        limit = max(1, int(limit))
         for flight in flights:
             if quotes >= limit or not isinstance(flight, dict):
                 continue
@@ -652,7 +845,7 @@ class NiraClient:
             cached = cache_get(avail_key)
             if cached and isinstance(cached, dict):
                 logger.info('Nira availability cache HIT')
-                return cached
+                return self._without_departed(cached)
 
         def _fetch() -> Dict[str, Any]:
             # Convert dates to Jalali format
@@ -706,18 +899,9 @@ class NiraClient:
                             'data': data,
                             'status_code': response.status_code,
                         }
-                        if fill_display_fares and isinstance(data, dict):
-                            try:
-                                self._fill_missing_display_fares(data)
-                            except Exception as exc:
-                                logger.warning('Display fare fill skipped: %s', type(exc).__name__)
-                        if use_cache and fill_display_fares and self.availability_cache_ttl > 0:
-                            cache_set(avail_key, result, self.availability_cache_ttl)
-                        return result
                     except ValueError:
-                        pass
-
-                if response.status_code == 200 and (
+                        result = None
+                elif response.status_code == 200 and (
                     'text/html' in content_type or response.text.strip().startswith('<!')
                 ):
                     logger.warning('Received HTML from /ibe/Availability, trying fallback endpoint')
@@ -727,53 +911,67 @@ class NiraClient:
                         return_date_jalali, office_pass_encoded,
                         read_timeout=fallback_read,
                     )
-                    if fill_display_fares and result.get('success') and isinstance(result.get('data'), dict):
-                        try:
-                            self._fill_missing_display_fares(result['data'])
-                        except Exception as exc:
-                            logger.warning('Display fare fill skipped: %s', type(exc).__name__)
-                    fallback_flights = []
-                    if isinstance(result.get('data'), dict):
-                        fallback_flights = result['data'].get('AvailableFlights') or []
-                    if (
-                        result.get('success')
-                        and fallback_flights
-                        and use_cache
-                        and fill_display_fares
-                        and self.availability_cache_ttl > 0
-                    ):
-                        cache_set(avail_key, result, self.availability_cache_ttl)
-                    return result
-
-                result = {
-                    'success': True,
-                    'data': response.text,
-                    'status_code': response.status_code,
-                    'content_type': content_type,
-                }
-                if use_cache and fill_display_fares and self.availability_cache_ttl > 0:
-                    cache_set(avail_key, result, self.availability_cache_ttl)
-                return result
-
+                else:
+                    result = {
+                        'success': True,
+                        'data': response.text,
+                        'status_code': response.status_code,
+                        'content_type': content_type,
+                    }
+                if result is None:
+                    result = {
+                        'success': False,
+                        'error': 'Nira availability response could not be read',
+                    }
             except requests.exceptions.Timeout:
-                return {
+                result = {
                     'success': False,
                     'error': f'Request timeout - Nira API did not respond in {self.timeout} seconds.',
                 }
             except requests.exceptions.ConnectionError:
-                return {
+                result = {
                     'success': False,
                     'error': 'Connection error - Could not connect to Nira API',
                 }
             except Exception as e:
-                logger.error(f'Error calling Nira Availability API: {e}')
-                return {
+                logger.error('Error calling Nira Availability API: %s', type(e).__name__)
+                result = {
                     'success': False,
-                    'error': f'Unexpected error: {str(e)}',
+                    'error': f'Unexpected error: {type(e).__name__}',
                 }
 
+            result = self._merge_documented_into(
+                result if isinstance(result, dict) else {'success': False},
+                origin,
+                destination,
+                departure_date,
+                adult_qty,
+                child_qty,
+                infant_qty,
+                use_cache,
+            )
+            documented_ok = bool(result.pop('_documented_ok', False)) if isinstance(result, dict) else False
+            if fill_display_fares and result.get('success') and isinstance(result.get('data'), dict):
+                try:
+                    self._fill_missing_display_fares(result['data'])
+                except Exception as exc:
+                    logger.warning('Display fare fill skipped: %s', type(exc).__name__)
+            flights = []
+            if isinstance(result.get('data'), dict):
+                flights = result['data'].get('AvailableFlights') or []
+            if (
+                result.get('success')
+                and isinstance(result.get('data'), dict)
+                and (flights or documented_ok)
+                and use_cache
+                and fill_display_fares
+                and self.availability_cache_ttl > 0
+            ):
+                cache_set(avail_key, result, self.availability_cache_ttl)
+            return result
+
         try:
-            return nira_guarded(_fetch, coalesce_key=f'avail:{avail_key}')
+            return self._without_departed(nira_guarded(_fetch, coalesce_key=f'avail:{avail_key}'))
         except (CircuitOpenError, OverloadedError) as exc:
             return nira_soft_error(exc)
     
@@ -925,14 +1123,11 @@ class NiraClient:
         departure_date: datetime,
     ) -> Dict[str, Any]:
         """
-        Nearby Nasim flights for the results page.
+        Display-only suggestions for the results page. Purchase stays closed.
 
-        Two groups, both display-only:
-        - the same route and the reverse route on later days
-        - other destinations from the same origin on the searched day and the days after
-
-        Availability lookups stay capped and fare quotes stay off the shared
-        availability cache so a suggestion scan cannot wipe a real search price.
+        - Same route and the reverse route for the next 7 days that have not departed.
+        - Every other destination from the same origin for the next 7 days.
+        Each card carries its own date. Past departures are left out.
         """
         import time
 
@@ -950,7 +1145,7 @@ class NiraClient:
         if not origin_u or not dest_u or origin_u == dest_u:
             return empty
 
-        cache_id = shared_cache_key('nira_suggest_v4', origin_u, dest_u, day.isoformat())
+        cache_id = shared_cache_key('nira_suggest_v5', origin_u, dest_u, day.isoformat())
         cached = cache_get(cache_id)
         if isinstance(cached, dict) and cached.get('success'):
             return cached
@@ -986,7 +1181,6 @@ class NiraClient:
                 code = str(row.get('CITY') or '').strip().upper()
                 if code and code not in {origin_u, dest_u} and code not in other_codes:
                     other_codes.append(code)
-        other_codes = other_codes[:4]
 
         def city_names(code: str) -> Dict[str, str]:
             found = names.get(code) or {}
@@ -1022,6 +1216,8 @@ class NiraClient:
                 status = str(flight.get('FlightStatus') or '').strip().upper()
                 if status in {'X', 'CANCELLED', 'CNL'}:
                     continue
+                if self._flight_has_departed(flight):
+                    continue
                 flight_no = str(flight.get('FlightNo') or flight.get('FlightNumber') or '').strip()
                 flight_origin = str(flight.get('Origin') or '').strip().upper()
                 flight_dest = str(flight.get('Destination') or '').strip().upper()
@@ -1052,66 +1248,88 @@ class NiraClient:
                     'arrival_time': clock_of(flight.get('ArrivalDateTime')),
                     'price': price_of(flight),
                     'can_book': False,
-                    '_flight': flight,
+                    '_flight': self._copy_flight_row(flight),
                 })
             return found
 
         def fetch(item):
             direction, route_origin, route_dest, when = item
-            try:
-                result = self.check_availability(
-                    origin=route_origin,
-                    destination=route_dest,
-                    departure_date=datetime.combine(when, datetime.min.time()),
-                    use_cache=True,
-                    fill_display_fares=False,
-                )
-            except Exception as exc:
-                logger.warning('Suggestion availability skipped: %s', type(exc).__name__)
-                result = {'success': False}
-            return direction, result if isinstance(result, dict) else {'success': False}, when
 
-        today = datetime.now().date()
-        route_offsets = [1, -1, 2, 3, 4, 5, 6, 7, -2]
+            def _load() -> Dict[str, Any]:
+                rows = self._documented_rows(
+                    route_origin,
+                    route_dest,
+                    datetime.combine(when, datetime.min.time()),
+                    use_cache=True,
+                )
+                if rows is None:
+                    return {'success': False}
+                return {'success': True, 'data': {'AvailableFlights': rows}}
+
+            result: Dict[str, Any] = {'success': False}
+            for _attempt in range(2):
+                try:
+                    loaded = nira_guarded(
+                        _load,
+                        coalesce_key=f'js:{route_origin}:{route_dest}:{when.isoformat()}',
+                    )
+                    result = loaded if isinstance(loaded, dict) else {'success': False}
+                    break
+                except OverloadedError:
+                    time.sleep(0.35)
+                except Exception as exc:
+                    logger.warning('Suggestion availability skipped: %s', type(exc).__name__)
+                    break
+            return direction, result, when
+
+        today = datetime.now(_TEHRAN).date()
+        route_start = max(day + timedelta(days=1), today)
         route_lookups = []
-        for offset in route_offsets:
-            when = day + timedelta(days=offset)
-            if when < today or when == day:
-                continue
+        for offset in range(7):
+            when = route_start + timedelta(days=offset)
             route_lookups.append(('same', origin_u, dest_u, when))
             route_lookups.append(('reverse', dest_u, origin_u, when))
-        other_lookups = [('other', origin_u, code, day) for code in other_codes]
-        other_lookups.extend(
-            ('other', origin_u, code, day + timedelta(days=1))
-            for code in other_codes[:3]
-            if day + timedelta(days=1) >= today
-        )
+        other_start = max(day, today)
+        other_lookups = []
+        for offset in range(7):
+            when = other_start + timedelta(days=offset)
+            for code in other_codes:
+                other_lookups.append(('other', origin_u, code, when))
 
         gathered = []
         timed_out = False
 
-        def has_flights(result: Dict[str, Any]) -> bool:
-            data = result.get('data') if isinstance(result, dict) else None
-            flights = data.get('AvailableFlights') if isinstance(data, dict) else None
-            return isinstance(flights, list) and len(flights) > 0
-
-        def run_until(items: List[tuple], deadline: float, stop_after: int) -> None:
+        def run_all(items: List[tuple], deadline: float) -> None:
             nonlocal timed_out
-            found = 0
-            for item in items:
-                if time.monotonic() > deadline:
-                    timed_out = True
-                    return
-                direction, result, when = fetch(item)
-                gathered.append((direction, result, when))
-                if has_flights(result):
-                    found += 1
-                if found >= stop_after:
-                    return
+            if not items or time.monotonic() >= deadline:
+                timed_out = timed_out or bool(items)
+                return
+            from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
-        # Same route and the return come first, so a slow city scan cannot hide them.
-        run_until(route_lookups, time.monotonic() + 14, stop_after=6)
-        run_until(other_lookups, time.monotonic() + 8, stop_after=4)
+            pool = ThreadPoolExecutor(max_workers=min(3, len(items)))
+            futures = [pool.submit(fetch, item) for item in items]
+            pending = set(futures)
+            try:
+                while pending:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        timed_out = True
+                        break
+                    done, pending = wait(pending, timeout=remaining, return_when=FIRST_COMPLETED)
+                    if not done:
+                        timed_out = True
+                        break
+                    for finished in done:
+                        try:
+                            gathered.append(finished.result())
+                        except Exception as exc:
+                            logger.warning('Suggestion worker skipped: %s', type(exc).__name__)
+            finally:
+                pool.shutdown(wait=False, cancel_futures=True)
+
+        # Same route and the return are queued first, so a long city scan cannot hide them.
+        started = time.monotonic()
+        run_all(route_lookups + other_lookups, started + 24)
 
         alternate: List[Dict[str, Any]] = []
         other: List[Dict[str, Any]] = []
@@ -1129,8 +1347,6 @@ class NiraClient:
 
         alternate.sort(key=lambda card: (card['date'], 0 if card['direction'] == 'same' else 1, card['departure_time']))
         other.sort(key=lambda card: (card['date'], card['destination'], card['departure_time']))
-        alternate = alternate[:8]
-        other = other[:8]
 
         quote_flights = []
         for card in alternate + other:
@@ -1139,7 +1355,7 @@ class NiraClient:
                 quote_flights.append(flight)
         if quote_flights:
             try:
-                self._fill_missing_display_fares({'AvailableFlights': quote_flights[:4]})
+                self._fill_missing_display_fares({'AvailableFlights': quote_flights}, limit=24)
             except Exception as exc:
                 logger.warning('Suggestion fare fill skipped: %s', type(exc).__name__)
             for card in alternate + other:
