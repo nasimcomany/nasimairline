@@ -7,6 +7,12 @@ import { useAppDispatch } from '../store/hooks';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import GlassmorphismHeader from '../components/Layout/GlassmorphismHeader';
 import { useLanguage } from '../contexts/LanguageContext';
+import {
+  checkMathCaptcha,
+  generateMathCaptcha,
+  captchaPrompt,
+  normalizeDigits,
+} from '../utils/mathCaptcha';
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +27,8 @@ const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsChecked, setTermsChecked] = useState(false);
-  const [captchaAnswer, setCaptchaAnswer] = useState(''); // ✨ جدید: ذخیره جواب کپچا
+  const [captcha, setCaptcha] = useState(() => generateMathCaptcha());
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
   
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
@@ -40,8 +47,33 @@ const RegisterPage: React.FC = () => {
     }
   };
 
+  const normalizePhone = (raw: string) => {
+    let phone = raw.replace(/[\s\-]/g, '');
+    if (phone.startsWith('+98')) phone = `0${phone.slice(3)}`;
+    else if (phone.startsWith('0098')) phone = `0${phone.slice(4)}`;
+    else if (phone.startsWith('98') && phone.length === 12) phone = `0${phone.slice(2)}`;
+    return phone;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.firstName.trim().length < 2) {
+      alert(t('auth.firstNameRequired'));
+      return;
+    }
+    if (formData.lastName.trim().length < 2) {
+      alert(t('auth.lastNameRequired'));
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      alert(t('auth.invalidEmail'));
+      return;
+    }
+    if (!/^09\d{9}$/.test(normalizePhone(formData.phone))) {
+      alert(t('auth.invalidPhone'));
+      return;
+    }
     
     if (formData.password !== formData.confirmPassword) {
       alert(t('auth.passwordMismatch'));
@@ -53,9 +85,10 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    // ✨ اعتبارسنجی کپچا قبل از نمایش مودال
-    if (!captchaAnswer.trim()) {
-      alert('لطفاً کد امنیتی را وارد کنید');
+    if (!checkMathCaptcha(captchaAnswer, captcha.answer)) {
+      alert(t('auth.captchaError') || 'کد امنیتی اشتباه است');
+      setCaptcha(generateMathCaptcha());
+      setCaptchaAnswer('');
       return;
     }
 
@@ -67,18 +100,18 @@ const RegisterPage: React.FC = () => {
     
     try {
       await dispatch(registerUser({
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        phone_number: formData.phone,
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone_number: normalizePhone(formData.phone),
         password: formData.password,
-        password_confirm: formData.password,
-        captcha: captchaAnswer, // ✨ جدید: ارسال کپچا به سرور
+        password_confirm: formData.confirmPassword,
+        captcha: captchaAnswer,
       })).unwrap();
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Registration error details:', error);
-      alert(error?.message || 'خطا در ثبت‌نام');
+      alert(typeof error === 'string' ? error : (error?.message || t('auth.registerError')));
     }
   };
 
@@ -267,23 +300,40 @@ const RegisterPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* ✨ فیلد کپچا - جدید */}
               <div>
                 <label htmlFor="captcha" className={`flex items-center gap-1.5 text-white font-medium mb-1 text-xs ${fontClass}`}>
-                  کد امنیتی (مثال: ۲ + ۳ = ؟)
+                  {t('auth.captcha')}
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="captcha"
-                    name="captcha"
-                    type="text"
-                    required
-                    value={captchaAnswer}
-                    onChange={(e) => setCaptchaAnswer(e.target.value)}
-                    className={`w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
-                    placeholder="پاسخ را وارد کنید"
-                  />
+                <div className="mt-1 flex gap-2 items-center">
+                  <div
+                    className="px-3 py-2.5 rounded-lg bg-white/90 text-blue-900 font-bold text-sm select-none"
+                    dir="ltr"
+                  >
+                    {captchaPrompt(captcha)}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCaptcha(generateMathCaptcha());
+                      setCaptchaAnswer('');
+                    }}
+                    className="px-2 py-2.5 text-xs font-semibold text-white bg-blue-800/80 rounded-lg hover:bg-blue-700"
+                  >
+                    {t('auth.captchaChange')}
+                  </button>
                 </div>
+                <input
+                  id="captcha"
+                  name="captcha"
+                  type="text"
+                  inputMode="numeric"
+                  required
+                  value={captchaAnswer}
+                  onChange={(e) => setCaptchaAnswer(normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3))}
+                  className={`mt-2 w-full bg-white/80 backdrop-blur-sm rounded-lg p-2.5 border border-white/50 text-blue-900 placeholder-blue-600/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm ${fontClass}`}
+                  placeholder={t('auth.captchaPlaceholder')}
+                  dir="ltr"
+                />
               </div>
 
               {/* ✨ بخش چک‌باکس شرایط اصلی - کنترل‌شده با state */}

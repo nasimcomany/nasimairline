@@ -10,6 +10,7 @@ from .views import (
     HeroSliderViewSet,
     HomePageSectionItemViewSet,
     HomePageSectionConfigViewSet,
+    HeaderMenuImageViewSet,
 )
 
 app_name = 'gallery'
@@ -21,6 +22,7 @@ router.register(r'images', GalleryImageViewSet, basename='image')
 router.register(r'hero-sliders', HeroSliderViewSet, basename='hero-slider')
 router.register(r'homepage-section-items', HomePageSectionItemViewSet, basename='homepage-section-item')
 router.register(r'homepage-section-configs', HomePageSectionConfigViewSet, basename='homepage-section-config')
+router.register(r'header-menu-images', HeaderMenuImageViewSet, basename='header-menu-image')
 
 urlpatterns = [
     path('', include(router.urls)),

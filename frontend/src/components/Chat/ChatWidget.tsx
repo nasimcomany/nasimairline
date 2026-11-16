@@ -9,6 +9,12 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import api from '../../services/api';
 import {
+  captchaPrompt,
+  checkMathCaptcha,
+  generateMathCaptcha,
+  normalizeDigits,
+} from '../../utils/mathCaptcha';
+import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
   PaperAirplaneIcon,
@@ -44,32 +50,26 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
   const [sessionId, setSessionId] = useState<string>(propSessionId || '');
   const [lastMessageTime, setLastMessageTime] = useState<string>('');
   
-  // Captcha state
-  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+', answer: 0 });
+  // Captcha — once per chat session (not every message)
+  const [captcha, setCaptcha] = useState(() => generateMathCaptcha());
   const [captchaInput, setCaptchaInput] = useState('');
   const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaPassed, setCaptchaPassed] = useState(false);
   const [captchaError, setCaptchaError] = useState('');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Generate new captcha
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 20) + 1;
-    const num2 = Math.floor(Math.random() * 20) + 1;
-    const operators = ['+', '-'];
-    const operator = operators[Math.floor(Math.random() * operators.length)];
-    const answer = operator === '+' ? num1 + num2 : num1 - num2;
-    setCaptcha({ num1, num2, operator, answer });
+  const refreshCaptcha = () => {
+    setCaptcha(generateMathCaptcha());
     setCaptchaInput('');
     setCaptchaError('');
   };
 
-  // Generate captcha when chat opens or when needed
   useEffect(() => {
-    if (isOpen) {
-      generateCaptcha();
+    if (isOpen && !captchaPassed) {
+      refreshCaptcha();
       setShowCaptcha(false);
     }
   }, [isOpen]);
@@ -247,41 +247,74 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
     }
   };
   
+  const isValidGuestEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
+  const extractChatError = (data: any): string => {
+    if (!data) return 'خطا در ارسال پیام';
+    if (typeof data === 'string') return data;
+    if (typeof data.detail === 'string') return data.detail;
+    if (Array.isArray(data.detail)) return String(data.detail[0] || 'خطا در ارسال پیام');
+    for (const key of ['guest_email', 'guest_name', 'message', 'non_field_errors']) {
+      const val = data[key];
+      if (typeof val === 'string') return val;
+      if (Array.isArray(val) && val[0]) return String(val[0]);
+    }
+    return 'خطا در ارسال پیام';
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!newMessage.trim()) return;
+
+    const name = guestName.trim();
+    const email = guestEmail.trim();
     
-    // For guest users, check if name/email is provided
-    if (!isAuthenticated && !guestName && !guestEmail) {
-      alert('لطفاً نام یا ایمیل خود را وارد کنید');
-      return;
+    // Guests: name OR a valid email (invalid email must not be sent to API)
+    if (!isAuthenticated) {
+      if (!name && !email) {
+        alert('لطفاً نام یا ایمیل خود را وارد کنید');
+        return;
+      }
+      if (email && !isValidGuestEmail(email)) {
+        alert('ایمیل واردشده معتبر نیست. یا ایمیل درست بنویسید یا فقط نام را پر کنید.');
+        return;
+      }
     }
 
-    // Check if captcha needs to be shown/validated
-    if (!showCaptcha) {
-      // Show captcha before sending first message
-      setShowCaptcha(true);
-      return;
-    }
-
-    // Validate captcha
-    if (parseInt(captchaInput) !== captcha.answer) {
-      setCaptchaError('کپچا اشتباه است. لطفاً دوباره تلاش کنید.');
-      generateCaptcha();
-      return;
+    // Ask captcha only until passed once this session
+    if (!captchaPassed) {
+      if (!showCaptcha) {
+        setShowCaptcha(true);
+        setCaptchaError('لطفاً کد امنیتی را وارد کنید و دوباره ارسال را بزنید.');
+        return;
+      }
+      if (!checkMathCaptcha(captchaInput, captcha.answer)) {
+        setCaptchaError('کپچا اشتباه است. لطفاً دوباره تلاش کنید.');
+        refreshCaptcha();
+        return;
+      }
+      setCaptchaPassed(true);
+      setShowCaptcha(false);
+      setCaptchaError('');
     }
     
     try {
       setIsLoading(true);
+      const activeSessionId =
+        sessionId || (!isAuthenticated ? sessionStorage.getItem(storageKey) || '' : '');
       const payload: any = {
-        message: newMessage,
-        session_id: sessionId,
+        message: newMessage.trim(),
+        session_id: activeSessionId,
       };
       
       if (!isAuthenticated) {
-        if (guestName) payload.guest_name = guestName;
-        if (guestEmail) payload.guest_email = guestEmail;
+        if (name) payload.guest_name = name;
+        // Only send email when valid — invalid EmailField was causing 400 for guests
+        if (email && isValidGuestEmail(email)) {
+          payload.guest_email = email;
+        }
       }
       
       if (chatMode === 'luggage_tracking') {
@@ -293,21 +326,18 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
       // استخراج session_id از response (اگر backend برگرداند)
       const responseData = response.data;
       if (responseData && responseData.session_id) {
-        if (responseData.session_id !== sessionId) {
+        if (responseData.session_id !== activeSessionId) {
           setSessionId(responseData.session_id);
           if (!isAuthenticated) sessionStorage.setItem(storageKey, responseData.session_id);
         }
       }
       
       setNewMessage('');
-      setCaptchaInput('');
-      setShowCaptcha(false);
-      generateCaptcha();
       // Reload messages to get the new one (با session_id جدید)
       await loadMessages();
     } catch (error: any) {
       console.error('Error sending message:', error);
-      alert(error.response?.data?.detail || 'خطا در ارسال پیام');
+      alert(extractChatError(error.response?.data));
     } finally {
       setIsLoading(false);
     }
@@ -323,8 +353,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
 
   const handleMessageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
-    // Show captcha when user starts typing
-    if (!showCaptcha && e.target.value.trim().length > 0) {
+    if (!captchaPassed && !showCaptcha && e.target.value.trim().length > 0) {
       setShowCaptcha(true);
     }
   };
@@ -512,30 +541,31 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
                   کپچا
                 </label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-2 text-center">
-                    <span className="text-lg font-bold text-blue-900 persian-font-vazir" style={{ direction: 'ltr' }}>
-                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-2 text-center" dir="ltr">
+                    <span className="text-lg font-bold text-blue-900 persian-font-vazir inline-block">
+                      {captchaPrompt(captcha)}
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={generateCaptcha}
+                    onClick={refreshCaptcha}
                     className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs persian-font-vazir"
                   >
                     تغییر
                   </button>
                 </div>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={captchaInput}
                   onChange={(e) => {
-                    setCaptchaInput(e.target.value);
+                    setCaptchaInput(normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3));
                     setCaptchaError('');
                   }}
                   placeholder="پاسخ را وارد کنید"
                   className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 persian-font-vazir"
                   style={{ direction: 'ltr', textAlign: 'right' }}
-                  required={showCaptcha}
+                  required={showCaptcha && !captchaPassed}
                 />
                 {captchaError && (
                   <p className="text-red-500 text-xs mt-1 persian-font-vazir">{captchaError}</p>
@@ -554,7 +584,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ sessionId: propSessionId }) => 
               />
               <button
                 type="submit"
-                disabled={isLoading || !newMessage.trim() || (showCaptcha && !captchaInput.trim())}
+                disabled={isLoading || !newMessage.trim() || (showCaptcha && !captchaPassed && !captchaInput.trim())}
                 className="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <PaperAirplaneIcon className="w-5 h-5" />

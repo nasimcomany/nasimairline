@@ -1,12 +1,17 @@
 """
-Seed ONLY Special Services (homepage section 1) default images + magazine articles.
-Does NOT touch hero / experience / survey / other section images.
+Seed homepage defaults (Special Services + one-time Experience/FAQ brand images) + magazine.
 
   python manage.py populate_site_defaults
   python manage.py populate_site_defaults --force
+  python manage.py populate_site_defaults --force-experience-faq
+
+Safe on every Docker / Runflare restart:
+  - Missing rows/images only
+  - Admin / limited-admin CMS edits are never overwritten unless --force
 """
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.core.management import call_command
@@ -23,23 +28,121 @@ HOME_DIR = ROOT / "defaults" / "homepage"
 MAG_DIR = ROOT / "defaults" / "magazine"
 MAG_FIXTURE = ROOT / "blog" / "fixtures" / "magazine_defaults.json"
 
-# Same images as localhost Special Services (section 1)
-SPECIAL_IMAGES = {
-    1: "44.png",
-    2: "33.png",
-    3: "22.png",
-    4: "11.png",
+# Special Services brand images + original links (order matches HomePage.tsx)
+SPECIAL_SERVICES_BRAND = {
+    1: {"file": "svc-network.jpg", "link_url": "/flights/map"},
+    2: {"file": "svc-weather.jpg", "link_url": "weather"},
+    3: {"file": "svc-mehrabad.jpg", "link_url": "https://fids.airport.ir/"},
+    4: {"file": "svc-ikia.jpg", "link_url": "https://ikac.ir/"},
 }
+SPECIAL_IMAGES = {k: v["file"] for k, v in SPECIAL_SERVICES_BRAND.items()}
+
+# Homepage experience grid (order matches HomePage.tsx)
+EXPERIENCE_BRAND = {
+    1: {
+        "file": "exp-complaints.jpg",
+        "title_fa": "ثبت شکایات",
+        "title_ar": "تسجيل الشكاوى",
+        "title_en": "Complaints",
+        "link_url": "/survey",
+    },
+    2: {
+        "file": "exp-feedback.jpg",
+        "title_fa": "انتقادات و پیشنهادات",
+        "title_ar": "انتقادات واقتراحات",
+        "title_en": "Feedback",
+        "link_url": "/tickets",
+    },
+    3: {
+        "file": "exp-mehrabad.jpg",
+        "title_fa": "پروازهای فرودگاه مهرآباد",
+        "title_ar": "رحلات مطار مهرآباد",
+        "title_en": "Mehrabad Airport Flights",
+        "link_url": "https://fids.airport.ir/",
+    },
+    4: {
+        "file": "exp-ikia.jpg",
+        "title_fa": "پروازهای فرودگاه امام خمینی (ره)",
+        "title_ar": "رحلات مطار الإمام الخميني",
+        "title_en": "Imam Khomeini Airport Flights",
+        "link_url": "https://ikac.ir/",
+    },
+    5: {
+        "file": "exp-iranology.jpg",
+        "title_fa": "ایران شناسی",
+        "title_ar": "إيرانولوجيا",
+        "title_en": "Iranology",
+        "link_url": "/iranology",
+    },
+}
+
+FAQ_BRAND = {
+    1: "faq-booking.jpg",
+    2: "faq-amenities.jpg",
+    3: "faq-status.jpg",
+    4: "faq-support.jpg",
+}
+
+# Popular routes cards (destination imagery; order matches homepage section)
+POPULAR_ROUTES_BRAND = {
+    1: {
+        "file": "route-mashhad.jpg",
+        "title_fa": "مشهد - تهران",
+        "title_ar": "مشهد - طهران",
+        "title_en": "Mashhad - Tehran",
+        "description_fa": "از ۸,۵۰۰,۰۰۰ تومان",
+        "description_ar": "من ۸,۵۰۰,۰۰۰ تومان",
+        "description_en": "From 8,500,000 Toman",
+        "link_url": "/flights/map",
+    },
+    2: {
+        "file": "route-kish.jpg",
+        "title_fa": "کیش - تهران",
+        "title_ar": "كيش - طهران",
+        "title_en": "Kish - Tehran",
+        "description_fa": "از ۷,۲۰۰,۰۰۰ تومان",
+        "description_ar": "من ۷,۲۰۰,۰۰۰ تومان",
+        "description_en": "From 7,200,000 Toman",
+        "link_url": "/flights/map",
+    },
+    3: {
+        "file": "route-shiraz.jpg",
+        "title_fa": "شیراز - مشهد",
+        "title_ar": "شيراز - مشهد",
+        "title_en": "Shiraz - Mashhad",
+        "description_fa": "از ۶,۹۰۰,۰۰۰ تومان",
+        "description_ar": "من ۶,۹۰۰,۰۰۰ تومان",
+        "description_en": "From 6,900,000 Toman",
+        "link_url": "/flights/map",
+    },
+    4: {
+        "file": "route-isfahan.jpg",
+        "title_fa": "اصفهان - تهران",
+        "title_ar": "أصفهان - طهران",
+        "title_en": "Isfahan - Tehran",
+        "description_fa": "از ۵,۸۰۰,۰۰۰ تومان",
+        "description_ar": "من ۵,۸۰۰,۰۰۰ تومان",
+        "description_en": "From 5,800,000 Toman",
+        "link_url": "/flights/map",
+    },
+}
+
+BRAND_SEED_MARKER = "homepage_brand_assets_v10.done"
 
 
 class Command(BaseCommand):
-    help = "Seed Special Services defaults (+ magazine). Other homepage images are left alone."
+    help = "Seed Special Services + one-time Experience/FAQ/Popular Routes brand images (+ magazine)."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--force",
             action="store_true",
             help="Overwrite Special Services images / force magazine content refresh",
+        )
+        parser.add_argument(
+            "--force-experience-faq",
+            action="store_true",
+            help="Force-refresh Experience/FAQ brand images even if already seeded",
         )
         parser.add_argument(
             "--skip-magazine",
@@ -50,12 +153,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         force = options["force"]
         call_command("populate_homepage_sections")
+        call_command("seed_header_menu_images")
         self._seed_special_services(force)
+        self._seed_experience_faq(force=options["force_experience_faq"])
         if not options["skip_magazine"]:
             self._seed_magazine(force)
         self.stdout.write(
             self.style.SUCCESS(
-                "Done: Special Services defaults only. Hero/experience/survey images untouched. Admin can edit all fields."
+                "Done: defaults seeded. Admin can still edit all CMS fields/images anytime."
             )
         )
 
@@ -70,7 +175,12 @@ class Command(BaseCommand):
         return path
 
     def _seed_special_services(self, force: bool):
-        for order, filename in SPECIAL_IMAGES.items():
+        """
+        Fill missing Special Service images only.
+        Never overwrite link_url / titles / admin-uploaded images unless --force.
+        """
+        for order, meta in SPECIAL_SERVICES_BRAND.items():
+            filename = meta["file"]
             path = self._open_home(filename)
             if not path:
                 continue
@@ -79,17 +189,101 @@ class Command(BaseCommand):
             ).first()
             if not item:
                 continue
+
             file_ok = False
             if item.image and not force:
                 try:
                     file_ok = item.image.storage.exists(item.image.name)
+                    # One-time migrate only known legacy placeholder filenames
+                    if file_ok and Path(item.image.name).name in {
+                        "11.png",
+                        "22.png",
+                        "33.png",
+                        "44.png",
+                    }:
+                        file_ok = False
                 except Exception:
                     file_ok = False
                 if file_ok:
+                    self.stdout.write(
+                        f"Kept CMS SPECIAL_SERVICE#{order} image (admin-owned)"
+                    )
                     continue
+
+            with path.open("rb") as fh:
+                item.image.save(path.name, File(fh), save=False)
+            # Only fill empty link on first seed; never clobber admin edits
+            if force or not (item.link_url or "").strip():
+                item.link_url = meta["link_url"]
+            item.is_active = True
+            item.save()
+            self.stdout.write(self.style.SUCCESS(f"SPECIAL_SERVICE#{order} <- {filename}"))
+
+    def _brand_marker_path(self) -> Path:
+        media_root = Path(getattr(settings, "MEDIA_ROOT", ROOT / "media"))
+        media_root.mkdir(parents=True, exist_ok=True)
+        return media_root / BRAND_SEED_MARKER
+
+    def _seed_experience_faq(self, force: bool = False):
+        marker = self._brand_marker_path()
+        if marker.exists() and not force:
+            self.stdout.write("Experience/FAQ brand assets already seeded; leave CMS as-is for admin edits.")
+            return
+
+        for order, meta in EXPERIENCE_BRAND.items():
+            path = self._open_home(meta["file"])
+            item = HomePageSectionItem.objects.filter(section_type="EXPERIENCE", order=order).first()
+            if not item or not path:
+                continue
+            item.title_fa = meta["title_fa"]
+            item.title_ar = meta["title_ar"]
+            item.title_en = meta["title_en"]
+            item.link_url = meta["link_url"]
+            item.is_active = True
+            with path.open("rb") as fh:
+                item.image.save(path.name, File(fh), save=False)
+            item.save()
+            self.stdout.write(self.style.SUCCESS(f"EXPERIENCE#{order} <- {meta['file']}"))
+
+        for order, filename in FAQ_BRAND.items():
+            path = self._open_home(filename)
+            item = HomePageSectionItem.objects.filter(section_type="FAQ", order=order).first()
+            if not item or not path:
+                continue
             with path.open("rb") as fh:
                 item.image.save(path.name, File(fh), save=True)
-            self.stdout.write(self.style.SUCCESS(f"SPECIAL_SERVICE#{order} <- {filename}"))
+            self.stdout.write(self.style.SUCCESS(f"FAQ#{order} <- {filename}"))
+
+        for order, meta in POPULAR_ROUTES_BRAND.items():
+            path = self._open_home(meta["file"])
+            item = HomePageSectionItem.objects.filter(
+                section_type="POPULAR_ROUTES", order=order
+            ).first()
+            if not item:
+                item = HomePageSectionItem(
+                    section_type="POPULAR_ROUTES",
+                    order=order,
+                    is_active=True,
+                )
+            if not path:
+                continue
+            item.title_fa = meta["title_fa"]
+            item.title_ar = meta["title_ar"]
+            item.title_en = meta["title_en"]
+            item.description_fa = meta["description_fa"]
+            item.description_ar = meta["description_ar"]
+            item.description_en = meta["description_en"]
+            item.link_url = meta["link_url"]
+            item.is_active = True
+            with path.open("rb") as fh:
+                item.image.save(path.name, File(fh), save=False)
+            item.save()
+            self.stdout.write(self.style.SUCCESS(f"POPULAR_ROUTES#{order} <- {meta['file']}"))
+
+        try:
+            marker.write_text("seeded\n", encoding="utf-8")
+        except Exception as exc:
+            self.stdout.write(self.style.WARNING(f"Could not write seed marker: {exc}"))
 
     def _seed_magazine(self, force: bool):
         if not MAG_FIXTURE.exists():
@@ -99,7 +293,8 @@ class Command(BaseCommand):
 
         data = json.loads(MAG_FIXTURE.read_text(encoding="utf-8"))
         for cat in data.get("categories", []):
-            Category.objects.update_or_create(
+            # Create missing magazine categories only — do not overwrite admin edits
+            _, created = Category.objects.get_or_create(
                 slug=cat["slug"],
                 defaults={
                     "name": cat["name"],
@@ -108,6 +303,13 @@ class Command(BaseCommand):
                     "is_active": cat.get("is_active", True),
                 },
             )
+            if force and not created:
+                Category.objects.filter(slug=cat["slug"]).update(
+                    name=cat["name"],
+                    description=cat.get("description") or "",
+                    order=cat.get("order") or 0,
+                    is_active=cat.get("is_active", True),
+                )
         author = (
             User.objects.filter(is_superuser=True).order_by("id").first()
             or User.objects.order_by("id").first()

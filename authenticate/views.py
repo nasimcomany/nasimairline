@@ -145,48 +145,63 @@ class StaffLoginView(generics.GenericAPIView):
         return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
 
+def _parse_captcha_int(value):
+    """Parse captcha numbers; accept Persian/Arabic digits; allow zero."""
+    if value is None or value == '':
+        raise ValueError('empty')
+    if isinstance(value, bool):
+        raise ValueError('invalid')
+    if isinstance(value, int):
+        return value
+    s = str(value).strip()
+    s = s.translate(str.maketrans('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789'))
+    s = s.replace(' ', '')
+    return int(s)
+
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def verify_captcha(request):
     """
-    Verify captcha for dashboard access
+    Verify captcha for dashboard access (fast, local arithmetic only).
     """
     captcha_answer = request.data.get('captcha_answer')
     captcha_num1 = request.data.get('captcha_num1')
     captcha_num2 = request.data.get('captcha_num2')
     captcha_operator = request.data.get('captcha_operator')
-    
-    if not all([captcha_answer, captcha_num1, captcha_num2, captcha_operator]):
+
+    if captcha_answer is None or captcha_num1 is None or captcha_num2 is None or not captcha_operator:
         return Response(
             {'error': 'تمام فیلدهای کپچا الزامی است.'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
-    # Calculate correct answer
-    if captcha_operator == '+':
-        correct_answer = captcha_num1 + captcha_num2
-    elif captcha_operator == '-':
-        correct_answer = captcha_num1 - captcha_num2
-    else:
-        return Response(
-            {'error': 'عملگر نامعتبر است.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    
-    # Verify answer
+
     try:
-        user_answer = int(captcha_answer)
-        if user_answer != correct_answer:
-            return Response(
-                {'error': 'کد امنیتی اشتباه است.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        num1 = _parse_captcha_int(captcha_num1)
+        num2 = _parse_captcha_int(captcha_num2)
+        user_answer = _parse_captcha_int(captcha_answer)
     except (ValueError, TypeError):
         return Response(
             {'error': 'پاسخ کپچا باید عدد باشد.'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
+    if captcha_operator == '+':
+        correct_answer = num1 + num2
+    elif captcha_operator == '-':
+        correct_answer = num1 - num2
+    else:
+        return Response(
+            {'error': 'عملگر نامعتبر است.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if user_answer != correct_answer:
+        return Response(
+            {'error': 'کد امنیتی اشتباه است.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     return Response({'message': 'کد امنیتی تأیید شد.'}, status=status.HTTP_200_OK)
 
 

@@ -1,19 +1,14 @@
-import React, { useState, useRef, useEffect, forwardRef } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setSearchParams } from '../../store/slices/flightSlice';
 import DatePicker from 'react-datepicker';
-import { registerLocale } from 'react-datepicker';
-import { faIR } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
-import { toJalaali, toGregorian } from 'jalaali-js';
 import { 
   PaperAirplaneIcon, 
   MapPinIcon, 
-  CalendarIcon, 
   TagIcon,
   ClockIcon,
-  XMarkIcon,
   ArrowsRightLeftIcon,
   TicketIcon
 } from '@heroicons/react/24/outline';
@@ -22,75 +17,19 @@ import { useChat } from '../../contexts/ChatContext';
 import CitySelect from './CitySelect';
 import PassengerSelect from './PassengerSelect';
 import CustomSelect from '../CustomSelect/CustomSelect';
+import JalaliBookingDatePicker from './JalaliBookingDatePicker';
 import { toLocalDateISO } from '../../utils/dateFormatter';
 
 interface EmiratesFlightSearchFormProps {
   onTabChange?: (tab: 'search' | 'manage' | 'whatson' | 'status' | 'services') => void;
 }
 
-// Register Persian locale
-registerLocale('fa', faIR);
-
-// Helper functions for date conversion
-const toJalaliDate = (date: Date) => {
-  const jalaali = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  return {
-    year: jalaali.jy,
-    month: jalaali.jm,
-    day: jalaali.jd
-  };
-};
-
-const toGregorianDate = (jalaliDate: { year: number; month: number; day: number }) => {
-  const gregorian = toGregorian(jalaliDate.year, jalaliDate.month, jalaliDate.day);
-  return new Date(gregorian.gy, gregorian.gm - 1, gregorian.gd);
-};
-
-// Persian month names
-const persianMonths = [
-  'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
-  'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+const englishMonths = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-// Format date in Jalali for display
-const formatJalaliDate = (date: Date): string => {
-  const jalaali = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  return `${jalaali.jy}/${jalaali.jm.toString().padStart(2, '0')}/${jalaali.jd.toString().padStart(2, '0')}`;
-};
-
-// Custom input component for Persian date display
-const JalaliDateInput = forwardRef<HTMLInputElement, { value?: string; onClick?: () => void; date: Date | null; size?: 'small' | 'large' }>(
-  ({ value: _value, onClick, date, size = 'small' }, ref) => {
-    // Always use Jalali date format, ignore the value from react-datepicker
-    const displayValue = date ? formatJalaliDate(date) : '';
-    
-    const isLarge = size === 'large';
-    
-    return (
-      <input
-        ref={ref}
-        type="text"
-        readOnly
-        value={displayValue}
-        onClick={onClick}
-        placeholder="انتخاب تاریخ"
-        className={`w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white cursor-pointer ${
-          isLarge ? 'px-3 py-2.5 text-base' : 'px-3 py-2.5 text-sm'
-        }`}
-        style={{ 
-          fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', 
-          direction: 'rtl',
-          minHeight: '48px',
-          height: '48px'
-        }}
-      />
-    );
-  }
-);
-
-JalaliDateInput.displayName = 'JalaliDateInput';
-
-// Custom header renderer for Persian calendar
+/** Month/year selects for Gregorian (EN) react-datepicker */
 const renderCustomHeader = (props: {
   date: Date;
   changeYear: (year: number) => void;
@@ -99,62 +38,90 @@ const renderCustomHeader = (props: {
   increaseMonth: () => void;
   prevMonthButtonDisabled: boolean;
   nextMonthButtonDisabled: boolean;
-  decreaseYear: () => void;
-  increaseYear: () => void;
-  prevYearButtonDisabled: boolean;
-  nextYearButtonDisabled: boolean;
-}, language: string): React.ReactElement => {
-  const { date, decreaseMonth, increaseMonth, prevMonthButtonDisabled, nextMonthButtonDisabled } = props;
-  
-  if (language === 'fa') {
-    const jalaali = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-    const monthName = persianMonths[jalaali.jm - 1];
-    const year = jalaali.jy;
+}): React.ReactElement => {
+  const {
+    date,
+    changeYear,
+    changeMonth,
+    decreaseMonth,
+    increaseMonth,
+    prevMonthButtonDisabled,
+    nextMonthButtonDisabled,
+  } = props;
 
-    return (
-      <div className="react-datepicker__header" style={{ direction: 'rtl', fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
-        <div className="react-datepicker__current-month">
-          {monthName} {year}
-        </div>
-        <div className="react-datepicker__navigation">
-          <button
-            type="button"
-            className="react-datepicker__navigation react-datepicker__navigation--next"
-            onClick={increaseMonth}
-            disabled={nextMonthButtonDisabled}
-            aria-label="ماه بعد"
-          >
-            <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--next">‹</span>
-          </button>
-          <button
-            type="button"
-            className="react-datepicker__navigation react-datepicker__navigation--previous"
-            onClick={decreaseMonth}
-            disabled={prevMonthButtonDisabled}
-            aria-label="ماه قبل"
-          >
-            <span className="react-datepicker__navigation-icon react-datepicker__navigation-icon--previous">›</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const selectStyle: React.CSSProperties = {
+    fontSize: '15px',
+    fontWeight: 700,
+    color: '#1e3a8a',
+    background: '#fff',
+    border: '1px solid #cbd5e1',
+    borderRadius: 8,
+    padding: '8px 10px',
+    minHeight: 40,
+    maxWidth: '100%',
+    cursor: 'pointer',
+  };
 
-  // Default header for non-Persian
+  const navBtnStyle: React.CSSProperties = {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    border: '1px solid #cbd5e1',
+    background: '#fff',
+    color: '#1e3a8a',
+    fontSize: 20,
+    lineHeight: 1,
+    cursor: 'pointer',
+    flexShrink: 0,
+  };
+
+  const gy = date.getFullYear();
+  const gm = date.getMonth();
+  const nowY = new Date().getFullYear();
+  const years: number[] = [];
+  for (let y = nowY; y <= nowY + 4; y += 1) years.push(y);
+
   return (
-    <div className="react-datepicker__header">
-      <div className="react-datepicker__current-month">
-        {date.toLocaleDateString(language, { month: 'long', year: 'numeric' })}
+    <div
+      className="nasim-dp-header"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 8,
+        padding: '10px 12px 6px',
+      }}
+    >
+      <button type="button" style={navBtnStyle} onClick={decreaseMonth} disabled={prevMonthButtonDisabled} aria-label="Previous month">
+        ‹
+      </button>
+      <div style={{ display: 'flex', gap: 6, flex: 1, minWidth: 0 }}>
+        <select
+          aria-label="Month"
+          value={gm}
+          onChange={(e) => changeMonth(Number(e.target.value))}
+          style={{ ...selectStyle, flex: 1.4 }}
+        >
+          {englishMonths.map((name, idx) => (
+            <option key={name} value={idx}>{name}</option>
+          ))}
+        </select>
+        <select
+          aria-label="Year"
+          value={gy}
+          onChange={(e) => changeYear(Number(e.target.value))}
+          style={{ ...selectStyle, flex: 1 }}
+        >
+          {years.map((y) => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
       </div>
+      <button type="button" style={navBtnStyle} onClick={increaseMonth} disabled={nextMonthButtonDisabled} aria-label="Next month">
+        ›
+      </button>
     </div>
   );
-};
-
-// Custom day content renderer for Persian calendar
-const renderDayContents = (day: number, date: Date) => {
-  if (!date) return day;
-  const jalaali = toJalaali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  return jalaali.jd;
 };
 
 const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onTabChange }) => {
@@ -237,98 +204,143 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
   return (
     <>
       <style>{`
-        ${language === 'fa' ? `
-          .react-datepicker {
-            font-family: 'DigiHamisheBold', Arial, sans-serif !important;
-            direction: rtl;
-            z-index: 9999 !important;
-          }
-          .react-datepicker__header {
-            direction: rtl;
-            font-family: 'DigiHamisheBold', Arial, sans-serif !important;
-          }
-          .react-datepicker__current-month {
-            font-family: 'DigiHamisheBold', Arial, sans-serif !important;
-          }
-          .react-datepicker__day-names {
-            direction: rtl;
-          }
-          .react-datepicker__week {
-            direction: rtl;
-          }
-          .react-datepicker__day {
-            font-family: 'DigiHamisheBold', Arial, sans-serif !important;
-          }
-        ` : ''}
-        .react-datepicker-popper {
-          z-index: 9999 !important;
-          max-width: calc(100vw - 0.75rem) !important;
+        .react-datepicker-popper,
+        .react-datepicker__portal {
+          z-index: 10050 !important;
+        }
+        .react-datepicker__portal {
+          background: rgba(15, 23, 42, 0.35);
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          padding: 12px;
         }
         .react-datepicker {
-          max-width: calc(100vw - 1rem) !important;
+          font-family: ${language === 'fa' ? "'DigiHamisheBold', 'DigiHamishe', Tahoma, sans-serif" : 'inherit'} !important;
+          direction: ${language === 'fa' ? 'rtl' : 'ltr'};
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 16px !important;
+          box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18) !important;
+          overflow: hidden;
+          width: min(340px, calc(100vw - 1.5rem)) !important;
+          max-width: min(340px, calc(100vw - 1.5rem)) !important;
+        }
+        .react-datepicker__header {
+          background: #f1f5f9 !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          padding: 0 0 8px !important;
+        }
+        .react-datepicker__navigation {
+          display: none !important;
+        }
+        .react-datepicker__current-month,
+        .react-datepicker-time__header,
+        .react-datepicker-year-header {
+          display: none !important;
+        }
+        .react-datepicker__day-names,
+        .react-datepicker__week {
+          display: flex;
+          justify-content: space-between;
+          margin: 0 6px;
+        }
+        .react-datepicker__day-name,
+        .react-datepicker__day {
+          width: 2.55rem !important;
+          line-height: 2.55rem !important;
+          margin: 0.12rem !important;
+          font-size: 15px !important;
+          border-radius: 10px !important;
+          font-family: inherit !important;
+        }
+        .react-datepicker__day:hover {
+          background: #dbeafe !important;
+          color: #1e3a8a !important;
+        }
+        .react-datepicker__day--selected,
+        .react-datepicker__day--keyboard-selected {
+          background: #1e3a8a !important;
+          color: #fff !important;
+          font-weight: 700 !important;
+        }
+        .react-datepicker__day--disabled {
+          color: #cbd5e1 !important;
+        }
+        .react-datepicker__month {
+          margin: 0.4rem !important;
+        }
+        .nasim-dp-header select:focus {
+          outline: 2px solid #1e3a8a;
+          outline-offset: 1px;
+        }
+        @media (max-width: 480px) {
+          .react-datepicker__day-name,
+          .react-datepicker__day {
+            width: 2.35rem !important;
+            line-height: 2.35rem !important;
+            font-size: 14px !important;
+          }
         }
       `}</style>
       <div className="rounded-3xl shadow-2xl overflow-visible max-w-full">
-      {/* Tabs */}
-      <div id="flight-search-tabs" className="flex border-b border-gray-300/30 bg-gray-400/30 backdrop-blur-xl rounded-t-3xl">
+      {/* Tabs: wrap on phone, one row on desktop */}
+      <div
+        id="flight-search-tabs"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-nowrap border-b border-gray-300/30 bg-gray-400/30 backdrop-blur-xl rounded-t-3xl overflow-hidden"
+      >
         <button
           onClick={() => handleTabChange('search')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight ${
             activeTab === 'search'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <PaperAirplaneIcon className={`w-5 h-5 ${activeTab === 'search' ? 'text-blue-900' : 'text-white'}`} />
+          <PaperAirplaneIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'search' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.bookFlight')}
         </button>
         <button
           onClick={() => handleTabChange('manage')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight ${
             activeTab === 'manage'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <TagIcon className={`w-5 h-5 ${activeTab === 'manage' ? 'text-blue-900' : 'text-white'}`} />
+          <TagIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'manage' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.manageBooking')}
         </button>
         <button
           onClick={() => handleTabChange('services')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight ${
             activeTab === 'services'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <MapPinIcon className={`w-5 h-5 ${activeTab === 'services' ? 'text-blue-900' : 'text-white'}`} />
+          <MapPinIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'services' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.specialServices')}
         </button>
         <button
           onClick={() => handleTabChange('whatson')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight ${
             activeTab === 'whatson'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <PaperAirplaneIcon className={`w-5 h-5 ${activeTab === 'whatson' ? 'text-blue-900' : 'text-white'}`} />
+          <PaperAirplaneIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'whatson' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightFacilities')}
         </button>
         <button
           onClick={() => handleTabChange('status')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight col-span-2 sm:col-span-1 lg:col-auto ${
             activeTab === 'status'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <ClockIcon className={`w-5 h-5 ${activeTab === 'status' ? 'text-blue-900' : 'text-white'}`} />
+          <ClockIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'status' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightStatus')}
         </button>
       </div>
@@ -336,13 +348,13 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
       {/* Tab Content */}
       <div className="bg-gray-200 overflow-visible rounded-b-3xl" style={{ minHeight: '220px' }}>
       {activeTab === 'search' && (
-        <form onSubmit={handleSearch} className="p-8">
+        <form onSubmit={handleSearch} className="p-4 sm:p-6 lg:p-8">
           {/* Trip Type Selector */}
-          <div className="flex flex-wrap gap-3 mb-5">
+          <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-5">
             <button
               type="button"
               onClick={() => setTripType('roundtrip')}
-              className={`px-8 py-4 rounded-lg text-lg font-bold transition-all ${
+              className={`px-4 py-2.5 sm:px-8 sm:py-4 rounded-lg text-sm sm:text-lg font-bold transition-all ${
                 tripType === 'roundtrip'
                   ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -354,7 +366,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             <button
               type="button"
               onClick={() => setTripType('oneway')}
-              className={`px-8 py-4 rounded-lg text-lg font-bold transition-all ${
+              className={`px-4 py-2.5 sm:px-8 sm:py-4 rounded-lg text-sm sm:text-lg font-bold transition-all ${
                 tripType === 'oneway'
                   ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -365,12 +377,11 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </button>
           </div>
 
-          {/* Desktop single-row fields (phones use desktop-scale viewport) */}
           <div
-            className={`grid gap-3 items-end w-full ${
+            className={`grid gap-3 items-end w-full grid-cols-1 sm:grid-cols-2 ${
               tripType === 'roundtrip'
-                ? 'grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
-                : 'grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
+                ? 'lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
+                : 'lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
             }`}
           >
             {/* Origin */}
@@ -414,44 +425,73 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
               <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                 {language === 'fa' ? 'تاریخ رفت' : t('home.flightSearch.departDate')}
               </label>
-              <DatePicker
-                selected={departureDate}
-                onChange={(date: Date | null) => setDepartureDate(date)}
-                minDate={new Date()}
-                dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
-                locale={language === 'fa' ? 'fa' : undefined}
-                className="w-full px-2 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white h-12 box-border"
-                wrapperClassName="w-full"
-                withPortal={typeof window !== 'undefined' ? window.innerWidth < 768 : false}
-                popperPlacement="bottom-start"
-                renderCustomHeader={(props) => renderCustomHeader(props, language)}
-                renderDayContents={language === 'fa' ? renderDayContents : undefined}
-                customInput={language === 'fa' ? <JalaliDateInput date={departureDate} size="large" /> : undefined}
-                required
-              />
+              {language === 'fa' ? (
+                <JalaliBookingDatePicker
+                  value={departureDate}
+                  onChange={(date) => {
+                    setDepartureDate(date);
+                    if (date && returnDate && returnDate < date) {
+                      setReturnDate(null);
+                    }
+                  }}
+                  minDate={new Date()}
+                  placeholder="انتخاب تاریخ"
+                />
+              ) : (
+                <DatePicker
+                  selected={departureDate}
+                  onChange={(date: Date | null) => {
+                    setDepartureDate(date);
+                    if (date && returnDate && returnDate < date) {
+                      setReturnDate(null);
+                    }
+                  }}
+                  minDate={new Date()}
+                  dateFormat="yyyy-MM-dd"
+                  className="w-full px-2 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white h-12 box-border"
+                  wrapperClassName="w-full block"
+                  withPortal
+                  portalId="nasim-datepicker-portal"
+                  popperPlacement="bottom-start"
+                  popperProps={{ strategy: 'fixed' }}
+                  renderCustomHeader={renderCustomHeader}
+                  shouldCloseOnSelect
+                  required
+                />
+              )}
             </div>
 
             {/* Return Date */}
             {tripType === 'roundtrip' && (
-              <div className="min-w-0 w-full">
+              <div className="min-w-0 w-full relative z-20">
                 <label className="block text-sm font-medium text-gray-600 mb-1.5" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
                   {language === 'fa' ? 'تاریخ برگشت' : t('home.flightSearch.returnDate')}
                 </label>
-                <DatePicker
-                  selected={returnDate}
-                  onChange={(date: Date | null) => setReturnDate(date)}
-                  minDate={departureDate || new Date()}
-                  dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
-                  locale={language === 'fa' ? 'fa' : undefined}
-                  className="w-full px-2 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white h-12 box-border"
-                  wrapperClassName="w-full"
-                  withPortal={typeof window !== 'undefined' ? window.innerWidth < 768 : false}
-                  popperPlacement="bottom-start"
-                  renderCustomHeader={(props) => renderCustomHeader(props, language)}
-                  renderDayContents={language === 'fa' ? renderDayContents : undefined}
-                  customInput={language === 'fa' ? <JalaliDateInput date={returnDate} size="large" /> : undefined}
-                  required
-                />
+                {language === 'fa' ? (
+                  <JalaliBookingDatePicker
+                    value={returnDate}
+                    onChange={setReturnDate}
+                    minDate={departureDate || new Date()}
+                    placeholder="انتخاب تاریخ"
+                  />
+                ) : (
+                  <DatePicker
+                    selected={returnDate}
+                    onChange={(date: Date | null) => setReturnDate(date)}
+                    minDate={departureDate || new Date()}
+                    openToDate={returnDate || departureDate || new Date()}
+                    dateFormat="yyyy-MM-dd"
+                    className="w-full px-2 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white h-12 box-border"
+                    wrapperClassName="w-full block"
+                    withPortal
+                    portalId="nasim-datepicker-portal"
+                    popperPlacement="bottom-end"
+                    popperProps={{ strategy: 'fixed' }}
+                    renderCustomHeader={renderCustomHeader}
+                    shouldCloseOnSelect
+                    required
+                  />
+                )}
               </div>
             )}
 
@@ -609,21 +649,30 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                 {t('home.flightSearch.flightDate')}
               </label>
               <div className="h-12">
-                <DatePicker
-                  selected={whatsonDate}
-                  onChange={(date: Date | null) => setWhatsonDate(date)}
-                  minDate={new Date()}
-                  dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
-                  locale={language === 'fa' ? 'fa' : undefined}
-                  className="w-full text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                  wrapperClassName="w-full h-full"
-                  withPortal={typeof window !== 'undefined' ? window.innerWidth < 768 : false}
-                  popperPlacement="bottom-start"
-                  renderCustomHeader={(props) => renderCustomHeader(props, language)}
-                  renderDayContents={language === 'fa' ? renderDayContents : undefined}
-                  customInput={language === 'fa' ? <JalaliDateInput date={whatsonDate} size="large" /> : undefined}
-                  required
-                />
+                {language === 'fa' ? (
+                  <JalaliBookingDatePicker
+                    value={whatsonDate}
+                    onChange={setWhatsonDate}
+                    minDate={new Date()}
+                    placeholder="انتخاب تاریخ"
+                  />
+                ) : (
+                  <DatePicker
+                    selected={whatsonDate}
+                    onChange={(date: Date | null) => setWhatsonDate(date)}
+                    minDate={new Date()}
+                    dateFormat="yyyy-MM-dd"
+                    className="w-full text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                    wrapperClassName="w-full h-full block"
+                    withPortal
+                    portalId="nasim-datepicker-portal"
+                    popperPlacement="bottom-start"
+                    popperProps={{ strategy: 'fixed' }}
+                    renderCustomHeader={renderCustomHeader}
+                    shouldCloseOnSelect
+                    required
+                  />
+                )}
               </div>
             </div>
             <button
@@ -661,21 +710,30 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
                 {t('home.flightSearch.flightDate')}
               </label>
               <div className="h-12">
-                <DatePicker
-                  selected={statusDate}
-                  onChange={(date: Date | null) => setStatusDate(date)}
-                  minDate={new Date()}
-                  dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy-MM-dd'}
-                  locale={language === 'fa' ? 'fa' : undefined}
-                  className="w-full text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
-                  wrapperClassName="w-full h-full"
-                  withPortal={typeof window !== 'undefined' ? window.innerWidth < 768 : false}
-                  popperPlacement="bottom-start"
-                  renderCustomHeader={(props) => renderCustomHeader(props, language)}
-                  renderDayContents={language === 'fa' ? renderDayContents : undefined}
-                  customInput={language === 'fa' ? <JalaliDateInput date={statusDate} size="large" /> : undefined}
-                  required
-                />
+                {language === 'fa' ? (
+                  <JalaliBookingDatePicker
+                    value={statusDate}
+                    onChange={setStatusDate}
+                    minDate={new Date()}
+                    placeholder="انتخاب تاریخ"
+                  />
+                ) : (
+                  <DatePicker
+                    selected={statusDate}
+                    onChange={(date: Date | null) => setStatusDate(date)}
+                    minDate={new Date()}
+                    dateFormat="yyyy-MM-dd"
+                    className="w-full text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 bg-white"
+                    wrapperClassName="w-full h-full block"
+                    withPortal
+                    portalId="nasim-datepicker-portal"
+                    popperPlacement="bottom-start"
+                    popperProps={{ strategy: 'fixed' }}
+                    renderCustomHeader={renderCustomHeader}
+                    shouldCloseOnSelect
+                    required
+                  />
+                )}
               </div>
             </div>
             <button

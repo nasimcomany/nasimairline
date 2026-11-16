@@ -5,7 +5,15 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from django.core.exceptions import ValidationError
 from django.db import models
-from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
+from .models import (
+    GalleryCategory,
+    GalleryAlbum,
+    GalleryImage,
+    HeroSlider,
+    HomePageSectionItem,
+    HomePageSectionConfig,
+    HeaderMenuImage,
+)
 
 
 class BaseGallerySerializer(serializers.ModelSerializer):
@@ -342,15 +350,15 @@ class HeroSliderSerializer(serializers.ModelSerializer):
 class HomePageSectionItemSerializer(serializers.ModelSerializer):
     """Serializer for HomePageSectionItem - public API"""
     image_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = HomePageSectionItem
         fields = [
             'id', 'uuid', 'section_type', 'title_fa', 'title_ar', 'title_en',
             'description_fa', 'description_ar', 'description_en',
-            'image_url', 'link_url', 'order', 'is_active'
+            'image_url', 'link_url', 'order', 'is_active', 'updated_at',
         ]
-    
+
     def get_image_url(self, obj):
         if obj.image:
             request = self.context.get('request')
@@ -371,4 +379,24 @@ class HomePageSectionConfigSerializer(serializers.ModelSerializer):
             'title2_fa', 'title2_ar', 'title2_en',
             'title3_fa', 'title3_ar', 'title3_en',
         ]
+
+
+class HeaderMenuImageSerializer(serializers.ModelSerializer):
+    """Public serializer for header mega-menu images"""
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = HeaderMenuImage
+        fields = [
+            'id', 'uuid', 'menu_key', 'item_key', 'label_fa', 'label_en', 'label_ar',
+            'image_url', 'order', 'is_active',
+        ]
+
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 

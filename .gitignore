@@ -39,7 +39,8 @@ frontend/node_modules/
 node_modules/
 npm-debug.log*
 yarn-error.log*
-frontend/build/
+# Runflare Docker uses committed SPA (see Dockerfile) — do NOT ignore frontend/build.
+# frontend/build/
 
 # Django artifacts
 staticfiles/

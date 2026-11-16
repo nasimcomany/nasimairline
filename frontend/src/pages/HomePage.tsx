@@ -47,6 +47,55 @@ import {
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 
+const DEFAULT_HERO_IMAGES = [
+  '/images/tstnasim.jpg',
+  '/images/tstnasim2.jpg',
+  '/images/tstnasim3.jpg',
+  '/images/tstnasim4.jpg',
+  '/images/tstnasim5.jpg',
+];
+
+/** Persist last good hero so the next visit paints CMS copy/images immediately. */
+const HERO_BOOTSTRAP_KEY = 'nasim.heroBootstrap.v2';
+
+type HeroBootstrap = {
+  images: string[];
+  hero?: HomePageSectionConfig;
+};
+
+function readHeroBootstrap(): HeroBootstrap | null {
+  try {
+    const raw = localStorage.getItem(HERO_BOOTSTRAP_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as HeroBootstrap;
+    if (!Array.isArray(parsed?.images) || parsed.images.length === 0) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeHeroBootstrap(data: HeroBootstrap) {
+  try {
+    localStorage.setItem(HERO_BOOTSTRAP_KEY, JSON.stringify(data));
+  } catch {
+    /* quota / private mode — ignore */
+  }
+}
+
+function preloadImage(url: string): Promise<void> {
+  return new Promise((resolve) => {
+    if (!url) {
+      resolve();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = url;
+  });
+}
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,16 +104,12 @@ const HomePage: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('general');
   
-  // Hero Slider state
-  // تصاویر از API دریافت می‌شوند و هر 12 ثانیه به صورت افقی تغییر می‌کنند
+  // Hero Slider state — hydrate from last successful CMS payload when available
   const [heroSliders, setHeroSliders] = useState<HeroSlider[]>([]);
-  const [heroImages, setHeroImages] = useState<string[]>([
-    '/images/tstnasim.jpg',
-    '/images/tstnasim2.jpg',
-    '/images/tstnasim3.jpg',
-    '/images/tstnasim4.jpg',
-    '/images/tstnasim5.jpg'
-  ]);
+  const [heroImages, setHeroImages] = useState<string[]>(() => {
+    const cached = readHeroBootstrap();
+    return cached?.images?.length ? cached.images : [...DEFAULT_HERO_IMAGES];
+  });
   const [currentHeroImageIndex, setCurrentHeroImageIndex] = useState(0);
 
   // Flight Search state
@@ -109,13 +154,19 @@ const HomePage: React.FC = () => {
   const [activeFlightTab, setActiveFlightTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
   /** Height of the glass tab bar so its blue bottom edge can sit on the hero bottom */
   const [flightTabBarHeight, setFlightTabBarHeight] = useState(68);
+  const [flightPanelHeight, setFlightPanelHeight] = useState(280);
   const HERO_SLIDER_HEIGHT = 560;
   const [specialServicesItems, setSpecialServicesItems] = useState<HomePageSectionItem[]>([]);
   const [experienceItems, setExperienceItems] = useState<HomePageSectionItem[]>([]);
   const [surveyItems, setSurveyItems] = useState<HomePageSectionItem[]>([]);
   const [faqItems, setFaqItems] = useState<HomePageSectionItem[]>([]);
   const [popularRouteItems, setPopularRouteItems] = useState<HomePageSectionItem[]>([]);
-  const [sectionConfigs, setSectionConfigs] = useState<Record<string, HomePageSectionConfig>>({});
+  const [sectionsReady, setSectionsReady] = useState(false);
+  const [sectionConfigs, setSectionConfigs] = useState<Record<string, HomePageSectionConfig>>(() => {
+    const cached = readHeroBootstrap();
+    if (cached?.hero) return { HERO: cached.hero };
+    return {} as Record<string, HomePageSectionConfig>;
+  });
   const [selectedFAQ, setSelectedFAQ] = useState<number | null>(null);
 
   const reservedSeats = ['A1', 'B2', 'C3', 'D4', 'A5', 'B6'];
@@ -136,107 +187,59 @@ const HomePage: React.FC = () => {
     linkUrl?: string;
   }
 
+  const routeImageBust = 'v=1';
+  const brandedRouteImages = [
+    `/images/route-mashhad.jpg?${routeImageBust}`,
+    `/images/route-kish.jpg?${routeImageBust}`,
+    `/images/route-shiraz.jpg?${routeImageBust}`,
+    `/images/route-isfahan.jpg?${routeImageBust}`,
+  ];
+
   const defaultOfferCards: OfferCard[] = [
     {
       id: 1,
-      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'دبی', ar: 'دبي', en: 'Dubai' },
-      price: { fa: '۱۵,۸۰۰,۰۰۰ تومان', ar: '۱۵,۸۰۰,۰۰۰ ريال', en: '15,800,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۰۵', ar: '۱۴۰۴/۱۰/۰۵', en: '2025/12/26' },
-      image: '/images/tehran.jpg',
-      alt: 'تهران - دبی',
-      fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
+      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
+      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
+      price: { fa: '۸,۵۰۰,۰۰۰ تومان', ar: '۸,۵۰۰,۰۰۰ ريال', en: '8,500,000 Toman' },
+      date: { fa: '', ar: '', en: '' },
+      image: brandedRouteImages[0],
+      alt: 'مشهد - تهران',
+      fallbackImage: brandedRouteImages[0],
+      linkUrl: '/flights/map',
     },
     {
       id: 2,
-      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      to: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
-      price: { fa: '۹,۵۰۰,۰۰۰ تومان', ar: '۹,۵۰۰,۰۰۰ ريال', en: '9,500,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۰۸', ar: '۱۴۰۴/۱۰/۰۸', en: '2025/12/29' },
-      image: '/images/mashhad.jpeg',
-      alt: 'مشهد - کیش',
-      fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
+      from: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
+      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
+      price: { fa: '۷,۲۰۰,۰۰۰ تومان', ar: '۷,۲۰۰,۰۰۰ ريال', en: '7,200,000 Toman' },
+      date: { fa: '', ar: '', en: '' },
+      image: brandedRouteImages[1],
+      alt: 'کیش - تهران',
+      fallbackImage: brandedRouteImages[1],
+      linkUrl: '/flights/map',
     },
     {
       id: 3,
-      from: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
-      to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      price: { fa: '۶,۲۰۰,۰۰۰ تومان', ar: '۶,۲۰۰,۰۰۰ ريال', en: '6,200,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۱۰', ar: '۱۴۰۴/۱۰/۱۰', en: '2025/12/31' },
-      image: '/images/isfahan.jpg',
-      alt: 'اصفهان - تهران',
-      fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
+      from: { fa: 'شیراز', ar: 'شيراز', en: 'Shiraz' },
+      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
+      price: { fa: '۶,۹۰۰,۰۰۰ تومان', ar: '۶,۹۰۰,۰۰۰ ريال', en: '6,900,000 Toman' },
+      date: { fa: '', ar: '', en: '' },
+      image: brandedRouteImages[2],
+      alt: 'شیراز - مشهد',
+      fallbackImage: brandedRouteImages[2],
+      linkUrl: '/flights/map',
     },
     {
       id: 4,
-      from: { fa: 'تبریز', ar: 'تبريز', en: 'Tabriz' },
-      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۸,۹۰۰,۰۰۰ تومان', ar: '۸,۹۰۰,۰۰۰ ريال', en: '8,900,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۱۲', ar: '۱۴۰۴/۱۰/۱۲', en: '2026/01/02' },
-      image: '/images/tabriz.jpg',
-      alt: 'تبریز - مشهد',
-      fallbackImage: '/images/sheremetyevo-airport-view-in-rainy-evening-moscow-free-video.jpg'
-    },
-    {
-      id: 5,
-      from: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
+      from: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
       to: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      price: { fa: '۱۰,۳۰۰,۰۰۰ تومان', ar: '۱۰,۳۰۰,۰۰۰ ريال', en: '10,300,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۱۵', ar: '۱۴۰۴/۱۰/۱۵', en: '2026/01/05' },
-      image: '/images/kish.jpg',
-      alt: 'کیش - تهران',
-      fallbackImage: '/images/airport-crew.jpg'
+      price: { fa: '۵,۸۰۰,۰۰۰ تومان', ar: '۵,۸۰۰,۰۰۰ ريال', en: '5,800,000 Toman' },
+      date: { fa: '', ar: '', en: '' },
+      image: brandedRouteImages[3],
+      alt: 'اصفهان - تهران',
+      fallbackImage: brandedRouteImages[3],
+      linkUrl: '/flights/map',
     },
-    {
-      id: 6,
-      from: { fa: 'آبادان', ar: 'أبادان', en: 'Abadan' },
-      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۱۱,۷۰۰,۰۰۰ تومان', ar: '۱۱,۷۰۰,۰۰۰ ريال', en: '11,700,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۱۸', ar: '۱۴۰۴/۱۰/۱۸', en: '2026/01/08' },
-      image: '/images/abadan.jpeg',
-      alt: 'آبادان - مشهد',
-      fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
-    },
-    {
-      id: 7,
-      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'اصفهان', ar: 'أصفهان', en: 'Isfahan' },
-      price: { fa: '۷,۴۰۰,۰۰۰ تومان', ar: '۷,۴۰۰,۰۰۰ ريال', en: '7,400,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۲۰', ar: '۱۴۰۴/۱۰/۲۰', en: '2026/01/10' },
-      image: '/images/tehran.jpg',
-      alt: 'تهران - اصفهان',
-      fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
-    },
-    {
-      id: 8,
-      from: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      to: { fa: 'تبریز', ar: 'تبريز', en: 'Tabriz' },
-      price: { fa: '۹,۸۰۰,۰۰۰ تومان', ar: '۹,۸۰۰,۰۰۰ ريال', en: '9,800,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۲۲', ar: '۱۴۰۴/۱۰/۲۲', en: '2026/01/12' },
-      image: '/images/mashhad.jpeg',
-      alt: 'مشهد - تبریز',
-      fallbackImage: '/images/airport-plane-photo_991869-62.jpg'
-    },
-    {
-      id: 9,
-      from: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
-      to: { fa: 'مشهد', ar: 'مشهد', en: 'Mashhad' },
-      price: { fa: '۱۲,۱۰۰,۰۰۰ تومان', ar: '۱۲,۱۰۰,۰۰۰ ريال', en: '12,100,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۲۵', ar: '۱۴۰۴/۱۰/۲۵', en: '2026/01/15' },
-      image: '/images/kish.jpg',
-      alt: 'کیش - مشهد',
-      fallbackImage: '/images/airplane-clouds-night_864588-19786.jpg'
-    },
-    {
-      id: 10,
-      from: { fa: 'تهران', ar: 'طهران', en: 'Tehran' },
-      to: { fa: 'کیش', ar: 'كيش', en: 'Kish' },
-      price: { fa: '۸,۶۰۰,۰۰۰ تومان', ar: '۸,۶۰۰,۰۰۰ ريال', en: '8,600,000 Toman' },
-      date: { fa: '۱۴۰۴/۱۰/۲۸', ar: '۱۴۰۴/۱۰/۲۸', en: '2026/01/18' },
-      image: '/images/tehran.jpg',
-      alt: 'تهران - کیش',
-      fallbackImage: '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg'
-    }
   ];
 
   const splitRouteTitle = (title: string) => {
@@ -249,10 +252,15 @@ const HomePage: React.FC = () => {
 
   const activeOfferCards: OfferCard[] = useMemo(() => {
     if (!popularRouteItems.length) return defaultOfferCards;
-    return popularRouteItems.map((item) => {
+    return popularRouteItems.map((item, index) => {
       const fa = splitRouteTitle(item.title_fa || '');
       const ar = splitRouteTitle(item.title_ar || item.title_fa || '');
       const en = splitRouteTitle(item.title_en || item.title_fa || '');
+      const branded = brandedRouteImages[index % brandedRouteImages.length];
+      const cmsUrl = item.image_url || '';
+      const image = cmsUrl
+        ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}${routeImageBust}`
+        : branded;
       return {
         id: item.id,
         from: { fa: fa.from, ar: ar.from, en: en.from },
@@ -263,17 +271,17 @@ const HomePage: React.FC = () => {
           en: item.description_en || '',
         },
         date: { fa: '', ar: '', en: '' },
-        image: item.image_url || '/images/tehran.jpg',
+        image,
         alt: item.title_fa,
-        fallbackImage: '/images/airport-plane-photo_991869-62.jpg',
-        linkUrl: item.link_url || '/tickets',
+        fallbackImage: branded,
+        linkUrl: (item.link_url || '').trim() || '/flights/map',
       };
     });
   }, [popularRouteItems]);
 
   // State for managing visible cards and queue
   const [visibleCardIds, setVisibleCardIds] = useState<number[]>([1, 2, 3, 4]);
-  const [queueCardIds, setQueueCardIds] = useState<number[]>([5, 6, 7, 8, 9, 10]);
+  const [queueCardIds, setQueueCardIds] = useState<number[]>([]);
   const [newCardId, setNewCardId] = useState<number | null>(null);
   const [removingCard, setRemovingCard] = useState<OfferCard | null>(null);
   
@@ -304,57 +312,79 @@ const HomePage: React.FC = () => {
     if (!flightInfo.passengers) setFlightInfo(prev => ({ ...prev, passengers: t('home.flightSearch.defaultPassengers') }));
   }, [t]);
 
-  // Keep the glass tab bar's blue bottom edge flush with the hero slider bottom
+  // Keep the glass tab bar flush with the hero, and reserve space for hanging tab body
   useLayoutEffect(() => {
     const measure = () => {
       const tabs = document.getElementById('flight-search-tabs');
-      if (!tabs) return;
-      const h = Math.round(tabs.getBoundingClientRect().height);
-      if (h > 0) setFlightTabBarHeight(h);
+      const panel = document.getElementById('flight-search-panel');
+      if (tabs) {
+        const h = Math.round(tabs.getBoundingClientRect().height);
+        if (h > 0) setFlightTabBarHeight(h);
+      }
+      if (panel) {
+        const h = Math.round(panel.getBoundingClientRect().height);
+        if (h > 0) setFlightPanelHeight(h);
+      }
     };
     measure();
+    const raf = window.requestAnimationFrame(measure);
     window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener('resize', measure);
+    };
   }, [activeFlightTab, language]);
 
-  // Fetch Hero Slider images from API
+  // Fetch Hero Slider images from API (preload first frame before swapping URLs)
   useEffect(() => {
+    let cancelled = false;
     const fetchHeroSliders = async () => {
       try {
         const sliders = await galleryService.getHeroSliders();
-        
-        if (sliders && sliders.length > 0) {
-          setHeroSliders(sliders);
-          const imageUrls = sliders
-            .map((slider) => slider.image_url)
-            .filter((url): url is string => Boolean(url && String(url).trim()));
-          // Keep local public defaults when CMS slides have no usable image yet
-          if (imageUrls.length > 0) {
-            setHeroImages(imageUrls);
-          }
-        }
+        if (cancelled || !sliders?.length) return;
+
+        setHeroSliders(sliders);
+        const imageUrls = sliders
+          .map((slider) => slider.image_url)
+          .filter((url): url is string => Boolean(url && String(url).trim()));
+        if (!imageUrls.length) return;
+
+        const sameAsCurrent =
+          imageUrls.length === heroImages.length &&
+          imageUrls.every((url, i) => url === heroImages[i]);
+        if (sameAsCurrent) return;
+
+        await preloadImage(imageUrls[0]);
+        if (!cancelled) setHeroImages(imageUrls);
       } catch (error) {
         console.error('Error loading hero sliders:', error);
       }
     };
 
     fetchHeroSliders();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- bootstrap once on mount
   }, []);
 
   // Fetch Homepage section items + titles from CMS
   useEffect(() => {
+    let cancelled = false;
     const fetchSections = async () => {
       try {
         const [items, configs] = await Promise.all([
           galleryService.getHomePageSectionItems(),
           galleryService.getHomePageSectionConfigs(),
         ]);
+        if (cancelled) return;
         setSpecialServicesItems(items.special_services);
         setExperienceItems(items.experience);
         setSurveyItems(items.survey);
         setFaqItems(items.faq);
         setPopularRouteItems(items.popular_routes);
         setSectionConfigs(configs);
+        setSectionsReady(true);
         if (items.popular_routes.length > 0) {
           const ids = items.popular_routes.map((r) => r.id);
           setVisibleCardIds(ids.slice(0, 4));
@@ -362,10 +392,30 @@ const HomePage: React.FC = () => {
         }
       } catch (error) {
         console.error('Error loading homepage sections:', error);
+        if (!cancelled) setSectionsReady(true);
       }
     };
     fetchSections();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  // Persist last good hero snapshot for instant correct first paint next visit.
+  // Only lock images after CMS sliders arrive so we don't cache local placeholders.
+  useEffect(() => {
+    const hero = sectionConfigs.HERO;
+    if (!hero) return;
+    const prev = readHeroBootstrap();
+    const images =
+      heroSliders.length > 0 && heroImages.length > 0
+        ? heroImages
+        : prev?.images?.length
+          ? prev.images
+          : heroImages;
+    if (!images.length) return;
+    writeHeroBootstrap({ images, hero });
+  }, [sectionConfigs, heroImages, heroSliders]);
 
   const pickLang = (fa?: string, ar?: string, en?: string, fallback = '') => {
     const value = language === 'fa' ? fa : language === 'ar' ? ar : en;
@@ -383,6 +433,51 @@ const HomePage: React.FC = () => {
     if (line === 2) return pickLang(c.title2_fa, c.title2_ar, c.title2_en, fallback);
     return pickLang(c.title3_fa, c.title3_ar, c.title3_en, fallback);
   };
+
+  const surveyBanner = useMemo(() => {
+    const survey = surveyItems[0];
+    // SURVEY banner copy is owned by HomePageSectionConfig (title1/2/3).
+    // Item is for image + link only; admin sync keeps config ↔ item aligned.
+    const title = pickConfig('SURVEY', 1, t('home.loyalty.enhanceTitle'));
+    const description = pickConfig(
+      'SURVEY',
+      2,
+      t('home.loyalty.fullDescription')
+    );
+    const buttonLabel = pickConfig(
+      'SURVEY',
+      3,
+      language === 'fa'
+        ? 'لینک نظرسنجی'
+        : language === 'ar'
+        ? 'رابط الاستبيان'
+        : 'Survey Link'
+    );
+    const bust = encodeURIComponent(
+      survey?.updated_at || String(survey?.id || survey?.uuid || '')
+    );
+    const cmsUrl = (survey?.image_url || '').trim();
+    // Wait for CMS before choosing image — avoids flashing the static fallback then swapping
+    let imageUrl: string | null = null;
+    if (sectionsReady) {
+      imageUrl = cmsUrl
+        ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}v=${bust}`
+        : '/images/airport-crew.jpg';
+    }
+    return {
+      survey,
+      title,
+      description,
+      buttonLabel,
+      imageUrl,
+      linkUrl: survey?.link_url || '/membership',
+    };
+  }, [surveyItems, sectionConfigs, language, t, sectionsReady]);
+
+  const [surveyImageSrc, setSurveyImageSrc] = useState<string | null>(null);
+  useEffect(() => {
+    setSurveyImageSrc(surveyBanner.imageUrl);
+  }, [surveyBanner.imageUrl]);
 
   // Helper: handle section item click (link_url)
   const handleSectionItemClick = (linkUrl: string) => {
@@ -1067,21 +1162,22 @@ const HomePage: React.FC = () => {
       <section
         id="search-form"
         className="relative z-20 overflow-visible"
-        style={{ paddingBottom: 300 }}
+        style={{ paddingBottom: Math.max(120, flightPanelHeight - flightTabBarHeight + 40) }}
       >
         <div
           className="absolute inset-x-0 top-0 overflow-hidden"
-          style={{ height: HERO_SLIDER_HEIGHT, backgroundColor: 'rgba(15, 23, 42, 0.35)' }}
+          style={{
+            height: HERO_SLIDER_HEIGHT,
+            backgroundColor: 'rgba(15, 23, 42, 0.35)',
+            // Cover paint before <img> finishes — avoids gray + alt-text flash
+            backgroundImage: heroImages[0] ? `url(${heroImages[0]})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+          }}
         >
           {heroImages.map((imageUrl, index) => {
             const slider = heroSliders[index];
-            const fallbacks = [
-              '/images/tstnasim.jpg',
-              '/images/tstnasim2.jpg',
-              '/images/tstnasim3.jpg',
-              '/images/tstnasim4.jpg',
-              '/images/tstnasim5.jpg',
-            ];
+            const fallbacks = DEFAULT_HERO_IMAGES;
             const SliderWrapper = slider?.link_url ? 'a' : 'div';
             const wrapperProps = slider?.link_url
               ? {
@@ -1109,9 +1205,9 @@ const HomePage: React.FC = () => {
               >
                 <img
                   src={imageUrl}
-                  alt={slider?.alt_text || `Hero image ${index + 1}`}
+                  alt={slider?.alt_text || ''}
                   loading={index === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
+                  decoding={index === 0 ? 'sync' : 'async'}
                   fetchPriority={index === 0 ? 'high' : 'low'}
                   className={`w-full h-full object-cover ${
                     slider?.link_url ? 'hover:opacity-95' : ''
@@ -1195,20 +1291,20 @@ const HomePage: React.FC = () => {
           bottom edge exactly on the hero bottom. White form body hangs below.
         */}
         <div
-          className="absolute inset-x-0 z-30 px-6 md:px-8"
+          className="absolute inset-x-0 z-30 px-3 sm:px-6 md:px-8"
           style={{
             top: HERO_SLIDER_HEIGHT - flightTabBarHeight,
             pointerEvents: 'auto',
           }}
         >
-          <div className="max-w-7xl mx-auto w-full">
+          <div id="flight-search-panel" className="max-w-7xl mx-auto w-full">
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
           </div>
         </div>
       </section>
 
       {/* Quote below booking — lower z so it never covers the form */}
-      <section className="relative z-0 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 24 }}>
+      <section className="relative z-0 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 32 }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 
@@ -1257,44 +1353,46 @@ const HomePage: React.FC = () => {
                 direction: language === 'en' ? 'ltr' : 'rtl'
               }}
             >
-              {(() => {
-              const config = sectionConfigs['SPECIAL_SERVICE'];
-              return config?.title1_fa || config?.title1_ar || config?.title1_en
-                ? (language === 'fa' ? config.title1_fa : language === 'ar' ? config.title1_ar : config.title1_en)
-                : t('home.services.specialTitle');
-            })()}
+              {pickConfig('SPECIAL_SERVICE', 1, t('home.services.specialTitle'))}
             </h2>
           </div>
 
-          {/* Special Services — defaults match localhost; CMS image/title/link win when set */}
+          {/* Special Services — CMS image/title/link win when set */}
           <div className="flex flex-row flex-nowrap items-stretch gap-3 sm:gap-5 max-w-full overflow-x-auto pb-1" style={{ justifyContent: 'center' }}>
             {(
               (() => {
+                const svcBust = 'v=7';
                 const defaults = [
-                  { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: '/images/44.png', link_url: '/flights/map', order: 1 },
-                  { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: '/images/33.png', link_url: 'weather', order: 2 },
-                  { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: '/images/22.png', link_url: 'https://fids.airport.ir/', order: 3 },
-                  { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: '/images/11.png', link_url: 'https://ikac.ir/', order: 4 },
+                  { id: 1, title_fa: 'شبکه پروازی', title_ar: 'شبكة الطيران', title_en: 'Flight Network', image_url: `/images/svc-network.jpg?${svcBust}`, link_url: '/flights/map', order: 1 },
+                  { id: 2, title_fa: 'آب و هوا', title_ar: 'الطقس', title_en: 'Weather', image_url: `/images/svc-weather.jpg?${svcBust}`, link_url: 'weather', order: 2 },
+                  { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: `/images/svc-mehrabad.jpg?${svcBust}`, link_url: 'https://fids.airport.ir/', order: 3 },
+                  { id: 4, title_fa: 'پروازهای فرودگاه امام', title_ar: 'رحلات مطار الإمام', title_en: 'Imam Airport Flights', image_url: `/images/svc-ikia.jpg?${svcBust}`, link_url: 'https://ikac.ir/', order: 4 },
                 ] as HomePageSectionItem[];
                 if (!specialServicesItems.length) return defaults;
-                return specialServicesItems.map((item, i) => ({
-                  ...item,
-                  image_url: item.image_url || defaults[i]?.image_url || defaults[0].image_url,
-                  link_url: item.link_url || defaults[i]?.link_url || '',
-                }));
+                return specialServicesItems.map((item, i) => {
+                  const branded = defaults[i]?.image_url || defaults[0].image_url;
+                  const cmsUrl = item.image_url || '';
+                  const image_url = cmsUrl
+                    ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}${svcBust}`
+                    : branded;
+                  return {
+                    ...item,
+                    image_url,
+                    link_url: item.link_url || defaults[i]?.link_url || '',
+                  };
+                });
               })()
             ).map((item, idx) => {
-              const title = language === 'fa' ? item.title_fa : language === 'ar' ? item.title_ar : item.title_en;
-              const defaultImgs = ['/images/44.png', '/images/33.png', '/images/22.png', '/images/11.png'];
+              const title = pickLang(item.title_fa, item.title_ar, item.title_en, '');
+              const defaultImgs = [
+                '/images/svc-network.jpg?v=7',
+                '/images/svc-weather.jpg?v=7',
+                '/images/svc-mehrabad.jpg?v=7',
+                '/images/svc-ikia.jpg?v=7',
+              ];
               const imgSrc = item.image_url || defaultImgs[idx] || defaultImgs[0];
               const isExpanded = hoveredService === null ? idx === 0 : hoveredService === idx + 1;
-              const linkUrl = (() => {
-                const isNetwork = /شبکه پروازی|Flight Network|شبكة الطيران/i.test(title) || item.id === 1;
-                const isWeather = /آب و هوا|وضعیت آب و هوا|Weather|الطقس|حالة الطقس/i.test(title) || item.id === 2;
-                if (isNetwork) return '/flights/map';
-                if (isWeather) return 'weather';
-                return item.link_url || '';
-              })();
+              const linkUrl = item.link_url || '';
               return (
                 <div 
                   key={item.id || idx}
@@ -1314,16 +1412,30 @@ const HomePage: React.FC = () => {
                       src={imgSrc}
                       alt={title}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      style={{ objectPosition: 'center center' }}
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = defaultImgs[idx] || defaultImgs[0];
                       }}
                     />
-                    <div className="absolute right-0 bottom-0 p-3 sm:p-4" style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}>
-                      <p className="text-black text-right font-semibold mb-2" style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif", fontSize: 'clamp(0.95rem, 2.2vw, 1.1rem)' }}>
+                    <div
+                      className="absolute right-0 bottom-0 p-3 sm:p-4"
+                      style={{ direction: language === 'en' ? 'ltr' : 'rtl' }}
+                    >
+                      <p
+                        className="text-white text-right font-semibold mb-2"
+                        style={{
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                          fontSize: 'clamp(0.95rem, 2.2vw, 1.1rem)',
+                          textShadow: '0 1px 3px rgba(0,0,0,0.55)',
+                        }}
+                      >
                         {title}
                       </p>
-                      <div className="h-0.5 transition-colors duration-300" style={{ backgroundColor: hoveredService === idx + 1 ? '#1e3a8a' : '#9ca3af' }}></div>
+                      <div
+                        className="h-0.5 transition-colors duration-300"
+                        style={{ backgroundColor: hoveredService === idx + 1 ? '#1e3a8a' : '#9ca3af' }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1571,7 +1683,9 @@ const HomePage: React.FC = () => {
                   src={card.image}
                   alt={card.alt}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  style={{ objectPosition: 'center center' }}
                   onError={(e) => {
+                    e.currentTarget.onerror = null;
                     e.currentTarget.src = card.fallbackImage;
                   }}
                 />
@@ -1583,18 +1697,27 @@ const HomePage: React.FC = () => {
                       background: 'linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.3))'
                     }}
                   >
-                    <div className="flex items-center justify-center gap-2">
-                      <span className={`text-white font-semibold text-base ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {card.from[language]}
-                      </span>
-                      <PaperAirplaneIcon className="w-4 h-4 text-white" />
-                      <span className={`text-white font-semibold text-base ${fontClass}`} style={{
-                        fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
-                      }}>
-                        {card.to[language]}
-                      </span>
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-2">
+                        <span className={`text-white font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {card.from[language]}
+                        </span>
+                        <PaperAirplaneIcon className="w-4 h-4 text-white" />
+                        <span className={`text-white font-semibold text-base ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {card.to[language]}
+                        </span>
+                      </div>
+                      {card.price[language] ? (
+                        <span className={`text-white/90 text-sm ${fontClass}`} style={{
+                          fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif"
+                        }}>
+                          {card.price[language]}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -1628,7 +1751,7 @@ const HomePage: React.FC = () => {
                       </div>
       </section>
 
-      {/* Loyalty / Survey banner — public fallback always visible; CMS image overlays when available */}
+      {/* Loyalty / Survey banner — single CMS image (no stacked fallback flicker) */}
       <section
         className="relative z-10 overflow-hidden bg-slate-900 loyalty-survey-banner"
         style={{
@@ -1636,20 +1759,19 @@ const HomePage: React.FC = () => {
         }}
       >
         <div className="loyalty-survey-banner__media absolute inset-0" aria-hidden>
-          <img
-            src="/images/airport-crew.jpg"
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: 'center 28%' }}
-          />
-          {surveyItems[0]?.image_url ? (
+          {surveyImageSrc ? (
             <img
-              src={surveyItems[0].image_url}
+              key={surveyImageSrc}
+              src={surveyImageSrc}
               alt=""
               className="absolute inset-0 w-full h-full object-cover"
               style={{ objectPosition: 'center 28%' }}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
+              onError={() => {
+                setSurveyImageSrc((prev) =>
+                  !prev || prev.includes('/images/airport-crew.jpg')
+                    ? prev
+                    : '/images/airport-crew.jpg'
+                );
               }}
             />
           ) : null}
@@ -1677,7 +1799,7 @@ const HomePage: React.FC = () => {
                 textShadow: '0 2px 20px rgba(0,0,0,0.4)',
               }}
             >
-              {pickConfig('SURVEY', 1, t('home.loyalty.enhanceTitle'))}
+              {surveyBanner.title}
             </h2>
             <p
               className={`loyalty-survey-banner__desc text-white/95 break-words ${fontClass}`}
@@ -1687,21 +1809,17 @@ const HomePage: React.FC = () => {
                 textShadow: '0 1px 12px rgba(0,0,0,0.35)',
               }}
             >
-              {pickConfig('SURVEY', 2, t('home.loyalty.fullDescription'))}
+              {surveyBanner.description}
             </p>
             <button
-              onClick={() => handleSectionItemClick(surveyItems[0]?.link_url || '/membership')}
+              onClick={() => handleSectionItemClick(surveyBanner.linkUrl)}
               className="loyalty-survey-banner__btn bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-xl transition-colors shadow-xl"
               style={{
                 fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 direction: language === 'en' ? 'ltr' : 'rtl',
               }}
             >
-              {pickConfig(
-                'SURVEY',
-                3,
-                language === 'fa' ? 'لینک نظرسنجی' : language === 'ar' ? 'رابط الاستبيان' : 'Survey Link'
-              )}
+              {surveyBanner.buttonLabel}
             </button>
           </div>
         </div>
@@ -1725,15 +1843,12 @@ const HomePage: React.FC = () => {
                 marginBottom: '6px',
                 color: '#000000',
                 opacity: 1,
-                fontFamily: "'IranNastaliq', 'Nastaliq', 'Al Qalam Taj Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif",
+                fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif',
                 fontStyle: 'normal',
                 fontVariant: 'normal',
                 textDecoration: 'none'
               }}>
-                {(() => {
-                  const c = sectionConfigs['EXPERIENCE'];
-                  return c?.title1_fa || c?.title1_ar || c?.title1_en ? (language === 'fa' ? c.title1_fa : language === 'ar' ? c.title1_ar : c.title1_en) : t('home.experience.flyWithNasim');
-                })()}
+                {pickConfig('EXPERIENCE', 1, t('home.experience.flyWithNasim'))}
               </p>
               
               {/* Second line - Large */}
@@ -1752,10 +1867,7 @@ const HomePage: React.FC = () => {
                 justifyContent: 'center',
                 fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
               }}>
-                {(() => {
-                  const c = sectionConfigs['EXPERIENCE'];
-                  return c?.title2_fa || c?.title2_ar || c?.title2_en ? (language === 'fa' ? c.title2_fa : language === 'ar' ? c.title2_ar : c.title2_en) : t('home.experience.exploreNasim');
-                })()}
+                {pickConfig('EXPERIENCE', 2, t('home.experience.exploreNasim'))}
               </h2>
               
               {/* Third line - Small */}
@@ -1768,10 +1880,7 @@ const HomePage: React.FC = () => {
                 opacity: 1,
                 fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif'
               }}>
-                {(() => {
-                  const c = sectionConfigs['EXPERIENCE'];
-                  return c?.title3_fa || c?.title3_ar || c?.title3_en ? (language === 'fa' ? c.title3_fa : language === 'ar' ? c.title3_ar : c.title3_en) : t('home.experience.planUnforgettable');
-                })()}
+                {pickConfig('EXPERIENCE', 3, t('home.experience.planUnforgettable'))}
               </p>
             </div>
           </div>
@@ -1779,20 +1888,34 @@ const HomePage: React.FC = () => {
           {/* Layout: 4 کارت کوچک + ۱ کارت بزرگ — ارتفاع برابر و وسط‌چین */}
           <div className="grid grid-cols-5 gap-3 sm:gap-4 w-full max-w-full mx-auto items-stretch" style={{ direction: 'rtl' }}>
             {(() => {
+              const cacheBust = 'v=41';
               const defaultExp: HomePageSectionItem[] = [
-                { id: 1, title_fa: 'تصویر ۱', title_ar: 'صورة ١', title_en: 'Image 1', image_url: '/images/two.png', link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
-                { id: 2, title_fa: 'تصویر ۲', title_ar: 'صورة ٢', title_en: 'Image 2', image_url: '/images/three.png', link_url: '/tickets', order: 2, section_type: 'EXPERIENCE', is_active: true },
-                { id: 3, title_fa: 'فرودگاه مهرآباد', title_ar: 'مطار مهرآباد', title_en: 'Mehrabad Airport', image_url: '/images/4reza.jpeg', link_url: 'https://fids.airport.ir/', order: 3, section_type: 'EXPERIENCE', is_active: true },
-                { id: 4, title_fa: 'تصویر ۴', title_ar: 'صورة ٤', title_en: 'Image 4', image_url: '/images/5reza.jpeg', link_url: 'https://ikac.ir/', order: 4, section_type: 'EXPERIENCE', is_active: true },
-                { id: 5, title_fa: 'ایرانولوژی', title_ar: 'إيرانولوجيا', title_en: 'Iranology', image_url: '/images/6reza.jpeg', link_url: '/iranology', order: 5, section_type: 'EXPERIENCE', is_active: true },
+                { id: 1, title_fa: 'ثبت شکایات', title_ar: 'تسجيل الشكاوى', title_en: 'Complaints', image_url: `/images/exp-complaints.jpg?${cacheBust}`, link_url: '/survey', order: 1, section_type: 'EXPERIENCE', is_active: true },
+                { id: 2, title_fa: 'انتقادات و پیشنهادات', title_ar: 'انتقادات واقتراحات', title_en: 'Feedback', image_url: `/images/exp-feedback.jpg?${cacheBust}`, link_url: '/tickets', order: 2, section_type: 'EXPERIENCE', is_active: true },
+                { id: 3, title_fa: 'پروازهای فرودگاه مهرآباد', title_ar: 'رحلات مطار مهرآباد', title_en: 'Mehrabad Airport Flights', image_url: `/images/exp-mehrabad.jpg?${cacheBust}`, link_url: 'https://fids.airport.ir/', order: 3, section_type: 'EXPERIENCE', is_active: true },
+                { id: 4, title_fa: 'پروازهای فرودگاه امام خمینی (ره)', title_ar: 'رحلات مطار الإمام الخميني', title_en: 'Imam Khomeini Airport Flights', image_url: `/images/exp-ikia.jpg?${cacheBust}`, link_url: 'https://ikac.ir/', order: 4, section_type: 'EXPERIENCE', is_active: true },
+                { id: 5, title_fa: 'ایران شناسی', title_ar: 'إيرانولوجيا', title_en: 'Iranology', image_url: `/images/exp-iranology.jpg?${cacheBust}`, link_url: '/iranology', order: 5, section_type: 'EXPERIENCE', is_active: true },
               ];
-              const fallbackImgs = ['/images/two.png', '/images/three.png', '/images/4reza.jpeg', '/images/5reza.jpeg', '/images/6reza.jpeg'];
-              const items = (experienceItems.length ? experienceItems : defaultExp).map((item, i) => ({
-                ...item,
-                // Prefer CMS URL; if missing use public fallback. Broken CMS URLs handled via onError.
-                image_url: item.image_url || defaultExp[i]?.image_url || fallbackImgs[i],
-                link_url: item.link_url || defaultExp[i]?.link_url || '',
-              }));
+              const fallbackImgs = [
+                `/images/exp-complaints.jpg?${cacheBust}`,
+                `/images/exp-feedback.jpg?${cacheBust}`,
+                `/images/exp-mehrabad.jpg?${cacheBust}`,
+                `/images/exp-ikia.jpg?${cacheBust}`,
+                `/images/exp-iranology.jpg?${cacheBust}`,
+              ];
+              // Prefer CMS uploads so admin can always replace images/text; local paths are fallback only.
+              const items = (experienceItems.length ? experienceItems : defaultExp).map((item, i) => {
+                const link = item.link_url || defaultExp[i]?.link_url || '';
+                const cmsUrl = item.image_url || '';
+                const image_url = cmsUrl
+                  ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}${cacheBust}`
+                  : (defaultExp[i]?.image_url || fallbackImgs[i]);
+                return {
+                  ...item,
+                  image_url,
+                  link_url: link,
+                };
+              });
               while (items.length < 5) {
                 const d = defaultExp[items.length];
                 items.push({
@@ -1818,7 +1941,7 @@ const HomePage: React.FC = () => {
                             border: '0.5px solid #d1d5db',
                             boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
                           }}
-                          onClick={() => handleSectionItemClick(idx === 0 ? '/survey' : idx === 1 ? '/tickets' : (item.link_url || ''))}
+                          onClick={() => handleSectionItemClick(item.link_url || '')}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)';
                             e.currentTarget.style.transform = 'translateY(-4px)';
@@ -1833,7 +1956,10 @@ const HomePage: React.FC = () => {
                               src={imgSrc}
                               alt={title}
                               className="absolute inset-0 w-full h-full object-cover"
-                              style={{ borderRadius: '16px', objectPosition: 'center' }}
+                              style={{
+                                borderRadius: '16px',
+                                objectPosition: 'center',
+                              }}
                               onError={(e) => {
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = fallbackImgs[idx];
@@ -1865,15 +1991,62 @@ const HomePage: React.FC = () => {
                     >
                       <div className="relative w-full h-full min-h-[200px]">
                         <img
-                          src={largeItem.image_url || '/images/6reza.jpeg'}
+                          src={largeItem.image_url || `/images/exp-iranology.jpg?${cacheBust}`}
                           alt={language === 'fa' ? largeItem.title_fa : language === 'ar' ? largeItem.title_ar : largeItem.title_en}
                           className="absolute inset-0 w-full h-full object-cover"
-                          style={{ borderRadius: '16px', objectPosition: 'center' }}
+                          style={{ borderRadius: '16px', objectPosition: 'center center' }}
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = '/images/6reza.jpeg';
+                            e.currentTarget.src = `/images/exp-iranology.jpg?${cacheBust}`;
                           }}
                         />
+                        <div
+                          className="absolute inset-x-0 top-0 z-[3] flex flex-col items-center pointer-events-none"
+                          dir={language === 'en' ? 'ltr' : 'rtl'}
+                          style={{
+                            paddingTop: '7%',
+                            paddingBottom: '18%',
+                            paddingLeft: '8%',
+                            paddingRight: '8%',
+                            textAlign: 'center',
+                            color: '#fff',
+                            background:
+                              'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.28) 55%, rgba(0,0,0,0) 100%)',
+                            textShadow:
+                              '0 1px 0 rgba(0,0,0,0.85), 0 2px 8px rgba(0,0,0,0.75), 0 0 2px rgba(0,0,0,0.9)',
+                            // DigiHamishe first so ی in هواپیمایی stays visible; bold via weight
+                            fontFamily: language === 'fa'
+                              ? "'DigiHamishe', 'DigiHamisheBold', Tahoma, sans-serif"
+                              : language === 'ar'
+                              ? "'Noto Sans Arabic', Tahoma, sans-serif"
+                              : 'Tahoma, sans-serif',
+                          }}
+                        >
+                          <div style={{ fontSize: 'clamp(16px, 2.3vw, 26px)', fontWeight: 700, lineHeight: 1.35 }}>
+                            {language === 'fa'
+                              ? '\u0647\u0648\u0627\u067e\u06cc\u0645\u0627\u06cc\u06cc \u0646\u0633\u06cc\u0645' /* هواپیمایی نسیم */
+                              : language === 'ar'
+                              ? 'طيران نسيم'
+                              : 'Nasim Air'}
+                          </div>
+                          <div style={{ fontSize: 'clamp(30px, 4.4vw, 52px)', fontWeight: 700, lineHeight: 1.2, marginTop: 8 }}>
+                            {language === 'fa'
+                              ? ((largeItem.title_fa || '').trim() || '\u0627\u06cc\u0631\u0627\u0646 \u0634\u0646\u0627\u0633\u06cc')
+                              : language === 'ar'
+                              ? ((largeItem.title_ar || '').trim() || 'إيرانولوجيا')
+                              : ((largeItem.title_en || '').trim() || 'Iranology')}
+                          </div>
+                          <div
+                            style={{
+                              width: 'clamp(56px, 9vw, 96px)',
+                              height: 3,
+                              background: '#fff',
+                              marginTop: 12,
+                              borderRadius: 2,
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.45)',
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
@@ -3023,16 +3196,36 @@ const HomePage: React.FC = () => {
   </div>
 
   <div className="flex justify-center items-center flex-wrap gap-4 sm:gap-8 md:gap-[42px] px-2 py-4 sm:py-5">
-    {(faqItems.length > 0
-      ? faqItems
-      : [
-          { id: 1, title_fa: 'راهنمای رزرو و خرید بلیط', title_ar: 'دليل الحجز وشراء التذاكر', title_en: 'Booking guide', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 1, is_active: true, section_type: 'FAQ' },
-          { id: 2, title_fa: 'امکانات و خدمات در پرواز', title_ar: 'المرافق والخدمات', title_en: 'Flight amenities', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 2, is_active: true, section_type: 'FAQ' },
-          { id: 3, title_fa: 'وضعیت پرواز و جزئیات', title_ar: 'حالة الرحلة والتفاصيل', title_en: 'Flight status', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 3, is_active: true, section_type: 'FAQ' },
-          { id: 4, title_fa: 'راه‌های ارتباط با پشتیبانی', title_ar: 'طرق الاتصال بالدعم', title_en: 'Contact support', description_fa: '', description_ar: '', description_en: '', image_url: null, link_url: '', order: 4, is_active: true, section_type: 'FAQ' },
-        ] as HomePageSectionItem[]
-    ).map((faq) => {
+    {(() => {
+      const faqCacheBust = 'v=2';
+      const faqFallbackImgs = [
+        `/images/faq-booking.jpg?${faqCacheBust}`,
+        `/images/faq-amenities.jpg?${faqCacheBust}`,
+        `/images/faq-status.jpg?${faqCacheBust}`,
+        `/images/faq-support.jpg?${faqCacheBust}`,
+      ];
+      const defaultFaqs: HomePageSectionItem[] = [
+        { id: 1, title_fa: 'راهنمای رزرو و خرید بلیط', title_ar: 'دليل الحجز وشراء التذاكر', title_en: 'Booking guide', description_fa: '', description_ar: '', description_en: '', image_url: faqFallbackImgs[0], link_url: '', order: 1, is_active: true, section_type: 'FAQ' },
+        { id: 2, title_fa: 'امکانات و خدمات در پرواز', title_ar: 'المرافق والخدمات', title_en: 'Flight amenities', description_fa: '', description_ar: '', description_en: '', image_url: faqFallbackImgs[1], link_url: '', order: 2, is_active: true, section_type: 'FAQ' },
+        { id: 3, title_fa: 'وضعیت پرواز و جزئیات', title_ar: 'حالة الرحلة والتفاصيل', title_en: 'Flight status', description_fa: '', description_ar: '', description_en: '', image_url: faqFallbackImgs[2], link_url: '', order: 3, is_active: true, section_type: 'FAQ' },
+        { id: 4, title_fa: 'راه‌های ارتباط با پشتیبانی', title_ar: 'طرق الاتصال بالدعم', title_en: 'Contact support', description_fa: '', description_ar: '', description_en: '', image_url: faqFallbackImgs[3], link_url: '', order: 4, is_active: true, section_type: 'FAQ' },
+      ];
+      const list = (faqItems.length > 0 ? faqItems : defaultFaqs).map((faq, i) => {
+        const cmsUrl = faq.image_url || '';
+        const image_url = cmsUrl
+          ? `${cmsUrl}${cmsUrl.includes('?') ? '&' : '?'}${faqCacheBust}`
+          : (defaultFaqs[i]?.image_url || faqFallbackImgs[i]);
+        return { ...faq, image_url };
+      });
+      return list;
+    })().map((faq, faqIdx) => {
       const label = pickLang(faq.title_fa, faq.title_ar, faq.title_en);
+      const faqFallbackImgs = [
+        '/images/faq-booking.jpg?v=2',
+        '/images/faq-amenities.jpg?v=2',
+        '/images/faq-status.jpg?v=2',
+        '/images/faq-support.jpg?v=2',
+      ];
       return (
         <div key={faq.id} className="flex flex-col items-center">
           <button
@@ -3048,11 +3241,11 @@ const HomePage: React.FC = () => {
               width: 'clamp(120px, 42vw, 195px)',
               height: 'clamp(120px, 42vw, 195px)',
               borderRadius: '9999px',
-              border: '3px solid #1e40af',
+              border: '3px solid #1e3a8a',
               boxShadow: '0 18px 35px rgba(0,0,0,0.4)',
               transform: 'translateY(0)',
               transition: 'all 0.25s ease',
-              backgroundColor: '#93c5fd',
+              backgroundColor: '#1e3a8a',
               position: 'relative',
               overflow: 'hidden',
               maxWidth: '100%',
@@ -3067,14 +3260,16 @@ const HomePage: React.FC = () => {
               e.currentTarget.style.boxShadow = '0 18px 35px rgba(0,0,0,0.4)';
             }}
           >
-            {faq.image_url ? (
-              <img
-                src={faq.image_url}
-                alt={label}
-                className="w-full h-full object-cover rounded-full absolute inset-0"
-                style={{ zIndex: 1 }}
-              />
-            ) : null}
+            <img
+              src={faq.image_url || faqFallbackImgs[faqIdx] || faqFallbackImgs[0]}
+              alt={label}
+              className="w-full h-full object-cover rounded-full absolute inset-0"
+              style={{ zIndex: 1 }}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = faqFallbackImgs[faqIdx] || faqFallbackImgs[0];
+              }}
+            />
           </button>
           <span
             className={`text-xs text-center mt-3 ${fontClass}`}
@@ -3162,9 +3357,9 @@ const HomePage: React.FC = () => {
                 </p>
                 <ul className="space-y-2">
                   <li>
-                    <a href="tel:7340000" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="tel:02173490000" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <PhoneIcon className="w-4 h-4 flex-shrink-0" />
-                      {language === 'fa' ? 'تلفن' : language === 'ar' ? 'هاتف' : 'Phone'}: 7340000
+                      {language === 'fa' ? 'تلفن' : language === 'ar' ? 'هاتف' : 'Phone'}: 02173490000
                     </a>
                   </li>
                   <li>
@@ -3195,7 +3390,7 @@ const HomePage: React.FC = () => {
                     </a>
                   </li>
                   <li>
-                    <a href="#" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+                    <a href="/safety-report/safety" className={`flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                       <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0" />
                       {language === 'fa' ? 'گزارش ایمنی پرواز' : language === 'ar' ? 'تقرير سلامة الرحلة' : 'Flight Safety Report'}
                     </a>
@@ -3210,48 +3405,135 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* بخش لوگوها: شبکه های اجتماعی بالا، لوگوهای YATA/CAO/... پایین */}
-            <div className="flex flex-col gap-4 flex-shrink-0 items-center">
+            {/* بخش لوگوها: شبکه های اجتماعی بالا، لوگوهای IATA/CAO/... پایین */}
+            <div className="flex flex-col gap-5 flex-shrink-0 items-center w-full lg:w-auto lg:min-w-[640px] overflow-visible">
               {/* ارتباط با ما در شبکه های اجتماعی - وسط‌چین */}
-              <div className={`flex flex-wrap items-center justify-center gap-3 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
+              <div
+                className={`flex flex-wrap items-center justify-center ${fontClass}`}
+                style={{
+                  fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif",
+                  gap: 8,
+                }}
+              >
                 <span className="text-sm font-medium text-white text-center sm:whitespace-nowrap">
                   {t('footer.socialTitle')}
                 </span>
-                <div className="flex items-center gap-1.5">
-                  <a href="https://www.instagram.com/flynasim" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 transition-colors hover:opacity-80" title="Instagram" aria-label="Instagram">
-                    <img src="/images/instagram.svg" alt="Instagram" className="w-6 h-6 object-contain" />
-                  </a>
-                  <a href="https://wa.me/989124268358" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 transition-colors hover:opacity-80" title="WhatsApp" aria-label="WhatsApp">
-                    <svg className="w-6 h-6" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
-                  </a>
-                  <a href="https://www.linkedin.com/company/flynasim" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 transition-colors hover:opacity-80" title="LinkedIn" aria-label="LinkedIn">
-                    <svg className="w-6 h-6" fill="#0A66C2" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                    </svg>
-                  </a>
-                  <a href="https://www.aparat.com/nasimair" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 transition-colors hover:opacity-80" title="آپارات" aria-label="Aparat">
-                    <img src="https://cdn.simpleicons.org/aparat/ea1d5d" alt="آپارات" className="w-6 h-6 object-contain" />
-                  </a>
+                <div className="flex items-center overflow-visible" style={{ gap: 8 }}>
+                  {([
+                    {
+                      href: 'https://www.instagram.com/flynasim',
+                      title: 'Instagram',
+                      node: <img src="/images/instagram.svg?v=4" alt="Instagram" style={{ width: 16, height: 16, objectFit: 'contain', display: 'block' }} />,
+                    },
+                    {
+                      href: 'https://wa.me/989124268358',
+                      title: 'WhatsApp',
+                      node: (
+                        <svg style={{ width: 16, height: 16, display: 'block' }} fill="#ffffff" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      href: 'https://www.linkedin.com/company/flynasim',
+                      title: 'LinkedIn',
+                      node: (
+                        <svg style={{ width: 16, height: 16, display: 'block' }} fill="#ffffff" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      href: 'https://www.aparat.com/nasimair',
+                      title: 'آپارات',
+                      node: <img src="/images/aparat.svg?v=4" alt="آپارات" style={{ width: 16, height: 16, objectFit: 'contain', display: 'block' }} />,
+                    },
+                    {
+                      href: 'https://ble.ir/09124268358',
+                      title: 'بله',
+                      node: (
+                        <img
+                          src="/images/bale.svg?v=4"
+                          alt="بله"
+                          style={{
+                            width: 16,
+                            height: 16,
+                            objectFit: 'contain',
+                            objectPosition: 'center',
+                            display: 'block',
+                          }}
+                        />
+                      ),
+                    },
+                  ] as const).map((item) => (
+                    <a
+                      key={item.title}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={item.title}
+                      aria-label={item.title}
+                      className="inline-flex items-center justify-center transition-opacity hover:opacity-80 overflow-visible"
+                      style={{ width: 28, height: 28, flex: '0 0 28px' }}
+                    >
+                      {item.node}
+                    </a>
+                  ))}
                 </div>
               </div>
 
-              {/* لوگوها / نشان‌ها */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full max-w-full">
-              <a href="https://www.iata.org/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
-                <img src="/images/IATA.svg" alt="IATA" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
-              <a href="https://caa.gov.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
-                <img src="/images/cao.png" alt="CAO" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
-              <a href="/" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
-                <img src="/images/nasim0.png" alt={language === 'fa' ? 'لوگو نسیم' : language === 'ar' ? 'شعار نسيم' : 'Nasim Logo'} className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
-              <a href="https://www.enamad.ir/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 transition-colors hover:opacity-80">
-                <img src="/images/enamad.png" alt="eNAMAD" className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
-              <a href="https://farasa.cao.ir/sysworkflow/fa/modern/3810212626028ab03488017019616799/6464336316028ab04e3c618028352200.php" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center h-16 sm:h-24 min-w-0 col-span-2 sm:col-span-1 transition-colors hover:opacity-80">
-                <img src="/images/hmosafer.png" alt={language === 'fa' ? 'حقوق مسافر' : language === 'ar' ? 'حقوق الراكب' : 'Passenger Rights'} className="h-12 sm:h-20 w-auto max-w-full object-contain" />
-              </a>
+              {/* لوگوها / نشان‌ها — تراز عمودی یکسان؛ IATA/CAO/حقوق مسافر کمی بزرگ‌تر برای وزن بصری برابر */}
+              <div
+                className="flex w-full items-center justify-center overflow-visible flex-wrap"
+                style={{ gap: 16, minHeight: 68 }}
+              >
+                {([
+                  { href: 'https://www.iata.org/', src: '/images/IATA.svg', alt: 'IATA', external: true, height: 60, maxWidth: 130, nudgeY: -4 },
+                  { href: 'https://caa.gov.ir/', src: '/images/cao.png?v=8', alt: 'CAO', external: true, height: 58, maxWidth: 140, nudgeY: 5 },
+                  { href: '/', src: '/images/nasim-footer.png?v=8', alt: language === 'fa' ? 'لوگو نسیم' : language === 'ar' ? 'شعار نسيم' : 'Nasim Logo', external: false, height: 50, maxWidth: 120, nudgeY: 0 },
+                  { href: 'https://www.enamad.ir/', src: '/images/enamad.png?v=7', alt: 'eNAMAD', external: true, height: 50, maxWidth: 110, nudgeY: 0 },
+                  {
+                    href: 'https://farasa.cao.ir/sysworkflow/fa/modern/3810212626028ab03488017019616799/6464336316028ab04e3c618028352200.php',
+                    src: '/images/hmosafer.png?v=8',
+                    alt: language === 'fa' ? 'حقوق مسافر' : language === 'ar' ? 'حقوق الراكب' : 'Passenger Rights',
+                    external: true,
+                    height: 60,
+                    maxWidth: 120,
+                    nudgeY: 0,
+                  },
+                ] as const).map((logo) => (
+                  <a
+                    key={logo.src}
+                    href={logo.href}
+                    {...(logo.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="inline-flex items-center justify-center transition-opacity hover:opacity-80 overflow-visible"
+                    style={{
+                      height: 68,
+                      width: 'auto',
+                      flex: '0 0 auto',
+                      padding: 0,
+                      boxSizing: 'border-box',
+                    }}
+                    title={logo.alt}
+                    aria-label={logo.alt}
+                  >
+                    <img
+                      src={logo.src}
+                      alt={logo.alt}
+                      className="block"
+                      style={{
+                        height: logo.height,
+                        width: 'auto',
+                        maxWidth: logo.maxWidth,
+                        objectFit: 'contain',
+                        objectPosition: 'center',
+                        filter: 'brightness(0) invert(1)',
+                        display: 'block',
+                        transform: logo.nudgeY ? `translateY(${logo.nudgeY}px)` : undefined,
+                      }}
+                    />
+                  </a>
+                ))}
               </div>
             </div>
           </div>

@@ -5,7 +5,15 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
+from .models import (
+    GalleryCategory,
+    GalleryAlbum,
+    GalleryImage,
+    HeroSlider,
+    HomePageSectionItem,
+    HomePageSectionConfig,
+    HeaderMenuImage,
+)
 
 User = get_user_model()
 
@@ -254,7 +262,10 @@ class HomePageSectionItemAdmin(admin.ModelAdmin):
             ),
             'description': (
                 'SPECIAL_SERVICE / EXPERIENCE: تصویر + عنوان + لینک. '
-                'SURVEY: یک آیتم با تصویر پس‌زمینه بنر و لینک دکمه. '
+                'SURVEY (بنر بزرگ): تصویر و لینک دکمه را اینجا عوض کنید. '
+                'متن تیتر/توضیح/دکمه را از «تنظیمات عناوین بخش‌های صفحه اصلی» '
+                '(نوع SURVEY، خط ۱ و ۲ و ۳) ویرایش کنید — یا همین‌جا عنوان و توضیح را '
+                'عوض کنید تا خودکار همان‌جا هم ذخیره شود. '
                 'FAQ: عنوان زیر دایره + متن مودال در فیلد توضیح. '
                 'POPULAR_ROUTES: عنوان مسیر، توضیح (قیمت/تاریخ)، تصویر کارت.'
             ),
@@ -292,6 +303,29 @@ class HomePageSectionItemAdmin(admin.ModelAdmin):
         if not change:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+        # SURVEY item edits (title/description) push into the config the site reads
+        if obj.section_type == 'SURVEY':
+            from gallery.models import HomePageSectionConfig
+            placeholder = {
+                'بنر نظرسنجی',
+                'Survey banner',
+                'بانر الاستبيان',
+            }
+            cfg, _ = HomePageSectionConfig.objects.get_or_create(section_type='SURVEY')
+            title_fa = (obj.title_fa or '').strip()
+            if title_fa and title_fa not in placeholder:
+                cfg.title1_fa = title_fa
+                if (obj.title_ar or '').strip():
+                    cfg.title1_ar = obj.title_ar.strip()
+                if (obj.title_en or '').strip():
+                    cfg.title1_en = obj.title_en.strip()
+            if (obj.description_fa or '').strip():
+                cfg.title2_fa = obj.description_fa.strip()
+                if (obj.description_ar or '').strip():
+                    cfg.title2_ar = obj.description_ar.strip()
+                if (obj.description_en or '').strip():
+                    cfg.title2_en = obj.description_en.strip()
+            cfg.save()
 
 
 @admin.register(HomePageSectionConfig)
@@ -310,7 +344,9 @@ class HomePageSectionConfigAdmin(admin.ModelAdmin):
             'description': (
                 'HERO: خط۱ عنوان اصلی، خط۲ زیرعنوان. '
                 'QUOTE: خط۱ متن فارسی/عربی، خط۲ متن انگلیسی کنار آن. '
-                'MEMBERSHIP / SURVEY: خط۱ عنوان، خط۲ توضیح، خط۳ متن دکمه. '
+                'MEMBERSHIP: خط۱ عنوان، خط۲ توضیح، خط۳ متن دکمه. '
+                'SURVEY (بنر بزرگ صفحه اصلی): خط۱ = تیتر سفید، خط۲ = توضیح زیر تیتر، '
+                'خط۳ = متن دکمه. تصویر بنر را از «المان‌های بخش صفحه اصلی» (نوع SURVEY) عوض کنید. '
                 'FAQ / POPULAR_ROUTES / SPECIAL_SERVICE / EXPERIENCE: عناوین بخش.'
             ),
         }),
@@ -328,6 +364,35 @@ class HomePageSectionConfigAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        # Keep SURVEY item labels aligned so both admin screens show the same copy
+        if obj.section_type == 'SURVEY':
+            from gallery.models import HomePageSectionItem
+            item = (
+                HomePageSectionItem.objects
+                .filter(section_type='SURVEY', is_active=True)
+                .order_by('order', 'id')
+                .first()
+            )
+            if not item:
+                return
+            dirty = False
+            t1 = (obj.title1_fa or '').strip()
+            if t1:
+                item.title_fa = t1
+                item.title_ar = (obj.title1_ar or '').strip()
+                item.title_en = (obj.title1_en or '').strip()
+                dirty = True
+            t2 = (obj.title2_fa or '').strip()
+            if t2:
+                item.description_fa = t2
+                item.description_ar = (obj.title2_ar or '').strip()
+                item.description_en = (obj.title2_en or '').strip()
+                dirty = True
+            if dirty:
+                item.save()
 
 
 @admin.register(HeroSlider)
@@ -408,3 +473,59 @@ class HeroSliderAdmin(admin.ModelAdmin):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} اسلایدر غیرفعال شد.')
     deactivate_sliders.short_description = 'غیرفعال کردن اسلایدرهای انتخاب شده'
+
+
+@admin.register(HeaderMenuImage)
+class HeaderMenuImageAdmin(admin.ModelAdmin):
+    """
+    Admin for header mega-menu images (top-level, nested, destination grid).
+    Upload an image to override the site default for that menu option.
+    """
+    list_display = [
+        'preview', 'menu_key', 'label_fa', 'label_ar', 'item_key', 'order', 'is_active', 'updated_at',
+    ]
+    list_filter = ['menu_key', 'is_active']
+    search_fields = ['label_fa', 'label_en', 'label_ar', 'item_key']
+    list_editable = ['order', 'is_active']
+    readonly_fields = ['uuid', 'updated_at', 'image_display']
+    ordering = ['menu_key', 'order', 'item_key']
+
+    fieldsets = (
+        ('گزینه منو', {
+            'fields': ('menu_key', 'item_key', 'label_fa', 'label_en', 'label_ar'),
+            'description': (
+                'هر ردیف یک گزینه یا زیرگزینه منوی هدر است. '
+                'عنوان فارسی، انگلیسی و عربی را می‌توانید جدا عوض کنید. '
+                'عنوان عربی فقط وقتی سایت روی زبان عربی است دیده می‌شود. '
+                'کلیدها را تغییر ندهید. کلید dest.X.Y برای سلول‌های گرید مقاصد است.'
+            ),
+        }),
+        ('تصویر', {
+            'fields': ('image', 'image_display'),
+        }),
+        ('نمایش', {
+            'fields': ('order', 'is_active'),
+        }),
+        ('اطلاعات', {
+            'fields': ('uuid', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+
+    def preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="width:72px;height:48px;object-fit:cover;border-radius:4px;" />',
+                obj.image.url,
+            )
+        return format_html('<span style="color:#888">پیش‌فرض سایت</span>')
+    preview.short_description = 'تصویر'
+
+    def image_display(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-width:420px;max-height:280px;border-radius:8px;" />',
+                obj.image.url,
+            )
+        return 'هنوز تصویری آپلود نشده — سایت تصویر پیش‌فرض را نشان می‌دهد'
+    image_display.short_description = 'پیش‌نمایش'

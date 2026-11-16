@@ -8,8 +8,8 @@
 # testing
 /coverage
 
-# production
-/build
+# production — committed for Runflare Docker (Dockerfile collectstatic; no npm build on server)
+# /build
 
 # misc
 .DS_Store

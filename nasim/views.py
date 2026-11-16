@@ -3,18 +3,65 @@ Views for serving React frontend and ops health checks
 """
 from django.views.generic import View
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse, Http404
 from django.db import connection
+import mimetypes
 import os
 import urllib.request
 
 
+class SpaRootAssetView(View):
+    """
+    Serve root SPA assets (favicon, manifest, logos) from frontend/build
+    with fallback to staticfiles/. Avoids Google/browsers hitting a broken
+    /favicon.ico when the STATIC_ROOT catch-all misses the file.
+    """
+
+    def get(self, request, path='', *args, **kwargs):
+        name = (path or '').lstrip('/').replace('\\', '/')
+        if not name or '/' in name or name.startswith('.'):
+            raise Http404()
+
+        candidates = [
+            os.path.join(getattr(settings, 'FRONTEND_BUILD_DIR', ''), name),
+            os.path.join(settings.STATIC_ROOT, name),
+            os.path.join(settings.BASE_DIR, 'frontend', 'public', name),
+        ]
+        for full in candidates:
+            if full and os.path.isfile(full):
+                content_type, _ = mimetypes.guess_type(full)
+                if name.endswith('.ico'):
+                    content_type = 'image/x-icon'
+                elif name.endswith('.json'):
+                    content_type = 'application/manifest+json'
+                response = FileResponse(open(full, 'rb'), content_type=content_type or 'application/octet-stream')
+                # Short browser cache; Google re-fetches /favicon.ico periodically
+                response['Cache-Control'] = 'public, max-age=86400'
+                return response
+        raise Http404()
+
+
+
 class HealthCheckView(View):
-    """Railway / uptime health endpoint — no auth, no SPA redirect."""
+    """
+    Ops health endpoint — no auth, no SPA redirect, never calls Nira.
+
+    - Default /healthz/ : liveness (process up) → always 200 so load balancers
+      do not yank the whole site when DB blips or Nira is slow.
+    - /healthz/?deep=1 or /api/health/ : readiness (DB) → 503 only if DB is down.
+    """
 
     def get(self, request, *args, **kwargs):
         from django.conf import settings as dj_settings
         from django.core.cache import cache
+
+        deep = (
+            request.GET.get('deep') in ('1', 'true', 'yes')
+            or request.path.rstrip('/').endswith('/api/health')
+        )
+
+        if not deep:
+            return JsonResponse({'status': 'ok', 'live': True}, status=200)
 
         db_ok = False
         db_error = None
@@ -36,9 +83,10 @@ class HealthCheckView(View):
         redis_configured = bool(getattr(dj_settings, 'CELERY_BROKER_URL', '') and
                                 not str(getattr(dj_settings, 'CELERY_BROKER_URL', '')).startswith('memory'))
 
-        # Degraded cache must NOT take the site down — only DB is critical for 200
+        # Degraded cache must NOT take the site down — only DB is critical for deep checks
         payload = {
             'status': 'ok' if db_ok else 'degraded',
+            'live': True,
             'database': 'ok' if db_ok else 'error',
             'cache': 'ok' if cache_ok else 'degraded',
             'broker': 'redis' if redis_configured else 'eager/memory',

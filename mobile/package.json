@@ -1,0 +1,19 @@
+{
+  "name": "nasim-airlines-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Android shell for https://nasimairlines.ir (Cafe Bazaar / Google Play)",
+  "scripts": {
+    "sync": "npx cap sync android",
+    "open": "npx cap open android",
+    "add:android": "npx cap add android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/status-bar": "^6.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}

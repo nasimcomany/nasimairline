@@ -46,6 +46,23 @@ def main():
     os.makedirs(STATIC_ROOT, exist_ok=True)
     shutil.copy2(index_html_src, index_html_dst)
     print(f"✅ Copied index.html to {index_html_dst}")
+
+    # Root icons/manifest must also exist under staticfiles for any STATIC_ROOT fallbacks
+    for name in (
+        'favicon.ico',
+        'favicon-16.png',
+        'favicon-32.png',
+        'favicon-48.png',
+        'favicon-64.png',
+        'apple-touch-icon.png',
+        'logo192.png',
+        'logo512.png',
+        'manifest.json',
+    ):
+        src = BUILD_DIR / name
+        if src.exists():
+            shutil.copy2(src, STATIC_ROOT / name)
+            print(f"✅ Copied {name} to staticfiles")
     
     # Step 3: Collect static files
     print("\n[3/3] Collecting static files...")

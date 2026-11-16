@@ -217,6 +217,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         from .constants import BOOKING_HELD
         from .inventory import (
             build_inventory_key,
+            build_membership_test_hold_details,
             count_locked_seats,
             extract_flight_identity,
             hold_minutes,
@@ -267,15 +268,38 @@ class BookingViewSet(viewsets.ModelViewSet):
         if adults < 1:
             adults = 1
 
+        from accounts.membership_booking_query import membership_counts_held_bookings
+
         ok, details = revalidate_with_nira(flight_data, adults, children, infants)
+        membership_test_hold = False
         if not ok:
-            return Response({
-                'success': False,
-                'code': details.get('error', 'unavailable'),
-                'error': details.get('message', 'پرواز در دسترس نیست.'),
-            }, status=status.HTTP_409_CONFLICT)
+            # Temporary: while باشگاه counts soft-holds, still create HELD so checkout
+            # intent is recorded even when Nira sale is closed / price is 0.
+            if membership_counts_held_bookings():
+                import logging
+                logging.getLogger(__name__).warning(
+                    'Membership test hold: Nira rejected (%s); creating local HELD anyway',
+                    details.get('error'),
+                )
+                details = build_membership_test_hold_details(
+                    flight_data, adults, children, infants
+                )
+                membership_test_hold = True
+            else:
+                return Response({
+                    'success': False,
+                    'code': details.get('error', 'unavailable'),
+                    'error': details.get('message', 'پرواز در دسترس نیست.'),
+                }, status=status.HTTP_409_CONFLICT)
 
         identity = details['identity']
+        if not identity.get('origin') or not identity.get('destination'):
+            return Response({
+                'success': False,
+                'code': 'incomplete_flight_data',
+                'error': 'اطلاعات پرواز ناقص است.',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         seats_needed = details['seats_needed']
         inventory_key = build_inventory_key(
             identity['flight_number'],
@@ -301,13 +325,16 @@ class BookingViewSet(viewsets.ModelViewSet):
                 Flight.objects.select_for_update().filter(pk=shadow_flight.pk).first()
 
                 locked = count_locked_seats(inventory_key)
-                # Soft cap: if Nira Status was numeric we could use it; otherwise block absurd pile-up
-                soft_cap = int(getattr(settings, 'BOOKING_SOFT_HOLD_CAP', 9))
-                if locked + seats_needed > soft_cap:
+                # Prefer Nira numeric remaining (via hold_cap); else soft pile-up cap
+                hold_cap = int(details.get('hold_cap') or getattr(settings, 'BOOKING_SOFT_HOLD_CAP', 9))
+                if locked + seats_needed > hold_cap:
                     return Response({
                         'success': False,
                         'code': 'local_hold_full',
-                        'error': 'ظرفیت موقت این پرواز در حال حاضر تکمیل است. لطفاً لحظاتی بعد دوباره تلاش کنید.',
+                        'error': 'ظرفیت این پرواز تکمیل است یا در حال خرید توسط دیگران است. لطفاً دوباره جستجو کنید.',
+                        'nira_remaining': details.get('nira_remaining'),
+                        'locked_locally': locked,
+                        'hold_cap': hold_cap,
                     }, status=status.HTTP_409_CONFLICT)
 
                 hold_until = timezone.now() + timedelta(minutes=hold_minutes())
@@ -317,7 +344,8 @@ class BookingViewSet(viewsets.ModelViewSet):
                     'flight_data': flight_data,
                     'created_from': 'booking_details_pay_click',
                     'inventory_key': inventory_key,
-                    'nira_revalidated': True,
+                    'nira_revalidated': not membership_test_hold,
+                    'membership_test_hold': membership_test_hold,
                     'nira_reserve': {
                         'supported': nira_reserve.get('supported'),
                         'code': nira_reserve.get('code'),

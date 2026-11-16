@@ -6,7 +6,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
+from .models import (
+    GalleryCategory,
+    GalleryAlbum,
+    GalleryImage,
+    HeroSlider,
+    HomePageSectionItem,
+    HomePageSectionConfig,
+    HeaderMenuImage,
+)
 from .serializers import (
     GalleryCategorySerializer,
     GalleryCategoryDetailSerializer,
@@ -17,6 +25,7 @@ from .serializers import (
     HeroSliderSerializer,
     HomePageSectionItemSerializer,
     HomePageSectionConfigSerializer,
+    HeaderMenuImageSerializer,
 )
 
 
@@ -189,7 +198,11 @@ class HomePageSectionItemViewSet(viewsets.ReadOnlyModelViewSet):
             'faq': [i for i in serializer.data if i['section_type'] == 'FAQ'],
             'popular_routes': [i for i in serializer.data if i['section_type'] == 'POPULAR_ROUTES'],
         }
-        return Response(data)
+        response = Response(data)
+        # CMS copy/images must never be served stale from browser/CDN caches
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response['Pragma'] = 'no-cache'
+        return response
 
 
 class HomePageSectionConfigViewSet(viewsets.ReadOnlyModelViewSet):
@@ -204,4 +217,44 @@ class HomePageSectionConfigViewSet(viewsets.ReadOnlyModelViewSet):
         configs = self.get_queryset()
         serializer = self.get_serializer(configs, many=True)
         data = {c['section_type']: c for c in serializer.data}
-        return Response(data)
+        response = Response(data)
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response['Pragma'] = 'no-cache'
+        return response
+
+
+class HeaderMenuImageViewSet(viewsets.ReadOnlyModelViewSet):
+    """Public read API for header mega-menu images."""
+    queryset = HeaderMenuImage.objects.filter(is_active=True).order_by('menu_key', 'order', 'item_key')
+    serializer_class = HeaderMenuImageSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def map(self, request):
+        """
+        Header CMS map — backward compatible with older SPA builds.
+
+        Legacy (top-level string URLs, only when an image exists):
+          { "flyWithNasim:0": "https://.../media/..." }
+
+        Rich payload for current SPA (labels + optional image):
+          { "_v2": { "flyWithNasim:0": { "image_url": "...|null", "label_fa": "...", "label_en": "...", "label_ar": "..." }, ... } }
+
+        Older clients ignore unknown "_v2" and keep using string URLs / local fallbacks.
+        """
+        legacy: dict = {}
+        v2: dict = {}
+        for row in self.get_queryset():
+            key = f'{row.menu_key}:{row.item_key}'
+            serializer = self.get_serializer(row)
+            url = serializer.data.get('image_url')
+            v2[key] = {
+                'image_url': url,
+                'label_fa': (row.label_fa or '').strip(),
+                'label_en': (row.label_en or '').strip(),
+                'label_ar': (row.label_ar or '').strip(),
+            }
+            if url:
+                legacy[key] = url
+        legacy['_v2'] = v2
+        return Response(legacy)

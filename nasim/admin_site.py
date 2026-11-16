@@ -112,10 +112,10 @@ limited_admin_site.register(IranCity, IranCityAdmin)
 limited_admin_site.register(IranologyArticle, IranologyArticleAdmin)
 
 # Register gallery models to limited admin site
-from gallery.models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig
+from gallery.models import GalleryCategory, GalleryAlbum, GalleryImage, HeroSlider, HomePageSectionItem, HomePageSectionConfig, HeaderMenuImage
 from gallery.admin import (
     GalleryCategoryAdmin, GalleryAlbumAdmin, GalleryImageAdmin, HeroSliderAdmin,
-    HomePageSectionItemAdmin, HomePageSectionConfigAdmin
+    HomePageSectionItemAdmin, HomePageSectionConfigAdmin, HeaderMenuImageAdmin
 )
 
 limited_admin_site.register(GalleryCategory, GalleryCategoryAdmin)
@@ -124,6 +124,7 @@ limited_admin_site.register(GalleryImage, GalleryImageAdmin)
 limited_admin_site.register(HeroSlider, HeroSliderAdmin)
 limited_admin_site.register(HomePageSectionItem, HomePageSectionItemAdmin)
 limited_admin_site.register(HomePageSectionConfig, HomePageSectionConfigAdmin)
+limited_admin_site.register(HeaderMenuImage, HeaderMenuImageAdmin)
 
 # Register support (chat + complaints + survey + cabin safety + safety hazard) models to limited admin site
 from support.models import ChatMessage, ComplaintForm, SurveyForm, CabinSafetyReportForm, SafetyHazardReportForm

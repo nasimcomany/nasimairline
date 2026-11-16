@@ -1,0 +1,20 @@
+{
+  "appId": "ir.nasimairlines.app",
+  "appName": "هواپیمایی نسیم",
+  "webDir": "www",
+  "server": {
+    "url": "https://nasimairlines.ir",
+    "cleartext": false,
+    "allowNavigation": [
+      "nasimairlines.ir",
+      "*.nasimairlines.ir",
+      "www.nasimairlines.ir",
+      "apps.nasimairlines.ir",
+      "api.nasimairlines.ir"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#ffffff"
+  }
+}

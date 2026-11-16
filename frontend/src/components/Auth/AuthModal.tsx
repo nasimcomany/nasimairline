@@ -1,27 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { loginUser, registerUser } from '../../store/slices/authSlice';
 import { AppDispatch } from '../../store';
 import CustomSelect from '../CustomSelect/CustomSelect';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { captchaPrompt, checkMathCaptcha, generateMathCaptcha, MathCaptchaChallenge, normalizeDigits } from '../../utils/mathCaptcha';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'register';
+  /** When true, stay on current page after login/register (e.g. booking checkout) */
+  stayOnPage?: boolean;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login', stayOnPage = false }) => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false); // ✨ نمایش مودال شرایط
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, language } = useLanguage();
+
+  const shouldStayOnPage =
+    stayOnPage ||
+    /\/booking|\/payment/i.test(location.pathname);
 
   // Login form
   const [loginForm, setLoginForm] = useState({
@@ -30,29 +37,40 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     captcha: ''
   });
 
-  // Register form
+  // Register form — passenger identity + contact required at signup
   const [registerForm, setRegisterForm] = useState({
     nationality: 'iranian',
     nationalId: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
     birthDate: '',
     password: '',
     confirmPassword: '',
     captcha: ''
   });
 
-  // Captcha
-  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+', answer: 0 });
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  const normalizePhone = (raw: string) => {
+    let phone = raw.replace(/[\s\-]/g, '');
+    if (phone.startsWith('+98')) phone = `0${phone.slice(3)}`;
+    else if (phone.startsWith('0098')) phone = `0${phone.slice(4)}`;
+    else if (phone.startsWith('98') && phone.length === 12) phone = `0${phone.slice(2)}`;
+    return phone;
+  };
+
+  const isValidIranPhone = (raw: string) => /^09\d{9}$/.test(normalizePhone(raw));
+
+  // Captcha — non-negative, Persian-digit safe
+  const [captcha, setCaptcha] = useState<MathCaptchaChallenge>(() => generateMathCaptcha());
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Generate new captcha
   const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 20) + 1;
-    const num2 = Math.floor(Math.random() * 20) + 1;
-    const operators = ['+', '-'];
-    const operator = operators[Math.floor(Math.random() * operators.length)];
-    const answer = operator === '+' ? num1 + num2 : num1 - num2;
-    setCaptcha({ num1, num2, operator, answer });
+    setCaptcha(generateMathCaptcha());
   };
 
   useEffect(() => {
@@ -60,6 +78,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       generateCaptcha();
       setError('');
       setSuccess('');
+      setLoginForm((prev) => ({ ...prev, captcha: '' }));
+      setRegisterForm((prev) => ({ ...prev, captcha: '' }));
     }
   }, [isOpen]);
 
@@ -82,9 +102,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     e.preventDefault();
     setError('');
 
-    // Validate captcha
-    const captchaAnswer = parseInt(loginForm.captcha.trim());
-    if (isNaN(captchaAnswer) || captchaAnswer !== captcha.answer) {
+    // Validate captcha (instant, local — no network)
+    if (!checkMathCaptcha(loginForm.captcha, captcha.answer)) {
       setError(t('auth.captchaError'));
       generateCaptcha();
       setLoginForm(prev => ({ ...prev, captcha: '' }));
@@ -142,11 +161,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
       setSuccess(t('auth.loginSuccess'));
       setTimeout(() => {
         onClose();
-        navigate('/dashboard');
+        if (!shouldStayOnPage) {
+          navigate('/dashboard');
+        }
       }, 1000);
     } catch (err: any) {
-      setError(err.message || t('auth.loginError'));
+      setError(typeof err === 'string' ? err : (err?.message || t('auth.loginError')));
       generateCaptcha();
+      setLoginForm((prev) => ({ ...prev, captcha: '' }));
     }
   };
 
@@ -155,12 +177,27 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     e.preventDefault();
     setError('');
 
-    // Validate captcha
-    const captchaAnswer = parseInt(registerForm.captcha.trim());
-    if (isNaN(captchaAnswer) || captchaAnswer !== captcha.answer) {
+    if (!checkMathCaptcha(registerForm.captcha, captcha.answer)) {
       setError(t('auth.captchaError'));
       generateCaptcha();
       setRegisterForm(prev => ({ ...prev, captcha: '' }));
+      return;
+    }
+
+    if (registerForm.firstName.trim().length < 2) {
+      setError(t('auth.firstNameRequired'));
+      return;
+    }
+    if (registerForm.lastName.trim().length < 2) {
+      setError(t('auth.lastNameRequired'));
+      return;
+    }
+    if (!isValidEmail(registerForm.email)) {
+      setError(t('auth.invalidEmail'));
+      return;
+    }
+    if (!isValidIranPhone(registerForm.phone)) {
+      setError(t('auth.invalidPhone'));
       return;
     }
 
@@ -207,16 +244,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     setError('');
 
     try {
+      const email = registerForm.email.trim().toLowerCase();
+      const phone = normalizePhone(registerForm.phone);
       const registerData: any = {
-        email: `${registerForm.nationalId}@nasimair.com`,
+        email,
         password: registerForm.password,
         password_confirm: registerForm.confirmPassword,
-        first_name: registerForm.nationalId,
-        last_name: registerForm.nationality,
-        phone_number: '', // ✨ خالی چون در فرم نیست
+        first_name: registerForm.firstName.trim(),
+        last_name: registerForm.lastName.trim(),
+        phone_number: phone,
         date_of_birth: registerForm.birthDate,
         nationality: registerForm.nationality,
-        captcha: registerForm.captcha // ✨ ارسال به سرور (در بک‌اند حذف می‌شه)
+        captcha: registerForm.captcha,
       };
       
       // اگر ملیت ایرانی بود، national_id بفرست، در غیر این صورت passport_number
@@ -230,18 +269,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
       setSuccess(t('auth.registerSuccess'));
       
-      // Auto login after registration
-      setTimeout(async () => {
-        await dispatch(loginUser({
-          email: `${registerForm.nationalId}@nasimair.com`,
-          password: registerForm.password
-        })).unwrap();
+      // Already authenticated — stay on booking/payment, otherwise go to panel
+      setTimeout(() => {
         onClose();
-        navigate('/dashboard');
-      }, 1500);
+        if (!shouldStayOnPage) {
+          navigate('/dashboard');
+        }
+      }, 800);
     } catch (err: any) {
-      setError(err.message || t('auth.registerError'));
+      const message =
+        typeof err === 'string'
+          ? err
+          : (err?.message || err?.payload || t('auth.registerError'));
+      setError(typeof message === 'string' ? message : t('auth.registerError'));
       generateCaptcha();
+      setRegisterForm((prev) => ({ ...prev, captcha: '' }));
     }
   };
 
@@ -360,9 +402,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   {t('auth.captcha')}
                 </label>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr' }}>
-                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center" dir="ltr">
+                    <span className="text-2xl font-bold text-blue-900 inline-block" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                      {captchaPrompt(captcha)}
                     </span>
                   </div>
                   <button
@@ -376,10 +418,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 </div>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={loginForm.captcha}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
+                  onChange={(e) => setLoginForm(prev => ({
+                    ...prev,
+                    captcha: normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3),
+                  }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                  dir="ltr"
                   placeholder={t('auth.captchaPlaceholder')}
                   required
                 />
@@ -460,6 +507,79 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 />
               </div>
 
+              {/* Passenger first / last name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('auth.firstName')}
+                  </label>
+                  <input
+                    type="text"
+                    value={registerForm.firstName}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                    placeholder={t('auth.firstNamePlaceholder')}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                    {t('auth.lastName')}
+                  </label>
+                  <input
+                    type="text"
+                    value={registerForm.lastName}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                    placeholder={t('auth.lastNamePlaceholder')}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Email — required */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.email')}
+                </label>
+                <input
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={registerForm.email}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                  dir="ltr"
+                  placeholder={t('auth.emailPlaceholder')}
+                  required
+                />
+              </div>
+
+              {/* Phone — required */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
+                  {t('auth.phone')}
+                </label>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  value={registerForm.phone}
+                  onChange={(e) => setRegisterForm(prev => ({
+                    ...prev,
+                    phone: e.target.value.replace(/[^\d+]/g, '').slice(0, 14),
+                  }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                  dir="ltr"
+                  placeholder={t('auth.phonePlaceholder')}
+                  required
+                />
+              </div>
+
               {/* Birth Date */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
@@ -533,9 +653,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   {t('auth.captcha')}
                 </label>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-bold text-blue-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr' }}>
-                      ? = {captcha.num1} {captcha.operator} {captcha.num2}
+                  <div className="flex-1 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center" dir="ltr">
+                    <span className="text-2xl font-bold text-blue-900 inline-block" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+                      {captchaPrompt(captcha)}
                     </span>
                   </div>
                   <button
@@ -549,10 +669,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 </div>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={registerForm.captcha}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, captcha: e.target.value.replace(/\D/g, '') }))}
+                  onChange={(e) => setRegisterForm(prev => ({
+                    ...prev,
+                    captcha: normalizeDigits(e.target.value).replace(/[^\d]/g, '').slice(0, 3),
+                  }))}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
-                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                  style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+                  dir="ltr"
                   placeholder={t('auth.captchaPlaceholder')}
                   required
                 />

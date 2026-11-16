@@ -63,15 +63,42 @@ export interface FlightAvailability {
   Stops?: number;                     // تعداد توقف
 }
 
+/** True when Nira marks the flight as cancelled (still listed for the passenger). */
+export function isCancelledNiraFlight(flight: FlightAvailability | null | undefined): boolean {
+  if (!flight) return false;
+  const status = String(flight.FlightStatus || '').trim().toUpperCase();
+  return status === 'X' || status === 'CANCELLED' || status === 'CNL';
+}
+
+/**
+ * Nira sends departure as Iran local time, without a timezone suffix.
+ * A flight is past once that date and clock time have been reached.
+ */
+export function flightDepartureHasPassed(
+  flight: { DepartureDateTime?: string } | null | undefined
+): boolean {
+  const raw = String(flight?.DepartureDateTime || '');
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (!match) return false;
+  const departure = new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5])
+  );
+  return !Number.isNaN(departure.getTime()) && departure.getTime() <= Date.now();
+}
+
 /**
  * Same rule for map + search results:
- * list scheduled flights from Nira, except hard-cancelled rows.
+ * list every Nira flight row with a flight number (including cancelled)
+ * whose departure date and time have not passed.
  * Sale/bookability is decided separately via getFlightSaleState().
  */
 export function isListedNiraFlight(flight: FlightAvailability | null | undefined): boolean {
   if (!flight) return false;
-  const status = String(flight.FlightStatus || '').trim().toUpperCase();
-  if (status === 'X' || status === 'CANCELLED' || status === 'CNL') return false;
+  if (flightDepartureHasPassed(flight)) return false;
   return Boolean(flight.FlightNo && flight.Origin && flight.Destination);
 }
 
@@ -94,12 +121,13 @@ export function filterDisplayableNiraFlights(
   return filterListedNiraFlights(flights);
 }
 
-export type FlightSaleState = 'bookable' | 'sale_closed' | 'schedule_only';
+export type FlightSaleState = 'bookable' | 'sale_closed' | 'schedule_only' | 'cancelled';
 
 export type NiraClassRow = FlightAvailability['ClassStatus'][number];
 
 /**
  * Airline-facing sale state from Nira inventory:
+ * - cancelled: flight is cancelled (still shown in results)
  * - bookable: online ticket can be sold
  * - sale_closed: flight exists / may have a class row, but sale is closed (price 0 / no reserve)
  * - schedule_only: only timetable — no class/seat inventory yet
@@ -108,6 +136,7 @@ export function getFlightSaleState(
   flight: FlightAvailability,
   classRow?: NiraClassRow | null
 ): FlightSaleState {
+  if (isCancelledNiraFlight(flight)) return 'cancelled';
   const classes = Array.isArray(flight.ClassStatus) ? flight.ClassStatus : [];
   if (classes.length === 0) return 'schedule_only';
 
@@ -123,6 +152,14 @@ export function getFlightSaleCopy(
   language: string
 ): { badge: string; notice: string; cta: string; priceLabel?: string } {
   if (language === 'en') {
+    if (state === 'cancelled') {
+      return {
+        badge: 'Cancelled',
+        notice: 'This flight has been cancelled.',
+        cta: 'Not available',
+        priceLabel: '—',
+      };
+    }
     if (state === 'bookable') {
       return { badge: 'Available to book', notice: '', cta: 'Select flight' };
     }
@@ -142,6 +179,14 @@ export function getFlightSaleCopy(
     };
   }
   if (language === 'ar') {
+    if (state === 'cancelled') {
+      return {
+        badge: 'ملغاة',
+        notice: 'تم إلغاء هذه الرحلة.',
+        cta: 'غير متاح',
+        priceLabel: '—',
+      };
+    }
     if (state === 'bookable') {
       return { badge: 'متاح للحجز', notice: '', cta: 'اختيار الرحلة' };
     }
@@ -161,6 +206,14 @@ export function getFlightSaleCopy(
     };
   }
   // fa (default)
+  if (state === 'cancelled') {
+    return {
+      badge: 'کنسل شده',
+      notice: 'این پرواز لغو شده است.',
+      cta: 'قابل رزرو نیست',
+      priceLabel: '—',
+    };
+  }
   if (state === 'bookable') {
     return { badge: 'قابل رزرو', notice: '', cta: 'انتخاب پرواز' };
   }
@@ -252,6 +305,55 @@ export const getDestinations = async (origin: string): Promise<OriginCity[]> => 
   }
 };
 
+export interface ScheduleFlight {
+  Origin: string;
+  Destination: string;
+  DepartureDateTime: string;
+  FlightNo: string;
+}
+
+export interface ScheduleResponse {
+  success: boolean;
+  data: {
+    NRSFlights: ScheduleFlight[];
+  };
+  from_date?: string;
+  to_date?: string;
+  status_code?: number;
+  error?: string;
+}
+
+/**
+ * All Nasim flights in a date range (Nira ModuleName=Flights).
+ */
+export const getScheduleFlights = async (
+  fromDate: string,
+  toDate?: string
+): Promise<ScheduleFlight[]> => {
+  try {
+    const to = toDate || fromDate;
+    const response = await fetch(
+      `${API_BASE_URL}/flights/nira/schedule/?from_date=${encodeURIComponent(fromDate)}&to_date=${encodeURIComponent(to)}`
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data: ScheduleResponse = await response.json();
+    if (!data.success || !Array.isArray(data.data?.NRSFlights)) {
+      return [];
+    }
+    return data.data.NRSFlights.filter((row) => {
+      const o = (row.Origin || '').toUpperCase();
+      const d = (row.Destination || '').toUpperCase();
+      if (!o || !d || o === 'UGT' || o === 'TTQ' || d === 'UGT' || d === 'TTQ') return false;
+      return Boolean(row.FlightNo);
+    });
+  } catch (error) {
+    console.error('Error fetching Nira schedule flights:', error);
+    return [];
+  }
+};
+
 /**
  * Check flight availability
  */
@@ -297,6 +399,58 @@ export const checkAvailability = async (params: {
   } catch (error) {
     console.error('Error checking flight availability:', error);
     throw error;
+  }
+};
+
+export interface FlightSuggestion {
+  direction: 'same' | 'reverse' | 'other';
+  origin: string;
+  destination: string;
+  origin_fa: string;
+  origin_en: string;
+  destination_fa: string;
+  destination_en: string;
+  date: string;
+  flight_no: string;
+  departure_time: string;
+  arrival_time: string;
+  price: number;
+  can_book: boolean;
+}
+
+export interface FlightSuggestionGroups {
+  alternate: FlightSuggestion[];
+  otherDestinations: FlightSuggestion[];
+}
+
+/**
+ * Nearby flights for the results page. Purchase stays closed.
+ */
+export const getFlightSuggestions = async (params: {
+  origin: string;
+  destination: string;
+  departure_date: string;
+}): Promise<FlightSuggestionGroups> => {
+  const empty = { alternate: [], otherDestinations: [] };
+  try {
+    const response = await fetch(`${API_BASE_URL}/flights/nira/suggestions/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        origin: params.origin,
+        destination: params.destination,
+        departure_date: params.departure_date,
+      }),
+    });
+    if (!response.ok) return empty;
+    const data = await response.json();
+    return {
+      alternate: Array.isArray(data.alternate) ? data.alternate : [],
+      otherDestinations: Array.isArray(data.other_destinations) ? data.other_destinations : [],
+    };
+  } catch (error) {
+    console.error('Error fetching flight suggestions:', error);
+    return empty;
   }
 };
 

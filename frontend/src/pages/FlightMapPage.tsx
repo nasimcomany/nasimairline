@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getOriginCities, getDestinations, checkAvailability, FlightAvailability, OriginCity, filterListedNiraFlights, getFlightSaleState, FlightSaleState } from '../services/niraApi';
+import { getOriginCities, getDestinations, checkAvailability, getScheduleFlights, FlightAvailability, OriginCity, filterListedNiraFlights, getFlightSaleState, FlightSaleState } from '../services/niraApi';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IranMap } from 'react-iran-map';
 import NeighboringCountryMap from '../components/Maps/NeighboringCountryMap';
-import { formatDateByLanguage, getCurrentDateFormatted, toLocalDateISO } from '../utils/dateFormatter';
+import { formatDateByLanguage, getCurrentDateFormatted, toLocalDateISO, toPersianDigits } from '../utils/dateFormatter';
 import { 
   MapPinIcon,
   CalendarDaysIcon,
@@ -58,6 +58,14 @@ const cityCoordinates: Record<string, { x: number; y: number }> = {
   'TBS': { x: 180, y: 80 },
   'TAS': { x: 980, y: 200 },
   'DYU': { x: 980, y: 160 },
+  'YES': { x: 560, y: 420 }, // Yasuj / Kohgiluyeh
+  'JSK': { x: 720, y: 900 }, // Jask
+  'HDM': { x: 300, y: 380 }, // Hamadan
+  'ACZ': { x: 850, y: 700 }, // Zabol area
+  'PFQ': { x: 200, y: 200 }, // Parsabad
+  'GCH': { x: 320, y: 580 }, // Gachsaran
+  'RJN': { x: 680, y: 700 }, // Rafsanjan
+  'SYJ': { x: 620, y: 620 }, // Sirjan
 };
 
 interface Flight {
@@ -113,6 +121,38 @@ const allProvincesData = {
   hamadan: 0
 };
 
+class MapErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center gap-3 px-6 text-center">
+          <p style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
+            نقشه یک لحظه باز نشد.
+          </p>
+          <button
+            type="button"
+            className="px-4 py-2 rounded-lg bg-blue-900 text-white"
+            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+            onClick={() => this.setState({ failed: false })}
+          >
+            دوباره نشان بده
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const FlightMapPage: React.FC = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
@@ -128,9 +168,7 @@ const FlightMapPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingCities, setLoadingCities] = useState(true);
   const [showFlights, setShowFlights] = useState(false);
-  const [destinationCities, setDestinationCities] = useState<string[]>([]); // Cities with available flights from selected city
-  const [originsWithFlights, setOriginsWithFlights] = useState<string[]>([]);
-  const [scanningOrigins, setScanningOrigins] = useState(false);
+  const [destinationCities, setDestinationCities] = useState<string[]>([]);
 
   const [mapWidth, setMapWidth] = useState(() =>
     typeof window !== 'undefined' ? Math.min(600, Math.max(280, window.innerWidth - 48)) : 600
@@ -146,90 +184,44 @@ const FlightMapPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchCities = async () => {
-      try {
-        setLoadingCities(true);
-        const originCities = await getOriginCities();
-        setCities(originCities);
-      } catch (error) {
-        console.error('Error fetching cities:', error);
-      } finally {
-        setLoadingCities(false);
+      setLoadingCities(true);
+      for (let attempt = 0; attempt < 3 && !cancelled; attempt += 1) {
+        try {
+          const originCities = await getOriginCities();
+          if (cancelled) return;
+          if (originCities.length > 0) {
+            setCities(originCities);
+            setLoadingCities(false);
+            return;
+          }
+        } catch (error) {
+          console.error('Error fetching cities:', error);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
       }
+      if (!cancelled) setLoadingCities(false);
     };
 
     fetchCities();
-  }, []);
-
-  // فقط شهرهایی که برای تاریخ انتخاب‌شده حداقل یک پرواز دارند
-  useEffect(() => {
-    let cancelled = false;
-    const scanOriginsForDate = async () => {
-      if (!cities.length) {
-        setOriginsWithFlights([]);
-        return;
-      }
-      setScanningOrigins(true);
-      const dateStr = toLocalDateISO(selectedDate);
-      const active: string[] = [];
-
-      await Promise.all(
-        cities.map(async (city) => {
-          const code = city.CITY;
-          if (!code || !cityCoordinates[code]) return;
-          try {
-            const destinations = await getDestinations(code);
-            const destCodes = destinations
-              .map((d) => d.CITY)
-              .filter((c) => c && c !== code);
-            for (const dest of destCodes) {
-              if (cancelled) return;
-              const flights = await checkAvailability({
-                origin: code,
-                destination: dest,
-                departure_date: dateStr,
-                round_trip: false,
-                adult_qty: 1,
-                child_qty: 0,
-                infant_qty: 0,
-              });
-              if (filterListedNiraFlights(flights).length > 0) {
-                active.push(code);
-                return;
-              }
-            }
-          } catch {
-            /* ignore single-origin failures */
-          }
-        })
-      );
-
-      if (!cancelled) {
-        setOriginsWithFlights(active);
-        setScanningOrigins(false);
-      }
-    };
-
-    scanOriginsForDate();
     return () => {
       cancelled = true;
     };
-  }, [cities, selectedDate]);
+  }, []);
 
-  const availableCityCodes = React.useMemo(
-    () => originsWithFlights.filter((code) => cityCoordinates[code]),
-    [originsWithFlights]
-  );
-
-  useEffect(() => {
-    if (scanningOrigins) return;
-    if (selectedCity && originsWithFlights.length > 0 && !originsWithFlights.includes(selectedCity)) {
-      setSelectedCity(null);
-      setFlights([]);
-      setDestinationCities([]);
-      setShowFlights(false);
-    }
-  }, [originsWithFlights, scanningOrigins, selectedCity]);
+  const originCodes = React.useMemo(() => {
+    const seen = new Set<string>();
+    const codes: string[] = [];
+    cities.forEach((city) => {
+      const code = (city.CITY || '').trim().toUpperCase();
+      if (!code || seen.has(code) || !cityCoordinates[code]) return;
+      seen.add(code);
+      codes.push(code);
+    });
+    return codes;
+  }, [cities]);
 
   const convertFlights = React.useCallback((allFlights: FlightAvailability[]): Flight[] => {
     const listed = filterListedNiraFlights(allFlights);
@@ -273,7 +265,8 @@ const FlightMapPage: React.FC = () => {
       return classes.map((classStatus, classIndex) => toCard(classStatus, classIndex));
     });
 
-    const rank = (s: FlightSaleState) => (s === 'bookable' ? 0 : s === 'sale_closed' ? 1 : 2);
+    const rank = (s: FlightSaleState) =>
+      s === 'bookable' ? 0 : s === 'sale_closed' ? 1 : s === 'schedule_only' ? 2 : 3;
     return cards.sort((a, b) => rank(a.saleState) - rank(b.saleState));
   }, []);
 
@@ -287,54 +280,115 @@ const FlightMapPage: React.FC = () => {
 
     try {
       const departureDate = toLocalDateISO(date);
-      const destinations = await getDestinations(cityCode);
+      const originU = cityCode.toUpperCase();
+
+      // 1) Timetable for the day — every Nasim OD from this origin (Flights module)
+      const schedule = await getScheduleFlights(departureDate, departureDate);
       if (requestId !== loadRequestId.current) return;
 
-      const validDestinations = destinations
-        .map(d => d.CITY)
-        .filter(code => code && code !== cityCode);
-
-      // فوری مقصدها را روی نقشه نشان بده تا UI سریع حس شود
-      setDestinationCities(validDestinations);
-
-      const results = await Promise.all(
-        validDestinations.map(async (destCode) => {
-          try {
-            const flights = await checkAvailability({
-              origin: cityCode,
-              destination: destCode,
-              departure_date: departureDate,
-              round_trip: false,
-              adult_qty: 1,
-              child_qty: 0,
-              infant_qty: 0,
-            });
-            return { destCode, flights: filterListedNiraFlights(flights || []) };
-          } catch {
-            return { destCode, flights: [] as FlightAvailability[] };
-          }
-        })
+      const scheduleFromOrigin = schedule.filter(
+        (row) => (row.Origin || '').toUpperCase() === originU
+      );
+      const scheduleDests = Array.from(
+        new Set(
+          scheduleFromOrigin
+            .map((row) => (row.Destination || '').toUpperCase())
+            .filter((code) => code && code !== originU)
+        )
       );
 
+      // 2) Also merge RoutesApp destinations (names + any extra ODs)
+      let routeDests: string[] = [];
+      try {
+        const destinations = await getDestinations(cityCode);
+        if (requestId !== loadRequestId.current) return;
+        routeDests = destinations
+          .map((d) => (d.CITY || '').toUpperCase())
+          .filter((code) => code && code !== originU);
+      } catch {
+        /* schedule-only is enough */
+      }
+
+      const validDestinations = Array.from(new Set([...scheduleDests, ...routeDests]));
+      setDestinationCities(validDestinations);
+
+      // 3) Enrich with Availability (price/classes) for each OD — concurrency capped
+      const DEST_CONCURRENCY = 3;
+      const allFlights: FlightAvailability[] = [];
+      const availableDestinations: string[] = [];
+      let next = 0;
+      const workers = Array.from(
+        { length: Math.min(DEST_CONCURRENCY, Math.max(validDestinations.length, 1)) },
+        async () => {
+          while (requestId === loadRequestId.current) {
+            const idx = next++;
+            if (idx >= validDestinations.length) break;
+            const destCode = validDestinations[idx];
+            try {
+              const flights = await checkAvailability({
+                origin: cityCode,
+                destination: destCode,
+                departure_date: departureDate,
+                round_trip: false,
+                adult_qty: 1,
+                child_qty: 0,
+                infant_qty: 0,
+              });
+              const listed = filterListedNiraFlights(flights || []);
+              if (listed.length > 0) {
+                availableDestinations.push(destCode);
+                allFlights.push(...listed);
+              } else {
+                // Still show schedule-only legs so map lists every Nasim flight
+                const schedLegs = scheduleFromOrigin.filter(
+                  (row) => (row.Destination || '').toUpperCase() === destCode
+                );
+                if (schedLegs.length) {
+                  availableDestinations.push(destCode);
+                  schedLegs.forEach((leg) => {
+                    allFlights.push({
+                      Origin: leg.Origin,
+                      Destination: leg.Destination,
+                      DepartureDateTime: leg.DepartureDateTime,
+                      ArrivalDateTime: leg.DepartureDateTime,
+                      FlightNo: leg.FlightNo,
+                      FlightStatus: '',
+                      FlightDurationTime: '',
+                      ClassStatus: [],
+                      DepartureAirportName: leg.Origin,
+                      ArrivalAirportName: leg.Destination,
+                      AircarftType: '',
+                      AircarftTypeNameFA: '',
+                      AircarftTypeNameEN: '',
+                      Meal: '',
+                      DepartureTerminal: '',
+                      ArrivalTerminal: '',
+                      JourneyType: '',
+                      AirLineCode: 'NSN',
+                    });
+                  });
+                }
+              }
+            } catch {
+              /* skip OD */
+            }
+          }
+        }
+      );
+      await Promise.all(workers);
+
       if (requestId !== loadRequestId.current) return;
 
-      const availableDestinations: string[] = [];
-      const allFlights: FlightAvailability[] = [];
-      results.forEach(({ destCode, flights }) => {
-        if (flights.length > 0) {
-          availableDestinations.push(destCode);
-          allFlights.push(...flights);
-        }
-      });
-
-      setDestinationCities(availableDestinations);
+      setDestinationCities(
+        Array.from(new Set([...validDestinations, ...availableDestinations]))
+      );
       setFlights(convertFlights(allFlights));
       setShowFlights(true);
     } catch (error) {
       if (requestId === loadRequestId.current) {
         console.error('Error loading route flights:', error);
         setFlights([]);
-        setDestinationCities([]);
+        setShowFlights(true);
       }
     } finally {
       if (requestId === loadRequestId.current) {
@@ -354,7 +408,7 @@ const FlightMapPage: React.FC = () => {
   };
 
   const getCityName = (cityCode: string) => {
-    const city = cities.find(c => c.CITY === cityCode);
+    const city = cities.find((c) => (c.CITY || '').toUpperCase() === cityCode.toUpperCase());
     if (!city) return cityCode;
     return language === 'en' ? city.CITYNAME_EN : city.CITYNAME_FA;
   };
@@ -416,9 +470,9 @@ const FlightMapPage: React.FC = () => {
                     }}
                     minDate={new Date()}
                     dateFormat={language === 'fa' ? 'yyyy/MM/dd' : 'yyyy/MM/dd'}
+                    renderDayContents={language === 'fa' ? (day) => toPersianDigits(String(day)) : undefined}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
                     wrapperClassName="w-full"
-                    readOnly={true}
                   />
                 </div>
                 {/* Tomorrow's Date Display */}
@@ -473,34 +527,11 @@ const FlightMapPage: React.FC = () => {
             <div className="lg:col-span-2">
               <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 overflow-hidden">
                 <div className="relative w-full overflow-hidden rounded-lg" style={{ height: `${Math.min(600, Math.max(280, mapWidth))}px` }}>
-                  {loadingCities || scanningOrigins ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-3">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
-                      <p
-                        className="text-sm text-gray-600"
-                        style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-                      >
-                        {language === 'fa'
-                          ? 'در حال پیدا کردن شهرهایی که در این تاریخ پرواز دارند…'
-                          : 'Finding cities with flights on this date…'}
-                      </p>
-                    </div>
-                  ) : availableCityCodes.length === 0 ? (
-                    <div className="flex items-center justify-center h-full px-6">
-                      <p
-                        className="text-center text-gray-600"
-                        style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
-                      >
-                        {language === 'fa'
-                          ? 'برای این تاریخ پروازی از نیرا پیدا نشد. تاریخ دیگری را امتحان کنید.'
-                          : 'No flights found for this date. Try another date.'}
-                      </p>
-                    </div>
-                  ) : (
                     <div
                       className="relative w-full h-full flex items-center justify-center overflow-hidden"
                       style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #dbeafe 100%)' }}
                     >
+                      <MapErrorBoundary>
                       {/* Same square box for IranMap + markers so coords stay aligned (SVG viewBox 1080) */}
                       <div
                         className="iran-map-container relative"
@@ -541,7 +572,7 @@ const FlightMapPage: React.FC = () => {
                             className="absolute inset-0"
                             style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
                           >
-                              {availableCityCodes.map((cityCode) => {
+                              {originCodes.map((cityCode) => {
                                 const coords = getCityCoordinates(cityCode);
                                 const scaledX = coords.x;
                                 const scaledY = coords.y;
@@ -585,7 +616,7 @@ const FlightMapPage: React.FC = () => {
                                 );
                               })}
                               
-                              {selectedCity && destinationCities.length > 0 && destinationCities.map((destCityCode) => {
+                              {selectedCity && destinationCities.filter((code) => cityCoordinates[code]).map((destCityCode) => {
                                 const selectedCoords = getCityCoordinates(selectedCity);
                                 const destCoords = getCityCoordinates(destCityCode);
                                 
@@ -606,8 +637,31 @@ const FlightMapPage: React.FC = () => {
                               })}
                           </svg>
                       </div>
+                      </MapErrorBoundary>
                     </div>
-                  )}
+                    {loadingCities && originCodes.length === 0 ? (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/75">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-900"></div>
+                        <p
+                          className="text-sm text-gray-600"
+                          style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                        >
+                          {language === 'fa' ? 'در حال آوردن شهرها…' : 'Loading cities…'}
+                        </p>
+                      </div>
+                    ) : null}
+                    {!loadingCities && originCodes.length === 0 ? (
+                      <div className="absolute inset-x-4 bottom-4 rounded-lg bg-white/95 px-4 py-3 text-center shadow">
+                        <p
+                          className="text-sm text-gray-700"
+                          style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                        >
+                          {language === 'fa'
+                            ? 'نقشه هست، ولی فهرست شهرها الان از سامانه نیامد. صفحه را یک بار تازه کنید.'
+                            : 'The map is here, but the city list did not load. Refresh the page.'}
+                        </p>
+                      </div>
+                    ) : null}
                 </div>
               </div>
             </div>

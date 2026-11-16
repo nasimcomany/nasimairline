@@ -16,6 +16,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+import sentry_sdk
 
 from nasim.production import (
     build_allowed_hosts,
@@ -44,6 +45,16 @@ SECRET_KEY = os.environ.get('SECRET_KEY', _DEFAULT_INSECURE_KEY)
 # On Railway default to False unless explicitly set True
 _debug_default = 'False' if IS_RAILWAY else 'True'
 DEBUG = env_bool('DEBUG', _debug_default == 'True')
+
+# Sentry — فقط وقتی SENTRY_DSN تنظیم شده باشد
+_SENTRY_DSN = os.environ.get('SENTRY_DSN', '').strip()
+if _SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        environment='production' if not DEBUG else 'development',
+        send_default_pii=False,
+        traces_sample_rate=0.0,
+    )
 
 ALLOWED_HOSTS = build_allowed_hosts(env_csv('ALLOWED_HOSTS', 'localhost,127.0.0.1'))
 
@@ -441,7 +452,7 @@ SUPPORT_EMAIL_MAPPING = {
 }
 
 # Security Contact Information (حراست)
-SECURITY_CONTACT_PHONE = os.environ.get('SECURITY_CONTACT_PHONE', '021123456789')
+SECURITY_CONTACT_PHONE = os.environ.get('SECURITY_CONTACT_PHONE', '02173490318')
 
 # Weather API (OpenWeatherMap) - برای پروکسی آب و هوا
 WEATHER_API_KEY = os.environ.get('REACT_APP_WEATHER_API_KEY', '') or os.environ.get('WEATHER_API_KEY', '')
@@ -456,26 +467,29 @@ ALWAYS_NOTIFY_EMAILS = [
     if email.strip()
 ]
 
-# Complaint Form - ایمیل‌های دریافت اعلان شکایت (جدا شده با کاما)
+# Complaint / انتقادات و پیشنهادات — فقط این لیست (بدون ALWAYS_NOTIFY)
 COMPLAINT_NOTIFICATION_EMAILS = [
-    email.strip() for email in 
+    email.strip() for email in
     os.environ.get(
         'COMPLAINT_NOTIFICATION_EMAILS',
-        'grifindorekamyar@gmail.com,info@nasimair.com,support@nasimair.com',
+        'grifindorekamyar@gmail.com,info@nasimair.com',
     ).split(',')
     if email.strip()
 ]
 if not COMPLAINT_NOTIFICATION_EMAILS:
-    COMPLAINT_NOTIFICATION_EMAILS = list(ALWAYS_NOTIFY_EMAILS) or ['grifindorekamyar@gmail.com']
+    COMPLAINT_NOTIFICATION_EMAILS = ['grifindorekamyar@gmail.com', 'info@nasimair.com']
 
-# Survey Form - ایمیل‌های دریافت اعلان نظرسنجی (پیش‌فرض: همان شکایت)
+# Survey Form — فقط این لیست (بدون ALWAYS_NOTIFY). پیش‌فرض: همان شکایت
 SURVEY_NOTIFICATION_EMAILS = [
     email.strip() for email in
-    os.environ.get('SURVEY_NOTIFICATION_EMAILS', '').split(',')
+    os.environ.get(
+        'SURVEY_NOTIFICATION_EMAILS',
+        'grifindorekamyar@gmail.com,info@nasimair.com',
+    ).split(',')
     if email.strip()
 ]
 if not SURVEY_NOTIFICATION_EMAILS:
-    SURVEY_NOTIFICATION_EMAILS = COMPLAINT_NOTIFICATION_EMAILS
+    SURVEY_NOTIFICATION_EMAILS = list(COMPLAINT_NOTIFICATION_EMAILS)
 
 # Chat widget — ایمیل اعلان پیام کاربر (علاوه بر تلگرام/واتساپ)
 CHAT_NOTIFICATION_EMAILS = [
@@ -525,10 +539,16 @@ MELLIPAYAMAK_FROM_NUMBER = os.environ.get('MELLIPAYAMAK_FROM_NUMBER', '')  # ش�
 NIRA_BASE_URL = os.environ.get('NIRA_BASE_URL', '')  # URL پایه سیستم نیرا (مثال: https://airline.example.com)
 NIRA_OFFICE_USER = os.environ.get('NIRA_OFFICE_USER', '')  # نام کاربری Office برای دسترسی به Web Service
 NIRA_OFFICE_PASS = os.environ.get('NIRA_OFFICE_PASS', '')  # رمز عبور Office
-# Cap prevents a single slow Nira call from pinning a Gunicorn worker (502/OOM risk)
-NIRA_API_TIMEOUT = min(int(os.environ.get('NIRA_API_TIMEOUT', '25')), int(os.environ.get('NIRA_API_TIMEOUT_CAP', '45')))
-NIRA_ROUTES_CACHE_TTL = int(os.environ.get('NIRA_ROUTES_CACHE_TTL', '180'))
-NIRA_AVAILABILITY_CACHE_TTL = int(os.environ.get('NIRA_AVAILABILITY_CACHE_TTL', '45'))
+# Cap prevents a single slow Nira call from pinning a Gunicorn worker (502/OOM risk).
+# Keep read timeout well under GUNICORN_TIMEOUT so hung Nira never outlives the worker.
+NIRA_API_TIMEOUT = min(int(os.environ.get('NIRA_API_TIMEOUT', '15')), int(os.environ.get('NIRA_API_TIMEOUT_CAP', '20')))
+NIRA_CONNECT_TIMEOUT = int(os.environ.get('NIRA_CONNECT_TIMEOUT', '3'))
+NIRA_ROUTES_CACHE_TTL = int(os.environ.get('NIRA_ROUTES_CACHE_TTL', '300'))
+NIRA_ROUTES_STALE_TTL = int(os.environ.get('NIRA_ROUTES_STALE_TTL', '86400'))  # serve stale on outage
+NIRA_AVAILABILITY_CACHE_TTL = int(os.environ.get('NIRA_AVAILABILITY_CACHE_TTL', '60'))
+NIRA_MAX_INFLIGHT = int(os.environ.get('NIRA_MAX_INFLIGHT', '4'))  # shared across workers when Redis is up
+NIRA_CIRCUIT_FAILURE_THRESHOLD = int(os.environ.get('NIRA_CIRCUIT_FAILURE_THRESHOLD', '5'))
+NIRA_CIRCUIT_RECOVERY_SECONDS = int(os.environ.get('NIRA_CIRCUIT_RECOVERY_SECONDS', '30'))
 NIRA_ENRICH_STATUS_ASYNC = env_bool('NIRA_ENRICH_STATUS_ASYNC', True)
 
 # تنظیمات API برای دریافت اطلاعات لحظه‌ای پروازها
@@ -612,6 +632,11 @@ CELERY_BEAT_SCHEDULE = {
 
 BOOKING_HOLD_MINUTES = int(os.environ.get('BOOKING_HOLD_MINUTES', '15'))
 BOOKING_SOFT_HOLD_CAP = int(os.environ.get('BOOKING_SOFT_HOLD_CAP', '9'))
+
+# Temporary: count non-expired HELD bookings for باشگاه مشتریان until real payment is live.
+# Defaults to DEBUG so production stays strict unless explicitly enabled.
+# Set MEMBERSHIP_COUNT_HELD_BOOKINGS=0 when payment confirmation is reliable.
+MEMBERSHIP_COUNT_HELD_BOOKINGS = env_bool('MEMBERSHIP_COUNT_HELD_BOOKINGS', DEBUG)
 
 # Nira IBE payment bridge (same pattern as other Nira airlines)
 # Template placeholders: {ref} {callback} {return_url} {amount}

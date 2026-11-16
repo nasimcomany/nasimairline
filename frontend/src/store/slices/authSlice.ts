@@ -11,6 +11,7 @@ interface User {
   date_of_birth?: string;
   gender?: string;
   nationality?: string;
+  passport_number?: string;
   membership_level: string;
   loyalty_points: number;
   uuid?: string;
@@ -69,6 +70,29 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+const extractApiError = (data: any, fallback: string): string => {
+  if (!data) return fallback;
+  if (typeof data === 'string') return data;
+  if (Array.isArray(data)) return String(data[0] || fallback);
+  if (typeof data.detail === 'string') return data.detail;
+  if (Array.isArray(data.detail)) return String(data.detail[0] || fallback);
+  for (const key of [
+    'email', 'phone_number', 'first_name', 'last_name',
+    'password', 'password_confirm', 'national_id', 'passport_number',
+    'username', 'non_field_errors',
+  ]) {
+    const val = data[key];
+    if (typeof val === 'string') return val;
+    if (Array.isArray(val) && val[0]) return String(val[0]);
+  }
+  // DRF sometimes returns {field: ["error"]} for other keys
+  for (const val of Object.values(data)) {
+    if (typeof val === 'string' && val.trim()) return val;
+    if (Array.isArray(val) && val[0]) return String(val[0]);
+  }
+  return fallback;
+};
+
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData: RegisterData, { rejectWithValue }) => {
@@ -80,7 +104,7 @@ export const registerUser = createAsyncThunk(
       localStorage.setItem('user', JSON.stringify(data.user));
       return data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'ثبت‌نام ناموفق بود');
+      return rejectWithValue(extractApiError(error.response?.data, 'ثبت‌نام ناموفق بود'));
     }
   }
 );
@@ -101,6 +125,9 @@ const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;
+      if (action.payload) {
+        localStorage.setItem('user', JSON.stringify(action.payload));
+      }
     },
   },
   extraReducers: (builder) => {

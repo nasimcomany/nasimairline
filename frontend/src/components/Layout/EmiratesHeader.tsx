@@ -14,7 +14,6 @@ import {
   SparklesIcon,
   MapPinIcon,
   BuildingOfficeIcon,
-  QuestionMarkCircleIcon,
   PaperAirplaneIcon,
   CalendarDaysIcon,
   GiftIcon,
@@ -36,15 +35,41 @@ import {
   WalletIcon,
   PhoneIcon,
   EnvelopeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { ANDROID_APP_VERSION } from '../../config/androidAppVersion';
+import galleryService, { HeaderMenuCmsSlot } from '../../services/galleryService';
 import AuthModal from '../Auth/AuthModal';
 import StaffLoginModal from '../Auth/StaffLoginModal';
 
 interface EmiratesHeaderProps {
   onWeatherClick?: () => void;
 }
+
+const AndroidVersionMark: React.FC<{ onDark?: boolean }> = ({ onDark = false }) => (
+  <span
+    style={{
+      position: 'absolute',
+      top: -7,
+      insetInlineEnd: 0,
+      fontSize: 8,
+      lineHeight: '11px',
+      letterSpacing: '0.06em',
+      fontWeight: 700,
+      fontFamily: 'Inter, sans-serif',
+      textTransform: 'none',
+      color: onDark ? '#dbe7ff' : '#1e3a8a',
+      border: `1px solid ${onDark ? 'rgba(219,231,255,0.75)' : '#1e3a8a'}`,
+      borderRadius: 999,
+      padding: '0 4px',
+      pointerEvents: 'none',
+    }}
+  >
+    {ANDROID_APP_VERSION}
+  </span>
+);
 
 const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,6 +78,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const [hoveredSubItem, setHoveredSubItem] = useState<{key: string, index: number} | null>(null);
   const [hoveredNestedPath, setHoveredNestedPath] = useState<number[]>([]); // e.g. [2] for مسافرین ویژه, [2,1] for درخواست ولیچر
+  const [cmsMenuSlots, setCmsMenuSlots] = useState<Record<string, HeaderMenuCmsSlot>>({});
   const [selectedDestinationIndex, setSelectedDestinationIndex] = useState<number | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
@@ -63,14 +89,38 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const loginDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const userDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const menuDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  const whereweflyTriggerRef = useRef<HTMLDivElement | null>(null);
-  const [whereweflyDropdownStyle, setWhereweflyDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
+  const menuTriggerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [megaDropdownStyle, setMegaDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
   const [flyDescModal, setFlyDescModal] = useState<{ title: string; descKey: string } | null>(null);
   const [aboutModal, setAboutModal] = useState<{ type: 'desc'; title: string; descKey: string } | { type: 'contact' } | null>(null);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { language, t, fontClass, setLanguage } = useLanguage();
+  const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setOpenMobileSection(null);
+      return;
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMenuOpen]);
+
+  // DigiHamisheBold is a separate family — font-bold alone often looks regular on FA.
+  const navBoldStyle: React.CSSProperties =
+    language === 'fa'
+      ? {
+          fontFamily: "'DigiHamisheBold', 'DigiHamishe', Tahoma, sans-serif",
+          fontWeight: 700,
+        }
+      : language === 'ar'
+      ? { fontFamily: "'Noto Sans Arabic', sans-serif", fontWeight: 700 }
+      : { fontFamily: 'Inter, sans-serif', fontWeight: 700 };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -108,42 +158,92 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return null; // index 1 (fleet) and 5 (magazine) navigate, no modal
   };
 
-  // Get default image for each menu category
-  const getDefaultImage = (key: string, subItemIndex?: number) => {
+  // CMS overrides for header menu photos + labels (admin → HeaderMenuImage)
+  useEffect(() => {
+    let cancelled = false;
+    galleryService.getHeaderMenuImages().then((map) => {
+      if (!cancelled) setCmsMenuSlots(map || {});
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const resolveMenuImage = (menuKey: string, itemKey: string, fallback: string) => {
+    const cms = cmsMenuSlots[`${menuKey}:${itemKey}`];
+    return (cms?.image_url && String(cms.image_url).trim()) || fallback;
+  };
+
+  /** Prefer the admin label for the active language; otherwise keep the built-in translation. */
+  const resolveMenuLabel = (menuKey: string, itemKey: string, fallback: string) => {
+    const cms = cmsMenuSlots[`${menuKey}:${itemKey}`];
+    if (!cms) return fallback;
+    if (language === 'ar') {
+      const ar = (cms.label_ar || '').trim();
+      if (ar) return ar;
+      return fallback;
+    }
+    if (language === 'en') {
+      const en = (cms.label_en || '').trim();
+      if (en) return en;
+    }
+    const fa = (cms.label_fa || '').trim();
+    if (fa) return fa;
+    const en = (cms.label_en || '').trim();
+    return en || fallback;
+  };
+
+  // Built-in defaults — used when CMS has no uploaded image for that slot
+  const getDefaultImage = (key: string, itemKey?: string) => {
     const images: Record<string, string[]> = {
-      'flyWithNasim': [
+      flyWithNasim: [
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-crew.jpg',
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
-        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
+        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg',
+        '/images/airport-plane-photo_991869-62.jpg',
       ],
-      'wherewefly': [
+      wherewefly: [
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-crew.jpg',
-        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
+        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg',
       ],
-      'about': [
+      about: [
         '/images/airport-crew.jpg',
         '/images/airplane-clouds-night_864588-19786.jpg',
         '/images/airport-plane-photo_991869-62.jpg',
-        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg'
-      ],
-      'safetyReport': [
-        '/images/airplane-clouds-night_864588-19786.jpg'
-      ],
-      'help': [
-        '/images/airplane-clouds-night_864588-19786.jpg',
-        '/images/airport-crew.jpg',
+        '/images/collection-of-aerospace-and-aviation-website-templates-vayudoot-aviation.jpeg',
         '/images/skyward-soar-airplane-flying-blue-sky-clouds_391229-21566.jpg',
-        '/images/airport-plane-photo_991869-62.jpg'
-      ]
+        '/images/airport-crew.jpg',
+        '/images/airplane-clouds-night_864588-19786.jpg',
+      ],
     };
-    
-    if (subItemIndex !== undefined && images[key] && images[key][subItemIndex]) {
-      return images[key][subItemIndex];
+
+    const topIndex = itemKey ? parseInt(String(itemKey).split('.')[0], 10) : 0;
+    const list = images[key] || [];
+    const fallback =
+      list[Number.isFinite(topIndex) ? topIndex % list.length : 0] ||
+      list[0] ||
+      '/images/airplane-clouds-night_864588-19786.jpg';
+
+    if (itemKey !== undefined && itemKey !== null && itemKey !== '') {
+      return resolveMenuImage(key, String(itemKey), fallback);
     }
-    return images[key]?.[0] || '/images/airplane-clouds-night_864588-19786.jpg';
+    return resolveMenuImage(key, '0', fallback);
+  };
+
+  const getActiveMenuItemKey = (menuKey: string) => {
+    if (menuKey === 'flyWithNasim' && hoveredNestedPath.length >= 2) {
+      return `${hoveredNestedPath[0]}.${hoveredNestedPath[1]}`;
+    }
+    if (menuKey === 'flyWithNasim' && hoveredNestedPath.length === 1) {
+      return `${hoveredNestedPath[0]}`;
+    }
+    if (hoveredSubItem && hoveredSubItem.key === menuKey) {
+      return String(hoveredSubItem.index);
+    }
+    return '0';
   };
 
   // Get multiple destination images with names for wherewefly dropdown
@@ -176,7 +276,15 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     };
     
     const index = subItemIndex !== undefined ? subItemIndex : 0;
-    return destinationData[index] || destinationData[0];
+    const base = destinationData[index] || destinationData[0];
+    return base.map((destination, cellIdx) => {
+      const itemKey = `dest.${index}.${cellIdx}`;
+      return {
+        ...destination,
+        name: resolveMenuLabel('wherewefly', itemKey, destination.name),
+        image: resolveMenuImage('wherewefly', itemKey, destination.image),
+      };
+    });
   };
 
   type DropdownSubItem = { label: string; path: string; children?: DropdownSubItem[] };
@@ -186,25 +294,25 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.flyWithNasim') || 'رزرو',
       path: '#',
       dropdown: [
-        { label: t('nav.checkInTime') || 'زمان مراجعه و پذیرش', path: '#' },
-        { label: t('nav.unacceptablePassengers') || 'مسافرین غیر قابل پذیرش', path: '#' },
+        { label: resolveMenuLabel('flyWithNasim', '0', t('nav.checkInTime') || 'زمان مراجعه و پذیرش'), path: '#' },
+        { label: resolveMenuLabel('flyWithNasim', '1', t('nav.unacceptablePassengers') || 'مسافرین غیر قابل پذیرش'), path: '#' },
         {
-          label: t('nav.specialPassengers') || 'مسافرین ویژه',
+          label: resolveMenuLabel('flyWithNasim', '2', t('nav.specialPassengers') || 'مسافرین ویژه'),
           path: '#',
           children: [
-            { label: t('nav.seatSelection') || 'انتخاب صندلی', path: '/#search-form' },
-            { label: t('nav.wheelchairRequest') || 'درخواست ولیچر', path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '2.0', t('nav.seatSelection') || 'انتخاب صندلی'), path: '/#search-form' },
+            { label: resolveMenuLabel('flyWithNasim', '2.1', t('nav.wheelchairRequest') || 'درخواست ولیچر'), path: '#' },
           ]
         },
-        { label: t('nav.refund') || 'استرداد', path: '#' },
+        { label: resolveMenuLabel('flyWithNasim', '3', t('nav.refund') || 'استرداد'), path: '#' },
         {
-          label: t('nav.baggage') || 'جامه دان',
+          label: resolveMenuLabel('flyWithNasim', '4', t('nav.baggage') || 'جامه دان'),
           path: '#',
           children: [
-            { label: t('nav.passengerBaggage') || 'بار همراه مسافر', path: '#' },
-            { label: t('nav.carryOnAcceptance') || 'پذیرش بار همراه', path: '#' },
-            { label: t('nav.prohibitedItems') || 'اقلام ممنوعه', path: '#' },
-            { label: t('nav.excessBaggage') || 'اضافه بار', path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '4.0', t('nav.passengerBaggage') || 'بار همراه مسافر'), path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '4.1', t('nav.carryOnAcceptance') || 'پذیرش بار همراه'), path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '4.2', t('nav.prohibitedItems') || 'اقلام ممنوعه'), path: '#' },
+            { label: resolveMenuLabel('flyWithNasim', '4.3', t('nav.excessBaggage') || 'اضافه بار'), path: '#' },
           ]
         },
       ]
@@ -214,23 +322,23 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
       label: t('nav.flightDestinations') || 'مقاصد',
       path: '#',
       dropdown: [
-        { label: t('nav.domestic') || 'داخلی', path: '/flights/map' },
-        { label: t('nav.international') || 'خارجی', path: '#' },
-        { label: t('nav.allDestinations') || 'همه مقاصد', path: '/flights/map' },
+        { label: resolveMenuLabel('wherewefly', '0', t('nav.domestic') || 'داخلی'), path: '/flights/map' },
+        { label: resolveMenuLabel('wherewefly', '1', t('nav.international') || 'خارجی'), path: '#' },
+        { label: resolveMenuLabel('wherewefly', '2', t('nav.allDestinations') || 'همه مقاصد'), path: '/flights/map' },
       ]
     },
     {
       key: 'about',
-      label: t('nav.about') || 'کمک',
+      label: t('nav.about') || 'ارتباط با ما',
       path: '#',
       dropdown: [
-        { label: t('nav.nasimHistory') || 'تاریخچه نسیم', path: '#' },
-        { label: t('nav.airlineFleet') || 'ناوگان هوایی', path: '/flights/map' },
-        { label: t('nav.contactUs') || 'تماس با ما', path: '#' },
-        { label: t('nav.cooperationRequest') || 'درخواست همکاری', path: '#' },
-        { label: t('nav.nasimTraining') || 'آموزش نسیم', path: '#' },
-        { label: t('nav.nasimMagazine') || 'مجله نسیم', path: '/magazine' },
-        { label: t('nav.safetyHazardReport') || 'گزارش مخاطرات ایمنی (SHOR)', path: '/safety-report/safety' },
+        { label: resolveMenuLabel('about', '0', t('nav.nasimHistory') || 'تاریخچه نسیم'), path: '#' },
+        { label: resolveMenuLabel('about', '1', t('nav.airlineFleet') || 'ناوگان هوایی'), path: '/flights/map' },
+        { label: resolveMenuLabel('about', '2', t('nav.contactUs') || 'تماس با ما'), path: '#' },
+        { label: resolveMenuLabel('about', '3', t('nav.cooperationRequest') || 'درخواست همکاری'), path: '#' },
+        { label: resolveMenuLabel('about', '4', t('nav.nasimTraining') || 'آموزش نسیم'), path: '#' },
+        { label: resolveMenuLabel('about', '5', t('nav.nasimMagazine') || 'مجله نسیم'), path: '/magazine' },
+        { label: resolveMenuLabel('about', '6', t('nav.safetyHazardReport') || 'گزارش مخاطرات ایمنی (SHOR)'), path: '/safety-report/safety' },
       ]
     },
   ];
@@ -282,12 +390,22 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Compute wherewefly dropdown position for Portal (fixed, centered, never clipped)
+  // Desktop mega-menus are portaled: sticky header + backdrop-blur clips overflow.
   useEffect(() => {
-    if (activeDropdown === 'wherewefly' && whereweflyTriggerRef.current) {
-      const rect = whereweflyTriggerRef.current.getBoundingClientRect();
+    const updatePosition = () => {
+      if (!activeDropdown) {
+        setMegaDropdownStyle(null);
+        return;
+      }
+      const trigger = menuTriggerRefs.current[activeDropdown];
+      if (!trigger) {
+        setMegaDropdownStyle(null);
+        return;
+      }
+      const rect = trigger.getBoundingClientRect();
       const margin = window.innerWidth < 768 ? 12 : 24;
-      const dropdownWidth = Math.min(1400, window.innerWidth - margin * 2);
+      const preferredWidth = activeDropdown === 'wherewefly' ? 1400 : 900;
+      const dropdownWidth = Math.min(preferredWidth, window.innerWidth - margin * 2);
       const left = Math.max(
         margin,
         Math.min(
@@ -295,18 +413,206 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
           rect.left + rect.width / 2 - dropdownWidth / 2,
         ),
       );
-      setWhereweflyDropdownStyle({ top: rect.bottom + 8, left, width: dropdownWidth });
-    } else {
-      setWhereweflyDropdownStyle(null);
-    }
+      setMegaDropdownStyle({ top: rect.bottom + 8, left, width: dropdownWidth });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
   }, [activeDropdown]);
 
+  const mobileMenuPanel =
+    isMenuOpen && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            id="nasim-mobile-nav"
+            role="dialog"
+            aria-modal="true"
+            dir={language === 'en' ? 'ltr' : 'rtl'}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 2147483000,
+              background: '#0f172a',
+              paddingTop: 80,
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              boxSizing: 'border-box',
+            }}
+          >
+            <nav className="w-full px-3 py-3 space-y-1" style={{ minHeight: 'calc(100% - 80px)' }}>
+              {menuItems.map((item) => (
+                <div key={item.key} className="w-full border-b border-white/10">
+                  {item.dropdown && item.dropdown.length > 0 ? (
+                    <>
+                      <button
+                        type="button"
+                        className={`w-full flex items-center justify-between gap-2 px-4 py-3.5 text-base font-bold text-white ${fontClass}`}
+                        onClick={() =>
+                          setOpenMobileSection((current) => (current === item.key ? null : item.key))
+                        }
+                      >
+                        <span>{item.label}</span>
+                        <ChevronDownIcon
+                          className={`w-5 h-5 shrink-0 transition-transform ${
+                            openMobileSection === item.key ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                      {openMobileSection === item.key && (
+                        <div className="pb-2 space-y-0.5">
+                          {item.path && item.path !== '#' && (
+                            <Link
+                              to={item.path}
+                              className={`block w-full px-4 py-2.5 text-sm text-blue-200 ${fontClass}`}
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              {item.label}
+                            </Link>
+                          )}
+                          {(function flattenItems(
+                            items: DropdownSubItem[],
+                            depth = 0,
+                            path = '',
+                            menuKey: string,
+                          ): React.ReactNode[] {
+                            return items.flatMap((subItem, index) => {
+                              const p = path ? `${path}-${index}` : `${index}`;
+                              const { parentIndex } = parseFlattenPath(p);
+                              const isFlyDesc = menuKey === 'flyWithNasim' && subItem.path === '#';
+                              const flyDescKey = isFlyDesc
+                                ? getFlyDescKey(parentIndex, parseFlattenPath(p).childIndex)
+                                : null;
+                              const aboutConfig =
+                                menuKey === 'about' && subItem.path === '#'
+                                  ? getAboutModalConfig(parentIndex, subItem.label)
+                                  : null;
+                              return [
+                                <Link
+                                  key={p}
+                                  to={subItem.path}
+                                  className={`block w-full py-2.5 text-sm text-gray-200 hover:bg-white/10 ${fontClass}`}
+                                  style={{
+                                    paddingInlineStart: `${16 + depth * 14}px`,
+                                    paddingInlineEnd: 16,
+                                  }}
+                                  onClick={(e) => {
+                                    if (flyDescKey) {
+                                      e.preventDefault();
+                                      setFlyDescModal({ title: subItem.label, descKey: flyDescKey });
+                                    } else if (aboutConfig) {
+                                      e.preventDefault();
+                                      setAboutModal(aboutConfig);
+                                    }
+                                    setIsMenuOpen(false);
+                                  }}
+                                >
+                                  {subItem.label}
+                                </Link>,
+                                ...(subItem.children
+                                  ? flattenItems(subItem.children, depth + 1, p, menuKey)
+                                  : []),
+                              ];
+                            });
+                          })(item.dropdown, 0, '', item.key)}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      className={`block w-full px-4 py-3.5 text-base font-bold text-white ${fontClass}`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </div>
+              ))}
+
+              <div className="pt-3 mt-2 space-y-1">
+                <a
+                  href="/downloads/nasim-airlines.apk"
+                  download="nasim-airlines.apk"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex w-full items-center gap-2 px-4 py-3 text-base font-bold text-white ${fontClass}`}
+                >
+                  <DevicePhoneMobileIcon className="w-5 h-5" />
+                  <span className="relative inline-block leading-none" style={{ paddingInlineEnd: 26 }}>
+                    {t('nav.androidApp') || 'اپ اندروید'}
+                    <AndroidVersionMark onDark />
+                  </span>
+                </a>
+                {isAuthenticated ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-3 text-base font-bold text-white ${fontClass}`}
+                  >
+                    {t('nav.logout')}
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthModalMode('login');
+                        setIsAuthModalOpen(true);
+                        setIsMenuOpen(false);
+                      }}
+                      className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-3 text-base font-bold text-white ${fontClass}`}
+                    >
+                      {t('nav.loginUsers')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsStaffLoginModalOpen(true);
+                        setIsMenuOpen(false);
+                      }}
+                      className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-3 text-base font-bold text-white ${fontClass}`}
+                    >
+                      {t('nav.loginStaff')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthModalMode('register');
+                        setIsAuthModalOpen(true);
+                        setIsMenuOpen(false);
+                      }}
+                      className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-3 text-base font-bold text-white ${fontClass}`}
+                    >
+                      {t('nav.register')}
+                    </button>
+                  </>
+                )}
+              </div>
+            </nav>
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
-    <header className="sticky top-0 z-50 relative" style={{ overflow: 'visible' }}>
-      <div className="flex h-20 relative" style={{ overflow: 'visible' }}>
+    <>
+    <header className={`sticky top-0 ${isMenuOpen ? 'z-[2147483001]' : 'z-50'}`} style={{ position: 'sticky', top: 0 }}>
+      <div className="flex h-20 w-full overflow-visible">
         {/* Dark Navigation Section - Glassmorphism */}
-        <div className="flex-1 bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center justify-between">
-        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative" style={{ overflow: 'visible' }}>
+        <div className="flex-1 min-w-0 w-full bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center">
+        <div className="w-full min-w-0 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
 
           {/* Logo with Blue Flag - در فارسی موازی با شروع رزرو پرواز (max-w-7xl + px-8) */}
           <div 
@@ -335,7 +641,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <img 
-                  src="/images/nasim0.png" 
+                  src="/images/nasim0.png?v=8" 
                   alt="هواپیمایی نسیم" 
                   className="object-contain"
                   style={{ 
@@ -354,7 +660,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             {menuItems.map((item) => (
               <div
                 key={item.key}
-                ref={item.key === 'wherewefly' ? whereweflyTriggerRef : undefined}
+                ref={(el) => {
+                  menuTriggerRefs.current[item.key] = el;
+                }}
                 className="relative h-full flex items-center"
                 onMouseEnter={() => handleMouseEnter(item.key, item.dropdown && item.dropdown.length > 0)}
                 onMouseLeave={handleMouseLeave}
@@ -363,6 +671,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   to={item.path}
                   className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                   style={{ 
+                    ...navBoldStyle,
                     borderBottom: activeDropdown === item.key ? '2px solid #000' : '2px solid transparent',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -380,14 +689,15 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 >
                   {item.key === 'flyWithNasim' && <CalendarDaysIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
                   {item.key === 'wherewefly' && <MapPinIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
-                  {item.key === 'about' && <QuestionMarkCircleIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
+                  {item.key === 'about' && <PhoneIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />}
                   {item.label}
                 </Link>
                 
-                {/* Dropdown Menu with Image - wherewefly uses Portal to avoid clipping; others inline */}
-                {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && item.key !== 'wherewefly' && (
+                {/* Dropdown Menu with Image - portaled so sticky/blur header cannot clip it */}
+                {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && item.key !== 'wherewefly' && megaDropdownStyle && createPortal(
                   <div 
-                    className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[9999] overflow-hidden w-[900px] max-w-[calc(100vw-48px)]`}
+                    className="fixed bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[2147483000] overflow-hidden"
+                    style={{ top: megaDropdownStyle.top, left: megaDropdownStyle.left, width: megaDropdownStyle.width }}
                     onMouseEnter={() => {
                       // Clear timeout when mouse enters dropdown
                       if (menuDropdownTimeoutRef.current) {
@@ -555,7 +865,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                       <div
                                         key={childIdx}
                                         className={`flex items-center gap-3 px-4 py-3 text-sm text-black hover:bg-gray-300 rounded-lg transition-all ${fontClass} ${language === 'en' ? 'text-left' : 'text-right'} ${childHovered ? 'bg-gray-300' : ''}`}
-                                        onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
+                                        onMouseEnter={() => {
+                                          setHoveredNestedPath([hoveredNestedPath[0], childIdx]);
+                                          setHoveredSubItem({ key: item.key, index: hoveredNestedPath[0] });
+                                        }}
                                       >
                                         <span className="font-medium">{child.label}</span>
                                         <ChevronDownIcon className="w-4 h-4 flex-shrink-0" style={{ transform: language === 'fa' || language === 'ar' ? 'rotate(-90deg)' : 'rotate(90deg)' }} />
@@ -575,7 +888,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                                             }
                                           }
                                         }}
-                                        onMouseEnter={() => setHoveredNestedPath([hoveredNestedPath[0], childIdx])}
+                                        onMouseEnter={() => {
+                                          setHoveredNestedPath([hoveredNestedPath[0], childIdx]);
+                                          setHoveredSubItem({ key: item.key, index: hoveredNestedPath[0] });
+                                        }}
                                       >
                                         <span className="font-medium">{child.label}</span>
                                       </Link>
@@ -723,23 +1039,21 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                         // Single image for other menus
                         <div className="w-80 h-[400px] bg-gray-100 flex-shrink-0 relative overflow-hidden m-4 rounded-2xl">
                           <img 
-                            src={hoveredSubItem && hoveredSubItem.key === item.key 
-                              ? getDefaultImage(item.key, hoveredSubItem.index)
-                              : getDefaultImage(item.key, 0)
-                            }
+                            src={getDefaultImage(item.key, getActiveMenuItemKey(item.key))}
                             alt={item.label}
                             className="w-full h-full object-cover transition-opacity duration-300 rounded-2xl"
                           />
                         </div>
                       )}
                     </div>
-                  </div>
+                  </div>,
+                  document.body,
                 )}
               </div>
             ))}
 
             {/* Wherewefly Dropdown via Portal - prevents icon/menu clipping */}
-            {activeDropdown === 'wherewefly' && whereweflyDropdownStyle && (() => {
+            {activeDropdown === 'wherewefly' && megaDropdownStyle && (() => {
               const item = menuItems.find(m => m.key === 'wherewefly');
               if (!item?.dropdown) return null;
               const getSubItemIcon = (label: string, key: string, itemIndex: number, path: string) => {
@@ -748,8 +1062,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               };
               return createPortal(
                 <div
-                  className="fixed bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[9999] overflow-visible"
-                  style={{ top: whereweflyDropdownStyle.top, left: whereweflyDropdownStyle.left, width: whereweflyDropdownStyle.width }}
+                  className="fixed bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[2147483000] overflow-visible"
+                  style={{ top: megaDropdownStyle.top, left: megaDropdownStyle.left, width: megaDropdownStyle.width }}
                   onMouseEnter={() => {
                     if (menuDropdownTimeoutRef.current) {
                       clearTimeout(menuDropdownTimeoutRef.current);
@@ -861,8 +1175,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <button 
-                  className={`px-4 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`} 
+                  className={`px-4 py-2 font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'text-lg' : 'text-base'}`} 
                   style={{ 
+                    ...navBoldStyle,
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -947,8 +1262,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                 }}
               >
                 <button
-                  className={`px-3 py-2 font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
+                  className={`px-3 py-2 font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} text-sm`}
                   style={{ 
+                    ...navBoldStyle,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
                   }}
@@ -1019,8 +1335,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   }}
                 >
                   <button
-                    className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
+                    className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                     style={{ 
+                      ...navBoldStyle,
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
                     }}
@@ -1073,8 +1390,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                     setAuthModalMode('register');
                     setIsAuthModalOpen(true);
                   }}
-                  className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
+                  className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
                   style={{ 
+                    ...navBoldStyle,
                     borderBottom: '2px solid transparent',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -1092,6 +1410,32 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               </>
             )}
 
+            {/* Android APK download */}
+            <a
+              href="/downloads/nasim-airlines.apk"
+              download="nasim-airlines.apk"
+              className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
+              style={{
+                ...navBoldStyle,
+                borderBottom: '2px solid transparent',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderBottomColor = '#000';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderBottomColor = 'transparent';
+              }}
+              title={t('nav.androidApp') || 'اپ اندروید'}
+            >
+              <DevicePhoneMobileIcon className={language === 'fa' ? 'w-5 h-5 text-black' : 'w-4 h-4 text-black'} />
+              <span className="relative inline-block leading-none" style={{ paddingInlineEnd: 26 }}>
+                {t('nav.androidApp') || 'اپ اندروید'}
+                <AndroidVersionMark />
+              </span>
+            </a>
+
             {/* Language Dropdown - at end of header */}
             <div 
               className="relative"
@@ -1104,8 +1448,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               }}
             >
               <button 
-                className={`font-medium text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
-                style={{ borderBottom: '2px solid transparent', textTransform: 'uppercase', letterSpacing: '0.5px' }}
+                className={`font-bold text-black hover:text-black transition-all h-full flex items-center gap-2 ${fontClass} ${language === 'fa' ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'}`}
+                style={{ ...navBoldStyle, borderBottom: '2px solid transparent', textTransform: 'uppercase', letterSpacing: '0.5px' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = '#000'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = 'transparent'; }}
               >
@@ -1130,7 +1474,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             <div className="lg:hidden flex items-center justify-between w-full gap-2 min-w-0">
               <Link to="/" className="flex items-center gap-2 min-w-0 shrink">
                 <div className="bg-blue-900 rounded-b-xl px-2.5 py-1.5 shadow-md">
-                  <img src="/images/nasim0.png" alt="Nasim" className="h-8 w-auto max-w-[7rem] object-contain" />
+                  <img src="/images/nasim0.png?v=8" alt="Nasim" className="h-8 w-auto max-w-[7rem] object-contain" />
                 </div>
                 <span className={`text-sm font-bold text-black truncate ${fontClass}`}>
                   {language === 'fa' ? 'نسیم ایر' : language === 'ar' ? 'نسيم إير' : 'Nasim Air'}
@@ -1146,9 +1490,11 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   {language === 'fa' ? 'FA' : language === 'ar' ? 'AR' : 'EN'}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="p-2 text-black hover:text-gray-700"
+                  className="relative z-[90] p-2 text-black hover:text-gray-700"
                   aria-label="Menu"
+                  aria-expanded={isMenuOpen}
                 >
                   {isMenuOpen ? (
                     <XMarkIcon className="w-6 h-6" />
@@ -1160,108 +1506,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             </div>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="lg:hidden border-t border-gray-700 py-4 bg-gray-900 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain">
-            <div className="px-4">
-              <nav className="space-y-2">
-                {menuItems.map((item) => (
-                  <div key={item.key}>
-                    <Link
-                      to={item.path}
-                      className={`block px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                    {item.dropdown && (
-                      <div className="pr-4 mt-1 space-y-1">
-                        {(function flattenItems(items: DropdownSubItem[], depth = 0, path = '', menuKey: string): React.ReactNode[] {
-                          return items.flatMap((subItem, index) => {
-                            const p = path ? `${path}-${index}` : `${index}`;
-                            const { parentIndex } = parseFlattenPath(p);
-                            const isFlyDesc = menuKey === 'flyWithNasim' && subItem.path === '#';
-                            const flyDescKey = isFlyDesc ? getFlyDescKey(parentIndex, parseFlattenPath(p).childIndex) : null;
-                            const aboutConfig = menuKey === 'about' && subItem.path === '#' ? getAboutModalConfig(parentIndex, subItem.label) : null;
-                            return [
-                            <Link
-                              key={p}
-                              to={subItem.path}
-                              className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors ${fontClass}`}
-                              style={{ paddingLeft: `${16 + depth * 12}px` }}
-                              onClick={(e) => {
-                                if (flyDescKey) {
-                                  e.preventDefault();
-                                  setFlyDescModal({ title: subItem.label, descKey: flyDescKey });
-                                } else if (aboutConfig) {
-                                  e.preventDefault();
-                                  setAboutModal(aboutConfig);
-                                }
-                                setIsMenuOpen(false);
-                              }}
-                            >
-                              {subItem.label}
-                            </Link>,
-                            ...(subItem.children ? flattenItems(subItem.children, depth + 1, p, menuKey) : [])
-                          ];
-                          });
-                        })(item.dropdown, 0, '', item.key)}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                
-                <div className="border-t border-gray-700 pt-4 mt-4">
-                  {isAuthenticated ? (
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMenuOpen(false);
-                      }}
-                      className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                    >
-                      {t('nav.logout')}
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => {
-                          setAuthModalMode('login');
-                          setIsAuthModalOpen(true);
-                          setIsMenuOpen(false);
-                        }}
-                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                      >
-                        {t('nav.loginUsers')}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsStaffLoginModalOpen(true);
-                          setIsMenuOpen(false);
-                        }}
-                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                      >
-                        {t('nav.loginStaff')}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setAuthModalMode('register');
-                          setIsAuthModalOpen(true);
-                          setIsMenuOpen(false);
-                        }}
-                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-medium text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
-                      >
-                        {t('nav.register')}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </nav>
-            </div>
-          </div>
-        )}
       </div>
+    </header>
+
+    {mobileMenuPanel}
 
       {/* Auth Modal */}
       <AuthModal
@@ -1408,11 +1656,11 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               <div className={`space-y-3 mb-6 ${fontClass}`} style={{ fontFamily: language === 'fa' ? 'DigiHamishe, DigiHamisheBold, sans-serif' : language === 'en' ? 'Inter, sans-serif' : "'Noto Sans Arabic', sans-serif" }}>
                 <div className="flex items-center gap-3 text-white/95">
                   <PhoneIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
-                  <span><strong>{t('contact.phone')}:</strong> 7340000</span>
+                  <span><strong>{t('contact.phone')}:</strong> 02173490000</span>
                 </div>
                 <div className="flex items-center gap-3 text-white/95">
                   <DocumentTextIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
-                  <span><strong>{t('contact.fax')}:</strong> 77610753</span>
+                  <span><strong>{t('contact.fax')}:</strong> 02177616753</span>
                 </div>
                 <div className="flex items-center gap-3 text-white/95">
                   <EnvelopeIcon className="w-5 h-5 flex-shrink-0 text-white/80" />
@@ -1449,7 +1697,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
           </div>
         </div>
       )}
-    </header>
+  </>
   );
 };
 

@@ -16,7 +16,8 @@ import {
 import { cities } from '../data/cities';
 import CustomSelect from '../components/CustomSelect/CustomSelect';
 import { useLanguage } from '../contexts/LanguageContext';
-import { checkAvailability, FlightAvailability, filterListedNiraFlights, getFlightSaleState, FlightSaleState } from '../services/niraApi';
+import { checkAvailability, FlightAvailability, filterListedNiraFlights, getFlightSaleState, getFlightSaleCopy, FlightSaleState } from '../services/niraApi';
+import FlightSuggestions from '../components/FlightResults/FlightSuggestions';
 
 interface Flight {
   id: string;
@@ -91,7 +92,7 @@ const FlightResultsPage: React.FC = () => {
           infant_qty: passengers.infants,
         });
 
-        // List all non-cancelled Nira flights (including schedule-only / sale-closed)
+        // Show every Nira flight for this OD+date (including cancelled / schedule-only)
         const listedFlights = filterListedNiraFlights(availableFlights);
 
         const convertedFlights: Flight[] = listedFlights.flatMap((flight, index) => {
@@ -121,11 +122,11 @@ const FlightResultsPage: React.FC = () => {
               arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', timeOpts),
               duration,
               price: Number(classStatus?.TotalPrice ?? 0),
-              availableSeats: saleState === 'bookable' ? 10 : 0,
+              availableSeats: 0,
               class: flightClass,
               stops: flight.Stops || 0,
-              saleState,
-              canBook: saleState === 'bookable',
+              saleState: saleState === 'bookable' ? 'sale_closed' : saleState,
+              canBook: false,
               actualDepartureTime: flight.ActualDepartureDateTime
                 ? new Date(flight.ActualDepartureDateTime).toLocaleTimeString('en-US', timeOpts)
                 : undefined,
@@ -143,11 +144,8 @@ const FlightResultsPage: React.FC = () => {
           return classes.map((classStatus, classIndex) => toCard(classStatus, classIndex));
         });
 
-        convertedFlights.sort((a, b) => {
-          const priceA = a.price || Number.MAX_SAFE_INTEGER;
-          const priceB = b.price || Number.MAX_SAFE_INTEGER;
-          return priceA - priceB;
-        });
+        // Default: departure time so multiple same-day flights stay visible in order
+        convertedFlights.sort((a, b) => a.departureTime.localeCompare(b.departureTime));
         setFlights(convertedFlights);
       } catch (error) {
         console.error('Error fetching flights:', error);
@@ -440,6 +438,33 @@ const FlightResultsPage: React.FC = () => {
 
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-3 sm:pt-4 border-t border-gray-200 gap-3 sm:gap-0">
                           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                            {(() => {
+                              const saleCopy = getFlightSaleCopy(flight.saleState, language);
+                              const badgeClass =
+                                flight.saleState === 'cancelled'
+                                  ? 'bg-red-100 text-red-800'
+                                  : flight.saleState === 'bookable'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-amber-100 text-amber-900';
+                              return (
+                                <>
+                                  <div
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${badgeClass}`}
+                                    style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                                  >
+                                    {saleCopy.badge}
+                                  </div>
+                                  {saleCopy.notice ? (
+                                    <span
+                                      className="text-xs sm:text-sm text-gray-600"
+                                      style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+                                    >
+                                      {saleCopy.notice}
+                                    </span>
+                                  ) : null}
+                                </>
+                              );
+                            })()}
                             {flight.availableSeats > 0 ? (
                               <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                                 <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
@@ -454,22 +479,19 @@ const FlightResultsPage: React.FC = () => {
                           </div>
                           <button
                             type="button"
+                            disabled={!flight.canBook}
                             onClick={() => {
-                              navigate(`/booking/details/${flight.id}`, {
-                                state: {
-                                  flight: {
-                                    ...flight,
-                                    origin: originCity?.name || flight.origin,
-                                    destination: destCity?.name || flight.destination,
-                                  },
-                                },
-                              });
+                              return;
                             }}
-                            className="w-full sm:w-auto bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 sm:px-8 py-2 sm:py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-sm sm:text-base"
+                            className={`w-full sm:w-auto font-bold px-4 sm:px-8 py-2 sm:py-3 rounded-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+                              flight.canBook
+                                ? 'bg-blue-900 hover:bg-blue-800 text-white transform hover:scale-105 shadow-lg hover:shadow-xl'
+                                : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                            }`}
                             style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                           >
-                            {t('flights.selectFlight')}
-                            <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                            {getFlightSaleCopy(flight.saleState, language).cta}
+                            {flight.canBook ? <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5" /> : null}
                           </button>
                         </div>
                       </div>
@@ -477,6 +499,12 @@ const FlightResultsPage: React.FC = () => {
                   ))}
                 </div>
               )}
+              <FlightSuggestions
+                origin={searchParams.origin}
+                destination={searchParams.destination}
+                departureDate={searchParams.departureDate}
+                originLabel={getCityName(originCity)}
+              />
             </div>
           </div>
         </div>

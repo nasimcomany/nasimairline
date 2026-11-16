@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
+import { setUser } from '../store/slices/authSlice';
 import EmiratesHeader from '../components/Layout/EmiratesHeader';
+import AuthModal from '../components/Auth/AuthModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cities } from '../data/cities';
 import bookingService from '../services/bookingService';
+import { authService } from '../services/authService';
 import { getFlightSaleState, getFlightSaleCopy, FlightSaleState } from '../services/niraApi';
 import {
   PaperAirplaneIcon,
@@ -19,6 +22,44 @@ import {
   ExclamationCircleIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
+
+const isTenDigitId = (value?: string | null) => /^\d{10}$/.test(String(value || '').trim());
+const BOGUS_NAME = /^(iranian|afghan|iraqi|other|ایرانی|افغان|عراقی|سایر)$/i;
+
+/** Resolve national ID from profile — new users store it in national_id; legacy used first_name */
+const resolveProfileNationalId = (user: { national_id?: string; first_name?: string } | null | undefined) => {
+  if (!user) return '';
+  if (isTenDigitId(user.national_id)) return String(user.national_id).trim();
+  if (isTenDigitId(user.first_name)) return String(user.first_name).trim();
+  return '';
+};
+
+const resolveProfileName = (value?: string | null) => {
+  const name = String(value || '').trim();
+  if (!name || isTenDigitId(name) || BOGUS_NAME.test(name)) return '';
+  return name;
+};
+
+const resolveProfileBirthDate = (value?: string | null) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  // Accept YYYY-MM-DD or ISO datetime
+  const m = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : '';
+};
+
+const resolveProfilePhone = (value?: string | null) => {
+  let phone = String(value || '').replace(/[\s\-]/g, '');
+  if (phone.startsWith('+98')) phone = `0${phone.slice(3)}`;
+  else if (phone.startsWith('0098')) phone = `0${phone.slice(4)}`;
+  else if (phone.startsWith('98') && phone.length === 12) phone = `0${phone.slice(2)}`;
+  return /^09\d{9}$/.test(phone) ? phone : String(value || '').replace(/\D/g, '').slice(0, 11);
+};
+
+const lockedInputClass =
+  'w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-700';
+const editableInputClass =
+  'w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900';
 
 interface PassengerInfo {
   type: 'adult' | 'child' | 'infant';
@@ -35,6 +76,7 @@ const BookingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { flightId } = useParams();
+  const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const searchParams = useSelector((state: RootState) => state.flight.searchParams);
   const { t, language } = useLanguage();
@@ -61,6 +103,8 @@ const BookingDetailsPage: React.FC = () => {
   // Errors
   const [errors, setErrors] = useState<string[]>([]);
   const [saleBlockNotice, setSaleBlockNotice] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
 
   // Get flight data - try from state first, fallback to mock
   const flightFromState = (location.state as any)?.flight;
@@ -174,33 +218,110 @@ const BookingDetailsPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Auto-fill first passenger national ID if logged in
-  // Note: first_name contains the national ID (as per registration flow)
+  // After login/register on this page, drop the "please login" banner
   useEffect(() => {
-    console.log('🔍 Full user object:', user);
-    console.log('🔍 Auto-fill check:', {
-      isAuthenticated,
-      hasUser: !!user,
-      firstName: user?.first_name,
-      nationalIdFromProfile: user?.national_id,
-      passengersCount: passengers.length,
-      firstPassengerNationalId: passengers[0]?.nationalId
-    });
-    
-    if (isAuthenticated && user && user.first_name && passengers.length > 0) {
-      const firstPassenger = passengers[0];
-      // Only fill if national ID is empty
-      // Use first_name as national ID (as per registration flow)
-      if (!firstPassenger.nationalId) {
-        console.log('✅ Auto-filling national ID from user first_name:', user.first_name);
-        setPassengers(prev => {
-          const updated = [...prev];
-          updated[0] = { ...updated[0], nationalId: user.first_name || '' };
-          return updated;
-        });
-      }
+    if (isAuthenticated) {
+      setErrors((prev) => prev.filter((e) => !e.includes('وارد حساب')));
+      setIsAuthModalOpen(false);
     }
-  }, [isAuthenticated, user?.first_name, passengers]);
+  }, [isAuthenticated]);
+
+  // Refresh profile from API so first/last name & DOB are not stale from localStorage
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const profile = await authService.getProfile();
+        if (!cancelled && profile) {
+          dispatch(setUser(profile));
+        }
+      } catch {
+        // keep cached user if profile fetch fails
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, dispatch]);
+
+  const profileFirstName = resolveProfileName(user?.first_name);
+  const profileLastName = resolveProfileName(user?.last_name);
+  const profileNationalId = resolveProfileNationalId(user);
+  const profileBirthDate = resolveProfileBirthDate(user?.date_of_birth);
+  const profilePhone = resolveProfilePhone(user?.phone_number);
+  const profileEmail = String(user?.email || '').trim();
+  const profileGender =
+    user?.gender === 'female' || user?.gender === 'F' || user?.gender === 'زن'
+      ? 'female'
+      : user?.gender === 'male' || user?.gender === 'M' || user?.gender === 'مرد'
+        ? 'male'
+        : '';
+  const profilePassport = String(user?.passport_number || '').trim();
+  const lockFirstPassenger = isAuthenticated && !!user;
+
+  // Auto-fill first passenger + contact from logged-in profile (overwrite empty / keep in sync)
+  useEffect(() => {
+    if (!isAuthenticated || !user || passengers.length === 0) return;
+
+    setPassengers((prev) => {
+      if (prev.length === 0) return prev;
+      const first = prev[0];
+      const next = { ...first };
+      let changed = false;
+
+      if (profileNationalId && first.nationalId !== profileNationalId) {
+        next.nationalId = profileNationalId;
+        next.isForeign = false;
+        changed = true;
+      }
+      if (profileFirstName && first.firstName !== profileFirstName) {
+        next.firstName = profileFirstName;
+        changed = true;
+      }
+      if (profileLastName && first.lastName !== profileLastName) {
+        next.lastName = profileLastName;
+        changed = true;
+      } else if (!profileLastName && BOGUS_NAME.test(first.lastName || '')) {
+        // Clear mistaken nationality values typed into last name
+        next.lastName = '';
+        changed = true;
+      }
+      if (profileBirthDate && first.birthDate !== profileBirthDate) {
+        next.birthDate = profileBirthDate;
+        changed = true;
+      }
+      if (profileGender && first.gender !== profileGender) {
+        next.gender = profileGender;
+        changed = true;
+      }
+      if (profilePassport && first.isForeign && first.passportNumber !== profilePassport) {
+        next.passportNumber = profilePassport;
+        changed = true;
+      }
+      if (!changed) return prev;
+      const updated = [...prev];
+      updated[0] = next;
+      return updated;
+    });
+
+    setContactInfo((prev) => ({
+      phone: profilePhone || prev.phone,
+      email: profileEmail || prev.email,
+    }));
+  }, [
+    isAuthenticated,
+    user,
+    passengers.length,
+    profileNationalId,
+    profileFirstName,
+    profileLastName,
+    profileBirthDate,
+    profilePhone,
+    profileEmail,
+    profileGender,
+    profilePassport,
+  ]);
 
   // Timer countdown
   useEffect(() => {
@@ -275,13 +396,6 @@ const BookingDetailsPage: React.FC = () => {
     setSaleBlockNotice(false);
     const newErrors: string[] = [];
 
-    // Final gate: explain in plain language when online sale is not open
-    if (!canBookFlight) {
-      setSaleBlockNotice(true);
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      return;
-    }
-
     // Validate terms
     if (!acceptedTerms) {
       newErrors.push(t('booking.acceptTermsError'));
@@ -312,10 +426,14 @@ const BookingDetailsPage: React.FC = () => {
       return;
     }
 
-    if (!isAuthenticated) {
-      setErrors(['برای ادامه پرداخت ابتدا وارد حساب کاربری خود شوید.']);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
+    // فروش فعلاً قفل است — لاگین اجباری نیست؛ فقط پیام قفل، بدون رفتن به درگاه
+    if (!canBookFlight) {
+      setSaleBlockNotice(true);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      // اگر لاگین باشد، رزرو موقت فقط برای آمار باشگاه ثبت می‌شود (بدون ترک صفحه)
+      if (!isAuthenticated) {
+        return;
+      }
     }
 
     try {
@@ -332,6 +450,13 @@ const BookingDetailsPage: React.FC = () => {
         cabin_class: String(flight.class || 'economy').toUpperCase(),
         idempotency_key: idempotencyKey,
       });
+
+      // فروش آنلاین فعلاً بسته است: رزرو موقت فقط برای باشگاه؛ به درگاه نرو
+      if (!canBookFlight) {
+        setSaleBlockNotice(true);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        return;
+      }
 
       // If airline configured Nira-hosted payment UI, go there directly
       if (initiated.payment_mode === 'nira_redirect' && initiated.payment_url) {
@@ -362,16 +487,45 @@ const BookingDetailsPage: React.FC = () => {
         err?.response?.data?.detail ||
         'خطا در رزرو موقت. لطفا دوباره تلاش کنید.';
       const code = err?.response?.data?.code;
-      const friendly =
-        code === 'sold_out' || code === 'flight_gone' || code === 'local_hold_full'
-          ? apiMessage
-          : apiMessage;
-      setErrors([friendly]);
+      if (!canBookFlight || code === 'sold_out' || code === 'flight_gone') {
+        setSaleBlockNotice(true);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        return;
+      }
+      setErrors([apiMessage]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const totalPrice = calculateTotalPrice();
+  const directTicketSales = Boolean(false);
+  const closedCopy = getFlightSaleCopy('sale_closed', language);
+
+  if (!directTicketSales) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <EmiratesHeader />
+      <div className="container mx-auto px-4 py-20">
+        <div className="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-8 text-center">
+          <p
+            className="text-lg text-gray-800 mb-6"
+            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+          >
+            {closedCopy.notice}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg"
+            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+          >
+            {t('flights.backToHome')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -441,32 +595,50 @@ const BookingDetailsPage: React.FC = () => {
                       </div>
 
                       {/* Gender */}
+                      {(() => {
+                        const isPrimary = lockFirstPassenger && index === 0;
+                        const lockGender = isPrimary && !!profileGender;
+                        const lockForeign = isPrimary && !!profileNationalId;
+                        // Always lock name fields for logged-in primary passenger
+                        const lockFirst = isPrimary;
+                        const lockLast = isPrimary;
+                        const lockNid = isPrimary && !!profileNationalId;
+                        const lockDob = isPrimary && !!profileBirthDate;
+                        const lockPassport = isPrimary && !!profilePassport;
+                        const profileTag = (
+                          <span className="text-xs text-green-600 mr-2">({t('booking.fromYourProfile')})</span>
+                        );
+                        return (
+                      <>
                       <div className="flex flex-wrap gap-3 sm:gap-4 mb-3 sm:mb-4">
-                        <label className="flex items-center gap-2 cursor-pointer">
+                        <label className={`flex items-center gap-2 ${lockGender ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
                           <input
                             type="radio"
                             name={`gender-${index}`}
                             checked={passenger.gender === 'male'}
                             onChange={() => updatePassenger(index, 'gender', 'male')}
+                            disabled={lockGender}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                           />
                           <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.male')}</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
+                        <label className={`flex items-center gap-2 ${lockGender ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
                           <input
                             type="radio"
                             name={`gender-${index}`}
                             checked={passenger.gender === 'female'}
                             onChange={() => updatePassenger(index, 'gender', 'female')}
+                            disabled={lockGender}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                           />
                           <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.female')}</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer mr-auto">
+                        <label className={`flex items-center gap-2 mr-auto ${lockForeign ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
                           <input
                             type="checkbox"
                             checked={passenger.isForeign}
                             onChange={(e) => updatePassenger(index, 'isForeign', e.target.checked)}
+                            disabled={lockForeign}
                             className="w-4 h-4 text-blue-900 focus:ring-blue-900 rounded"
                           />
                           <span style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>{t('booking.foreignNational')}</span>
@@ -478,12 +650,15 @@ const BookingDetailsPage: React.FC = () => {
                         <div>
                           <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             {t('booking.firstNameEnglish')} *
+                            {lockFirst ? profileTag : null}
                           </label>
                           <input
                             type="text"
                             value={passenger.firstName}
                             onChange={(e) => updatePassenger(index, 'firstName', e.target.value)}
-                            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                            disabled={lockFirst}
+                            readOnly={lockFirst}
+                            className={lockFirst ? lockedInputClass : editableInputClass}
                             style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                             placeholder="First Name"
                             required
@@ -493,12 +668,15 @@ const BookingDetailsPage: React.FC = () => {
                         <div>
                           <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             {t('booking.lastNameEnglish')} *
+                            {lockLast ? profileTag : null}
                           </label>
                           <input
                             type="text"
                             value={passenger.lastName}
                             onChange={(e) => updatePassenger(index, 'lastName', e.target.value)}
-                            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                            disabled={lockLast}
+                            readOnly={lockLast}
+                            className={lockLast ? lockedInputClass : editableInputClass}
                             style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                             placeholder="Last Name"
                             required
@@ -509,18 +687,15 @@ const BookingDetailsPage: React.FC = () => {
                           <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {t('booking.nationalId')} *
-                              {index === 0 && isAuthenticated && passenger.nationalId && (
-                                <span className="text-xs text-green-600 mr-2">({t('booking.fromYourProfile') || 'از پروفایل شما'})</span>
-                              )}
+                              {lockNid ? profileTag : null}
                             </label>
                             <input
                               type="text"
                               value={passenger.nationalId}
                               onChange={(e) => updatePassenger(index, 'nationalId', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                              disabled={index === 0 && isAuthenticated && !!passenger.nationalId}
-                              className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 ${
-                                index === 0 && isAuthenticated && passenger.nationalId ? 'bg-gray-100 cursor-not-allowed' : ''
-                              }`}
+                              disabled={lockNid}
+                              readOnly={lockNid}
+                              className={lockNid ? lockedInputClass : editableInputClass}
                               style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'right' }}
                               placeholder={t('booking.nationalId10Digits')}
                               maxLength={10}
@@ -533,12 +708,15 @@ const BookingDetailsPage: React.FC = () => {
                           <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                               {t('booking.passportNumber')} *
+                              {lockPassport ? profileTag : null}
                             </label>
                             <input
                               type="text"
                               value={passenger.passportNumber || ''}
                               onChange={(e) => updatePassenger(index, 'passportNumber', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                              disabled={lockPassport}
+                              readOnly={lockPassport}
+                              className={lockPassport ? lockedInputClass : editableInputClass}
                               style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                               placeholder="Passport Number"
                               required
@@ -549,6 +727,7 @@ const BookingDetailsPage: React.FC = () => {
                         <div>
                           <label className="block text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                             {t('booking.birthDate')} *
+                            {lockDob ? profileTag : null}
                           </label>
                           <div className="relative">
                             <CalendarDaysIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -557,13 +736,18 @@ const BookingDetailsPage: React.FC = () => {
                               value={passenger.birthDate}
                               onChange={(e) => updatePassenger(index, 'birthDate', e.target.value)}
                               max={new Date().toISOString().split('T')[0]}
-                              className="w-full pr-10 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                              disabled={lockDob}
+                              readOnly={lockDob}
+                              className={`pr-10 pl-3 ${lockDob ? lockedInputClass : editableInputClass}`}
                               style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
                               required
                             />
                           </div>
                         </div>
                       </div>
+                      </>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>
@@ -613,6 +797,9 @@ const BookingDetailsPage: React.FC = () => {
                   <div>
                     <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.passengerPhone')} *
+                      {lockFirstPassenger && profilePhone ? (
+                        <span className="text-xs text-green-600 mr-2">({t('booking.fromYourProfile')})</span>
+                      ) : null}
                     </label>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <div className="flex items-center gap-2 px-2 sm:px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg">
@@ -622,11 +809,13 @@ const BookingDetailsPage: React.FC = () => {
                       <input
                         type="tel"
                         value={contactInfo.phone}
-                        onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-                        className="flex-1 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                        onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 11) }))}
+                        disabled={lockFirstPassenger && !!profilePhone}
+                        readOnly={lockFirstPassenger && !!profilePhone}
+                        className={`flex-1 ${lockFirstPassenger && profilePhone ? lockedInputClass : editableInputClass}`}
                         style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'right' }}
-                        placeholder="9123456789"
-                        maxLength={10}
+                        placeholder="09123456789"
+                        maxLength={11}
                         required
                       />
                     </div>
@@ -635,6 +824,9 @@ const BookingDetailsPage: React.FC = () => {
                   <div>
                     <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-1" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}>
                       {t('booking.emailAddress')} *
+                      {lockFirstPassenger && profileEmail ? (
+                        <span className="text-xs text-green-600 mr-2">({t('booking.fromYourProfile')})</span>
+                      ) : null}
                     </label>
                     <div className="relative">
                       <EnvelopeIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
@@ -642,7 +834,9 @@ const BookingDetailsPage: React.FC = () => {
                         type="email"
                         value={contactInfo.email}
                         onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full pr-8 sm:pr-10 pl-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                        disabled={lockFirstPassenger && !!profileEmail}
+                        readOnly={lockFirstPassenger && !!profileEmail}
+                        className={`pr-8 sm:pr-10 pl-3 ${lockFirstPassenger && profileEmail ? lockedInputClass : editableInputClass}`}
                         style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: 'ltr', textAlign: 'left' }}
                         placeholder="email@example.com"
                         required
@@ -849,6 +1043,18 @@ const BookingDetailsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          if (isAuthenticated) {
+            setErrors((prev) => prev.filter((e) => !e.includes('وارد حساب')));
+          }
+        }}
+        initialMode={authModalMode}
+        stayOnPage
+      />
     </div>
   );
 };

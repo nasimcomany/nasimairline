@@ -17,6 +17,7 @@ export interface HomePageSectionItem {
   link_url: string;
   order: number;
   is_active: boolean;
+  updated_at?: string;
 }
 
 export interface HomePageSectionConfig {
@@ -115,10 +116,59 @@ export const getHomePageSectionConfigs = async (): Promise<Record<string, HomePa
   }
 };
 
+/** CMS override for one header menu slot (image and/or labels) */
+export type HeaderMenuCmsSlot = {
+  image_url?: string | null;
+  label_fa?: string;
+  label_en?: string;
+  label_ar?: string;
+};
+
+/**
+ * Active header mega-menu CMS overrides keyed as "menuKey:itemKey"
+ * (images + admin labels).
+ *
+ * Supports:
+ * - New API: { _v2: { "menu:key": { image_url, label_fa, label_en, label_ar } }, "menu:key": "url", ... }
+ * - Mid API: flat object slots
+ * - Legacy API: flat string URL map
+ */
+export const getHeaderMenuImages = async (): Promise<Record<string, HeaderMenuCmsSlot>> => {
+  try {
+    const response = await api.get<Record<string, any>>('/gallery/header-menu-images/map/');
+    const raw = response.data || {};
+    const normalized: Record<string, HeaderMenuCmsSlot> = {};
+
+    const source =
+      raw._v2 && typeof raw._v2 === 'object'
+        ? (raw._v2 as Record<string, HeaderMenuCmsSlot | string>)
+        : raw;
+
+    Object.entries(source).forEach(([key, value]) => {
+      if (key === '_v2') return;
+      if (typeof value === 'string') {
+        normalized[key] = { image_url: value };
+      } else if (value && typeof value === 'object') {
+        normalized[key] = {
+          image_url: value.image_url ?? null,
+          label_fa: value.label_fa || '',
+          label_en: value.label_en || '',
+          label_ar: value.label_ar || '',
+        };
+      }
+    });
+    return normalized;
+  } catch (error) {
+    console.error('Error fetching header menu images:', error);
+    return {};
+  }
+};
+
 const galleryService = {
   getHeroSliders,
   getHomePageSectionItems,
   getHomePageSectionConfigs,
+  getHeaderMenuImages,
 };
 
 export default galleryService;
