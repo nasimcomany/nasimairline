@@ -498,6 +498,34 @@ const BookingDetailsPage: React.FC = () => {
   };
 
   const totalPrice = calculateTotalPrice();
+  const directTicketSales = Boolean(false);
+  const closedCopy = getFlightSaleCopy('sale_closed', language);
+
+  if (!directTicketSales) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <EmiratesHeader />
+      <div className="container mx-auto px-4 py-20">
+        <div className="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-8 text-center">
+          <p
+            className="text-lg text-gray-800 mb-6"
+            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif', direction: language === 'en' ? 'ltr' : 'rtl' }}
+          >
+            {closedCopy.notice}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg"
+            style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}
+          >
+            {t('flights.backToHome')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">

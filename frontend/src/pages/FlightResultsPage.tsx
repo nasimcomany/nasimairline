@@ -121,11 +121,11 @@ const FlightResultsPage: React.FC = () => {
               arrivalTime: arrivalDateTime.toLocaleTimeString('en-US', timeOpts),
               duration,
               price: Number(classStatus?.TotalPrice ?? 0),
-              availableSeats: saleState === 'bookable' ? 10 : 0,
+              availableSeats: 0,
               class: flightClass,
               stops: flight.Stops || 0,
-              saleState,
-              canBook: saleState === 'bookable',
+              saleState: saleState === 'bookable' ? 'sale_closed' : saleState,
+              canBook: false,
               actualDepartureTime: flight.ActualDepartureDateTime
                 ? new Date(flight.ActualDepartureDateTime).toLocaleTimeString('en-US', timeOpts)
                 : undefined,
@@ -480,16 +480,7 @@ const FlightResultsPage: React.FC = () => {
                             type="button"
                             disabled={!flight.canBook}
                             onClick={() => {
-                              if (!flight.canBook) return;
-                              navigate(`/booking/details/${flight.id}`, {
-                                state: {
-                                  flight: {
-                                    ...flight,
-                                    origin: originCity?.name || flight.origin,
-                                    destination: destCity?.name || flight.destination,
-                                  },
-                                },
-                              });
+                              return;
                             }}
                             className={`w-full sm:w-auto font-bold px-4 sm:px-8 py-2 sm:py-3 rounded-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
                               flight.canBook

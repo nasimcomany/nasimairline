@@ -413,7 +413,174 @@ class NiraClient:
             },
             'status_code': schedule.get('status_code', 200),
         }
-    
+
+    @staticmethod
+    def _parse_money(value: Any) -> int:
+        text = str(value or '').strip().replace(',', '')
+        if not text or text in {'-', 'None'}:
+            return 0
+        try:
+            amount = float(text)
+        except ValueError:
+            return 0
+        if amount <= 0:
+            return 0
+        return int(amount)
+
+    def _quote_adult_fare(
+        self,
+        *,
+        origin: str,
+        destination: str,
+        departure_date: str,
+        flight_no: str,
+        rbd: str,
+        airline: str,
+    ) -> int:
+        """
+        Nira FareJS adult total for one flight and class.
+        Documented as FareJS.jsp with Route, RBD, DepartureDate and FlightNO.
+        Returns 0 when Nira has no fare. Does not reserve or open a sale.
+        """
+        from nasim.cache_utils import cache_get, cache_set, cache_key
+
+        rbd = (rbd or '').strip().upper()
+        if not rbd or not self.base_url or not self.office_user:
+            return 0
+        key = cache_key(
+            'nira_fare',
+            (airline or 'NSN').upper(),
+            origin,
+            destination,
+            departure_date,
+            flight_no,
+            rbd,
+        )
+        cached = cache_get(key)
+        if isinstance(cached, int):
+            return cached
+
+        import base64
+        stamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        token = base64.b64encode(f'{self.office_user}_{stamp}'.encode('utf-8')).decode('utf-8')
+        try:
+            response = self._http_get(
+                f"{self.base_url.rstrip('/')}/ws1/FareJS.jsp",
+                params={
+                    'AirLine': airline or 'NSN',
+                    'Route': f'{origin}-{destination}',
+                    'RBD': rbd,
+                    'DepartureDate': departure_date,
+                    'FlightNO': flight_no,
+                    'OfficeUser': self.office_user,
+                    'OfficePass': token,
+                },
+                headers={'Accept': 'application/json'},
+                read_timeout=8,
+            )
+            data = response.json()
+        except Exception as exc:
+            logger.warning(
+                'Nira fare quote failed for flight %s class %s: %s',
+                flight_no,
+                rbd,
+                type(exc).__name__,
+            )
+            return 0
+        if not isinstance(data, dict):
+            return 0
+        amount = self._parse_money(data.get('AdultTotalPrice'))
+        cache_set(key, amount, 300)
+        return amount
+
+    def _fill_missing_display_fares(self, data: Dict[str, Any]) -> None:
+        """
+        Availability can list a closed class at price 0 while FareJS still has
+        the adult fare, usually on class Y. Copy that number onto the card.
+        AllowReservation is forced false so the row still cannot be sold.
+        """
+        flights = data.get('AvailableFlights')
+        if not isinstance(flights, list):
+            return
+        quotes = 0
+        limit = 8
+        for flight in flights:
+            if quotes >= limit or not isinstance(flight, dict):
+                continue
+            status = str(flight.get('FlightStatus') or '').strip().upper()
+            if status in {'X', 'CANCELLED', 'CNL'}:
+                continue
+            classes = flight.get('ClassStatus')
+            if classes is None:
+                classes = []
+                flight['ClassStatus'] = classes
+            if not isinstance(classes, list):
+                continue
+            if any(
+                isinstance(row, dict) and self._parse_money(row.get('TotalPrice')) > 0
+                for row in classes
+            ):
+                continue
+            origin = str(flight.get('Origin') or '').strip().upper()
+            destination = str(flight.get('Destination') or '').strip().upper()
+            departure = str(flight.get('DepartureDateTime') or '')[:10]
+            flight_no = str(flight.get('FlightNo') or flight.get('FlightNumber') or '').strip()
+            airline = str(flight.get('AirLineCode') or 'NSN').strip() or 'NSN'
+            if not (origin and destination and len(departure) == 10 and flight_no):
+                continue
+
+            def quote(letter: str) -> int:
+                nonlocal quotes
+                if quotes >= limit:
+                    return 0
+                quotes += 1
+                return self._quote_adult_fare(
+                    origin=origin,
+                    destination=destination,
+                    departure_date=departure,
+                    flight_no=flight_no,
+                    rbd=letter,
+                    airline=airline,
+                )
+
+            if not classes:
+                amount = quote('Y')
+                if amount <= 0:
+                    continue
+                classes.append({
+                    'CabinClass': 'Economy Class',
+                    'CurrencyCode': 'IRR',
+                    'Status': 'C',
+                    'TotalPrice': amount,
+                    'ClassName': 'Y',
+                    'Refundable': True,
+                    'AllowReservation': False,
+                })
+                logger.info('Display fare filled for flight %s from class Y', flight_no)
+                continue
+
+            for row in classes:
+                if quotes >= limit or not isinstance(row, dict):
+                    continue
+                if self._parse_money(row.get('TotalPrice')) > 0:
+                    continue
+                letters = []
+                own = str(row.get('ClassName') or '').strip().upper()
+                if own:
+                    letters.append(own)
+                if 'Y' not in letters:
+                    letters.append('Y')
+                amount = 0
+                for letter in letters:
+                    amount = quote(letter)
+                    if amount > 0:
+                        break
+                if amount <= 0:
+                    continue
+                row['TotalPrice'] = amount
+                row['AllowReservation'] = False
+                logger.info('Display fare filled for flight %s', flight_no)
+
     def check_availability(
         self,
         origin: str,
@@ -537,6 +704,11 @@ class NiraClient:
                             'data': data,
                             'status_code': response.status_code,
                         }
+                        if isinstance(data, dict):
+                            try:
+                                self._fill_missing_display_fares(data)
+                            except Exception as exc:
+                                logger.warning('Display fare fill skipped: %s', type(exc).__name__)
                         if use_cache and self.availability_cache_ttl > 0:
                             cache_set(avail_key, result, self.availability_cache_ttl)
                         return result
@@ -553,6 +725,11 @@ class NiraClient:
                         return_date_jalali, office_pass_encoded,
                         read_timeout=fallback_read,
                     )
+                    if result.get('success') and isinstance(result.get('data'), dict):
+                        try:
+                            self._fill_missing_display_fares(result['data'])
+                        except Exception as exc:
+                            logger.warning('Display fare fill skipped: %s', type(exc).__name__)
                     if result.get('success') and use_cache and self.availability_cache_ttl > 0:
                         cache_set(avail_key, result, self.availability_cache_ttl)
                     return result

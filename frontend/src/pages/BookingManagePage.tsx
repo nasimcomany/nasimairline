@@ -301,7 +301,7 @@ const BookingManagePage: React.FC = () => {
                       مبلغ کل:
                     </span>
                     <span className="text-lg font-bold text-gray-900" style={{ fontFamily: 'DigiHamishe, DigiHamisheBold, sans-serif' }}>
-                      {booking.payment.amount.toLocaleString('fa-IR')} تومان
+                      {booking.payment.amount.toLocaleString('fa-IR')} ریال
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
