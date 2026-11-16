@@ -310,6 +310,28 @@ class NiraAPIViewSet(viewsets.ViewSet):
             return response
 
         return Response(result, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='suggestions')
+    def suggestions(self, request):
+        """
+        Display-only nearby flights for the results page.
+        Same route and the reverse on later days, plus other cities from the origin.
+        Nothing here can be purchased.
+        """
+        serializer = NiraAvailabilityRequestSerializer(data={
+            'origin': request.data.get('origin'),
+            'destination': request.data.get('destination'),
+            'departure_date': request.data.get('departure_date'),
+            'round_trip': False,
+        })
+        serializer.is_valid(raise_exception=True)
+        validated = serializer.validated_data
+        result = self.nira_client.suggest_related_flights(
+            origin=validated['origin'],
+            destination=validated['destination'],
+            departure_date=datetime.combine(validated['departure_date'], datetime.min.time()),
+        )
+        return Response(result, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['get'], url_path='routes/origins')
     def get_origin_cities(self, request):

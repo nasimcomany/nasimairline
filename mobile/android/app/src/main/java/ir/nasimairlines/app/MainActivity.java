@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String START_URL = "https://nasimairlines.ir/";
     private static final String DESKTOP_UA =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    + "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 NasimAirlinesApp/1.5";
+                    + "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 NasimAirlinesApp/1.6";
 
     private WebView webView;
     private View statusPanel;

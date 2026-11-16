@@ -4,4 +4,4 @@
  * The Android shell loads https://nasimairlines.ir, so this mark
  * appears on the website and inside the downloaded app after deploy.
  */
-export const ANDROID_APP_VERSION = '1.5';
+export const ANDROID_APP_VERSION = '1.6';

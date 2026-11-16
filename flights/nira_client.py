@@ -457,7 +457,7 @@ class NiraClient:
             rbd,
         )
         cached = cache_get(key)
-        if isinstance(cached, int):
+        if isinstance(cached, int) and cached > 0:
             return cached
 
         import base64
@@ -490,7 +490,8 @@ class NiraClient:
         if not isinstance(data, dict):
             return 0
         amount = self._parse_money(data.get('AdultTotalPrice'))
-        cache_set(key, amount, 300)
+        if amount > 0:
+            cache_set(key, amount, 300)
         return amount
 
     def _fill_missing_display_fares(self, data: Dict[str, Any]) -> None:
@@ -592,6 +593,7 @@ class NiraClient:
         child_qty: int = 0,
         infant_qty: int = 0,
         use_cache: bool = True,
+        fill_display_fares: bool = True,
     ) -> Dict[str, Any]:
         """
         Check flight availability using Nira IBE API
@@ -704,12 +706,12 @@ class NiraClient:
                             'data': data,
                             'status_code': response.status_code,
                         }
-                        if isinstance(data, dict):
+                        if fill_display_fares and isinstance(data, dict):
                             try:
                                 self._fill_missing_display_fares(data)
                             except Exception as exc:
                                 logger.warning('Display fare fill skipped: %s', type(exc).__name__)
-                        if use_cache and self.availability_cache_ttl > 0:
+                        if use_cache and fill_display_fares and self.availability_cache_ttl > 0:
                             cache_set(avail_key, result, self.availability_cache_ttl)
                         return result
                     except ValueError:
@@ -725,12 +727,21 @@ class NiraClient:
                         return_date_jalali, office_pass_encoded,
                         read_timeout=fallback_read,
                     )
-                    if result.get('success') and isinstance(result.get('data'), dict):
+                    if fill_display_fares and result.get('success') and isinstance(result.get('data'), dict):
                         try:
                             self._fill_missing_display_fares(result['data'])
                         except Exception as exc:
                             logger.warning('Display fare fill skipped: %s', type(exc).__name__)
-                    if result.get('success') and use_cache and self.availability_cache_ttl > 0:
+                    fallback_flights = []
+                    if isinstance(result.get('data'), dict):
+                        fallback_flights = result['data'].get('AvailableFlights') or []
+                    if (
+                        result.get('success')
+                        and fallback_flights
+                        and use_cache
+                        and fill_display_fares
+                        and self.availability_cache_ttl > 0
+                    ):
                         cache_set(avail_key, result, self.availability_cache_ttl)
                     return result
 
@@ -740,7 +751,7 @@ class NiraClient:
                     'status_code': response.status_code,
                     'content_type': content_type,
                 }
-                if use_cache and self.availability_cache_ttl > 0:
+                if use_cache and fill_display_fares and self.availability_cache_ttl > 0:
                     cache_set(avail_key, result, self.availability_cache_ttl)
                 return result
 
@@ -907,6 +918,248 @@ class NiraClient:
         key_string = "|".join(key_parts)
         return hashlib.md5(key_string.encode()).hexdigest()
     
+    def suggest_related_flights(
+        self,
+        origin: str,
+        destination: str,
+        departure_date: datetime,
+    ) -> Dict[str, Any]:
+        """
+        Nearby Nasim flights for the results page.
+
+        Two groups, both display-only:
+        - the same route and the reverse route on later days
+        - other destinations from the same origin on the searched day and the days after
+
+        Availability lookups stay capped and fare quotes stay off the shared
+        availability cache so a suggestion scan cannot wipe a real search price.
+        """
+        import time
+
+        from nasim.cache_utils import cache_get, cache_set, cache_key as shared_cache_key
+
+        origin_u = (origin or '').strip().upper()
+        dest_u = (destination or '').strip().upper()
+        day = departure_date.date()
+        empty = {
+            'success': True,
+            'alternate': [],
+            'other_destinations': [],
+            'sale_closed': True,
+        }
+        if not origin_u or not dest_u or origin_u == dest_u:
+            return empty
+
+        cache_id = shared_cache_key('nira_suggest_v4', origin_u, dest_u, day.isoformat())
+        cached = cache_get(cache_id)
+        if isinstance(cached, dict) and cached.get('success'):
+            return cached
+
+        names: Dict[str, Dict[str, str]] = {}
+
+        def remember(rows: Any) -> None:
+            if not isinstance(rows, list):
+                return
+            for row in rows:
+                if not isinstance(row, dict) or self._is_nira_test_city(row):
+                    continue
+                code = str(row.get('CITY') or '').strip().upper()
+                if not code:
+                    continue
+                names[code] = {
+                    'fa': str(row.get('CITYNAME_FA') or code),
+                    'en': str(row.get('CITYNAME_EN') or code),
+                }
+
+        origins_result = self.get_origin_cities()
+        if isinstance(origins_result, dict) and origins_result.get('success'):
+            remember((origins_result.get('data') or {}).get('NRSRoutesApp'))
+
+        other_codes: List[str] = []
+        dest_result = self.get_destinations(origin_u)
+        if isinstance(dest_result, dict) and dest_result.get('success'):
+            rows = (dest_result.get('data') or {}).get('NRSRoutesApp') or []
+            remember(rows)
+            for row in rows:
+                if not isinstance(row, dict) or self._is_nira_test_city(row):
+                    continue
+                code = str(row.get('CITY') or '').strip().upper()
+                if code and code not in {origin_u, dest_u} and code not in other_codes:
+                    other_codes.append(code)
+        other_codes = other_codes[:4]
+
+        def city_names(code: str) -> Dict[str, str]:
+            found = names.get(code) or {}
+            return {'fa': found.get('fa') or code, 'en': found.get('en') or code}
+
+        def price_of(flight: Dict[str, Any]) -> int:
+            best = 0
+            classes = flight.get('ClassStatus') or []
+            if isinstance(classes, list):
+                for row in classes:
+                    if isinstance(row, dict):
+                        best = max(best, self._parse_money(row.get('TotalPrice')))
+            return best
+
+        def clock_of(value: Any) -> str:
+            text = str(value or '')
+            for sep in ('T', ' '):
+                if sep in text:
+                    rest = text.split(sep, 1)[1]
+                    if len(rest) >= 5 and rest[2] == ':':
+                        return rest[:5]
+            return ''
+
+        def cards_from(result: Dict[str, Any], direction: str, queried) -> List[Dict[str, Any]]:
+            data = result.get('data') if isinstance(result, dict) else None
+            flights = data.get('AvailableFlights') if isinstance(data, dict) else None
+            if not isinstance(flights, list):
+                return []
+            found: List[Dict[str, Any]] = []
+            for flight in flights:
+                if not isinstance(flight, dict):
+                    continue
+                status = str(flight.get('FlightStatus') or '').strip().upper()
+                if status in {'X', 'CANCELLED', 'CNL'}:
+                    continue
+                flight_no = str(flight.get('FlightNo') or flight.get('FlightNumber') or '').strip()
+                flight_origin = str(flight.get('Origin') or '').strip().upper()
+                flight_dest = str(flight.get('Destination') or '').strip().upper()
+                if not flight_no or not flight_origin or not flight_dest:
+                    continue
+                dep_raw = str(flight.get('DepartureDateTime') or '')
+                date_iso = dep_raw[:10] if len(dep_raw) >= 10 and dep_raw[4] == '-' else queried.isoformat()
+                if (
+                    direction != 'other'
+                    and date_iso == day.isoformat()
+                    and flight_origin == origin_u
+                    and flight_dest == dest_u
+                ):
+                    continue
+                origin_name = city_names(flight_origin)
+                dest_name = city_names(flight_dest)
+                found.append({
+                    'direction': 'reverse' if direction == 'reverse' else ('other' if direction == 'other' else 'same'),
+                    'origin': flight_origin,
+                    'destination': flight_dest,
+                    'origin_fa': origin_name['fa'],
+                    'origin_en': origin_name['en'],
+                    'destination_fa': dest_name['fa'],
+                    'destination_en': dest_name['en'],
+                    'date': date_iso,
+                    'flight_no': flight_no,
+                    'departure_time': clock_of(dep_raw),
+                    'arrival_time': clock_of(flight.get('ArrivalDateTime')),
+                    'price': price_of(flight),
+                    'can_book': False,
+                    '_flight': flight,
+                })
+            return found
+
+        def fetch(item):
+            direction, route_origin, route_dest, when = item
+            try:
+                result = self.check_availability(
+                    origin=route_origin,
+                    destination=route_dest,
+                    departure_date=datetime.combine(when, datetime.min.time()),
+                    use_cache=True,
+                    fill_display_fares=False,
+                )
+            except Exception as exc:
+                logger.warning('Suggestion availability skipped: %s', type(exc).__name__)
+                result = {'success': False}
+            return direction, result if isinstance(result, dict) else {'success': False}, when
+
+        today = datetime.now().date()
+        route_offsets = [1, -1, 2, 3, 4, 5, 6, 7, -2]
+        route_lookups = []
+        for offset in route_offsets:
+            when = day + timedelta(days=offset)
+            if when < today or when == day:
+                continue
+            route_lookups.append(('same', origin_u, dest_u, when))
+            route_lookups.append(('reverse', dest_u, origin_u, when))
+        other_lookups = [('other', origin_u, code, day) for code in other_codes]
+        other_lookups.extend(
+            ('other', origin_u, code, day + timedelta(days=1))
+            for code in other_codes[:3]
+            if day + timedelta(days=1) >= today
+        )
+
+        gathered = []
+        timed_out = False
+
+        def has_flights(result: Dict[str, Any]) -> bool:
+            data = result.get('data') if isinstance(result, dict) else None
+            flights = data.get('AvailableFlights') if isinstance(data, dict) else None
+            return isinstance(flights, list) and len(flights) > 0
+
+        def run_until(items: List[tuple], deadline: float, stop_after: int) -> None:
+            nonlocal timed_out
+            found = 0
+            for item in items:
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    return
+                direction, result, when = fetch(item)
+                gathered.append((direction, result, when))
+                if has_flights(result):
+                    found += 1
+                if found >= stop_after:
+                    return
+
+        # Same route and the return come first, so a slow city scan cannot hide them.
+        run_until(route_lookups, time.monotonic() + 14, stop_after=6)
+        run_until(other_lookups, time.monotonic() + 8, stop_after=4)
+
+        alternate: List[Dict[str, Any]] = []
+        other: List[Dict[str, Any]] = []
+        seen = set()
+        for direction, result, when in gathered:
+            for card in cards_from(result, direction, when):
+                key = (card['date'], card['origin'], card['destination'], card['flight_no'])
+                if key in seen:
+                    continue
+                seen.add(key)
+                if direction == 'other':
+                    other.append(card)
+                else:
+                    alternate.append(card)
+
+        alternate.sort(key=lambda card: (card['date'], 0 if card['direction'] == 'same' else 1, card['departure_time']))
+        other.sort(key=lambda card: (card['date'], card['destination'], card['departure_time']))
+        alternate = alternate[:8]
+        other = other[:8]
+
+        quote_flights = []
+        for card in alternate + other:
+            flight = card.get('_flight')
+            if card['price'] <= 0 and isinstance(flight, dict):
+                quote_flights.append(flight)
+        if quote_flights:
+            try:
+                self._fill_missing_display_fares({'AvailableFlights': quote_flights[:4]})
+            except Exception as exc:
+                logger.warning('Suggestion fare fill skipped: %s', type(exc).__name__)
+            for card in alternate + other:
+                flight = card.get('_flight')
+                if isinstance(flight, dict):
+                    card['price'] = price_of(flight)
+
+        for card in alternate + other:
+            card.pop('_flight', None)
+            card['can_book'] = False
+
+        payload = {
+            'success': True,
+            'alternate': alternate,
+            'other_destinations': other,
+            'sale_closed': True,
+        }
+        cache_set(cache_id, payload, 45 if timed_out else 120)
+        return payload
+
     def get_origin_cities(self, force_refresh: bool = False) -> Dict[str, Any]:
         """
         Get list of origin cities from Nira Routes API

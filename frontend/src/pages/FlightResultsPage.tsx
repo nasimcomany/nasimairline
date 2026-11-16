@@ -17,6 +17,7 @@ import { cities } from '../data/cities';
 import CustomSelect from '../components/CustomSelect/CustomSelect';
 import { useLanguage } from '../contexts/LanguageContext';
 import { checkAvailability, FlightAvailability, filterListedNiraFlights, getFlightSaleState, getFlightSaleCopy, FlightSaleState } from '../services/niraApi';
+import FlightSuggestions from '../components/FlightResults/FlightSuggestions';
 
 interface Flight {
   id: string;
@@ -498,6 +499,12 @@ const FlightResultsPage: React.FC = () => {
                   ))}
                 </div>
               )}
+              <FlightSuggestions
+                origin={searchParams.origin}
+                destination={searchParams.destination}
+                departureDate={searchParams.departureDate}
+                originLabel={getCityName(originCity)}
+              />
             </div>
           </div>
         </div>

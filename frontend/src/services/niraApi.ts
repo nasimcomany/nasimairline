@@ -380,3 +380,55 @@ export const checkAvailability = async (params: {
   }
 };
 
+export interface FlightSuggestion {
+  direction: 'same' | 'reverse' | 'other';
+  origin: string;
+  destination: string;
+  origin_fa: string;
+  origin_en: string;
+  destination_fa: string;
+  destination_en: string;
+  date: string;
+  flight_no: string;
+  departure_time: string;
+  arrival_time: string;
+  price: number;
+  can_book: boolean;
+}
+
+export interface FlightSuggestionGroups {
+  alternate: FlightSuggestion[];
+  otherDestinations: FlightSuggestion[];
+}
+
+/**
+ * Nearby flights for the results page. Purchase stays closed.
+ */
+export const getFlightSuggestions = async (params: {
+  origin: string;
+  destination: string;
+  departure_date: string;
+}): Promise<FlightSuggestionGroups> => {
+  const empty = { alternate: [], otherDestinations: [] };
+  try {
+    const response = await fetch(`${API_BASE_URL}/flights/nira/suggestions/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        origin: params.origin,
+        destination: params.destination,
+        departure_date: params.departure_date,
+      }),
+    });
+    if (!response.ok) return empty;
+    const data = await response.json();
+    return {
+      alternate: Array.isArray(data.alternate) ? data.alternate : [],
+      otherDestinations: Array.isArray(data.other_destinations) ? data.other_destinations : [],
+    };
+  } catch (error) {
+    console.error('Error fetching flight suggestions:', error);
+    return empty;
+  }
+};
+
