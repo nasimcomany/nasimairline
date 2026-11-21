@@ -283,66 +283,64 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
         }
       `}</style>
       <div className="rounded-3xl shadow-2xl overflow-visible max-w-full">
-      {/* Tabs */}
-      <div id="flight-search-tabs" className="flex border-b border-gray-300/30 bg-gray-400/30 backdrop-blur-xl rounded-t-3xl">
+      {/* Tabs: wrap on phone, one row on desktop */}
+      <div
+        id="flight-search-tabs"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-nowrap border-b border-gray-300/30 bg-gray-400/30 backdrop-blur-xl rounded-t-3xl overflow-hidden"
+      >
         <button
           onClick={() => handleTabChange('search')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight ${
             activeTab === 'search'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <PaperAirplaneIcon className={`w-5 h-5 ${activeTab === 'search' ? 'text-blue-900' : 'text-white'}`} />
+          <PaperAirplaneIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'search' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.bookFlight')}
         </button>
         <button
           onClick={() => handleTabChange('manage')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight ${
             activeTab === 'manage'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <TagIcon className={`w-5 h-5 ${activeTab === 'manage' ? 'text-blue-900' : 'text-white'}`} />
+          <TagIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'manage' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.manageBooking')}
         </button>
         <button
           onClick={() => handleTabChange('services')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight ${
             activeTab === 'services'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <MapPinIcon className={`w-5 h-5 ${activeTab === 'services' ? 'text-blue-900' : 'text-white'}`} />
+          <MapPinIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'services' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.specialServices')}
         </button>
         <button
           onClick={() => handleTabChange('whatson')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight ${
             activeTab === 'whatson'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <PaperAirplaneIcon className={`w-5 h-5 ${activeTab === 'whatson' ? 'text-blue-900' : 'text-white'}`} />
+          <PaperAirplaneIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'whatson' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightFacilities')}
         </button>
         <button
           onClick={() => handleTabChange('status')}
-          className={`flex items-center gap-2.5 px-7 py-5 font-medium transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex items-center justify-center gap-1.5 lg:gap-2.5 px-2 py-3 lg:px-7 lg:py-5 font-medium transition-colors min-w-0 w-full whitespace-normal lg:whitespace-nowrap text-[13px] sm:text-sm lg:text-[17px] leading-tight col-span-2 sm:col-span-1 lg:col-auto ${
             activeTab === 'status'
               ? 'text-blue-900 border-b-2 border-blue-900 bg-gray-300/25'
               : 'text-white bg-transparent hover:text-white hover:bg-gray-300/15'
           } ${fontClass}`}
-          style={{ fontSize: '17px' }}
         >
-          <ClockIcon className={`w-5 h-5 ${activeTab === 'status' ? 'text-blue-900' : 'text-white'}`} />
+          <ClockIcon className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 ${activeTab === 'status' ? 'text-blue-900' : 'text-white'}`} />
           {t('home.flightSearch.flightStatus')}
         </button>
       </div>
@@ -350,13 +348,13 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
       {/* Tab Content */}
       <div className="bg-gray-200 overflow-visible rounded-b-3xl" style={{ minHeight: '220px' }}>
       {activeTab === 'search' && (
-        <form onSubmit={handleSearch} className="p-8">
+        <form onSubmit={handleSearch} className="p-4 sm:p-6 lg:p-8">
           {/* Trip Type Selector */}
-          <div className="flex flex-wrap gap-3 mb-5">
+          <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-5">
             <button
               type="button"
               onClick={() => setTripType('roundtrip')}
-              className={`px-8 py-4 rounded-lg text-lg font-bold transition-all ${
+              className={`px-4 py-2.5 sm:px-8 sm:py-4 rounded-lg text-sm sm:text-lg font-bold transition-all ${
                 tripType === 'roundtrip'
                   ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -368,7 +366,7 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             <button
               type="button"
               onClick={() => setTripType('oneway')}
-              className={`px-8 py-4 rounded-lg text-lg font-bold transition-all ${
+              className={`px-4 py-2.5 sm:px-8 sm:py-4 rounded-lg text-sm sm:text-lg font-bold transition-all ${
                 tripType === 'oneway'
                   ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -379,12 +377,11 @@ const EmiratesFlightSearchForm: React.FC<EmiratesFlightSearchFormProps> = ({ onT
             </button>
           </div>
 
-          {/* Desktop single-row fields (phones use desktop-scale viewport) */}
           <div
-            className={`grid gap-3 items-end w-full ${
+            className={`grid gap-3 items-end w-full grid-cols-1 sm:grid-cols-2 ${
               tripType === 'roundtrip'
-                ? 'grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
-                : 'grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
+                ? 'lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
+                : 'lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_auto]'
             }`}
           >
             {/* Origin */}
