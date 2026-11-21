@@ -154,7 +154,6 @@ const HomePage: React.FC = () => {
   const [activeFlightTab, setActiveFlightTab] = useState<'search' | 'manage' | 'whatson' | 'status' | 'services'>('search');
   /** Height of the glass tab bar so its blue bottom edge can sit on the hero bottom */
   const [flightTabBarHeight, setFlightTabBarHeight] = useState(68);
-  const [flightPanelHeight, setFlightPanelHeight] = useState(280);
   const HERO_SLIDER_HEIGHT = 560;
   const [specialServicesItems, setSpecialServicesItems] = useState<HomePageSectionItem[]>([]);
   const [experienceItems, setExperienceItems] = useState<HomePageSectionItem[]>([]);
@@ -312,27 +311,17 @@ const HomePage: React.FC = () => {
     if (!flightInfo.passengers) setFlightInfo(prev => ({ ...prev, passengers: t('home.flightSearch.defaultPassengers') }));
   }, [t]);
 
-  // Keep the glass tab bar flush with the hero, and reserve space for hanging tab body
+  // Keep the glass tab bar's blue bottom edge flush with the hero slider bottom
   useLayoutEffect(() => {
     const measure = () => {
       const tabs = document.getElementById('flight-search-tabs');
-      const panel = document.getElementById('flight-search-panel');
-      if (tabs) {
-        const h = Math.round(tabs.getBoundingClientRect().height);
-        if (h > 0) setFlightTabBarHeight(h);
-      }
-      if (panel) {
-        const h = Math.round(panel.getBoundingClientRect().height);
-        if (h > 0) setFlightPanelHeight(h);
-      }
+      if (!tabs) return;
+      const h = Math.round(tabs.getBoundingClientRect().height);
+      if (h > 0) setFlightTabBarHeight(h);
     };
     measure();
-    const raf = window.requestAnimationFrame(measure);
     window.addEventListener('resize', measure);
-    return () => {
-      window.cancelAnimationFrame(raf);
-      window.removeEventListener('resize', measure);
-    };
+    return () => window.removeEventListener('resize', measure);
   }, [activeFlightTab, language]);
 
   // Fetch Hero Slider images from API (preload first frame before swapping URLs)
@@ -1162,7 +1151,7 @@ const HomePage: React.FC = () => {
       <section
         id="search-form"
         className="relative z-20 overflow-visible"
-        style={{ paddingBottom: Math.max(120, flightPanelHeight - flightTabBarHeight + 40) }}
+        style={{ paddingBottom: 300 }}
       >
         <div
           className="absolute inset-x-0 top-0 overflow-hidden"
@@ -1291,20 +1280,20 @@ const HomePage: React.FC = () => {
           bottom edge exactly on the hero bottom. White form body hangs below.
         */}
         <div
-          className="absolute inset-x-0 z-30 px-3 sm:px-6 md:px-8"
+          className="absolute inset-x-0 z-30 px-6 md:px-8"
           style={{
             top: HERO_SLIDER_HEIGHT - flightTabBarHeight,
             pointerEvents: 'auto',
           }}
         >
-          <div id="flight-search-panel" className="max-w-7xl mx-auto w-full">
+          <div className="max-w-7xl mx-auto w-full">
             <EmiratesFlightSearchForm onTabChange={setActiveFlightTab} />
           </div>
         </div>
       </section>
 
       {/* Quote below booking — lower z so it never covers the form */}
-      <section className="relative z-0 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 32 }}>
+      <section className="relative z-0 py-4 sm:py-8 bg-gradient-to-b from-white to-gray-50" style={{ paddingTop: 24 }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 

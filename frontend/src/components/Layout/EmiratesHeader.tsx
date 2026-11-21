@@ -89,27 +89,14 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
   const loginDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const userDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const menuDropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  const menuTriggerRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [megaDropdownStyle, setMegaDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
+  const whereweflyTriggerRef = useRef<HTMLDivElement | null>(null);
+  const [whereweflyDropdownStyle, setWhereweflyDropdownStyle] = useState<{ top: number; left: number; width: number } | null>(null);
   const [flyDescModal, setFlyDescModal] = useState<{ title: string; descKey: string } | null>(null);
   const [aboutModal, setAboutModal] = useState<{ type: 'desc'; title: string; descKey: string } | { type: 'contact' } | null>(null);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { language, t, fontClass, setLanguage } = useLanguage();
-  const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isMenuOpen) {
-      setOpenMobileSection(null);
-      return;
-    }
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isMenuOpen]);
 
   // DigiHamisheBold is a separate family — font-bold alone often looks regular on FA.
   const navBoldStyle: React.CSSProperties =
@@ -390,22 +377,12 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Desktop mega-menus are portaled: sticky header + backdrop-blur clips overflow.
+  // Compute wherewefly dropdown position for Portal (fixed, centered, never clipped)
   useEffect(() => {
-    const updatePosition = () => {
-      if (!activeDropdown) {
-        setMegaDropdownStyle(null);
-        return;
-      }
-      const trigger = menuTriggerRefs.current[activeDropdown];
-      if (!trigger) {
-        setMegaDropdownStyle(null);
-        return;
-      }
-      const rect = trigger.getBoundingClientRect();
+    if (activeDropdown === 'wherewefly' && whereweflyTriggerRef.current) {
+      const rect = whereweflyTriggerRef.current.getBoundingClientRect();
       const margin = window.innerWidth < 768 ? 12 : 24;
-      const preferredWidth = activeDropdown === 'wherewefly' ? 1400 : 900;
-      const dropdownWidth = Math.min(preferredWidth, window.innerWidth - margin * 2);
+      const dropdownWidth = Math.min(1400, window.innerWidth - margin * 2);
       const left = Math.max(
         margin,
         Math.min(
@@ -413,206 +390,18 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
           rect.left + rect.width / 2 - dropdownWidth / 2,
         ),
       );
-      setMegaDropdownStyle({ top: rect.bottom + 8, left, width: dropdownWidth });
-    };
-
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
-    };
+      setWhereweflyDropdownStyle({ top: rect.bottom + 8, left, width: dropdownWidth });
+    } else {
+      setWhereweflyDropdownStyle(null);
+    }
   }, [activeDropdown]);
 
-  const mobileMenuPanel =
-    isMenuOpen && typeof document !== 'undefined'
-      ? createPortal(
-          <div
-            id="nasim-mobile-nav"
-            role="dialog"
-            aria-modal="true"
-            dir={language === 'en' ? 'ltr' : 'rtl'}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              width: '100%',
-              height: '100%',
-              zIndex: 2147483000,
-              background: '#0f172a',
-              paddingTop: 80,
-              overflowY: 'auto',
-              WebkitOverflowScrolling: 'touch',
-              boxSizing: 'border-box',
-            }}
-          >
-            <nav className="w-full px-3 py-3 space-y-1" style={{ minHeight: 'calc(100% - 80px)' }}>
-              {menuItems.map((item) => (
-                <div key={item.key} className="w-full border-b border-white/10">
-                  {item.dropdown && item.dropdown.length > 0 ? (
-                    <>
-                      <button
-                        type="button"
-                        className={`w-full flex items-center justify-between gap-2 px-4 py-3.5 text-base font-bold text-white ${fontClass}`}
-                        onClick={() =>
-                          setOpenMobileSection((current) => (current === item.key ? null : item.key))
-                        }
-                      >
-                        <span>{item.label}</span>
-                        <ChevronDownIcon
-                          className={`w-5 h-5 shrink-0 transition-transform ${
-                            openMobileSection === item.key ? 'rotate-180' : ''
-                          }`}
-                        />
-                      </button>
-                      {openMobileSection === item.key && (
-                        <div className="pb-2 space-y-0.5">
-                          {item.path && item.path !== '#' && (
-                            <Link
-                              to={item.path}
-                              className={`block w-full px-4 py-2.5 text-sm text-blue-200 ${fontClass}`}
-                              onClick={() => setIsMenuOpen(false)}
-                            >
-                              {item.label}
-                            </Link>
-                          )}
-                          {(function flattenItems(
-                            items: DropdownSubItem[],
-                            depth = 0,
-                            path = '',
-                            menuKey: string,
-                          ): React.ReactNode[] {
-                            return items.flatMap((subItem, index) => {
-                              const p = path ? `${path}-${index}` : `${index}`;
-                              const { parentIndex } = parseFlattenPath(p);
-                              const isFlyDesc = menuKey === 'flyWithNasim' && subItem.path === '#';
-                              const flyDescKey = isFlyDesc
-                                ? getFlyDescKey(parentIndex, parseFlattenPath(p).childIndex)
-                                : null;
-                              const aboutConfig =
-                                menuKey === 'about' && subItem.path === '#'
-                                  ? getAboutModalConfig(parentIndex, subItem.label)
-                                  : null;
-                              return [
-                                <Link
-                                  key={p}
-                                  to={subItem.path}
-                                  className={`block w-full py-2.5 text-sm text-gray-200 hover:bg-white/10 ${fontClass}`}
-                                  style={{
-                                    paddingInlineStart: `${16 + depth * 14}px`,
-                                    paddingInlineEnd: 16,
-                                  }}
-                                  onClick={(e) => {
-                                    if (flyDescKey) {
-                                      e.preventDefault();
-                                      setFlyDescModal({ title: subItem.label, descKey: flyDescKey });
-                                    } else if (aboutConfig) {
-                                      e.preventDefault();
-                                      setAboutModal(aboutConfig);
-                                    }
-                                    setIsMenuOpen(false);
-                                  }}
-                                >
-                                  {subItem.label}
-                                </Link>,
-                                ...(subItem.children
-                                  ? flattenItems(subItem.children, depth + 1, p, menuKey)
-                                  : []),
-                              ];
-                            });
-                          })(item.dropdown, 0, '', item.key)}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <Link
-                      to={item.path}
-                      className={`block w-full px-4 py-3.5 text-base font-bold text-white ${fontClass}`}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </div>
-              ))}
-
-              <div className="pt-3 mt-2 space-y-1">
-                <a
-                  href="/downloads/nasim-airlines.apk"
-                  download="nasim-airlines.apk"
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`flex w-full items-center gap-2 px-4 py-3 text-base font-bold text-white ${fontClass}`}
-                >
-                  <DevicePhoneMobileIcon className="w-5 h-5" />
-                  <span className="relative inline-block leading-none" style={{ paddingInlineEnd: 26 }}>
-                    {t('nav.androidApp') || 'اپ اندروید'}
-                    <AndroidVersionMark onDark />
-                  </span>
-                </a>
-                {isAuthenticated ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
-                    className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-3 text-base font-bold text-white ${fontClass}`}
-                  >
-                    {t('nav.logout')}
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthModalMode('login');
-                        setIsAuthModalOpen(true);
-                        setIsMenuOpen(false);
-                      }}
-                      className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-3 text-base font-bold text-white ${fontClass}`}
-                    >
-                      {t('nav.loginUsers')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsStaffLoginModalOpen(true);
-                        setIsMenuOpen(false);
-                      }}
-                      className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-3 text-base font-bold text-white ${fontClass}`}
-                    >
-                      {t('nav.loginStaff')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthModalMode('register');
-                        setIsAuthModalOpen(true);
-                        setIsMenuOpen(false);
-                      }}
-                      className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-3 text-base font-bold text-white ${fontClass}`}
-                    >
-                      {t('nav.register')}
-                    </button>
-                  </>
-                )}
-              </div>
-            </nav>
-          </div>,
-          document.body,
-        )
-      : null;
-
   return (
-    <>
-    <header className={`sticky top-0 ${isMenuOpen ? 'z-[2147483001]' : 'z-50'}`} style={{ position: 'sticky', top: 0 }}>
-      <div className="flex h-20 w-full overflow-visible">
+    <header className="sticky top-0 z-50 relative" style={{ overflow: 'visible' }}>
+      <div className="flex h-20 relative" style={{ overflow: 'visible' }}>
         {/* Dark Navigation Section - Glassmorphism */}
-        <div className="flex-1 min-w-0 w-full bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center">
-        <div className="w-full min-w-0 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
+        <div className="flex-1 bg-gray-400/30 backdrop-blur-xl border-b border-gray-300/30 shadow-2xl flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative" style={{ overflow: 'visible' }}>
 
           {/* Logo with Blue Flag - در فارسی موازی با شروع رزرو پرواز (max-w-7xl + px-8) */}
           <div 
@@ -660,9 +449,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             {menuItems.map((item) => (
               <div
                 key={item.key}
-                ref={(el) => {
-                  menuTriggerRefs.current[item.key] = el;
-                }}
+                ref={item.key === 'wherewefly' ? whereweflyTriggerRef : undefined}
                 className="relative h-full flex items-center"
                 onMouseEnter={() => handleMouseEnter(item.key, item.dropdown && item.dropdown.length > 0)}
                 onMouseLeave={handleMouseLeave}
@@ -693,11 +480,10 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   {item.label}
                 </Link>
                 
-                {/* Dropdown Menu with Image - portaled so sticky/blur header cannot clip it */}
-                {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && item.key !== 'wherewefly' && megaDropdownStyle && createPortal(
+                {/* Dropdown Menu with Image - wherewefly uses Portal to avoid clipping; others inline */}
+                {activeDropdown === item.key && item.dropdown && item.dropdown.length > 0 && item.key !== 'wherewefly' && (
                   <div 
-                    className="fixed bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[2147483000] overflow-hidden"
-                    style={{ top: megaDropdownStyle.top, left: megaDropdownStyle.left, width: megaDropdownStyle.width }}
+                    className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[9999] overflow-hidden w-[900px] max-w-[calc(100vw-48px)]`}
                     onMouseEnter={() => {
                       // Clear timeout when mouse enters dropdown
                       if (menuDropdownTimeoutRef.current) {
@@ -1046,14 +832,13 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                         </div>
                       )}
                     </div>
-                  </div>,
-                  document.body,
+                  </div>
                 )}
               </div>
             ))}
 
             {/* Wherewefly Dropdown via Portal - prevents icon/menu clipping */}
-            {activeDropdown === 'wherewefly' && megaDropdownStyle && (() => {
+            {activeDropdown === 'wherewefly' && whereweflyDropdownStyle && (() => {
               const item = menuItems.find(m => m.key === 'wherewefly');
               if (!item?.dropdown) return null;
               const getSubItemIcon = (label: string, key: string, itemIndex: number, path: string) => {
@@ -1062,8 +847,8 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
               };
               return createPortal(
                 <div
-                  className="fixed bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[2147483000] overflow-visible"
-                  style={{ top: megaDropdownStyle.top, left: megaDropdownStyle.left, width: megaDropdownStyle.width }}
+                  className="fixed bg-gray-200 rounded-xl shadow-2xl border border-gray-300/30 z-[9999] overflow-visible"
+                  style={{ top: whereweflyDropdownStyle.top, left: whereweflyDropdownStyle.left, width: whereweflyDropdownStyle.width }}
                   onMouseEnter={() => {
                     if (menuDropdownTimeoutRef.current) {
                       clearTimeout(menuDropdownTimeoutRef.current);
@@ -1490,11 +1275,9 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
                   {language === 'fa' ? 'FA' : language === 'ar' ? 'AR' : 'EN'}
                 </button>
                 <button
-                  type="button"
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="relative z-[90] p-2 text-black hover:text-gray-700"
+                  className="p-2 text-black hover:text-gray-700"
                   aria-label="Menu"
-                  aria-expanded={isMenuOpen}
                 >
                   {isMenuOpen ? (
                     <XMarkIcon className="w-6 h-6" />
@@ -1506,10 +1289,120 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
             </div>
           </div>
         </div>
-      </div>
-    </header>
 
-    {mobileMenuPanel}
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="lg:hidden border-t border-gray-700 py-4 bg-gray-900 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain">
+            <div className="px-4">
+              <nav className="space-y-2">
+                {menuItems.map((item) => (
+                  <div key={item.key}>
+                    <Link
+                      to={item.path}
+                      className={`block px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                    {item.dropdown && (
+                      <div className="pr-4 mt-1 space-y-1">
+                        {(function flattenItems(items: DropdownSubItem[], depth = 0, path = '', menuKey: string): React.ReactNode[] {
+                          return items.flatMap((subItem, index) => {
+                            const p = path ? `${path}-${index}` : `${index}`;
+                            const { parentIndex } = parseFlattenPath(p);
+                            const isFlyDesc = menuKey === 'flyWithNasim' && subItem.path === '#';
+                            const flyDescKey = isFlyDesc ? getFlyDescKey(parentIndex, parseFlattenPath(p).childIndex) : null;
+                            const aboutConfig = menuKey === 'about' && subItem.path === '#' ? getAboutModalConfig(parentIndex, subItem.label) : null;
+                            return [
+                            <Link
+                              key={p}
+                              to={subItem.path}
+                              className={`block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors ${fontClass}`}
+                              style={{ paddingLeft: `${16 + depth * 12}px` }}
+                              onClick={(e) => {
+                                if (flyDescKey) {
+                                  e.preventDefault();
+                                  setFlyDescModal({ title: subItem.label, descKey: flyDescKey });
+                                } else if (aboutConfig) {
+                                  e.preventDefault();
+                                  setAboutModal(aboutConfig);
+                                }
+                                setIsMenuOpen(false);
+                              }}
+                            >
+                              {subItem.label}
+                            </Link>,
+                            ...(subItem.children ? flattenItems(subItem.children, depth + 1, p, menuKey) : [])
+                          ];
+                          });
+                        })(item.dropdown, 0, '', item.key)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                <div className="border-t border-gray-700 pt-4 mt-4">
+                  <a
+                    href="/downloads/nasim-airlines.apk"
+                    download="nasim-airlines.apk"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center gap-2 px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                  >
+                    <DevicePhoneMobileIcon className="w-5 h-5" />
+                    <span className="relative inline-block leading-none" style={{ paddingInlineEnd: 26 }}>
+                      {t('nav.androidApp') || 'اپ اندروید'}
+                      <AndroidVersionMark onDark />
+                    </span>
+                  </a>
+                  {isAuthenticated ? (
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className={`w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                    >
+                      {t('nav.logout')}
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setAuthModalMode('login');
+                          setIsAuthModalOpen(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      >
+                        {t('nav.loginUsers')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsStaffLoginModalOpen(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      >
+                        {t('nav.loginStaff')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAuthModalMode('register');
+                          setIsAuthModalOpen(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`block w-full ${language === 'en' ? 'text-left' : 'text-right'} px-4 py-2 text-base font-bold text-white hover:bg-gray-800 hover:text-gray-300 transition-colors ${fontClass}`}
+                      >
+                        {t('nav.register')}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </nav>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Auth Modal */}
       <AuthModal
@@ -1697,7 +1590,7 @@ const EmiratesHeader: React.FC<EmiratesHeaderProps> = ({ onWeatherClick }) => {
           </div>
         </div>
       )}
-  </>
+    </header>
   );
 };
 
