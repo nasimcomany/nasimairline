@@ -359,6 +359,7 @@ class FlightMealFeedbackViewSet(viewsets.ModelViewSet):
             feedback = serializer.instance
             recipients = merge_notification_emails(
                 getattr(settings, 'MEAL_FEEDBACK_NOTIFICATION_EMAILS', []),
+                exclude=['safety@nasimair.com'],
             )
             if recipients:
                 from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL

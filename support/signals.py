@@ -112,7 +112,10 @@ def _send_ticket_email_async(ticket_id, category, reference, title, user_full_na
                 exclude=['safety@nasimair.com'],
             )
         else:
-            recipients = merge_notification_emails(recipient_email)
+            recipients = merge_notification_emails(
+                recipient_email,
+                exclude=['safety@nasimair.com'],
+            )
 
         if not recipients:
             logger.warning('No recipients for ticket category %s', category)
