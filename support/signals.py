@@ -102,17 +102,15 @@ def _send_ticket_email_async(ticket_id, category, reference, title, user_full_na
 {admin_url}
 """
         
-        from nasim.email_recipients import merge_notification_emails
+        from nasim.email_recipients import form_recipients, merge_notification_emails
 
-        # انتقادات و پیشنهادات (FEEDBACK): فقط لیست شکایت — بدون ALWAYS_NOTIFY
+        # انتقادات و پیشنهادات (FEEDBACK): همان لیست شکایت، به‌اضافه پشتیبانی، بدون ایمنی
         if str(category).strip().upper() == 'FEEDBACK':
-            recipients = [
-                e.strip()
-                for e in (getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None) or [])
-                if e and str(e).strip()
-            ]
-            if not recipients:
-                recipients = [recipient_email] if recipient_email else []
+            recipients = form_recipients(
+                getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None) or [recipient_email],
+                'support@nasimair.com',
+                exclude=['safety@nasimair.com'],
+            )
         else:
             recipients = merge_notification_emails(recipient_email)
 

@@ -295,6 +295,7 @@ def send_chat_notification_email(chat_message):
 
     recipients = merge_notification_emails(
         getattr(settings, 'CHAT_NOTIFICATION_EMAILS', []),
+        exclude=['safety@nasimair.com'],
     )
     if not recipients:
         logger.warning('No CHAT_NOTIFICATION_EMAILS / ALWAYS_NOTIFY_EMAILS configured.')

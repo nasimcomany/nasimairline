@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.conf import settings
 from django.db import models
-from nasim.email_recipients import merge_notification_emails
+from nasim.email_recipients import form_recipients, merge_notification_emails
 from .models import Ticket, TicketMessage, TicketAttachment, TicketCategory, ChatMessage, ComplaintForm, SurveyForm, CabinSafetyReportForm, SafetyHazardReportForm
 from .permissions import IsTicketOwnerOrStaff
 from .serializers import (
@@ -353,12 +353,12 @@ def submit_complaint_form(request):
     from .email_i18n import get_labels
     L = get_labels(lang, 'complaint')
 
-    # شکایت فقط به COMPLAINT_NOTIFICATION_EMAILS (پیش‌فرض: info@nasimair.com)
-    recipient_list = [
-        e.strip()
-        for e in (getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None) or ['info@nasimair.com'])
-        if e and str(e).strip()
-    ]
+    # شکایت به لیست خودش و پشتیبانی می‌رود، بدون صندوق ایمنی
+    recipient_list = form_recipients(
+        getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None) or ['info@nasimair.com'],
+        'support@nasimair.com',
+        exclude=['safety@nasimair.com'],
+    )
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -460,16 +460,14 @@ def submit_survey_form(request):
     def lbl(v):
         return get_survey_label(v, lang)
 
-    # نظرسنجی فقط به SURVEY_NOTIFICATION_EMAILS (پیش‌فرض: info@nasimair.com)
-    recipient_list = [
-        e.strip()
-        for e in (
-            getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None)
-            or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None)
-            or ['info@nasimair.com']
-        )
-        if e and str(e).strip()
-    ]
+    # نظرسنجی به لیست خودش و پشتیبانی می‌رود، بدون صندوق ایمنی
+    recipient_list = form_recipients(
+        getattr(settings, 'SURVEY_NOTIFICATION_EMAILS', None)
+        or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', None)
+        or ['info@nasimair.com'],
+        'support@nasimair.com',
+        exclude=['safety@nasimair.com'],
+    )
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -589,8 +587,15 @@ def submit_cabin_safety_form(request):
     def fmt_list(lst):
         return ', '.join(lst) if lst else '—'
 
-    base_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', [])
-    recipient_list = merge_notification_emails(base_list, 'safety@nasimair.com')
+    base_list = getattr(settings, 'CABIN_SAFETY_NOTIFICATION_EMAILS', None) or [
+        'grifindorekamyar@gmail.com',
+        'safety@nasimair.com',
+    ]
+    recipient_list = merge_notification_emails(
+        base_list,
+        'safety@nasimair.com',
+        exclude=['publicrelation@nasimair.com', 'support@nasimair.com'],
+    )
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL
@@ -693,8 +698,15 @@ def submit_safety_hazard_form(request):
     from .email_i18n import get_labels
     L = get_labels(lang, 'safety_hazard')
 
-    base_list = getattr(settings, 'SAFETY_HAZARD_NOTIFICATION_EMAILS', None) or getattr(settings, 'COMPLAINT_NOTIFICATION_EMAILS', [])
-    recipient_list = merge_notification_emails(base_list, 'safety@nasimair.com')
+    base_list = getattr(settings, 'SAFETY_HAZARD_NOTIFICATION_EMAILS', None) or [
+        'grifindorekamyar@gmail.com',
+        'safety@nasimair.com',
+    ]
+    recipient_list = merge_notification_emails(
+        base_list,
+        'safety@nasimair.com',
+        exclude=['publicrelation@nasimair.com', 'support@nasimair.com'],
+    )
     if recipient_list:
         try:
             from_email = settings.EMAIL_HOST_USER or settings.DEFAULT_FROM_EMAIL

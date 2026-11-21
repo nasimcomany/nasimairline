@@ -491,6 +491,29 @@ SURVEY_NOTIFICATION_EMAILS = [
 if not SURVEY_NOTIFICATION_EMAILS:
     SURVEY_NOTIFICATION_EMAILS = list(COMPLAINT_NOTIFICATION_EMAILS)
 
+# گزارش اجباری ایمنی کابین و گزارش مخاطرات — صندوق ایمنی، نه پشتیبانی و روابط عمومی
+CABIN_SAFETY_NOTIFICATION_EMAILS = [
+    email.strip() for email in
+    os.environ.get(
+        'CABIN_SAFETY_NOTIFICATION_EMAILS',
+        'grifindorekamyar@gmail.com,safety@nasimair.com',
+    ).split(',')
+    if email.strip()
+]
+if not CABIN_SAFETY_NOTIFICATION_EMAILS:
+    CABIN_SAFETY_NOTIFICATION_EMAILS = ['grifindorekamyar@gmail.com', 'safety@nasimair.com']
+
+SAFETY_HAZARD_NOTIFICATION_EMAILS = [
+    email.strip() for email in
+    os.environ.get(
+        'SAFETY_HAZARD_NOTIFICATION_EMAILS',
+        'grifindorekamyar@gmail.com,safety@nasimair.com',
+    ).split(',')
+    if email.strip()
+]
+if not SAFETY_HAZARD_NOTIFICATION_EMAILS:
+    SAFETY_HAZARD_NOTIFICATION_EMAILS = list(CABIN_SAFETY_NOTIFICATION_EMAILS)
+
 # Chat widget — ایمیل اعلان پیام کاربر (علاوه بر تلگرام/واتساپ)
 CHAT_NOTIFICATION_EMAILS = [
     email.strip() for email in
